@@ -1,0 +1,22 @@
+{
+  "name": "content-monorepo",
+  "version": "1.0.0",
+  "description": "content ts monorepo",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "build": "dotenv -- turbo run build",
+    "dev": "dotenv -- turbo dev",
+    "lint": "turbo run lint",
+    "format": "turbo run format"
+  },
+  "engines": {
+    "node": "^21.5"
+  },
+  "packageManager": "pnpm@8.12.1",
+  "dependencies": {
+    "dotenv-cli": "latest"
+  },
+  "devDependencies": {
+    "turbo": "latest"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["**/.env.*local", "tsconfig.json"],
+  "globalDotEnv": [".env"],
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
+    },
+    "test-integrations": {
+      "dependsOn": ["^build"]
+    },
+    "lint": {},
+    "format": {},
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
