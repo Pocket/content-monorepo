@@ -1,0 +1,49 @@
+{
+  "TableName": "PROAPI-local-Prospects",
+  "KeySchema": [
+    {
+      "AttributeName": "id",
+      "KeyType": "HASH"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "id",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "scheduledSurfaceGuid",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "prospectType",
+      "AttributeType": "S"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "scheduledSurfaceGuid-prospectType",
+      "KeySchema": [
+        {
+          "AttributeName": "scheduledSurfaceGuid",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "prospectType",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  }
+}

@@ -18,6 +18,12 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "db:generate-client": {
+      "cache": false
+    },
+    "db:migrate:reset": {
+      "cache": false
     }
   }
 }

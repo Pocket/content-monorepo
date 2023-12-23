@@ -54,10 +54,13 @@ If there are no changes to the services, `turbo` uses the cached results of the 
 To spin up all services from the root of the monorepo:
 ```
 cd content-monorepo
-docker-compose up --wait
+docker compose up --build -V
 pnpm dev
 ```
-This will spin up dependent docker services (detached mode), and run the node ts services.
+This will spin up dependent docker services and run the node ts services (new tab).
+
+To run docker containers in detached mode:
+`docker compose up --wait`
 
 To spin up a service individually:
 ```

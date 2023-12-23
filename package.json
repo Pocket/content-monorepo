@@ -6,6 +6,8 @@
     "preinstall": "npx only-allow pnpm",
     "build": "dotenv -- turbo run build",
     "dev": "dotenv -- turbo dev",
+    "db:generate-client": "turbo run db:generate-client",
+    "db:migrate:reset": "turbo run db:migrate:reset",
     "lint": "turbo run lint",
     "format": "turbo run format"
   },
