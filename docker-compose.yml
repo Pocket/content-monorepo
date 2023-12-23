@@ -1,0 +1,42 @@
+version: '3'
+services:
+  ## Start Common Services
+  mysql:
+    image: mysql:8
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - TZ=UTC
+
+  localstack:
+    image: localstack/localstack:3.0.2
+    ports:
+      - '4566:4566'
+    volumes:
+      - ./.docker/localstack:/init/ready.d
+    environment:
+      SERVICES: s3,dynamodb
+      DATA_DIR: /tmp/localstack/data
+      DOCKER_HOST: unix:///var/run/docker.sock
+      LOCALSTACK_HOST: localstack
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - -c
+        - curl --write-out '%{http_code}' --silent --output /dev/null http://localhost:4566/_localstack/health
+      interval: 5s
+      timeout: 10s
+      start_period: 10s
+
+  snowplow:
+    image: pocket/snowplow-micro:dev
+    healthcheck:
+      test: ['CMD', 'bash', '-c', 'curl -sf localhost:9090/micro/all']
+      interval: 5s
+      timeout: 10s
+      start_period: 10s
+      retries: 30
+    ports:
+      - '9090:9090'
