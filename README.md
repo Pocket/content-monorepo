@@ -40,6 +40,7 @@ Purpose of some important files in the root of the monorepo:
 To build all services:
 ```
 cd content-monorepo
+pnpm install
 pnpm build
 ```
 Sample build output:
