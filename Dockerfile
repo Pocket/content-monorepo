@@ -1,4 +1,4 @@
-# FROM: https://github.com/Pocket/pocket-monorepo/tree/main
+# ADOPTED FROM: https://github.com/Pocket/pocket-monorepo/tree/main
 # Adapted from https://turbo.build/repo/docs/handbook/deploying-with-docker
 # and https://github.com/vercel/turbo/issues/5462#issuecomment-1624792583
 
@@ -6,15 +6,11 @@
 # Docker build step that creates our 
 # base image used in all steps
 #----------------------------------------
-FROM node:20.10-alpine AS base
+FROM node:21.5.0-alpine AS base
 
 ARG SCOPE
-ARG APP_PATH
 ARG PORT
 ARG GIT_SHA
-ARG SENTRY_AUTH_TOKEN
-ARG SENTRY_ORG
-ARG SENTRY_PROJECT
 
 ## Add curl for health checks
 RUN apk add --no-cache curl
@@ -34,12 +30,8 @@ RUN pnpm add -g turbo pnpm
 #----------------------------------------
 FROM base AS setup
 ARG SCOPE
-ARG APP_PATH
 ARG PORT
 ARG GIT_SHA
-ARG SENTRY_AUTH_TOKEN
-ARG SENTRY_ORG
-ARG SENTRY_PROJECT
 
 RUN apk add --no-cache curl
 RUN apk update
@@ -58,12 +50,8 @@ RUN turbo prune --scope=$SCOPE --docker
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS builder
 ARG SCOPE
-ARG APP_PATH
 ARG PORT
 ARG GIT_SHA
-ARG SENTRY_AUTH_TOKEN
-ARG SENTRY_ORG
-ARG SENTRY_PROJECT
 
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
@@ -87,12 +75,6 @@ RUN pnpm run build --filter=${SCOPE}...
 ## Installing only the dev dependencies after we used them to build
 RUN rm -rf node_modules/ && pnpm install --prod --filter=${SCOPE} --frozen-lockfile
 
-# Inject sentry source maps
-RUN pnpm --filter=$SCOPE --prod deploy pruned
-RUN pnpx @sentry/cli sourcemaps inject pruned/dist
-
-# If sentry project was passed, upload the source maps
-RUN if [ -n "$SENTRY_PROJECT" ] ; then pnpx @sentry/cli sourcemaps upload pruned/dist --release ${GIT_SHA} --auth-token ${SENTRY_AUTH_TOKEN} --org ${SENTRY_ORG} --project ${SENTRY_PROJECT} ; fi
 
 #----------------------------------------
 # Docker build step that:
