@@ -1,3 +1,4 @@
+*Note: README needs some updated as service is migrated to monorepo*
 # Prospect API
 
 This repo contains two distinct but related applications: an API and a Lambda.
@@ -96,16 +97,14 @@ To run operations in the GraphQL playground, you'll need to specify some HTTP he
 
 1. Open up the GraphQL playground at `http://localhost:4026`.
 2. Click the **HTTP HEADERS** link at the bottom of the left hand side of the playground to reveal a text box.
-3. Enter the necessary headers (see sample below) into the box and try an operation - it should work!
+3. Click the 'Bulk Edit' button at the bottom of the screen and paste in the text below
 
 The sample headers below allow full access to all queries and mutations:
 
-```typescript
-{
-  "groups": "mozilliansorg_pocket_scheduled_surface_curator_full",
-  "name": "Cherry Glazer",
-  "username": "ad|Mozilla-LDAP|cglazer"
-}
+```
+groups:mozilliansorg_pocket_scheduled_surface_curator_full
+name:Cherry Glazer
+username:ad|Mozilla-LDAP|cglazer
 ```
 
 Note that the `groups` header can contain mulitple values separated by commas (but still in a single string).
