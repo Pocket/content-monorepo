@@ -1,0 +1,59 @@
+import { faker } from '@faker-js/faker';
+
+import { CorpusLanguage, Prospect, ProspectType, Topics } from '../types';
+
+// turn the enum into an array so we can grab a random one easily
+const topicsArray = Object.keys(Topics).map((key) => Topics[key]);
+
+/**
+ * creates a Prospect object with the specified scheduledSurface, prospectType,
+ * and curated status. the rest of the data will be faker faked.
+ *
+ * this may warrant future refactoring if we want control over more than just
+ * the three data points / parameters
+ *
+ * @param scheduledSurfaceGuid string new tab GUID
+ * @param prospectType ProspectType enum value
+ * @param curated boolean
+ * @returns Prospect
+ */
+export const createProspect = (
+  scheduledSurfaceGuid: string,
+  prospectType: ProspectType,
+  curated = false,
+): Prospect => {
+  // randomize number of authors
+  const authorCount = faker.datatype.number({ min: 1, max: 3 });
+  const authors: string[] = [];
+
+  for (let i = 0; i < authorCount; i++) {
+    authors.push(faker.name.findName());
+  }
+
+  return {
+    id: faker.datatype.uuid(),
+    prospectId: faker.datatype.uuid(),
+    scheduledSurfaceGuid,
+    topic: faker.random.arrayElement(topicsArray),
+    prospectType,
+    url: faker.internet.url(),
+    rank: faker.datatype.number(),
+    saveCount: faker.datatype.number(),
+    curated,
+    createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
+    domain: faker.internet.domainName(),
+    excerpt: faker.lorem.paragraph(),
+    imageUrl: faker.internet.url(),
+    language: faker.random.arrayElement(Object.values(CorpusLanguage)),
+    publisher: faker.random.arrayElement([
+      'The New York Times',
+      'The Atlantic',
+      'The Guardian',
+      'The Register',
+    ]),
+    title: faker.lorem.words(),
+    isSyndicated: faker.datatype.boolean(),
+    isCollection: faker.datatype.boolean(),
+    authors: authors.join(','),
+  };
+};

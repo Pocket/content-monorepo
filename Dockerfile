@@ -6,7 +6,7 @@
 # Docker build step that creates our 
 # base image used in all steps
 #----------------------------------------
-FROM node:21.5.0-alpine AS base
+FROM node:18.18-alpine AS base
 
 ARG SCOPE
 ARG PORT
@@ -74,7 +74,7 @@ RUN pnpm run build --filter=${SCOPE}...
 
 ## Installing only the dev dependencies after we used them to build
 RUN rm -rf node_modules/ && pnpm install --prod --filter=${SCOPE} --frozen-lockfile
-
+RUN pnpm --filter=$SCOPE --prod deploy pruned
 
 #----------------------------------------
 # Docker build step that:

@@ -1,6 +1,6 @@
 version: '3'
 services:
-  ## Start Common Services
+  # Start Common Services
   mysql:
     image: mysql:8
     ports:
@@ -14,7 +14,7 @@ services:
     ports:
       - '4566:4566'
     volumes:
-      - ./.docker/localstack:/init/ready.d
+      - ./.docker/aws:/etc/localstack/init/ready.d
     environment:
       SERVICES: s3,dynamodb
       DATA_DIR: /tmp/localstack/data

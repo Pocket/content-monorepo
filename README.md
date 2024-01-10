@@ -17,7 +17,7 @@ The following is an outline of how the monorepo is structured:
 monorepo /
 	.circleci /
 		all shared jobs + specific configs per service
-	. aws /
+	infrastructure /
 		infra per service
 	.docker /
 		shared resources here
@@ -37,9 +37,12 @@ Purpose of some important files in the root of the monorepo:
 	`turbo.json` - Configure behavior for `turbo`
 
 ## Build
+First, create a local `.env` file and copy the contents of `example.env`.
+
 To build all services:
 ```
 cd content-monorepo
+nvm use
 pnpm install
 pnpm build
 ```
@@ -68,8 +71,16 @@ cd servers/server1
 npm run dev
 ```
 
+## DynamoDB
+Prospect-api uses `dynamodb` as the db system. When running `docker compose up`, the `localstack` container executes a `dynamodb.sh` script where the prospect-api table
+is created. 
+To seed the table with data, run the seeding script:
+``` 
+pnpm db:seed  
+```  
+
 ## Prisma
-Some of the services use `prisma` as their ORM, and to setup & seed the tables, some tasks need to be run separately from `docker compose`.
+Collection-api & curated-corput-api use `prisma` as their ORM, and to setup & seed the tables, some tasks need to be run separately from `docker compose`.
 
 ### Generate Prisma Typescript Types
 `pnpm db:generate-client`

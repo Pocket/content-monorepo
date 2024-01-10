@@ -13,11 +13,18 @@
     "test-integrations": {
       "dependsOn": ["^build"]
     },
+    "synth": {
+      "dependsOn": ["^build"],
+      "outputs": ["cdktf.out/**"]
+    },
     "lint": {},
     "format": {},
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "db:seed": {
+      "cache": false
     },
     "db:generate-client": {
       "cache": false
