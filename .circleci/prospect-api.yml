@@ -1,0 +1,247 @@
+
+workflows:
+  prospect-api:
+    jobs:
+
+      ######
+      # Every PR Jobs
+      ######
+      - apollo:
+          name: prospect-api_apollo_admin
+          fed_graph_name: pocket-admin-api
+          schema_file_path: servers/prospect-api/schema.graphql
+          graph_name: prospect-api
+          prod_graph_url: https://prospect-api.readitlater.com
+          dev_graph_url: https://prospect-api.getpocket.dev
+          apollo_key_env: ADMIN_APOLLO_KEY
+
+      - test_integrations:
+          <<: *not_dev_main
+          for: prospect_api
+          context: pocket
+          name: prospect-api_test_integrations
+          scope: prospect-api
+
+      # Try building the ECS docker image on each branch
+      - build_image:
+          <<: *not_dev_main
+          context: pocket
+          for: prospect_api
+          name: prospect_api_build_docker
+          aws-access-key-id: Dev_AWS_ACCESS_KEY
+          aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
+          aws-region: Dev_AWS_DEFAULT_REGION
+          repo-name: prospectapi-dev-app
+          ecr-url: 410318598490.dkr.ecr.us-east-1.amazonaws.com
+          push: false
+          extra-build-args: --build-arg GIT_SHA=${CIRCLE_SHA1} --build-arg SCOPE=prospect-api --build-arg PORT=4026
+
+      - build_lambda:
+            <<: *not_dev_main
+            context: pocket
+            for: prospect_api
+            name: prospect-api_build_lambda
+            aws-access-key-id: Dev_AWS_ACCESS_KEY
+            aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
+            aws-region: Dev_AWS_DEFAULT_REGION
+            scope: prospect-api-aws_lambda
+
+      - infrastructure:
+          <<: *not_dev_main
+          context: pocket
+          for: prospect_api
+          name: prospect-api_infrastructure_plan_prod
+          scope: prospect-api-cdk
+          stack-output-path: infrastructure/prospect-api/cdktf.out/stacks/prospect-api
+          resource-class: pocket/default-prod
+          workspace: Prod
+          dev: false
+          apply: false
+
+      ######
+      # Dev Branch Deployment (Dev Environment)
+      ######
+
+      - infrastructure:
+          <<: *only_dev
+          context: pocket
+          for: prospect_api
+          name: prospect-api_infrastructure_apply_dev
+          scope: prospect-api-cdk
+          stack-output-path: infrastructure/prospect-api/cdktf.out/stacks/prospect-api
+          resource-class: pocket/default-dev
+          workspace: Dev
+          apply: true
+          dev: true
+#
+#      # Build & Deploy the Dev Docker Image
+      - build_image:
+          <<: *only_dev
+          context: pocket
+          for: prospect_api
+          name: prospect-api_build_docker_dev
+          aws-access-key-id: Dev_AWS_ACCESS_KEY
+          aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
+          aws-region: Dev_AWS_DEFAULT_REGION
+          repo-name: prospectapi-dev-app
+          ecr-url: 410318598490.dkr.ecr.us-east-1.amazonaws.com
+          push: true
+          extra-build-args: --build-arg GIT_SHA=${CIRCLE_SHA1} --build-arg SCOPE=prospect-api --build-arg PORT=4026
+          requires:
+            - prospect-api_infrastructure_apply_dev
+
+      - code_deploy_ecs:
+          <<: *only_dev
+          context: pocket
+          for: prospect_api
+          name: prospect-api_code_deploy_ecs_dev
+          resource-class: pocket/default-dev
+          codedeploy-app-name: ProspectAPI-Dev-ECS
+          codedeploy-group-name: ProspectAPI-Dev-ECS
+          requires:
+            - prospect-api_build_docker_dev
+
+      - build_lambda:
+          <<: *only_dev
+          context: pocket
+          for: prospect_api
+          name: prospect-api_build_lambda_dev
+          aws-access-key-id: Dev_AWS_ACCESS_KEY
+          aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
+          aws-region: Dev_AWS_DEFAULT_REGION
+          scope: prospect-api-aws_lambda
+          s3-bucket: pocket-prospectapi-dev-sqs-translation
+          requires:
+            - prospect-api_infrastructure_apply_dev
+
+      - code_deploy_lambda:
+          <<: *only_dev
+          context: pocket
+          for: prospect_api
+          name: prospect-api_code_deploy_lambda_dev
+          resource-class: pocket/default-dev
+          codedeploy-app-name: ProspectAPI-Dev-Sqs-Translation-Lambda
+          codedeploy-group-name: ProspectAPI-Dev-Sqs-Translation-Lambda
+          function-name: ProspectAPI-Dev-Sqs-Translation-Function
+          s3-bucket: pocket-prospectapi-dev-sqs-translation
+          requires:
+            - prospect-api_build_lambda_dev
+
+
+      # Notify sentry of dev deployment
+      - sentry_release_notification:
+          <<: *only_dev
+          name: prospect-api_sentry-release-notification-dev
+          context: pocket
+          for: prospect_api
+          sentry_project_name: prospect-api
+          sentry_env: development
+          sentry_org: pocket
+          requires:
+            - prospect-api_code_deploy_ecs_dev
+
+      # Setup params we may use in Lambdas
+      - setup_deploy_params:
+          <<: *only_dev
+          name: prospect-api_deploy-params-dev
+          aws_access_key_id: Dev_AWS_ACCESS_KEY
+          aws_secret_access_key: Dev_AWS_SECRET_ACCESS_KEY
+          context: pocket
+          env: Dev
+          service_name: ProspectAPI
+          requires:
+            - prospect-api_code_deploy_ecs_dev
+            - prospect-api_code_deploy_lambda_dev
+      ######
+      # Main Branch Deployment (Prod Environment)
+      ######
+#      - infrastructure:
+#          <<: *only_main
+#          context: pocket
+#          for: prospect_api
+#          name: prospect-api_infrastructure_apply_prod
+#          scope: prospect-api-cdk
+#          stack-output-path: infrastructure/prospect-api/cdktf.out/stacks/prospect-api
+#          resource-class: pocket/default-prod
+#          workspace: Prod
+#          apply: true
+#          dev: false
+#
+#      # Build & Deploy the Prod Docker Image
+#      - build_image:
+#          <<: *only_main
+#          context: pocket
+#          for: prospect_api
+#          name: prospect-api_build_docker_prod
+#          aws-access-key-id: Prod_AWS_ACCESS_KEY
+#          aws-secret-access-key: Prod_AWS_SECRET_ACCESS_KEY
+#          aws-region: Prod_AWS_DEFAULT_REGION
+#          repo-name: prospectapi-prod-app
+#          ecr-url: 996905175585.dkr.ecr.us-east-1.amazonaws.com
+#          push: true
+#          extra-build-args: --build-arg GIT_SHA=${CIRCLE_SHA1} --build-arg SCOPE=prospect-api --build-arg PORT=4026
+#          requires:
+#            - prospect-api_infrastructure_apply_prod
+#
+#      - code_deploy_ecs:
+#          <<: *only_main
+#          context: pocket
+#          for: prospect_api
+#          name: prospect-api_code_deploy_ecs_prod
+#          resource-class: pocket/default-prod
+#          codedeploy-app-name: ProspectAPI-Prod-ECS
+#          codedeploy-group-name: ProspectAPI-Prod-ECS
+#          requires:
+#            - prospect-api_build_docker_prod
+#
+#      - build_lambda:
+#          <<: *only_main
+#          context: pocket
+#          for: prospect_api
+#          name: prospect-api_build_lambda_prod
+#          aws-access-key-id: Prod_AWS_ACCESS_KEY
+#          aws-secret-access-key: Prod_AWS_SECRET_ACCESS_KEY
+#          aws-region: Prod_AWS_DEFAULT_REGION
+#          scope: prospect-api-aws_lambda
+#          s3-bucket: pocket-prospectapi-prod-sqs-translation
+#          requires:
+#            - prospect-api_infrastructure_apply_prod
+#
+#      - code_deploy_lambda:
+#          <<: *only_main
+#          context: pocket
+#          for: prospect_api
+#          name: prospect-api_code_deploy_lambda_prod
+#          resource-class: pocket/default-prod
+#          codedeploy-app-name: ProspectAPI-Prod-Sqs-Translation-Lambda
+#          codedeploy-group-name: ProspectAPI-Prod-Sqs-Translation-Lambda
+#          function-name: ProspectAPI-Prod-Sqs-Translation-Function
+#          s3-bucket: pocket-prospectapi-prod-sqs-translation
+#          requires:
+#            - prospect-api_build_lambda_prod
+#
+#      # Notify sentry of main deployment
+#      - sentry_release_notification:
+#          <<: *only_main
+#          name: prospect-api_sentry-release-notification-prod
+#          context: pocket
+#          for: prospect_api
+#          sentry_project_name: prospect-api
+#          sentry_env: production
+#          sentry_org: pocket
+#          requires:
+#            - prospect-api_code_deploy_ecs_prod
+#            - prospect-api_code_deploy_lambda_prod
+#
+#      # Setup params we may use in Lambdas
+#      - setup_deploy_params:
+#          <<: *only_main
+#          name: prospect-api_deploy-params-prod
+#          aws_access_key_id: Prod_AWS_ACCESS_KEY
+#          aws_secret_access_key: Prod_AWS_SECRET_ACCESS_KEY
+#          context: pocket
+#          env: Prod
+#          service_name: ProspectAPI
+#          requires:
+#            - prospect-api_code_deploy_ecs_prod
+#            - prospect-api_code_deploy_lambda_prod

@@ -6,13 +6,18 @@
     "preinstall": "npx only-allow pnpm",
     "build": "dotenv -- turbo run build",
     "dev": "dotenv -- turbo dev",
-    "db:generate-client": "turbo run db:generate-client",
-    "db:migrate:reset": "turbo run db:migrate:reset",
+    "synth": "dotenv -- turbo run synth",
+    "test": "dotenv -- turbo run test",
+    "test-integrations": "dotenv -- turbo run test-integrations --no-cache",
+    "db:seed": "dotenv -- turbo run db:seed",
+    "db:generate-client": "dotenv -- turbo run db:generate-client",
+    "db:migrate:reset": "dotenv -- turbo run db:migrate:reset",
     "lint": "turbo run lint",
-    "format": "turbo run format"
+    "format": "turbo run format",
+    "clean": "rm -rf .turbo node_modules packages/**/.turbo packages/**/dist packages/**/node_modules servers/**/logs servers/**/.turbo servers/**/dist servers/**/node_modules lambdas/**/logs lambdas/**/.turbo lambdas/**/dist lambdas/**/node_modules infrastructure/**/dist infrastructure/**/node_modules infrastructure/**/.turbo infrastructure/**/cdktf.out"
   },
   "engines": {
-    "node": "^21.5"
+    "node": "18.18"
   },
   "packageManager": "pnpm@8.12.1",
   "dependencies": {

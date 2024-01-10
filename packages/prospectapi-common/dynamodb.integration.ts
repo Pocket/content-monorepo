@@ -1,0 +1,33 @@
+import * as chai from 'chai';
+
+import { ProspectType } from './types';
+import { dbClient } from './dynamodb-client';
+import { getProspectById, insertProspect, truncateDb } from './dynamodb';
+import { createProspect } from './test/helpers';
+
+// use chai's expect (not jest's)
+const expect = chai.expect;
+
+describe('dynamodb.common', () => {
+  beforeAll(async () => {
+    dbClient.destroy();
+  });
+  afterEach(async () => {
+    await truncateDb(dbClient);
+  });
+  afterAll(async () => {
+    dbClient.destroy();
+  });
+
+  describe('insertProspect', () => {
+    it('should insert a prospect', async () => {
+      const prospect = createProspect('EN_US', ProspectType.TIMESPENT);
+
+      await insertProspect(dbClient, prospect);
+
+      const res = await getProspectById(dbClient, prospect.id);
+
+      expect(res).not.to.be.undefined;
+    });
+  });
+});

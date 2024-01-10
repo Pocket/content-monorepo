@@ -17,13 +17,13 @@ jobs:
           name: Generate List of Configs to Merge
           command: |
             # Generate a list of all the circleci configs we want to run
-            file_list=(".circleci/common.yml" ".circleci/repo-jobs.yml" ".circleci/prospect-api.yml")       
+            file_list=(".circleci/shared.yml" ".circleci/monorepo-jobs.yml" ".circleci/prospect-api.yml")       
             touch /tmp/configs.txt
 
             # Add file header to each file and dump it to the config list
             for file in "${file_list[@]}"; do
               echo "$file" >> /tmp/configs.txt
-              awk -v new_content="$(cat .circleci/header.yml)" 'BEGIN {print new_content} {print}' "$file" > temp_file && mv temp_file "$file"
+              awk -v new_content="$(cat .circleci/branch-filters.yml)" 'BEGIN {print new_content} {print}' "$file" > temp_file && mv temp_file "$file"
             done
       - path-filtering/generate-config:
           config-list-path: /tmp/configs.txt

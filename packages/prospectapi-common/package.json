@@ -1,0 +1,35 @@
+{
+  "name": "prospectapi-common",
+  "version": "1.0.0",
+  "description": "common code shared between api and lambda",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "test": "jest \"\\.spec\\.ts\"",
+    "test-integrations": "jest \"\\.integration\\.ts\" --runInBand",
+    "lint": "eslint --fix-dry-run \"**/*.ts\" \"test/**/*.ts\"",
+    "format": "eslint --fix \"**/*.ts\" \"test/**/*.ts\""
+  },
+  "author": "pocket",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "@apollo/client": "3.7.16",
+    "@aws-sdk/client-dynamodb": "3.391.0",
+    "@aws-sdk/lib-dynamodb": "3.391.0",
+    "@sentry/node": "6.19.7",
+    "@faker-js/faker": "6.0.0",
+    "graphql-tag": "2.12.6",
+    "cross-fetch": "3.1.5",
+    "tldts": "5.7.87"
+  },
+  "devDependencies": {
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*",
+    "@types/chai": "4.3.4",
+    "@types/jest": "28.1.7",
+    "chai": "4.3.7",
+    "jest": "28.1.3",
+    "ts-jest": "28.0.8"
+  }
+}

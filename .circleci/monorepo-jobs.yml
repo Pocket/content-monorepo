@@ -1,0 +1,34 @@
+jobs:
+  lint:
+    docker:
+      - image: *node_image
+    steps:
+      - checkout
+      - install_pnpm
+      - run:
+          name: Lint
+          # Need to build first, so the linter picks up all needed imports
+          command: |
+            pnpm run build
+            pnpm run lint --concurrency=2
+
+  test:
+    docker:
+      - image: *node_image
+    steps:
+      - checkout
+      - install_pnpm
+      - run:
+          name: Test
+          command: |
+            pnpm run test --concurrency=2
+
+workflows:
+  monorepo:
+    jobs:
+      - lint:
+          <<: *not_dev_main
+          context: pocket
+      - test:
+          <<: *not_dev_main
+          context: pocket

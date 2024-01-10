@@ -1,3 +1,20 @@
 {
-  "name": "tsconfig"
+  "name": "tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@types/node": "^20.10",
+    "ts-node": "10.9.2",
+    "tslib": "2.6.2",
+    "typescript": "5.3.3",
+    "tsup": "8.0.1"
+  },
+  "engines": {
+    "node": "^20.10"
+  }
 }
