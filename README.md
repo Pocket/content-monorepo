@@ -1,5 +1,8 @@
 # Content-Monorepo  
 This repo contains Content owned TS microservices structured in a monorepo.  
+
+Some of the patterns such as docker & circleCI have been adopted from [Pocket's Monorepo](https://github.com/Pocket/pocket-monorepo)
+setup by Daniel & Kat.
   
 ## Technology Used
   
