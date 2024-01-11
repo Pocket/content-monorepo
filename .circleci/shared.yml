@@ -1,3 +1,4 @@
+# Adopted from https://github.com/Pocket/pocket-monorepo/tree/main/.circleci
 version: 2.1
 
 orbs:
@@ -31,27 +32,6 @@ parameters:
     default: false
 
 commands:
-  # Refrenced from https://github.com/kelvintaywl-cci/dynamic-config-showcase/blob/main/.circleci/next.yml
-  exit-early-if-irrelevant:
-    parameters:
-      <<: *repo_for_enum
-    steps:
-      - run:
-          name: stop early unless relevant
-          command: |
-            # looks up the relevant pipeline parameter via the env var
-            export RELEVANT=$(eval echo "\$<< parameters.for >>")
-
-            # NOTE: env var values are strings (not boolean)
-            if [ "${RELEVANT}" = "1" ]; then
-              echo "continuing, since job is for << parameters.for >>"
-            else
-              echo "stopping early!"
-              circleci-agent step halt
-            fi
-          environment:
-            prospect_api: << pipeline.parameters.prospect_api >>
-
   install_pnpm:
     steps:
       - run:
@@ -124,8 +104,6 @@ jobs:
     machine: true
     resource_class: << parameters.resource-class >>
     steps:
-#      - exit-early-if-irrelevant:
-#          for: << parameters.for >>
       - checkout
       - restore_cache:
           name: Restore Tfenv
@@ -238,8 +216,6 @@ jobs:
     machine: true
     resource_class: << parameters.resource-class >>
     steps:
-#      - exit-early-if-irrelevant:
-#          for: << parameters.for >>
       - attach_workspace:
           at: << parameters.workspace >>
       - run:
@@ -294,8 +270,6 @@ jobs:
     machine: true
     resource_class: << parameters.resource-class >>
     steps:
-#      - exit-early-if-irrelevant:
-#          for: << parameters.for >>
       - jq/install
       - run:
           name: Deploy Lambda
@@ -370,8 +344,6 @@ jobs:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
     steps:
-#      - exit-early-if-irrelevant:
-#          for: << parameters.for >>
       - checkout
       - install_pnpm
       - run:
@@ -421,8 +393,6 @@ jobs:
     executor: aws-cli/default
 
     steps:
-#      - exit-early-if-irrelevant:
-#          for: << parameters.for >>
       - checkout
       - aws-cli/setup:
           aws-access-key-id: << parameters.aws-access-key-id >>
@@ -483,8 +453,6 @@ jobs:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
     steps:
-#      - exit-early-if-irrelevant:
-#          for: << parameters.for >>
       - run:
           name: Setup Environment variables
           command: |
@@ -653,8 +621,6 @@ jobs:
           username: $DOCKER_LOGIN
           password: $DOCKER_PASSWORD
     steps:
-#      - exit-early-if-irrelevant:
-#          for: << parameters.for >>
       - run:
           name: Setup Environment variables
           command: |
