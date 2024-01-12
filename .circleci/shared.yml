@@ -17,7 +17,7 @@ repo_for_enum: &repo_for_enum
     enum:
       - prospect_api
 
-resource_class_enmum: &resource_class_enmum
+resource_class_enum: &resource_class_enum
   resource-class:
     description: The self hosted runnner to run on
     type: enum
@@ -32,6 +32,26 @@ parameters:
     default: false
 
 commands:
+  # Refrenced from https://github.com/kelvintaywl-cci/dynamic-config-showcase/blob/main/.circleci/next.yml
+  exit-early-if-irrelevant:
+    parameters:
+      <<: *repo_for_enum
+    steps:
+      - run:
+          name: stop early unless relevant
+          command: |
+            # looks up the relevant pipeline parameter via the env var
+            export RELEVANT=$(eval echo "\$<< parameters.for >>")
+
+            # NOTE: env var values are strings (not boolean)
+            if [ "${RELEVANT}" = "1" ]; then
+              echo "continuing, since job is for << parameters.for >>"
+            else
+              echo "stopping early!"
+              circleci-agent step halt
+            fi
+          environment:
+            prospect_api: << pipeline.parameters.prospect_api >>
   install_pnpm:
     steps:
       - run:
@@ -99,11 +119,13 @@ jobs:
         description: Whether or not we should save off the app spec file for later use
         type: boolean
         default: true
-      <<: [*repo_for_enum, *resource_class_enmum]
+      <<: [*repo_for_enum, *resource_class_enum]
     # Our self hosted runners dont support docker images, cause its not deployed in kubernetes, so we have some special steps
     machine: true
     resource_class: << parameters.resource-class >>
     steps:
+      - exit-early-if-irrelevant:
+          for: << parameters.for >>
       - checkout
       - restore_cache:
           name: Restore Tfenv
@@ -211,11 +233,13 @@ jobs:
       codedeploy-group-name:
         description: CodeDeploy group name
         type: string
-      <<: [*repo_for_enum, *resource_class_enmum]
+      <<: [*repo_for_enum, *resource_class_enum]
     # Our self hosted runners dont support docker images, cause its not deployed in kubernetes, so we have some special steps
     machine: true
     resource_class: << parameters.resource-class >>
     steps:
+      - exit-early-if-irrelevant:
+          for: << parameters.for >>
       - attach_workspace:
           at: << parameters.workspace >>
       - run:
@@ -265,11 +289,13 @@ jobs:
         type: string
         description: The name of the lambda alias to use
         default: DEPLOYED
-      <<: [*repo_for_enum, *resource_class_enmum]
+      <<: [*repo_for_enum, *resource_class_enum]
     # Our self hosted runners dont support docker images, cause its not deployed in kubernetes, so we have some special steps
     machine: true
     resource_class: << parameters.resource-class >>
     steps:
+      - exit-early-if-irrelevant:
+          for: << parameters.for >>
       - jq/install
       - run:
           name: Deploy Lambda
@@ -393,6 +419,8 @@ jobs:
     executor: aws-cli/default
 
     steps:
+      - exit-early-if-irrelevant:
+          for: << parameters.for >>
       - checkout
       - aws-cli/setup:
           aws-access-key-id: << parameters.aws-access-key-id >>
@@ -453,6 +481,8 @@ jobs:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
     steps:
+      - exit-early-if-irrelevant:
+          for: << parameters.for >>
       - run:
           name: Setup Environment variables
           command: |
@@ -621,6 +651,8 @@ jobs:
           username: $DOCKER_LOGIN
           password: $DOCKER_PASSWORD
     steps:
+      - exit-early-if-irrelevant:
+          for: << parameters.for >>
       - run:
           name: Setup Environment variables
           command: |
