@@ -23,13 +23,13 @@
       "cache": false,
       "persistent": true
     },
-    "db:seed": {
+    "db:dynamo-seed": {
       "cache": false
     },
-    "db:generate-client": {
+    "db:prisma-seed": {
       "cache": false
     },
-    "db:migrate:reset": {
+    "db:generate-prisma-client": {
       "cache": false
     }
   }

@@ -79,17 +79,28 @@ Prospect-api uses `dynamodb` as the db system. When running `docker compose up`,
 is created. 
 To seed the table with data, run the seeding script:
 ``` 
-pnpm db:seed  
+cd content-monorepo
+pnpm db:dynamo-seed
 ```  
 
 ## Prisma
 Collection-api & curated-corput-api use `prisma` as their ORM, and to setup & seed the tables, some tasks need to be run separately from `docker compose`.
 
 ### Generate Prisma Typescript Types
-`pnpm db:generate-client`
+```
+cd content-monorepo
+db:generate-prisma-client
+```
 
 ### Resetting & Seeding the Databases
-Make sure the `.env` under each service contains the appropriate `DATABSE_URL`.
+Make sure the `.env` under each service using `prisma` contains the appropriate `DATABSE_URL`.
+For `curated-corpus-api`: `DATABASE_URL=mysql://root:@localhost:3306/curation_corpus?connect_timeout=300`
 
 Run:
-`pnpm db:migrate:reset`
+```
+cd content-monorepo
+prisma db seed
+```
+
+### Applying migration
+Please refer to the specific README of the service for applying a prisma migration.

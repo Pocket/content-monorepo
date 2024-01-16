@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { expect } from 'chai';
+// import { expect } from 'chai';
 
 import config from './config';
 import {
@@ -12,7 +12,7 @@ import {
 } from './lib';
 import { Prospect, ProspectType, Topics } from 'prospectapi-common';
 
-// turn the enum into an array so we can grab a random one easy peasy
+// turn the enum into an array, we can grab a random one easy-peasy
 const topicsArray = Object.keys(Topics).map((key) => Topics[key]);
 
 // TODO: refactor into a seeder-type helper for all tests?
@@ -43,55 +43,54 @@ const makeProspects = (
 describe('lib', () => {
   describe('isValidScheduledSurfaceGuid', () => {
     it('should return true for a valid scheduled surface GUID', () => {
-      expect(getScheduledSurfaceByGuid('NEW_TAB_EN_US')).not.to.be.undefined;
+      expect(getScheduledSurfaceByGuid('NEW_TAB_EN_US')).not.toBeUndefined();
     });
 
     it('should return false for an invalid scheduled surface GUID', () => {
-      expect(getScheduledSurfaceByGuid('NEW_TAB_CY_GB')).to.be.undefined; // Welsh
+      expect(getScheduledSurfaceByGuid('NEW_TAB_CY_GB')).toBeUndefined(); // Welsh
     });
   });
 
   describe('isValidProspectType', () => {
     it('should return true for a valid prospect type', () => {
       expect(isValidProspectType('NEW_TAB_EN_US', ProspectType.SYNDICATED_NEW))
-        .to.be.true;
+        .toBeTruthy();
 
-      expect(isValidProspectType('NEW_TAB_DE_DE', ProspectType.COUNTS)).to.be
-        .true;
+      expect(isValidProspectType('NEW_TAB_DE_DE', ProspectType.COUNTS)).toBeTruthy();
     });
 
     it('should return false for an invalid prospect type', () => {
       expect(isValidProspectType('NEW_TAB_DE_DE', ProspectType.SYNDICATED_NEW))
-        .to.be.false;
+        .toBeFalsy();
     });
   });
 
   describe('standardizeLanguage', () => {
     it('should standardize valid corpus languages', () => {
-      expect(standardizeLanguage('en')).to.equal('EN');
-      expect(standardizeLanguage('EN')).to.equal('EN');
+      expect(standardizeLanguage('en')).toEqual('EN');
+      expect(standardizeLanguage('EN')).toEqual('EN');
 
-      expect(standardizeLanguage('de')).to.equal('DE');
-      expect(standardizeLanguage('DE')).to.equal('DE');
+      expect(standardizeLanguage('de')).toEqual('DE');
+      expect(standardizeLanguage('DE')).toEqual('DE');
 
-      expect(standardizeLanguage('es')).to.equal('ES');
-      expect(standardizeLanguage('ES')).to.equal('ES');
+      expect(standardizeLanguage('es')).toEqual('ES');
+      expect(standardizeLanguage('ES')).toEqual('ES');
 
-      expect(standardizeLanguage('fr')).to.equal('FR');
-      expect(standardizeLanguage('FR')).to.equal('FR');
+      expect(standardizeLanguage('fr')).toEqual('FR');
+      expect(standardizeLanguage('FR')).toEqual('FR');
 
-      expect(standardizeLanguage('it')).to.equal('IT');
-      expect(standardizeLanguage('IT')).to.equal('IT');
+      expect(standardizeLanguage('it')).toEqual('IT');
+      expect(standardizeLanguage('IT')).toEqual('IT');
     });
 
     it('should return undefined if a non-corpus language is passed', () => {
-      expect(standardizeLanguage('hi')).to.be.undefined;
-      expect(standardizeLanguage('ga')).to.be.undefined;
-      expect(standardizeLanguage('xx')).to.be.undefined;
+      expect(standardizeLanguage('hi')).toBeUndefined();
+      expect(standardizeLanguage('ga')).toBeUndefined();
+      expect(standardizeLanguage('xx')).toBeUndefined();
     });
 
     it('should return undefined if null is passed', () => {
-      expect(standardizeLanguage()).to.be.undefined;
+      expect(standardizeLanguage()).toBeUndefined();
     });
   });
 
@@ -164,16 +163,16 @@ describe('lib', () => {
       console.log(result);
 
       // we have two prospect types
-      expect(Object.keys(result).length).to.equal(2);
+      expect(Object.keys(result).length).toEqual(2);
 
-      expect(result.COUNTS.length).to.equal(3);
-      expect(result.COUNTS[0].rank).to.equal(20);
-      expect(result.COUNTS[1].rank).to.equal(20);
-      expect(result.COUNTS[2].rank).to.equal(10);
+      expect(result.COUNTS.length).toEqual(3);
+      expect(result.COUNTS[0].rank).toEqual(20);
+      expect(result.COUNTS[1].rank).toEqual(20);
+      expect(result.COUNTS[2].rank).toEqual(10);
 
-      expect(result.SYNDICATED_NEW.length).to.equal(2);
-      expect(result.SYNDICATED_NEW[0].rank).to.equal(20);
-      expect(result.SYNDICATED_NEW[1].rank).to.equal(10);
+      expect(result.SYNDICATED_NEW.length).toEqual(2);
+      expect(result.SYNDICATED_NEW[0].rank).toEqual(20);
+      expect(result.SYNDICATED_NEW[1].rank).toEqual(10);
     });
   });
 
@@ -272,18 +271,18 @@ describe('lib', () => {
       });
 
       // number of results should be the same as the original list of prospects
-      expect(result.length).to.equal(6);
+      expect(result.length).toEqual(6);
 
       // the two COUNTS prospects should be in ascending order based on their rank
-      expect(countsProspects[0].rank).to.be.below(countsProspects[1].rank);
+      expect(countsProspects[0].rank).toBeLessThan(countsProspects[1].rank);
 
       // the two SYNDICATED_NEW prospects should be in ascending order based on their rank
-      expect(syndicatedProspects[0].rank).to.be.below(
+      expect(syndicatedProspects[0].rank).toBeLessThan(
         syndicatedProspects[1].rank
       );
 
       // the two TIMESPENT prospects should be in ascending order based on their rank
-      expect(organicTimespentProspects[0].rank).to.be.below(
+      expect(organicTimespentProspects[0].rank).toBeLessThan(
         organicTimespentProspects[1].rank
       );
     });
@@ -294,7 +293,7 @@ describe('lib', () => {
       const sortedRankedProspects = getSortedRankedProspects(prospects);
       const result = getRandomizedSortedRankedProspects(sortedRankedProspects);
 
-      expect(result.length).to.equal(0);
+      expect(result.length).toEqual(0);
     });
 
     it('should return a list of prospects of default batch size if more are provided', () => {
@@ -326,7 +325,7 @@ describe('lib', () => {
       const result = getRandomizedSortedRankedProspects(sortedRankedProspects);
 
       // we should get a list equal to default batch size
-      expect(result.length).to.equal(config.app.prospectBatchSize);
+      expect(result.length).toEqual(config.app.prospectBatchSize);
     });
   });
 
@@ -348,7 +347,7 @@ describe('lib', () => {
       const deDupedProspects = deDuplicateProspectUrls(prospects);
 
       // since no duplicates exist, resultant de-duped array should be same length as original
-      expect(deDupedProspects.length).to.equal(prospects.length);
+      expect(deDupedProspects.length).toEqual(prospects.length);
     });
 
     it('should return the de-duplicated prospect list', () => {
@@ -374,7 +373,7 @@ describe('lib', () => {
       const deDupedProspects = deDuplicateProspectUrls(prospects);
 
       // length of returned array should be 4 after removing 2 duplicates
-      expect(deDupedProspects.length).to.equal(4);
+      expect(deDupedProspects.length).toEqual(4);
     });
   });
 });
