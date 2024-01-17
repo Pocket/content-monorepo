@@ -8,6 +8,7 @@
       "outputs": ["dist/**"]
     },
     "test": {
+      "cache": false,
       "dependsOn": ["^build"]
     },
     "test-integrations": {

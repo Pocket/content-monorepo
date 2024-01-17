@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { Prospect, Topics, ProspectType } from './types';
 import { toUnixTimestamp } from './lib';
 import { generateInsertParams } from './dynamodb';
@@ -23,15 +22,15 @@ describe('dynamodb.common', () => {
     it('should correctly map prospect into a dynamodb item', () => {
       const params = generateInsertParams(prospect);
 
-      expect(params.Item?.id).to.equal(prospect.id);
-      expect(params.Item?.scheduledSurfaceGuid).to.equal(
+      expect(params.Item?.id).toEqual(prospect.id);
+      expect(params.Item?.scheduledSurfaceGuid).toEqual(
         prospect.scheduledSurfaceGuid,
       );
-      expect(params.Item?.rank).to.equal(prospect.rank);
-      expect(params.Item?.url).to.equal(prospect.url);
-      expect(params.Item?.topic).to.equal(prospect.topic);
-      expect(params.Item?.prospectType).to.equal(prospect.prospectType);
-      expect(params.Item?.createdAt).not.be.null;
+      expect(params.Item?.rank).toEqual(prospect.rank);
+      expect(params.Item?.url).toEqual(prospect.url);
+      expect(params.Item?.topic).toEqual(prospect.topic);
+      expect(params.Item?.prospectType).toEqual(prospect.prospectType);
+      expect(params.Item?.createdAt).not.toBeNull();
     });
 
     it('should generate a `createdAt` date of the current time', () => {
@@ -41,7 +40,7 @@ describe('dynamodb.common', () => {
       const now = toUnixTimestamp();
       const oneMinuteAgo = toUnixTimestamp(new Date(now - 6000));
 
-      expect(params.Item?.createdAt).to.be.greaterThan(oneMinuteAgo);
+      expect(params.Item?.createdAt).toBeGreaterThan(oneMinuteAgo);
     });
   });
 });

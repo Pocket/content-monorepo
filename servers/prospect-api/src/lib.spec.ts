@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-// import { expect } from 'chai';
 
 import config from './config';
 import {
