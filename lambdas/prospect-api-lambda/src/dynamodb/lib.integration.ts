@@ -1,6 +1,3 @@
-import * as chai from 'chai';
-import chaiAsPromised = require('chai-as-promised');
-
 import {
   Prospect,
   Topics,
@@ -18,10 +15,6 @@ import {
   batchDeleteProspects,
   deleteOldProspects,
 } from './lib';
-
-// so we can expect on async functions
-chai.use(chaiAsPromised);
-const expect = chai.expect;
 
 describe('dynamodb', () => {
   let prospect: Prospect;
@@ -49,7 +42,7 @@ describe('dynamodb', () => {
 
       const res = await getProspectById(dbClient, prospect.id);
 
-      expect(res).not.to.be.undefined;
+      expect(res).not.toBeUndefined();
     });
   });
 
@@ -64,7 +57,7 @@ describe('dynamodb', () => {
       // make sure it's gone
       const res = await getProspectById(dbClient, prospect.id);
 
-      expect(res).to.be.undefined;
+      expect(res).toBeUndefined();
     });
 
     it('should delete multiple prospects by id', async () => {
@@ -88,11 +81,11 @@ describe('dynamodb', () => {
 
       // this one should be deleted
       let res = await getProspectById(dbClient, 'deleteTest1');
-      expect(res).to.be.undefined;
+      expect(res).toBeUndefined();
 
       // this one should still exist
       res = await getProspectById(dbClient, 'deleteTest3');
-      expect(res).not.to.be.undefined;
+      expect(res).not.toBeUndefined();
     });
 
     it(`should throw if trying to delete more than ${config.aws.dynamoDb.maxBatchDelete} items (dynamo limit)`, async () => {
@@ -111,7 +104,7 @@ describe('dynamodb', () => {
 
       await expect(
           batchDeleteProspects(dbClient, prospectIds)
-      ).to.be.rejectedWith(
+      ).rejects.toThrow(
           `cannot delete more than ${config.aws.dynamoDb.maxBatchDelete} dynamo items at once! you are trying to delete ${prospectIds.length}!`
       );
     });
@@ -170,13 +163,13 @@ describe('dynamodb', () => {
       // only half of the EN_US/TIMESPENT prospects should be returned, as the
       // other half are too new. none of the 5 EN_US/SYNDICATED_NEW prospects
       // should be returned
-      expect(res.length).to.equal(6);
+      expect(res.length).toEqual(6);
 
       // should only get EN_US prospects that are 'old'
       for (let i = 0; i < res.length; i++) {
-        expect(res[i].scheduledSurfaceGuid).to.equal('NEW_TAB_EN_US');
-        expect(res[i].prospectType).to.equal(ProspectType.TIMESPENT);
-        expect(res[i].createdAt).to.be.equal(lastMetaflowRun);
+        expect(res[i].scheduledSurfaceGuid).toEqual('NEW_TAB_EN_US');
+        expect(res[i].prospectType).toEqual(ProspectType.TIMESPENT);
+        expect(res[i].createdAt).toEqual(lastMetaflowRun);
       }
     });
   });
@@ -272,7 +265,7 @@ describe('dynamodb', () => {
           ProspectType.TIMESPENT
       );
 
-      expect(deleteMeProspects.length).to.equal(0);
+      expect(deleteMeProspects.length).toEqual(0);
     });
 
     it('should delete prospects in multiple batches', async () => {
