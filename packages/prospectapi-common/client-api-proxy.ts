@@ -10,6 +10,7 @@ import {
 } from '@apollo/client/core';
 import fetch from 'cross-fetch';
 import gql from 'graphql-tag';
+import pRetry from 'p-retry';
 
 import config from './config';
 import { ClientApiItem } from './types';
@@ -43,41 +44,45 @@ export const getUrlMetadata = async (
     });
   }
 
-  const data = await client.query({
-    query: gql`
-      query ProspectApiUrlMetadata($url: String!) {
-        itemByUrl(url: $url) {
-          resolvedUrl
-          excerpt
-          title
-          language
-          topImageUrl
-          authors {
-            name
-          }
-          domainMetadata {
-            name
-          }
-          syndicatedArticle {
-            authorNames
+  const dataPromise = async () =>
+    client.query({
+      query: gql`
+        query ProspectApiUrlMetadata($url: String!) {
+          itemByUrl(url: $url) {
+            resolvedUrl
             excerpt
-            mainImage
-            publisher {
-              name
-              url
-            }
             title
-          }
-          collection {
-            slug
+            language
+            topImageUrl
+            authors {
+              name
+            }
+            domainMetadata {
+              name
+            }
+            syndicatedArticle {
+              authorNames
+              excerpt
+              mainImage
+              publisher {
+                name
+                url
+              }
+              title
+            }
+            collection {
+              slug
+            }
           }
         }
-      }
-    `,
-    variables: {
-      url,
-    },
-  });
+      `,
+      variables: {
+        url,
+      },
+    });
+
+  // pRetry with retries the query on failure, with exponential backoff
+  const data = await pRetry(dataPromise, { retries: 2 });
 
   if (!data.data?.itemByUrl) {
     Sentry.captureException(new Error(`no parser data found for url ${url}`));
