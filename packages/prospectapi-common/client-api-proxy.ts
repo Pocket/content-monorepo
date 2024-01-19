@@ -10,12 +10,25 @@ import {
 } from '@apollo/client/core';
 import fetch from 'cross-fetch';
 import gql from 'graphql-tag';
-import pRetry from 'p-retry';
+import fetchRetry from 'fetch-retry';
 
 import config from './config';
 import { ClientApiItem } from './types';
 
 let client;
+
+const fetchWithBackoff = fetchRetry(fetch, {
+  retries: 2,
+  // Retry if the status code indicates that the service is temporarily unavailable.
+  // By default, fetch-retry only retries on network errors.
+  // 504 is the only one that's been observed in production.
+  retryOn: [429, 500, 502, 503, 504],
+  // Retry with exponential backoff to give sub-graphs (like the Parser) time to recover.
+  // The delay was chosen arbitrarily. We don't have evidence that it is necessary.
+  retryDelay: (attempt) => {
+    return Math.pow(2, attempt) * 2000; // 2000, 4000, 8000
+  },
+});
 
 /**
  * calls client API to get data for the given url
@@ -27,7 +40,10 @@ export const getUrlMetadata = async (
   // Move Apollo Client instantiation to inside the function to prevent memory leaks.
   if (!client) {
     client = new ApolloClient({
-      link: createHttpLink({ fetch, uri: config.app.clientApiEndpoint }),
+      link: createHttpLink({
+        fetch: fetchWithBackoff,
+        uri: config.app.clientApiEndpoint,
+      }),
       cache: new InMemoryCache(),
       name: config.app.apolloClientName,
       version: config.app.version,
@@ -44,45 +60,41 @@ export const getUrlMetadata = async (
     });
   }
 
-  const dataPromise = async () =>
-    client.query({
-      query: gql`
-        query ProspectApiUrlMetadata($url: String!) {
-          itemByUrl(url: $url) {
-            resolvedUrl
+  const data = await client.query({
+    query: gql`
+      query ProspectApiUrlMetadata($url: String!) {
+        itemByUrl(url: $url) {
+          resolvedUrl
+          excerpt
+          title
+          language
+          topImageUrl
+          authors {
+            name
+          }
+          domainMetadata {
+            name
+          }
+          syndicatedArticle {
+            authorNames
             excerpt
+            mainImage
+            publisher {
+              name
+              url
+            }
             title
-            language
-            topImageUrl
-            authors {
-              name
-            }
-            domainMetadata {
-              name
-            }
-            syndicatedArticle {
-              authorNames
-              excerpt
-              mainImage
-              publisher {
-                name
-                url
-              }
-              title
-            }
-            collection {
-              slug
-            }
+          }
+          collection {
+            slug
           }
         }
-      `,
-      variables: {
-        url,
-      },
-    });
-
-  // pRetry with retries the query on failure, with exponential backoff
-  const data = await pRetry(dataPromise, { retries: 2 });
+      }
+    `,
+    variables: {
+      url,
+    },
+  });
 
   if (!data.data?.itemByUrl) {
     Sentry.captureException(new Error(`no parser data found for url ${url}`));
