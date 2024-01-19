@@ -13,16 +13,22 @@ describe('getUrlMetadata', () => {
 
   const server = setupServer();
 
-  // Helper function to setup server behavior
+  /**
+   * Set up the mock server to return responses for the ProspectApiUrlMetadata query.
+   * @param errorCount Number of times to error out (default 0), before returning a successful response.
+   */
   const addProspectMetadataHandlerToServer = (errorCount: number = 0) => {
     let callCount = 0;
 
     server.use(
       graphql.query('ProspectApiUrlMetadata', () => {
         callCount += 1;
-        return callCount <= errorCount
-          ? HttpResponse.json({}, { status: 504 })
-          : HttpResponse.json({ data: mockData });
+        // For the first errorCount number of requests, return a 504 error, then return a success response.
+        if (callCount <= errorCount) {
+          return HttpResponse.json({}, { status: 504 });
+        } else {
+          return HttpResponse.json({ data: mockData });
+        }
       }),
     );
   };
