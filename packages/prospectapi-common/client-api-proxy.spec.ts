@@ -13,16 +13,28 @@ describe('getUrlMetadata', () => {
 
   const server = setupServer();
 
+  // Helper function to setup server behavior
+  const addProspectMetadataHandlerToServer = (
+    errorCount: number = 0,
+  ) => {
+    let callCount = 0;
+
+    server.use(
+      graphql.query('ProspectApiUrlMetadata', () => {
+        callCount += 1;
+        return callCount <= errorCount
+          ? HttpResponse.json({}, { status: 504 })
+          : HttpResponse.json({ data: mockData });
+      }),
+    );
+  };
+
   beforeAll(() => server.listen());
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
   it('returns data after a successful query', async () => {
-    server.use(
-      graphql.query('ProspectApiUrlMetadata', () => {
-        return HttpResponse.json({ data: mockData });
-      }),
-    );
+    addProspectMetadataHandlerToServer();
 
     const result = await getUrlMetadata('https://example.com');
 
@@ -30,36 +42,27 @@ describe('getUrlMetadata', () => {
   });
 
   it('retries the query on failure', async () => {
-    let callCount = 0;
+    const errorCount = 2;
+    addProspectMetadataHandlerToServer(errorCount);
 
-    server.use(
-      graphql.query('ProspectApiUrlMetadata', () => {
-        callCount += 1;
-        return callCount < 3 // First and second request will error out
-          ? HttpResponse.json({}, { status: 504 })
-          : HttpResponse.json({ data: mockData });
-      }),
-    );
-
-    const result = await getUrlMetadata('https://example.com');
+    const startTime = Date.now();
+    // Uses a low retryDelay of 100 ms to make the test faster.
+    const retryDelay = 100;
+    const result = await getUrlMetadata('https://example.com', retryDelay);
+    const endTime = Date.now();
 
     expect(result).toEqual(mockData.itemByUrl);
-  }, 8000); // Set test timeout to 5 seconds, because fetch-retry is configured with 2 + 4 = 6 seconds of delay.
+    // Check that there was a delay between retries.
+    expect(endTime - startTime).toBeGreaterThanOrEqual(errorCount * retryDelay);
+  });
 
-  it('retries the query on failure', async () => {
-    let callCount = 0;
+  it('throws an exception after 2 failed retries', async () => {
+    // errorCount of 3 exceeds max retries (2), and will therefore fail.
+    addProspectMetadataHandlerToServer(3);
 
-    server.use(
-      graphql.query('ProspectApiUrlMetadata', () => {
-        callCount += 1;
-        return callCount < 4 // First and second request will error out
-          ? HttpResponse.json({}, { status: 504 })
-          : HttpResponse.json({ data: mockData });
-      }),
+    // Uses a low retryDelay of 100 ms to make the test faster.
+    await expect(getUrlMetadata('https://example.com', 100)).rejects.toThrow(
+      'Response not successful: Received status code 504',
     );
-
-    const result = await getUrlMetadata('https://example.com');
-
-    expect(result).toEqual(mockData.itemByUrl);
-  }, 8000); // Set test timeout to 5 seconds, because fetch-retry is configured with 2 + 4 = 6 seconds of delay.
+  });
 });
