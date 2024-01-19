@@ -14,9 +14,7 @@ describe('getUrlMetadata', () => {
   const server = setupServer();
 
   // Helper function to setup server behavior
-  const addProspectMetadataHandlerToServer = (
-    errorCount: number = 0,
-  ) => {
+  const addProspectMetadataHandlerToServer = (errorCount: number = 0) => {
     let callCount = 0;
 
     server.use(
