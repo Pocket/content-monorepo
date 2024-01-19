@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import {
   getAllSnowplowEvents,
   resetSnowplowEvents,
@@ -39,10 +38,10 @@ describe('snowplow', () => {
 
     // this isn't a great test, but we can at least verify a good event exists
     // (could it be a good event from a different test file? yep!)
-    expect(allEvents.good).to.be.greaterThan(0);
+    expect(allEvents.good).toBeGreaterThan(0);
 
     // we can check that we have zero bad events - this is the one real expect
     // in this test.
-    expect(allEvents.bad).to.equal(0);
+    expect(allEvents.bad).toEqual(0);
   });
 });

@@ -12,9 +12,8 @@
     "test:watch": "npm test -- --watchAll",
     "test": "jest \"\\.spec\\.ts\"",
     "test-integrations": "jest \"\\.integration\\.ts\" --runInBand",
-    "lint-check": "eslint --fix-dry-run \"src/**/*.ts\"",
-    "lint-fix": "eslint --fix \"src/**/*.ts\"",
-    "db:seed": "node dist/seeder.js"
+    "lint": "eslint --fix-dry-run \"src/**/*.ts\"",
+    "db:dynamo-seed": "node dist/seeder.js"
   },
   "author": "",
   "license": "ISC",
@@ -32,16 +31,12 @@
     "@faker-js/faker": "6.0.0",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
-    "@types/chai": "4.3.4",
     "@types/chai-spies": "1.0.3",
     "@types/jest": "28.1.7",
     "@types/lodash": "4.14.182",
-    "chai": "4.3.7",
-    "chai-spies": "1.0.0",
     "jest": "29.7.0",
     "lodash": "4.17.21",
     "nodemon": "2.0.22",
-    "sinon": "^17.0.1",
     "ts-jest": "29.1.1"
   },
   "files": [

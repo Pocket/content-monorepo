@@ -1,5 +1,3 @@
-import { expect } from 'chai';
-
 import {
   Prospect,
   ProspectType,
@@ -38,187 +36,187 @@ describe('lib', () => {
 
   describe('hasValidStructure', () => {
     it('should return true if object has all prospect properties', () => {
-      expect(hasValidStructure(validSqsProspect)).to.be.true;
+      expect(hasValidStructure(validSqsProspect)).toBeTruthy();
     });
 
     it('should return false if object is missing a prospect_id', () => {
       delete validSqsProspect.prospect_id;
 
-      expect(hasValidStructure(validSqsProspect)).to.be.false;
+      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if object is missing a scheduled_surface_guid', () => {
       delete validSqsProspect.scheduled_surface_guid;
 
-      expect(hasValidStructure(validSqsProspect)).to.be.false;
+      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if object is missing a predicted_topic', () => {
       delete validSqsProspect.predicted_topic;
 
-      expect(hasValidStructure(validSqsProspect)).to.be.false;
+      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if object is missing a prospect_source', () => {
       delete validSqsProspect.prospect_source;
 
-      expect(hasValidStructure(validSqsProspect)).to.be.false;
+      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if object is missing a url', () => {
       delete validSqsProspect.url;
 
-      expect(hasValidStructure(validSqsProspect)).to.be.false;
+      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if object is missing a save_count', () => {
       delete validSqsProspect.save_count;
 
-      expect(hasValidStructure(validSqsProspect)).to.be.false;
+      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if object is missing a rank', () => {
       delete validSqsProspect.rank;
 
-      expect(hasValidStructure(validSqsProspect)).to.be.false;
+      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
     });
   });
 
   describe('hasValidProspectId', () => {
     it('should return true if the prospect_id is a string', () => {
-      expect(hasValidProspectId(validSqsProspect)).to.be.true;
+      expect(hasValidProspectId(validSqsProspect)).toBeTruthy();
     });
 
     it('should return false if the prospect_id is not a string', () => {
       validSqsProspect.prospect_id = 123;
-      expect(hasValidProspectId(validSqsProspect)).to.be.false;
+      expect(hasValidProspectId(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if the prospect_id is empty', () => {
       validSqsProspect.prospect_id = undefined;
-      expect(hasValidProspectId(validSqsProspect)).to.be.false;
+      expect(hasValidProspectId(validSqsProspect)).toBeFalsy();
     });
   });
 
   describe('hasValidScheduledSurfaceGuid', () => {
     it('should return true if the scheduled_surface_guid is one of our guids', () => {
-      expect(hasValidScheduledSurfaceGuid(validSqsProspect)).to.be.true;
+      expect(hasValidScheduledSurfaceGuid(validSqsProspect)).toBeTruthy();
     });
 
     it('should return false if the scheduled_surface_guid is not one of our guids', () => {
       validSqsProspect.scheduled_surface_guid = 'NEW_TAB_CY_GB'; // Welsh
-      expect(hasValidScheduledSurfaceGuid(validSqsProspect)).to.be.false;
+      expect(hasValidScheduledSurfaceGuid(validSqsProspect)).toBeFalsy();
 
       validSqsProspect.scheduled_surface_guid = 42;
-      expect(hasValidScheduledSurfaceGuid(validSqsProspect)).to.be.false;
+      expect(hasValidScheduledSurfaceGuid(validSqsProspect)).toBeFalsy();
 
       validSqsProspect.scheduled_surface_guid = undefined;
-      expect(hasValidScheduledSurfaceGuid(validSqsProspect)).to.be.false;
+      expect(hasValidScheduledSurfaceGuid(validSqsProspect)).toBeFalsy();
     });
   });
 
   describe('hasValidPredictedTopic', () => {
     it('should return true if the predicted_topic is one of our enums', () => {
-      expect(hasValidPredictedTopic(validSqsProspect)).to.be.true;
+      expect(hasValidPredictedTopic(validSqsProspect)).toBeTruthy();
     });
 
     it('should return true if predicted_topic is an empty string', () => {
       validSqsProspect.predicted_topic = '';
-      expect(hasValidPredictedTopic(validSqsProspect)).to.be.true;
+      expect(hasValidPredictedTopic(validSqsProspect)).toBeTruthy();
     });
 
     it('should return false if the predicted_topic is not one of our enums', () => {
       validSqsProspect.predicted_topic =
         'companies without staging environments';
-      expect(hasValidPredictedTopic(validSqsProspect)).to.be.false;
+      expect(hasValidPredictedTopic(validSqsProspect)).toBeFalsy();
 
       validSqsProspect.predicted_topic = 900;
-      expect(hasValidPredictedTopic(validSqsProspect)).to.be.false;
+      expect(hasValidPredictedTopic(validSqsProspect)).toBeFalsy();
 
       validSqsProspect.predicted_topic = undefined;
-      expect(hasValidPredictedTopic(validSqsProspect)).to.be.false;
+      expect(hasValidPredictedTopic(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if predicted_topic is a single space string', () => {
       validSqsProspect.predicted_topic = ' ';
-      expect(hasValidPredictedTopic(validSqsProspect)).to.be.false;
+      expect(hasValidPredictedTopic(validSqsProspect)).toBeFalsy();
     });
   });
 
   describe('hasValidProspectSource', () => {
     it("should return true if the prospect_source is one of our enums assigned to the prospect's scheduled surface", () => {
-      expect(hasValidProspectSource(validSqsProspect)).to.be.true;
+      expect(hasValidProspectSource(validSqsProspect)).toBeTruthy();
     });
 
     it('should return false if the prospect_source is not one of our enums', () => {
       validSqsProspect.prospect_source = 'GUT_FEELING';
-      expect(hasValidProspectSource(validSqsProspect)).to.be.false;
+      expect(hasValidProspectSource(validSqsProspect)).toBeFalsy();
     });
 
     it('should return true if the prospect_source is lower case', () => {
       validSqsProspect.prospect_type = 'organic_timespent';
-      expect(hasValidProspectSource(validSqsProspect)).to.be.true;
+      expect(hasValidProspectSource(validSqsProspect)).toBeTruthy();
     });
 
     it('should return false if the prospect_source is not valid for the given scheduled surface', () => {
       // de-DE does not have a SYNDICATED_NEW prospectType
       validSqsProspect.scheduled_surface_guid = 'NEW_TAB_DE_DE';
 
-      expect(hasValidProspectSource(validSqsProspect)).to.be.false;
+      expect(hasValidProspectSource(validSqsProspect)).toBeFalsy();
     });
   });
 
   describe('hasValidUrl', () => {
     it('should return true if the url is valid', () => {
-      expect(hasValidUrl(validSqsProspect)).to.be.true;
+      expect(hasValidUrl(validSqsProspect)).toBeTruthy();
     });
 
     it('should return false if the url is invalid', () => {
       validSqsProspect.url = 'getpocket.com';
-      expect(hasValidUrl(validSqsProspect)).to.be.false;
+      expect(hasValidUrl(validSqsProspect)).toBeFalsy();
 
       validSqsProspect.url = 'ftp://getpocket.com';
-      expect(hasValidUrl(validSqsProspect)).to.be.false;
+      expect(hasValidUrl(validSqsProspect)).toBeFalsy();
 
       validSqsProspect.url = 'file://getpocket.com';
-      expect(hasValidUrl(validSqsProspect)).to.be.false;
+      expect(hasValidUrl(validSqsProspect)).toBeFalsy();
 
       validSqsProspect.url = 900;
-      expect(hasValidUrl(validSqsProspect)).to.be.false;
+      expect(hasValidUrl(validSqsProspect)).toBeFalsy();
 
       validSqsProspect.url = undefined;
-      expect(hasValidUrl(validSqsProspect)).to.be.false;
+      expect(hasValidUrl(validSqsProspect)).toBeFalsy();
     });
   });
 
   describe('hasValidSaveCount', () => {
     it('should return true if the save_count is numeric', () => {
-      expect(hasValidSaveCount(validSqsProspect)).to.be.true;
+      expect(hasValidSaveCount(validSqsProspect)).toBeTruthy();
     });
 
     it('should return false if the save_count is not numeric', () => {
       validSqsProspect.save_count = '42';
-      expect(hasValidSaveCount(validSqsProspect)).to.be.false;
+      expect(hasValidSaveCount(validSqsProspect)).toBeFalsy();
 
       validSqsProspect.save_count = [];
-      expect(hasValidSaveCount(validSqsProspect)).to.be.false;
+      expect(hasValidSaveCount(validSqsProspect)).toBeFalsy();
 
       validSqsProspect.save_count = {};
-      expect(hasValidSaveCount(validSqsProspect)).to.be.false;
+      expect(hasValidSaveCount(validSqsProspect)).toBeFalsy();
 
       validSqsProspect.save_count = false;
-      expect(hasValidSaveCount(validSqsProspect)).to.be.false;
+      expect(hasValidSaveCount(validSqsProspect)).toBeFalsy();
     });
   });
 
   describe('validateProperties', () => {
     it('should return a non-zero array if the prospect has errors', () => {
       delete validSqsProspect.scheduled_surface_guid;
-      expect(validateProperties(validSqsProspect).length).to.be.greaterThan(0);
+      expect(validateProperties(validSqsProspect).length).toBeGreaterThan(0);
     });
 
     it('should return an empty array if the prospect is valid', () => {
-      expect(validateProperties(validSqsProspect).length).to.equal(0);
+      expect(validateProperties(validSqsProspect).length).toEqual(0);
     });
   });
 
@@ -237,15 +235,15 @@ describe('lib', () => {
 
       const result = convertSqsProspectToProspect(validSqsProspect);
 
-      expect(result.id).to.exist; // we trust uuidV4 to work
-      expect(result.prospectId).to.equal(expected.prospectId);
-      expect(result.scheduledSurfaceGuid).to.equal(
+      expect(result.id).toBeDefined(); // we trust uuidV4 to work
+      expect(result.prospectId).toEqual(expected.prospectId);
+      expect(result.scheduledSurfaceGuid).toEqual(
         expected.scheduledSurfaceGuid
       );
-      expect(result.url).to.equal(expected.url);
-      expect(result.prospectType).to.equal(expected.prospectType);
-      expect(result.topic).to.equal(expected.topic);
-      expect(result.saveCount).to.equal(expected.saveCount);
+      expect(result.url).toEqual(expected.url);
+      expect(result.prospectType).toEqual(expected.prospectType);
+      expect(result.topic).toEqual(expected.topic);
+      expect(result.saveCount).toEqual(expected.saveCount);
     });
   });
 
@@ -295,7 +293,7 @@ describe('lib', () => {
         authors: 'questlove,rafael frumkin',
       };
 
-      expect(expected).to.deep.equal(
+      expect(expected).toEqual(
         hydrateProspectMetadata(prospectToHydrate, urlMetadata)
       );
     });
@@ -337,7 +335,7 @@ describe('lib', () => {
         domain: 'test-domain',
       };
 
-      expect(expected).to.deep.equal(
+      expect(expected).toEqual(
         hydrateProspectMetadata(prospectToHydrate, urlMetadata)
       );
     });
@@ -352,7 +350,7 @@ describe('lib', () => {
         },
       };
 
-      expect(Array.isArray(getProspectsFromMessageJson(json))).to.be.true;
+      expect(Array.isArray(getProspectsFromMessageJson(json))).toBeTruthy();
     });
 
     it('should return undefined if candidates is not an array', () => {
@@ -364,7 +362,7 @@ describe('lib', () => {
         },
       };
 
-      expect(getProspectsFromMessageJson(json)).to.be.undefined;
+      expect(getProspectsFromMessageJson(json)).toBeUndefined();
     });
 
     it('should return undefined given an unexpected json structure', () => {
@@ -373,7 +371,7 @@ describe('lib', () => {
         hammer: 'time',
       };
 
-      expect(getProspectsFromMessageJson(json)).to.be.undefined;
+      expect(getProspectsFromMessageJson(json)).toBeUndefined();
     });
   });
 });

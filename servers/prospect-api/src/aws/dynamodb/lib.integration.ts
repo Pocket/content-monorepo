@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import request from 'supertest';
 import { print } from 'graphql';
 
@@ -110,32 +109,32 @@ describe('queries integration tests', () => {
               },
             },
           });
-      expect(result.body.errors).to.be.undefined;
+      expect(result.body.errors).toBeUndefined();
       const {
         body: { data },
       } = result;
       const resultArray = data?.getProspects;
       resultArray.forEach((item: Prospect) => {
-        expect(item.id).to.exist;
-        expect(item.scheduledSurfaceGuid).to.exist;
-        expect(item.url).to.exist;
-        expect(item.topic).to.exist;
-        expect(item.prospectType).to.exist;
-        expect(item.saveCount).to.exist;
-        expect(item.createdAt).to.exist;
-        expect(item.domain).to.exist;
-        expect(item.imageUrl).to.exist;
-        expect(item.publisher).to.exist;
-        expect(item.title).to.exist;
-        expect(item.isSyndicated).to.exist;
-        expect(item.isCollection).to.exist;
-        expect(item.excerpt).to.exist;
-        expect(item.language).to.exist;
-        expect(item.authors).to.exist;
+        expect(item.id).toBeDefined();
+        expect(item.scheduledSurfaceGuid).toBeDefined();
+        expect(item.url).toBeDefined();
+        expect(item.topic).toBeDefined();
+        expect(item.prospectType).toBeDefined();
+        expect(item.saveCount).toBeDefined();
+        expect(item.createdAt).toBeDefined();
+        expect(item.domain).toBeDefined();
+        expect(item.imageUrl).toBeDefined();
+        expect(item.publisher).toBeDefined();
+        expect(item.title).toBeDefined();
+        expect(item.isSyndicated).toBeDefined();
+        expect(item.isCollection).toBeDefined();
+        expect(item.excerpt).toBeDefined();
+        expect(item.language).toBeDefined();
+        expect(item.authors).toBeDefined();
         // Federated Approved Corpus Item
-        expect(item.approvedCorpusItem).to.exist;
+        expect(item.approvedCorpusItem).toBeDefined();
         // `url` is the only field that is resolved locally
-        expect(item.approvedCorpusItem?.url).to.exist;
+        expect(item.approvedCorpusItem?.url).toBeDefined();
       });
     });
 
@@ -154,7 +153,7 @@ describe('queries integration tests', () => {
               },
             },
           });
-      expect(result.body.errors).to.be.undefined;
+      expect(result.body.errors).toBeUndefined();
       const {
         body: { data },
       } = result;
@@ -162,28 +161,28 @@ describe('queries integration tests', () => {
       const resultArray = data?.getProspects;
 
       resultArray.forEach((item: Prospect) => {
-        expect(item.id).to.exist;
-        expect(item.scheduledSurfaceGuid).to.exist;
-        expect(item.url).to.exist;
-        expect(item.topic).to.exist;
-        expect(item.prospectType).to.exist;
-        expect(item.saveCount).to.exist;
-        expect(item.createdAt).to.exist;
-        expect(item.domain).to.exist;
-        expect(item.imageUrl).to.exist;
-        expect(item.publisher).to.exist;
-        expect(item.title).to.exist;
-        expect(item.isSyndicated).to.exist;
-        expect(item.isCollection).to.exist;
+        expect(item.id).toBeDefined();
+        expect(item.scheduledSurfaceGuid).toBeDefined();
+        expect(item.url).toBeDefined();
+        expect(item.topic).toBeDefined();
+        expect(item.prospectType).toBeDefined();
+        expect(item.saveCount).toBeDefined();
+        expect(item.createdAt).toBeDefined();
+        expect(item.domain).toBeDefined();
+        expect(item.imageUrl).toBeDefined();
+        expect(item.publisher).toBeDefined();
+        expect(item.title).toBeDefined();
+        expect(item.isSyndicated).toBeDefined();
+        expect(item.isCollection).toBeDefined();
         // Federated Approved Corpus Item
-        expect(item.approvedCorpusItem).to.exist;
+        expect(item.approvedCorpusItem).toBeDefined();
         // `url` is the only field that is resolved locally
-        expect(item.approvedCorpusItem?.url).to.exist;
+        expect(item.approvedCorpusItem?.url).toBeDefined();
 
         // these are purposefully removed in seedDb() above
-        expect(item.excerpt).not.to.exist;
-        expect(item.language).not.to.exist;
-        expect(item.authors).not.to.exist;
+        expect(item.excerpt).toBeNull();
+        expect(item.language).toBeNull();
+        expect(item.authors).toBeNull();
       });
     });
 
@@ -200,7 +199,7 @@ describe('queries integration tests', () => {
             },
           });
 
-      expect(result.body.errors).to.be.undefined;
+      expect(result.body.errors).toBeUndefined();
       const {
         body: { data },
       } = result;
@@ -213,7 +212,7 @@ describe('queries integration tests', () => {
         );
       }, 0);
 
-      expect(enUsCount).to.equal(resultArray.length);
+      expect(enUsCount).toEqual(resultArray.length);
     });
 
     it('should return a full batch filtered by new tab and prospect type', async () => {
@@ -229,7 +228,7 @@ describe('queries integration tests', () => {
               },
             },
           });
-      expect(result.body.errors).to.be.undefined;
+      expect(result.body.errors).toBeUndefined();
       const {
         body: { data },
       } = result;
@@ -248,7 +247,7 @@ describe('queries integration tests', () => {
         }
       }, 0);
 
-      expect(validCount).to.equal(resultArray.length);
+      expect(validCount).toEqual(resultArray.length);
     });
 
     it('should return a partial batch filtered by publisher (included)', async () => {
@@ -267,8 +266,8 @@ describe('queries integration tests', () => {
           });
 
       // check these first just in case
-      expect(result.body.errors).to.be.undefined;
-      expect(result.body.data).not.to.be.null;
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
 
       const resultArray = result.body.data?.getProspects;
 
@@ -279,7 +278,7 @@ describe('queries integration tests', () => {
           0
       );
 
-      expect(resultCount).to.equal(resultArray.length);
+      expect(resultCount).toEqual(resultArray.length);
     });
 
     it('should return a partial batch filtered by publisher (excluded)', async () => {
@@ -296,7 +295,7 @@ describe('queries integration tests', () => {
               },
             },
           });
-      expect(result.body.errors).to.be.undefined;
+      expect(result.body.errors).toBeUndefined();
       const {
         body: { data },
       } = result;
@@ -310,7 +309,7 @@ describe('queries integration tests', () => {
           0
       );
 
-      expect(resultCount).to.equal(resultArray.length);
+      expect(resultCount).toEqual(resultArray.length);
     });
 
     it('should return less than a full batch when limited items exist', async () => {
@@ -327,7 +326,7 @@ describe('queries integration tests', () => {
             },
           });
 
-      expect(result.body.errors).to.be.undefined;
+      expect(result.body.errors).toBeUndefined();
       const {
         body: { data },
       } = result;
@@ -346,7 +345,7 @@ describe('queries integration tests', () => {
         }
       }, 0);
 
-      expect(validCount).to.equal(resultArray.length);
+      expect(validCount).toEqual(resultArray.length);
     });
 
     it('should throw an error if given an invalid new tab', async () => {
@@ -362,12 +361,12 @@ describe('queries integration tests', () => {
             },
           });
 
-      expect(result.body.errors?.length).to.equal(1);
+      expect(result.body.errors?.length).toEqual(1);
 
       // this *should* always be true - but I couldn't figure out how to access
       // a specific index of a possibly undefined array
       if (result.body.errors) {
-        expect(result.body.errors[0].message).to.equal(
+        expect(result.body.errors[0].message).toEqual(
             "NEW_TAB_CY_GB isn't a valid scheduled surface guid!"
         );
       }
@@ -388,12 +387,12 @@ describe('queries integration tests', () => {
           });
 
       // we should get an error
-      expect(result.body.errors?.length).to.equal(1);
+      expect(result.body.errors?.length).toEqual(1);
 
       // this *should* always be true - but i couldn't figure out how to access
       // a specific index of a possibly undefined array
 
-      expect(result?.body.errors?.[0].message).to.equal(
+      expect(result?.body.errors?.[0].message).toEqual(
           'SYNDICATED_NEW is not a valid prospect type for scheduled surface New Tab (de-DE)'
       );
     });
@@ -419,11 +418,11 @@ describe('queries integration tests', () => {
           });
 
       // we should get an authorization error
-      expect(result.body.errors).to.not.be.undefined;
+      expect(result.body.errors).not.toBeUndefined();
 
-      expect(result.body.errors?.length).to.equal(1);
+      expect(result.body.errors?.length).toEqual(1);
 
-      expect(result?.body.errors?.[0].message).to.equal(
+      expect(result?.body.errors?.[0].message).toEqual(
           'Not authorized for action'
       );
     });
@@ -432,7 +431,7 @@ describe('queries integration tests', () => {
       const { groups, ...undefinedGroupsHeaders } = {
         ...headers,
       };
-      expect(groups).to.exist;
+      expect(groups).toBeDefined();
 
       // the request we make is for EN_US scheduled surface
       const result = await request(app)
@@ -447,13 +446,13 @@ describe('queries integration tests', () => {
             },
           });
       // we should get an authorization error
-      expect(result.body.errors).to.not.be.undefined;
+      expect(result.body.errors).not.toBeUndefined();
 
-      expect(result.body.data).to.be.null;
+      expect(result.body.data).toBeNull();
 
-      expect(result.body.errors?.length).to.equal(1);
+      expect(result.body.errors?.length).toEqual(1);
 
-      expect(result?.body.errors?.[0].message).to.equal(
+      expect(result?.body.errors?.[0].message).toEqual(
           'Not authorized for action'
       );
     });
@@ -510,14 +509,14 @@ describe('mutations integration tests', () => {
           });
 
       // check these first just in case
-      expect(result.body.errors).to.be.undefined;
-      expect(result.body.data).not.to.be.null;
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
 
       // get the prospect directly from the db (as `curated` is not a part of
       // our graph)
       const res = await getProspectById(dbClient, prospect.id);
 
-      expect(res?.curated).to.equal(true);
+      expect(res?.curated).toEqual(true);
     });
 
     it('should return all properties of an updated prospect', async () => {
@@ -540,8 +539,8 @@ describe('mutations integration tests', () => {
           });
 
       // check these first just in case
-      expect(result.body.errors).to.be.undefined;
-      expect(result.body.data).not.to.be.null;
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
 
       const updatedProspect = result.body.data?.updateProspectAsCurated;
 
@@ -553,7 +552,7 @@ describe('mutations integration tests', () => {
       // add expected federated fields that are on graphql schema
       expectedProspect.approvedCorpusItem = { url: expectedProspect.url };
 
-      expect(updatedProspect).to.deep.equal(expectedProspect);
+      expect(updatedProspect).toEqual(expectedProspect);
     });
 
     it('should update prospect if the user has the required auth group for a given scheduled surface', async () => {
@@ -575,15 +574,15 @@ describe('mutations integration tests', () => {
             },
           });
 
-      expect(result.body.errors).to.be.undefined;
+      expect(result.body.errors).toBeUndefined();
 
-      expect(result.body.data).not.to.be.null;
+      expect(result.body.data).not.toBeNull();
 
       // get the prospect directly from the db (as `curated` is not a part of
       // our graph)
       const res = await getProspectById(dbClient, prospect.id);
 
-      expect(res?.curated).to.equal(true);
+      expect(res?.curated).toEqual(true);
     });
     it('should throw an error if the user does not have the required auth group for a given scheduled surface', async () => {
       const prospect = createProspect(
@@ -609,11 +608,11 @@ describe('mutations integration tests', () => {
             },
           });
 
-      expect(result.body.errors).not.to.be.undefined;
+      expect(result.body.errors).not.toBeUndefined();
 
-      expect(result.body.errors?.length).to.equal(1);
+      expect(result.body.errors?.length).toEqual(1);
 
-      expect(result?.body.errors?.[0].message).to.equal(
+      expect(result?.body.errors?.[0].message).toEqual(
           'Not authorized for action'
       );
     });
@@ -639,14 +638,14 @@ describe('mutations integration tests', () => {
           });
 
       // check these first just in case
-      expect(result.body.errors).to.be.undefined;
-      expect(result.body.data).not.to.be.null;
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
 
       // get the prospect directly from the db (as `curated` is not a part of
       // our graph)
       const res = await getProspectById(dbClient, prospect.id);
 
-      expect(res?.curated).to.equal(true);
+      expect(res?.curated).toEqual(true);
     });
 
     it('should return all properties of an updated prospect', async () => {
@@ -669,8 +668,8 @@ describe('mutations integration tests', () => {
           });
 
       // check these first just in case
-      expect(result.body.errors).to.be.undefined;
-      expect(result.body.data).not.to.be.null;
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
 
       const updatedProspect = result.body.data?.dismissProspect;
 
@@ -682,7 +681,7 @@ describe('mutations integration tests', () => {
       // add expected federated fields that are on graphql schema
       expectedProspect.approvedCorpusItem = { url: expectedProspect.url };
 
-      expect(updatedProspect).to.deep.equal(expectedProspect);
+      expect(updatedProspect).toEqual(expectedProspect);
     });
 
     it('should update prospect if the user has the required auth group for a given scheduled surface', async () => {
@@ -704,15 +703,15 @@ describe('mutations integration tests', () => {
             },
           });
 
-      expect(result.body.errors).to.be.undefined;
+      expect(result.body.errors).toBeUndefined();
 
-      expect(result.body.data).not.to.be.null;
+      expect(result.body.data).not.toBeNull();
 
       // get the prospect directly from the db (as `curated` is not a part of
       // our graph)
       const res = await getProspectById(dbClient, prospect.id);
 
-      expect(res?.curated).to.equal(true);
+      expect(res?.curated).toBeTruthy();
     });
     it('should throw an error if the user does not have the required auth group for a given scheduled surface', async () => {
       const prospect = createProspect(
@@ -738,9 +737,9 @@ describe('mutations integration tests', () => {
             },
           });
 
-      expect(result.body.errors).not.to.be.undefined;
-      expect(result.body.errors?.length).to.equal(1);
-      expect(result?.body.errors?.[0].message).to.equal(
+      expect(result.body.errors).not.toBeUndefined();
+      expect(result.body.errors?.length).toEqual(1);
+      expect(result?.body.errors?.[0].message).toEqual(
           'Not authorized for action'
       );
     });
