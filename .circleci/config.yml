@@ -18,7 +18,7 @@ jobs:
           name: Generate List of Configs to Merge
           command: |
             # Generate a list of all the circleci configs we want to run
-            file_list=(".circleci/shared.yml" ".circleci/monorepo-jobs.yml" ".circleci/prospect-api.yml" ".circleci/curated-corpus-api.yml")       
+            file_list=(".circleci/shared.yml" ".circleci/monorepo-jobs.yml" ".circleci/prospect-api.yml")       
             touch /tmp/configs.txt
 
             # Add file header to each file and dump it to the config list
@@ -46,7 +46,6 @@ jobs:
           output-path: /tmp/pipeline-parameters.json
           mapping: |
             ((servers|infrastructure|lambdas)/prospect-api/.*)|(packages/.*)|(pnpm-lock\.yaml)|(Dockerfile) prospect_api true
-            ((servers|infrastructure)/curated-corpus-api/.*)|(packages/.*)|(pnpm-lock\.yaml)|(Dockerfile) curated_corpus_api true
       - continuation/continue:
           configuration_path: /tmp/generated-config.yml
           parameters: /tmp/pipeline-parameters.json

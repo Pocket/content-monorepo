@@ -6,7 +6,6 @@ jobs:
     steps:
       - checkout
       - install_pnpm
-      - generate_prisma_client
       - run:
           name: Lint
           # Need to build first, so the linter picks up all needed imports
@@ -20,7 +19,6 @@ jobs:
     steps:
       - checkout
       - install_pnpm
-      - generate_prisma_client
       - run:
           name: Test
           command: |

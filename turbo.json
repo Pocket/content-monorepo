@@ -32,9 +32,6 @@
     },
     "db:generate-prisma-client": {
       "cache": false
-    },
-    "migrate:prisma-reset": {
-      "cache": false
     }
   }
 }
