@@ -141,8 +141,8 @@ jobs:
     machine: true
     resource_class: << parameters.resource-class >>
     steps:
-#      - exit-early-if-irrelevant:
-#          for: << parameters.for >>
+      - exit-early-if-irrelevant:
+          for: << parameters.for >>
       - checkout
       - restore_cache:
           name: Restore Tfenv
@@ -255,8 +255,8 @@ jobs:
     machine: true
     resource_class: << parameters.resource-class >>
     steps:
-#      - exit-early-if-irrelevant:
-#          for: << parameters.for >>
+      - exit-early-if-irrelevant:
+          for: << parameters.for >>
       - attach_workspace:
           at: << parameters.workspace >>
       - run:
@@ -450,8 +450,8 @@ jobs:
     executor: aws-cli/default
 
     steps:
-#      - exit-early-if-irrelevant:
-#          for: << parameters.for >>
+      - exit-early-if-irrelevant:
+          for: << parameters.for >>
       - checkout
       - aws-cli/setup:
           aws-access-key-id: << parameters.aws-access-key-id >>
@@ -754,8 +754,8 @@ jobs:
           username: $DOCKER_LOGIN
           password: $DOCKER_PASSWORD
     steps:
-#      - exit-early-if-irrelevant:
-#          for: << parameters.for >>
+      - exit-early-if-irrelevant:
+          for: << parameters.for >>
       - run:
           name: Setup Environment variables
           command: |
