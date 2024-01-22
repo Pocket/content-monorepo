@@ -40,7 +40,7 @@ WORKDIR /app
 COPY . .
 # Prune the structure to an optimized folder structure with just the `scopes` app dependencies. 
 RUN turbo prune --scope=$SCOPE --docker
- 
+
 #----------------------------------------
 # Docker build step that:
 # 1. Installs all the dependencies
@@ -57,7 +57,7 @@ ARG GIT_SHA
 RUN apk add --no-cache libc6-compat
 RUN apk update
 WORKDIR /app
- 
+
 # First install the dependencies (as they change less often)
 COPY .gitignore .gitignore
 COPY --from=setup /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml

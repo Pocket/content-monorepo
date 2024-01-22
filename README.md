@@ -89,17 +89,18 @@ Collection-api & curated-corput-api use `prisma` as their ORM, and to setup & se
 ### Generate Prisma Typescript Types
 ```
 cd content-monorepo
-db:generate-prisma-client
+pnpm db:generate-prisma-client
 ```
 
 ### Resetting & Seeding the Databases
 Make sure the `.env` under each service using `prisma` contains the appropriate `DATABSE_URL`.
+
 For `curated-corpus-api`: `DATABASE_URL=mysql://root:@localhost:3306/curation_corpus?connect_timeout=300`
 
 Run:
 ```
 cd content-monorepo
-prisma db seed
+pnpm prisma db seed
 ```
 
 ### Applying migration
