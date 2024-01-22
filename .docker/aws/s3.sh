@@ -1,7 +1,7 @@
 #!/bin/bash
 set -x
 
-S3=('curated-corpus-api-local-images', 'collection-api-local-images')
+S3=('curated-corpus-api-local-images')
 
 for s3_bucket in "${S3[@]}"; do
   awslocal s3 mb s3://"${s3_bucket}"

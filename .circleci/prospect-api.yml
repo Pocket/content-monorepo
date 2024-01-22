@@ -8,6 +8,7 @@ workflows:
       ######
       - apollo:
           name: prospect-api_apollo_admin
+          multiple_schema: false
           fed_graph_name: pocket-admin-api
           schema_file_path: servers/prospect-api/schema.graphql
           graph_name: prospect-api
@@ -21,6 +22,7 @@ workflows:
           context: pocket
           name: prospect-api_test_integrations
           scope: prospect-api
+          run_prisma_jobs: false
 
       # Try building the ECS docker image on each branch
       - build_image:
@@ -80,6 +82,7 @@ workflows:
           context: pocket
           for: prospect_api
           name: prospect-api_build_docker_dev
+          run_prisma_jobs: false
           aws-access-key-id: Dev_AWS_ACCESS_KEY
           aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
           aws-region: Dev_AWS_DEFAULT_REGION
@@ -173,6 +176,7 @@ workflows:
           context: pocket
           for: prospect_api
           name: prospect-api_build_docker_prod
+          run_prisma_jobs: false
           aws-access-key-id: Prod_AWS_ACCESS_KEY
           aws-secret-access-key: Prod_AWS_SECRET_ACCESS_KEY
           aws-region: Prod_AWS_DEFAULT_REGION
