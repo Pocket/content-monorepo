@@ -10,23 +10,39 @@ import {
 } from '@apollo/client/core';
 import fetch from 'cross-fetch';
 import gql from 'graphql-tag';
+import fetchRetry from 'fetch-retry';
 
 import config from './config';
 import { ClientApiItem } from './types';
 
 let client;
+let clientRetryDelay;
 
 /**
  * calls client API to get data for the given url
+ * @param url The url to retrieve metadata for.
+ * @param retryDelay Time in milliseconds to wait between retries. The default delay is 10 seconds, and was chosen to
+ * give subgraphs (like the parser) time to recover. We don't have concrete evidence that a delay helps; it's a guess.
  * @returns JSON response from client API
  */
 export const getUrlMetadata = async (
   url: string,
+  retryDelay: number = 10000,
 ): Promise<ClientApiItem | null> => {
   // Move Apollo Client instantiation to inside the function to prevent memory leaks.
-  if (!client) {
+  if (!client || clientRetryDelay != retryDelay) {
     client = new ApolloClient({
-      link: createHttpLink({ fetch, uri: config.app.clientApiEndpoint }),
+      link: createHttpLink({
+        fetch: fetchRetry(fetch, {
+          retries: 2,
+          // Retry if the status code indicates that the service is temporarily unavailable.
+          // By default, fetch-retry only retries on network errors.
+          // 504 is the only one that's been observed in production.
+          retryOn: [429, 500, 502, 503, 504],
+          retryDelay,
+        }),
+        uri: config.app.clientApiEndpoint,
+      }),
       cache: new InMemoryCache(),
       name: config.app.apolloClientName,
       version: config.app.version,
@@ -41,6 +57,8 @@ export const getUrlMetadata = async (
         },
       },
     });
+
+    clientRetryDelay = retryDelay;
   }
 
   const data = await client.query({
