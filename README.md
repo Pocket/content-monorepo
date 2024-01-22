@@ -83,6 +83,7 @@ cd content-monorepo
 pnpm db:dynamo-seed
 ```  
 
+
 ## Prisma
 Collection-api & curated-corput-api use `prisma` as their ORM, and to setup & seed the tables, some tasks need to be run separately from `docker compose`.
 
