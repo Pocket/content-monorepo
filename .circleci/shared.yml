@@ -16,7 +16,6 @@ repo_for_enum: &repo_for_enum
     type: enum
     enum:
       - prospect_api
-      - curated_corpus_api
 
 resource_class_enum: &resource_class_enum
   resource-class:
@@ -29,9 +28,6 @@ resource_class_enum: &resource_class_enum
 
 parameters:
   prospect_api:
-    type: boolean
-    default: false
-  curated_corpus_api:
     type: boolean
     default: false
 
@@ -56,7 +52,6 @@ commands:
             fi
           environment:
             prospect_api: << pipeline.parameters.prospect_api >>
-            curated_corpus_api: << pipeline.parameters.curated_corpus_api >>
   install_pnpm:
     steps:
       - run:
@@ -68,18 +63,6 @@ commands:
           name: Install Dependencies
           command: |
             pnpm install
-  generate_prisma_client:
-    steps:
-      - run:
-          name: Generate prisma client
-          command: pnpm run db:generate-prisma-client
-  apply_prisma_migration:
-    steps:
-      - run:
-          name: Apply prisma migration
-          command: |
-            export $(egrep -v '^#' .docker/local.env | xargs -0)
-            pnpm run migrate:prisma-reset
   install_infrastructure_pnpm:
     steps:
       - run:
@@ -356,10 +339,6 @@ jobs:
   test_integrations:
     description: Run integration tests against external services, e.g. MySQL
     parameters:
-      run_prisma_jobs:
-        type: boolean
-        description: Indicates if prisma jobs needs to be run
-        default: false
       scope:
         description: The pnpm scope to run tests for
         type: string
@@ -393,12 +372,6 @@ jobs:
     steps:
       - checkout
       - install_pnpm
-      - when:
-          condition:
-            equal: [ true, << parameters.run_prisma_jobs >> ]
-          steps:
-            - generate_prisma_client
-            - apply_prisma_migration
       - run:
           name: run setup.sh
           command: |
@@ -415,10 +388,6 @@ jobs:
     description: Build and/or push docker image to ECR.
 
     parameters:
-      run_prisma_jobs:
-        type: boolean
-        description: Indicates if prisma jobs needs to be run
-        default: false
       aws-access-key-id:
         description: 'AWS access key id environment variable'
         type: string
@@ -475,13 +444,11 @@ jobs:
                 aws-access-key-id: << parameters.aws-access-key-id >>
                 aws-secret-access-key: << parameters.aws-secret-access-key >>
                 tag: << parameters.tag >>
-                remote-docker-version: default
                 extra-build-args: << parameters.extra-build-args >>
       - unless:
           condition: <<parameters.push>>
           steps:
             - setup_remote_docker:
-                version: default
                 docker-layer-caching: true
             - aws-ecr/build-image:
                 repo: << parameters.repo-name >>
@@ -574,32 +541,16 @@ jobs:
       If the branch is the development branch, will deploy the subgraph to the development federated graph.
 
     parameters:
-      multiple_schema:
-        type: boolean
-        description: if service has more than 1 graphql schema to deploy
-        default: false
       fed_graph_name:
         type: string
         description: The name of federated graph to check
-      client_graph_name:
-        type: string
-        description: The name of client graph to check
-        default: ""
       graph_name:
         type: string
         description: The name of this subgraph
       schema_file_path:
         type: string
-        description: The path to the schema file
+        description: The patht to the schema file
         default: ./schema.graphql
-      admin_schema_file_path:
-        type: string
-        description: The path to the admin schema file
-        default: ./schema-admin.graphql
-      shared_schema_file_path:
-        type: string
-        description: The path to the shared schema file
-        default: ./schema-shared-admin.graphql
       prod_graph_url:
         type: string
         description: The production subgraph url
@@ -655,66 +606,14 @@ jobs:
                 name: build schema
                 command: |
                   << parameters.build_command >>
+      - run:
+          name: check service
+          command: |
+            export APOLLO_KEY=$<< parameters.apollo_key_env >>
+            rover subgraph check << parameters.fed_graph_name >>@<< parameters.prod_graph_variant_name >> --schema << parameters.schema_file_path >> --name=<< parameters.graph_name >>
       - when:
           condition:
-            equal: [ true, << parameters.multiple_schema >> ]
-          steps:
-            - run:
-                name: build admin schema
-                command: cat << parameters.shared_schema_file_path >> << parameters.admin_schema_file_path >> > schema-admin-api.graphql
-            - run:
-                name: build public schema
-                command: cat << parameters.shared_schema_file_path >> << parameters.schema_file_path >> > schema.graphql
-            - run:
-                name: check client schema
-                command: rover subgraph check << parameters.client_graph_name >>@<< parameters.prod_graph_variant_name >> --schema ./schema.graphql --name=<< parameters.graph_name >>
-            - run:
-                name: check admin schema
-                command: |
-                  export APOLLO_KEY=$<< parameters.apollo_key_env >>
-                  rover subgraph check << parameters.fed_graph_name >>@<< parameters.prod_graph_variant_name >> --schema ./schema-admin-api.graphql --name=<< parameters.graph_name >>
-      - when:
-          condition:
-            equal: [ false, << parameters.multiple_schema >> ]
-          steps:
-            - run:
-                name: check service
-                command: |
-                  export APOLLO_KEY=$<< parameters.apollo_key_env >>
-                  rover subgraph check << parameters.fed_graph_name >>@<< parameters.prod_graph_variant_name >> --schema << parameters.schema_file_path >> --name=<< parameters.graph_name >>
-      - when:
-          condition:
-            and:
-              - equal: [ << parameters.prod_branch >>, << pipeline.git.branch >> ]
-              - equal: [ true, << parameters.multiple_schema >> ]
-          steps:
-            - run:
-                name: push service to prod client api
-                command: rover subgraph publish << parameters.client_graph_name >>@<< parameters.prod_graph_variant_name >> --schema ./schema.graphql --routing-url << parameters.prod_graph_url >> --name=<< parameters.graph_name >>
-            - run:
-                name: push service to prod admin api
-                command: |
-                  export APOLLO_KEY=$ADMIN_APOLLO_KEY
-                  rover subgraph publish << parameters.fed_graph_name >>@<< parameters.prod_graph_variant_name >> --schema ./schema-admin-api.graphql --routing-url << parameters.prod_graph_url >>/admin --name=<< parameters.graph_name >>
-      - when:
-          condition:
-            and:
-              - equal: [ << parameters.dev_branch >>, << pipeline.git.branch >> ]
-              - equal: [ true, << parameters.multiple_schema >> ]
-          steps:
-            - run:
-                name: push service to dev client api
-                command: rover subgraph publish << parameters.client_graph_name >>@<< parameters.dev_graph_variant_name >> --schema ./schema.graphql --routing-url << parameters.dev_graph_url >> --name=<< parameters.graph_name >>
-            - run:
-                name: push service to dev admin api
-                command: |
-                  export APOLLO_KEY=$ADMIN_APOLLO_KEY
-                  rover subgraph publish << parameters.fed_graph_name >>@<< parameters.dev_graph_variant_name >> --schema ./schema-admin-api.graphql --routing-url << parameters.dev_graph_url >>/admin --name=<< parameters.graph_name >>
-      - when:
-          condition:
-            and:
-              - equal: [<< parameters.prod_branch >>, << pipeline.git.branch >>]
-              - equal: [ false, << parameters.multiple_schema >> ]
+            equal: [<< parameters.prod_branch >>, << pipeline.git.branch >>]
           steps:
             - run:
                 name: push service to prod
@@ -723,9 +622,7 @@ jobs:
                   rover subgraph publish << parameters.fed_graph_name >>@<< parameters.prod_graph_variant_name >> --schema << parameters.schema_file_path >> --routing-url << parameters.prod_graph_url >> --name=<< parameters.graph_name >>
       - when:
           condition:
-            and:
-              - equal: [<< parameters.dev_branch >>, << pipeline.git.branch >>]
-              - equal: [ false, << parameters.multiple_schema >> ]
+            equal: [<< parameters.dev_branch >>, << pipeline.git.branch >>]
           steps:
             - run:
                 name: push service to dev
