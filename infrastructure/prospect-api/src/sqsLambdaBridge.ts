@@ -1,29 +1,21 @@
 import { Construct } from 'constructs';
 import { config } from './config';
-import {
-  ApplicationDynamoDBTable,
-  PocketVPC,
-} from '@pocket-tools/terraform-modules';
+import { PocketVPC } from '@pocket-tools/terraform-modules';
 import { PocketSQSWithLambdaTarget } from '@pocket-tools/terraform-modules';
 import { LAMBDA_RUNTIMES } from '@pocket-tools/terraform-modules';
 import { DataAwsSsmParameter } from '@cdktf/provider-aws/lib/data-aws-ssm-parameter';
-import { PocketPagerDuty } from '@pocket-tools/terraform-modules';
 
-export class SqsLambda extends Construct {
+export class SqsLambdaBridge extends Construct {
   constructor(
     scope: Construct,
     private name: string,
-    prospectsTable: ApplicationDynamoDBTable,
-    pagerDuty?: PocketPagerDuty,
   ) {
     super(scope, name);
 
     const vpc = new PocketVPC(this, 'pocket-shared-vpc');
 
-    const { sentryDsn, gitSha } = this.getEnvVariableValues();
-
-    new PocketSQSWithLambdaTarget(this, 'translation-sqs-lambda', {
-      name: `${config.prefix}-Sqs-Translation`,
+    new PocketSQSWithLambdaTarget(this, 'bridge-sqs-lambda', {
+      name: `${config.prefix}-Sqs-Bridge`,
       // batch size is 1 so SQS doesn't get smart and try to combine them
       // (a combined message will mean a skipped candidate set from ML)
       batchSize: 1,
@@ -33,31 +25,15 @@ export class SqsLambda extends Construct {
         visibilityTimeoutSeconds: 300,
       },
       lambda: {
-        runtime: LAMBDA_RUNTIMES.NODEJS14,
+        runtime: LAMBDA_RUNTIMES.NODEJS18,
         handler: 'index.handler',
         timeout: 120,
         memorySizeInMb: 512,
         reservedConcurrencyLimit: 1,
-        executionPolicyStatements: [
-          {
-            effect: 'Allow',
-            actions: [
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:DescribeTable',
-              'dynamodb:UpdateItem',
-              'dynamodb:Query',
-            ],
-            resources: [
-              prospectsTable.dynamodb.arn,
-              `${prospectsTable.dynamodb.arn}/*`,
-            ],
-          },
-        ],
+        executionPolicyStatements: [],
         environment: {
-          PROSPECT_API_PROSPECTS_TABLE: prospectsTable.dynamodb.name,
-          SENTRY_DSN: sentryDsn,
-          GIT_SHA: gitSha,
+          SENTRY_DSN: this.getSentryDsn(),
+          GIT_SHA: this.getGitSha(),
           ENVIRONMENT:
             config.environment === 'Prod' ? 'production' : 'development',
         },
@@ -70,32 +46,27 @@ export class SqsLambda extends Construct {
           accountId: vpc.accountId,
         },
         alarms: {
-          // TODO: set better alarm values
-          /*
-          errors: {
-            evaluationPeriods: 3,
-            period: 3600, // 1 hour
-            threshold: 20,
-            actions: config.isDev
-              ? []
-              : [pagerDuty!.snsNonCriticalAlarmTopic.arn],
-          },
-          */
+          // We don't configure alarms for this lambda, and
+          // instead rely on Sentry to alert on failure.
         },
       },
       tags: config.tags,
     });
   }
 
-  private getEnvVariableValues() {
+  private getSentryDsn() {
     const sentryDsn = new DataAwsSsmParameter(this, 'sentry-dsn', {
       name: `/${config.name}/${config.environment}/SENTRY_DSN`,
     });
 
+    return sentryDsn.value;
+  }
+
+  private getGitSha() {
     const serviceHash = new DataAwsSsmParameter(this, 'service-hash', {
       name: `${config.circleCIPrefix}/SERVICE_HASH`,
     });
 
-    return { sentryDsn: sentryDsn.value, gitSha: serviceHash.value };
+    return serviceHash.value;
   }
 }
