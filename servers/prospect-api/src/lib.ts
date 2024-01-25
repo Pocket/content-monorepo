@@ -18,10 +18,10 @@ import { ProspectReviewStatus, SnowplowProspect } from './events/types';
  * @returns ScheduledSurface if valid GUID, undefined if not
  */
 export const getScheduledSurfaceByGuid = (
-  guid: string
+  guid: string,
 ): ScheduledSurface | undefined => {
   return ScheduledSurfaces.find(
-    (surface: ScheduledSurface) => surface.guid === guid
+    (surface: ScheduledSurface) => surface.guid === guid,
   );
 };
 
@@ -35,13 +35,13 @@ export const getScheduledSurfaceByGuid = (
  */
 export const isValidProspectType = (
   scheduledSurfaceGuid: string,
-  prospectType: string
+  prospectType: string,
 ): boolean => {
   // get the new tab (already validated using the above function)
   const scheduledSurface: ScheduledSurface = ScheduledSurfaces.filter(
     (scheduledSurface) => {
       return scheduledSurface.guid === scheduledSurfaceGuid;
-    }
+    },
   )[0];
 
   let isValid = false;
@@ -64,7 +64,7 @@ export const isValidProspectType = (
  *  rank, ascending
  */
 export const getSortedRankedProspects = (
-  prospects: Prospect[]
+  prospects: Prospect[],
 ): SortedRankedProspects => {
   // get all unique prospectTypes from `prospects` - this will be our random choice
   const availableProspectTypes: string[] = [];
@@ -105,7 +105,7 @@ export const getSortedRankedProspects = (
  * ranked for its prospect type
  */
 export const getRandomizedSortedRankedProspects = (
-  sortedProspects: SortedRankedProspects
+  sortedProspects: SortedRankedProspects,
 ): Prospect[] => {
   // deep cloning the method parameter to avoid mutating it
   const sortedProspectsClone = cloneDeep(sortedProspects);
@@ -157,7 +157,7 @@ export const getRandomizedSortedRankedProspects = (
   // Log a message to sentry if we get prospects fewer than default batch size
   batchSize < config.app.prospectBatchSize &&
     Sentry.captureMessage(
-      `Found prospects fewer than default batch size: ${batchSize}`
+      `Found prospects fewer than default batch size: ${batchSize}`,
     );
 
   return result;
@@ -170,7 +170,7 @@ export const getRandomizedSortedRankedProspects = (
  * @returns either a CorpusLanguage enum or undefined
  */
 export const standardizeLanguage = (
-  language?: string
+  language?: string,
 ): CorpusLanguage | undefined => {
   return language ? CorpusLanguage[language.toUpperCase()] : undefined;
 };
@@ -181,7 +181,7 @@ export const standardizeLanguage = (
  * @returns prospects sorted by their rank in ascending order
  */
 export const getProspectsSortedByAscendingRank = (
-  prospects: Prospect[]
+  prospects: Prospect[],
 ): Prospect[] => {
   return prospects.sort((a: Prospect, b: Prospect) => {
     return a.rank - b.rank;
@@ -195,7 +195,7 @@ export const getProspectsSortedByAscendingRank = (
  * @param prospects
  */
 export const findAndLogTrueDuplicateProspects = (
-  prospects: Prospect[]
+  prospects: Prospect[],
 ): void => {
   const trueDuplicateProspects: Prospect[] = [];
   const duplicateProspectProps = new Set();
@@ -216,7 +216,7 @@ export const findAndLogTrueDuplicateProspects = (
 
   if (trueDuplicateProspects.length > 0) {
     Sentry.captureMessage(
-      `True duplicate prospects found: ${[...trueDuplicateProspects]}`
+      `True duplicate prospects found: ${[...trueDuplicateProspects]}`,
     );
   }
 };
@@ -253,7 +253,9 @@ export const deDuplicateProspectUrls = (prospects: Prospect[]): Prospect[] => {
  */
 export const prospectToSnowplowProspect = (
   prospect: Prospect,
-  authUserName: string
+  authUserName: string,
+  statusReasons?: string[],
+  statusReasonComment?: string,
 ): SnowplowProspect => {
   return {
     object_version: 'new',
@@ -276,5 +278,29 @@ export const prospectToSnowplowProspect = (
     prospect_review_status: ProspectReviewStatus.Dismissed,
     reviewed_at: Date.now(),
     reviewed_by: authUserName,
+    status_reasons: statusReasons,
+    status_reason_comment: statusReasonComment,
   };
+};
+
+/**
+ * takes a comma separated string and returns an array of strings
+ * @param reasonCsv a string of comma separated values or null
+ * @returns a string array
+ */
+export const parseReasonsCsv = (reasonCsv: string | null): string[] => {
+  // if a csv of reasons was provided, split the comma separated string of
+  // reasons into an array
+  let reasons: string[] = [];
+
+  if (reasonCsv) {
+    reasons = reasonCsv.split(',').map((reason) => {
+      // TODO: once reasons are finalized, is it worth validating them here?
+      if (reason.trim().length > 0) {
+        return reason.trim();
+      }
+    });
+  }
+
+  return reasons;
 };

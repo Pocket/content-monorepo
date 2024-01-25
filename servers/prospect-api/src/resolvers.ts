@@ -26,6 +26,7 @@ import {
   findAndLogTrueDuplicateProspects,
   deDuplicateProspectUrls,
   prospectToSnowplowProspect,
+  parseReasonsCsv,
 } from './lib';
 
 import { GetProspectsFilters, Context } from './types';
@@ -51,16 +52,16 @@ export const resolvers = {
     getProspects: async (
       parent,
       { filters }: GetProspectsFilters,
-      { db, userAuth }: Context
+      { db, userAuth }: Context,
     ): Promise<Prospect[]> => {
       const scheduledSurface = getScheduledSurfaceByGuid(
-        filters.scheduledSurfaceGuid
+        filters.scheduledSurfaceGuid,
       );
 
       // validate filters
       if (scheduledSurface === undefined) {
         throw new UserInputError(
-          `${filters.scheduledSurfaceGuid} isn't a valid scheduled surface guid!`
+          `${filters.scheduledSurfaceGuid} isn't a valid scheduled surface guid!`,
         );
       }
 
@@ -68,11 +69,11 @@ export const resolvers = {
         if (
           !isValidProspectType(
             filters.scheduledSurfaceGuid,
-            filters.prospectType
+            filters.prospectType,
           )
         ) {
           throw new UserInputError(
-            `${filters.prospectType} is not a valid prospect type for scheduled surface ${scheduledSurface.name}`
+            `${filters.prospectType} is not a valid prospect type for scheduled surface ${scheduledSurface.name}`,
           );
         }
       }
@@ -91,7 +92,7 @@ export const resolvers = {
         // sort prospects by ascending rank and return the default batch size of them
         prospects = getProspectsSortedByAscendingRank(prospects).slice(
           0,
-          config.app.prospectBatchSize
+          config.app.prospectBatchSize,
         );
       } else {
         // randomize by prospect type and sort by descending rank
@@ -119,7 +120,7 @@ export const resolvers = {
     updateProspectAsCurated: async (
       parent,
       { id },
-      { db, userAuth }: Context
+      { db, userAuth }: Context,
     ): Promise<Prospect | null> => {
       // fetch prospect from db first
       const prospect = dynamoItemToProspect(await getProspectById(db, id));
@@ -134,7 +135,7 @@ export const resolvers = {
     dismissProspect: async (
       parent,
       { id },
-      { db, userAuth }: Context
+      { db, userAuth }: Context,
     ): Promise<Prospect | null> => {
       // fetch prospect from db first
       const prospect = dynamoItemToProspect(await getProspectById(db, id));
@@ -156,7 +157,47 @@ export const resolvers = {
       queueSnowplowEvent(
         snowplowTracker,
         'prospect_reviewed',
-        prospectToSnowplowProspect(prospect, userAuth.username)
+        prospectToSnowplowProspect(prospect, userAuth.username),
+      );
+
+      return updateProspectAsCurated(db, id);
+    },
+    removeProspect: async (
+      parent,
+      { data },
+      { db, userAuth }: Context,
+    ): Promise<Prospect | null> => {
+      const { id, reason, reasonComment } = data;
+
+      // fetch prospect from db first
+      const prospect = dynamoItemToProspect(await getProspectById(db, id));
+
+      // check if user has write access for this mutation
+      if (!userAuth.canWrite(prospect.scheduledSurfaceGuid)) {
+        throw new AuthenticationError('Not authorized for action');
+      }
+
+      // 2024-01-24: keeping the below comment for if/when we send these events
+      // to event bridge instead of snowplow.
+
+      // 2022-11-10: event bridge on pause while system stability is improved.
+      // will go back to this code/send when event bridge is ready.
+      // Send the 'Dismiss' event to Pocket event bridge
+      // await sendEventBridgeEvent(prospect, userAuth);
+
+      // in the mean time, send the dismiss event directly to snowplow
+      // initialize snowplow tracker
+      const snowplowEmitter = getEmitter();
+      const snowplowTracker = getTracker(snowplowEmitter);
+      queueSnowplowEvent(
+        snowplowTracker,
+        'prospect_reviewed',
+        prospectToSnowplowProspect(
+          prospect,
+          userAuth.username,
+          parseReasonsCsv(reason),
+          reasonComment,
+        ),
       );
 
       return updateProspectAsCurated(db, id);

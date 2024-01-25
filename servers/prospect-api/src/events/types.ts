@@ -71,6 +71,9 @@ export type SnowplowProspect = {
   prospect_review_status: ProspectReviewStatus;
   // The Unix timestamp in seconds.
   reviewed_at?: number;
-  // The LDAP string of the curator who reviewed this prospect - for now, only dismissing prospect.
+  // The LDAP string of the curator who reviewed this prospect - for now, only removing prospect.
   reviewed_by?: string;
+  // optional removal reasons and comment provided by a curator - only when removing.
+  status_reasons?: string[];
+  status_reason_comment?: string;
 };

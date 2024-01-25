@@ -18,6 +18,7 @@ import { GET_PROSPECTS } from '../../test/admin-server/queries.gql';
 import {
   UPDATE_DISMISS_PROSPECT,
   UPDATE_PROSPECT_AS_CURATED,
+  UPDATE_REMOVE_PROSPECT,
 } from '../../test/admin-server/mutations.gql';
 import { Context, MozillaAccessGroup } from '../../types';
 import { ApolloServer } from '@apollo/server';
@@ -34,8 +35,8 @@ const seedDb = async () => {
 
   for (let i = 0; i < config.app.prospectBatchSize * 2; i++) {
     await insertProspect(
-        dbClient,
-        createProspect('NEW_TAB_EN_US', ProspectType.COUNTS)
+      dbClient,
+      createProspect('NEW_TAB_EN_US', ProspectType.COUNTS),
     );
   }
 
@@ -55,16 +56,16 @@ const seedDb = async () => {
   // plenty of NEW_TAB_DE_DE / GOBAL not curated
   for (let i = 0; i < config.app.prospectBatchSize * 2; i++) {
     await insertProspect(
-        dbClient,
-        createProspect('NEW_TAB_DE_DE', ProspectType.COUNTS)
+      dbClient,
+      createProspect('NEW_TAB_DE_DE', ProspectType.COUNTS),
     );
   }
 
   // NEW_TAB_EN_US / COUNTS curated - these should not be returned at all
   for (let i = 0; i < config.app.prospectBatchSize * 2; i++) {
     await insertProspect(
-        dbClient,
-        createProspect('NEW_TAB_EN_US', ProspectType.COUNTS, true)
+      dbClient,
+      createProspect('NEW_TAB_EN_US', ProspectType.COUNTS, true),
     );
   }
 };
@@ -98,17 +99,17 @@ describe('queries integration tests', () => {
     it('should return all prospect properties', async () => {
       // this will give us 10 prospects
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(GET_PROSPECTS),
-            variables: {
-              filters: {
-                scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-                prospectType: ProspectType.COUNTS,
-              },
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(GET_PROSPECTS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+              prospectType: ProspectType.COUNTS,
             },
-          });
+          },
+        });
       expect(result.body.errors).toBeUndefined();
       const {
         body: { data },
@@ -142,17 +143,17 @@ describe('queries integration tests', () => {
       // this will give us 10 prospects, some of which are missing optional
       // attributes - language, excerpt, and authors
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(GET_PROSPECTS),
-            variables: {
-              filters: {
-                scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-                prospectType: ProspectType.TIMESPENT,
-              },
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(GET_PROSPECTS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+              prospectType: ProspectType.TIMESPENT,
             },
-          });
+          },
+        });
       expect(result.body.errors).toBeUndefined();
       const {
         body: { data },
@@ -188,16 +189,16 @@ describe('queries integration tests', () => {
 
     it('should return a full batch filtered by new tab', async () => {
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(GET_PROSPECTS),
-            variables: {
-              filters: {
-                scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-              },
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(GET_PROSPECTS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_EN_US',
             },
-          });
+          },
+        });
 
       expect(result.body.errors).toBeUndefined();
       const {
@@ -208,7 +209,7 @@ describe('queries integration tests', () => {
       // all prospects should be NEW_TAB_EN_US
       const enUsCount = resultArray.reduce((counter, result) => {
         return (
-            counter + (result.scheduledSurfaceGuid === 'NEW_TAB_EN_US' ? 1 : 0)
+          counter + (result.scheduledSurfaceGuid === 'NEW_TAB_EN_US' ? 1 : 0)
         );
       }, 0);
 
@@ -217,17 +218,17 @@ describe('queries integration tests', () => {
 
     it('should return a full batch filtered by new tab and prospect type', async () => {
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(GET_PROSPECTS),
-            variables: {
-              filters: {
-                scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-                prospectType: ProspectType.COUNTS,
-              },
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(GET_PROSPECTS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+              prospectType: ProspectType.COUNTS,
             },
-          });
+          },
+        });
       expect(result.body.errors).toBeUndefined();
       const {
         body: { data },
@@ -238,8 +239,8 @@ describe('queries integration tests', () => {
       // all prospects should be NEW_TAB_EN_US/COUNTS
       const validCount = resultArray.reduce((counter, result) => {
         if (
-            result.scheduledSurfaceGuid === 'NEW_TAB_EN_US' &&
-            result.prospectType === ProspectType.COUNTS
+          result.scheduledSurfaceGuid === 'NEW_TAB_EN_US' &&
+          result.prospectType === ProspectType.COUNTS
         ) {
           return counter + 1;
         } else {
@@ -252,18 +253,18 @@ describe('queries integration tests', () => {
 
     it('should return a partial batch filtered by publisher (included)', async () => {
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(GET_PROSPECTS),
-            variables: {
-              filters: {
-                scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-                // A partial but case-sensitive match for The Atlantic
-                includePublisher: 'Atlant',
-              },
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(GET_PROSPECTS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+              // A partial but case-sensitive match for The Atlantic
+              includePublisher: 'Atlant',
             },
-          });
+          },
+        });
 
       // check these first just in case
       expect(result.body.errors).toBeUndefined();
@@ -273,9 +274,9 @@ describe('queries integration tests', () => {
 
       // all returned prospects should be from The Atlantic
       const resultCount = resultArray.reduce(
-          (counter, current) =>
-              current.publisher === 'The Atlantic' ? ++counter : counter,
-          0
+        (counter, current) =>
+          current.publisher === 'The Atlantic' ? ++counter : counter,
+        0,
       );
 
       expect(resultCount).toEqual(resultArray.length);
@@ -283,18 +284,18 @@ describe('queries integration tests', () => {
 
     it('should return a partial batch filtered by publisher (excluded)', async () => {
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(GET_PROSPECTS),
-            variables: {
-              filters: {
-                scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-                // A partial but case-sensitive match for The New York Times
-                excludePublisher: 'New',
-              },
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(GET_PROSPECTS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+              // A partial but case-sensitive match for The New York Times
+              excludePublisher: 'New',
             },
-          });
+          },
+        });
       expect(result.body.errors).toBeUndefined();
       const {
         body: { data },
@@ -304,9 +305,9 @@ describe('queries integration tests', () => {
 
       // all returned prospects should be from The Atlantic
       const resultCount = resultArray.reduce(
-          (counter, current) =>
-              current.publisher !== 'The New York Times' ? ++counter : counter,
-          0
+        (counter, current) =>
+          current.publisher !== 'The New York Times' ? ++counter : counter,
+        0,
       );
 
       expect(resultCount).toEqual(resultArray.length);
@@ -314,17 +315,17 @@ describe('queries integration tests', () => {
 
     it('should return less than a full batch when limited items exist', async () => {
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(GET_PROSPECTS),
-            variables: {
-              filters: {
-                scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-                prospectType: ProspectType.TIMESPENT,
-              },
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(GET_PROSPECTS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+              prospectType: ProspectType.TIMESPENT,
             },
-          });
+          },
+        });
 
       expect(result.body.errors).toBeUndefined();
       const {
@@ -336,8 +337,8 @@ describe('queries integration tests', () => {
       // all prospects should be NEW_TAB_EN_US/TIMESPENT
       const validCount = resultArray.reduce((counter, result) => {
         if (
-            result.scheduledSurfaceGuid === 'NEW_TAB_EN_US' &&
-            result.prospectType === ProspectType.TIMESPENT
+          result.scheduledSurfaceGuid === 'NEW_TAB_EN_US' &&
+          result.prospectType === ProspectType.TIMESPENT
         ) {
           return counter + 1;
         } else {
@@ -350,16 +351,16 @@ describe('queries integration tests', () => {
 
     it('should throw an error if given an invalid new tab', async () => {
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(GET_PROSPECTS),
-            variables: {
-              filters: {
-                scheduledSurfaceGuid: 'NEW_TAB_CY_GB', // Welsh - probably safe for the foreseeable future
-              },
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(GET_PROSPECTS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_CY_GB', // Welsh - probably safe for the foreseeable future
             },
-          });
+          },
+        });
 
       expect(result.body.errors?.length).toEqual(1);
 
@@ -367,24 +368,24 @@ describe('queries integration tests', () => {
       // a specific index of a possibly undefined array
       if (result.body.errors) {
         expect(result.body.errors[0].message).toEqual(
-            "NEW_TAB_CY_GB isn't a valid scheduled surface guid!"
+          "NEW_TAB_CY_GB isn't a valid scheduled surface guid!",
         );
       }
     });
 
     it('should throw an error if given an invalid prospect type', async () => {
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(GET_PROSPECTS),
-            variables: {
-              filters: {
-                scheduledSurfaceGuid: 'NEW_TAB_DE_DE',
-                prospectType: ProspectType.SYNDICATED_NEW,
-              },
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(GET_PROSPECTS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_DE_DE',
+              prospectType: ProspectType.SYNDICATED_NEW,
             },
-          });
+          },
+        });
 
       // we should get an error
       expect(result.body.errors?.length).toEqual(1);
@@ -393,7 +394,7 @@ describe('queries integration tests', () => {
       // a specific index of a possibly undefined array
 
       expect(result?.body.errors?.[0].message).toEqual(
-          'SYNDICATED_NEW is not a valid prospect type for scheduled surface New Tab (de-DE)'
+        'SYNDICATED_NEW is not a valid prospect type for scheduled surface New Tab (de-DE)',
       );
     });
     it('should throw an error if the user does not have the required auth group for a given scheduled surface', async () => {
@@ -405,17 +406,17 @@ describe('queries integration tests', () => {
 
       // the request we make is for EN_US scheduled surface
       const result = await request(app)
-          .post(url)
-          .set(unAuthorizedHeaders)
-          .send({
-            query: print(GET_PROSPECTS),
-            variables: {
-              filters: {
-                scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-                prospectType: ProspectType.SYNDICATED_NEW,
-              },
+        .post(url)
+        .set(unAuthorizedHeaders)
+        .send({
+          query: print(GET_PROSPECTS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+              prospectType: ProspectType.SYNDICATED_NEW,
             },
-          });
+          },
+        });
 
       // we should get an authorization error
       expect(result.body.errors).not.toBeUndefined();
@@ -423,7 +424,7 @@ describe('queries integration tests', () => {
       expect(result.body.errors?.length).toEqual(1);
 
       expect(result?.body.errors?.[0].message).toEqual(
-          'Not authorized for action'
+        'Not authorized for action',
       );
     });
     it('should not return any prospects if request header groups are missing', async () => {
@@ -435,16 +436,16 @@ describe('queries integration tests', () => {
 
       // the request we make is for EN_US scheduled surface
       const result = await request(app)
-          .post(url)
-          .set(undefinedGroupsHeaders)
-          .send({
-            query: print(GET_PROSPECTS),
-            variables: {
-              filters: {
-                scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-              },
+        .post(url)
+        .set(undefinedGroupsHeaders)
+        .send({
+          query: print(GET_PROSPECTS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_EN_US',
             },
-          });
+          },
+        });
       // we should get an authorization error
       expect(result.body.errors).not.toBeUndefined();
 
@@ -453,7 +454,7 @@ describe('queries integration tests', () => {
       expect(result.body.errors?.length).toEqual(1);
 
       expect(result?.body.errors?.[0].message).toEqual(
-          'Not authorized for action'
+        'Not authorized for action',
       );
     });
   });
@@ -491,22 +492,22 @@ describe('mutations integration tests', () => {
   describe('updateProspectAsCurated', () => {
     it('should updated a prospect as curated', async () => {
       const prospect = createProspect(
-          'NEW_TAB_EN_US',
-          ProspectType.SYNDICATED_NEW,
-          false
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
       );
 
       await insertProspect(dbClient, prospect);
 
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(UPDATE_PROSPECT_AS_CURATED),
-            variables: {
-              id: prospect.id,
-            },
-          });
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(UPDATE_PROSPECT_AS_CURATED),
+          variables: {
+            id: prospect.id,
+          },
+        });
 
       // check these first just in case
       expect(result.body.errors).toBeUndefined();
@@ -521,22 +522,22 @@ describe('mutations integration tests', () => {
 
     it('should return all properties of an updated prospect', async () => {
       const prospect = createProspect(
-          'NEW_TAB_EN_US',
-          ProspectType.SYNDICATED_NEW,
-          false
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
       );
 
       await insertProspect(dbClient, prospect);
 
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(UPDATE_PROSPECT_AS_CURATED),
-            variables: {
-              id: prospect.id,
-            },
-          });
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(UPDATE_PROSPECT_AS_CURATED),
+          variables: {
+            id: prospect.id,
+          },
+        });
 
       // check these first just in case
       expect(result.body.errors).toBeUndefined();
@@ -557,22 +558,22 @@ describe('mutations integration tests', () => {
 
     it('should update prospect if the user has the required auth group for a given scheduled surface', async () => {
       const prospect = createProspect(
-          'NEW_TAB_EN_US',
-          ProspectType.SYNDICATED_NEW,
-          false
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
       );
 
       await insertProspect(dbClient, prospect);
 
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(UPDATE_PROSPECT_AS_CURATED),
-            variables: {
-              id: prospect.id,
-            },
-          });
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(UPDATE_PROSPECT_AS_CURATED),
+          variables: {
+            id: prospect.id,
+          },
+        });
 
       expect(result.body.errors).toBeUndefined();
 
@@ -586,9 +587,9 @@ describe('mutations integration tests', () => {
     });
     it('should throw an error if the user does not have the required auth group for a given scheduled surface', async () => {
       const prospect = createProspect(
-          'NEW_TAB_EN_US',
-          ProspectType.SYNDICATED_NEW,
-          false
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
       );
 
       await insertProspect(dbClient, prospect);
@@ -599,43 +600,43 @@ describe('mutations integration tests', () => {
       };
 
       const result = await request(app)
-          .post(url)
-          .set(unAuthorizedHeaders)
-          .send({
-            query: print(UPDATE_PROSPECT_AS_CURATED),
-            variables: {
-              id: prospect.id,
-            },
-          });
+        .post(url)
+        .set(unAuthorizedHeaders)
+        .send({
+          query: print(UPDATE_PROSPECT_AS_CURATED),
+          variables: {
+            id: prospect.id,
+          },
+        });
 
       expect(result.body.errors).not.toBeUndefined();
 
       expect(result.body.errors?.length).toEqual(1);
 
       expect(result?.body.errors?.[0].message).toEqual(
-          'Not authorized for action'
+        'Not authorized for action',
       );
     });
   });
   describe('dismissProspect', () => {
     it('should updated a prospect as curated', async () => {
       const prospect = createProspect(
-          'NEW_TAB_EN_US',
-          ProspectType.SYNDICATED_NEW,
-          false
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
       );
 
       await insertProspect(dbClient, prospect);
 
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(UPDATE_DISMISS_PROSPECT),
-            variables: {
-              id: prospect.id,
-            },
-          });
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(UPDATE_DISMISS_PROSPECT),
+          variables: {
+            id: prospect.id,
+          },
+        });
 
       // check these first just in case
       expect(result.body.errors).toBeUndefined();
@@ -650,22 +651,22 @@ describe('mutations integration tests', () => {
 
     it('should return all properties of an updated prospect', async () => {
       const prospect = createProspect(
-          'NEW_TAB_EN_US',
-          ProspectType.SYNDICATED_NEW,
-          false
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
       );
 
       await insertProspect(dbClient, prospect);
 
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(UPDATE_DISMISS_PROSPECT),
-            variables: {
-              id: prospect.id,
-            },
-          });
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(UPDATE_DISMISS_PROSPECT),
+          variables: {
+            id: prospect.id,
+          },
+        });
 
       // check these first just in case
       expect(result.body.errors).toBeUndefined();
@@ -686,22 +687,22 @@ describe('mutations integration tests', () => {
 
     it('should update prospect if the user has the required auth group for a given scheduled surface', async () => {
       const prospect = createProspect(
-          'NEW_TAB_EN_US',
-          ProspectType.SYNDICATED_NEW,
-          false
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
       );
 
       await insertProspect(dbClient, prospect);
 
       const result = await request(app)
-          .post(url)
-          .set(headers)
-          .send({
-            query: print(UPDATE_DISMISS_PROSPECT),
-            variables: {
-              id: prospect.id,
-            },
-          });
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(UPDATE_DISMISS_PROSPECT),
+          variables: {
+            id: prospect.id,
+          },
+        });
 
       expect(result.body.errors).toBeUndefined();
 
@@ -715,9 +716,9 @@ describe('mutations integration tests', () => {
     });
     it('should throw an error if the user does not have the required auth group for a given scheduled surface', async () => {
       const prospect = createProspect(
-          'NEW_TAB_EN_US',
-          ProspectType.SYNDICATED_NEW,
-          false
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
       );
 
       await insertProspect(dbClient, prospect);
@@ -728,19 +729,222 @@ describe('mutations integration tests', () => {
       };
 
       const result = await request(app)
-          .post(url)
-          .set(unAuthorizedHeaders)
-          .send({
-            query: print(UPDATE_DISMISS_PROSPECT),
-            variables: {
-              id: prospect.id,
-            },
-          });
+        .post(url)
+        .set(unAuthorizedHeaders)
+        .send({
+          query: print(UPDATE_DISMISS_PROSPECT),
+          variables: {
+            id: prospect.id,
+          },
+        });
 
       expect(result.body.errors).not.toBeUndefined();
       expect(result.body.errors?.length).toEqual(1);
       expect(result?.body.errors?.[0].message).toEqual(
-          'Not authorized for action'
+        'Not authorized for action',
+      );
+    });
+  });
+
+  /*
+  these are currently largely a copy of the dismissProspect tests above. once
+  removeProspect is adopted by the curation tools, we will be removing the
+  dismissProspect mutation and all related tests.
+  */
+  describe('removeProspect', () => {
+    it('should update a prospect as curated without status reasons', async () => {
+      const prospect = createProspect(
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
+      );
+
+      await insertProspect(dbClient, prospect);
+
+      const result = await request(app)
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(UPDATE_REMOVE_PROSPECT),
+          variables: {
+            data: {
+              id: prospect.id,
+            },
+          },
+        });
+
+      // check these first just in case
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+
+      // get the prospect directly from the db (as `curated` is not a part of
+      // our graph)
+      const res = await getProspectById(dbClient, prospect.id);
+
+      expect(res?.curated).toEqual(true);
+    });
+
+    it('should update a prospect as curated with a single status reason', async () => {
+      const prospect = createProspect(
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
+      );
+
+      await insertProspect(dbClient, prospect);
+
+      const result = await request(app)
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(UPDATE_REMOVE_PROSPECT),
+          variables: {
+            data: {
+              id: prospect.id,
+              reason: 'PUBLISHER',
+            },
+          },
+        });
+
+      // check these first just in case
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+
+      // get the prospect directly from the db (as `curated` is not a part of
+      // our graph)
+      const res = await getProspectById(dbClient, prospect.id);
+
+      expect(res?.curated).toEqual(true);
+    });
+
+    it('should update a prospect as curated with multiple status reasons and comment', async () => {
+      const prospect = createProspect(
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
+      );
+
+      await insertProspect(dbClient, prospect);
+
+      const result = await request(app)
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(UPDATE_REMOVE_PROSPECT),
+          variables: {
+            data: {
+              id: prospect.id,
+              reason: 'PUBLISHER,TOPIC',
+              reasonComment: 'publisher and topic spread were not good enough',
+            },
+          },
+        });
+
+      // check these first just in case
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+
+      // get the prospect directly from the db (as `curated` is not a part of
+      // our graph)
+      const res = await getProspectById(dbClient, prospect.id);
+
+      expect(res?.curated).toEqual(true);
+    });
+
+    it('should return all properties of an updated prospect', async () => {
+      const prospect = createProspect(
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
+      );
+
+      await insertProspect(dbClient, prospect);
+
+      const result = await request(app)
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(UPDATE_DISMISS_PROSPECT),
+          variables: {
+            id: prospect.id,
+          },
+        });
+
+      // check these first just in case
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+
+      const updatedProspect = result.body.data?.dismissProspect;
+
+      // internal Prospect type differs from graph Prospect type
+      // curated and rank are not exposed via public graph, redact from expectations
+      const expectedProspect: any = { ...prospect };
+      delete expectedProspect.curated;
+      delete expectedProspect.rank;
+      // add expected federated fields that are on graphql schema
+      expectedProspect.approvedCorpusItem = { url: expectedProspect.url };
+
+      expect(updatedProspect).toEqual(expectedProspect);
+    });
+
+    it('should update prospect if the user has the required auth group for a given scheduled surface', async () => {
+      const prospect = createProspect(
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
+      );
+
+      await insertProspect(dbClient, prospect);
+
+      const result = await request(app)
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(UPDATE_DISMISS_PROSPECT),
+          variables: {
+            id: prospect.id,
+          },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+
+      expect(result.body.data).not.toBeNull();
+
+      // get the prospect directly from the db (as `curated` is not a part of
+      // our graph)
+      const res = await getProspectById(dbClient, prospect.id);
+
+      expect(res?.curated).toBeTruthy();
+    });
+
+    it('should throw an error if the user does not have the required auth group for a given scheduled surface', async () => {
+      const prospect = createProspect(
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
+      );
+
+      await insertProspect(dbClient, prospect);
+
+      const unAuthorizedHeaders = {
+        ...headers,
+        groups: MozillaAccessGroup.NEW_TAB_CURATOR_DEDE,
+      };
+
+      const result = await request(app)
+        .post(url)
+        .set(unAuthorizedHeaders)
+        .send({
+          query: print(UPDATE_DISMISS_PROSPECT),
+          variables: {
+            id: prospect.id,
+          },
+        });
+
+      expect(result.body.errors).not.toBeUndefined();
+      expect(result.body.errors?.length).toEqual(1);
+      expect(result?.body.errors?.[0].message).toEqual(
+        'Not authorized for action',
       );
     });
   });
