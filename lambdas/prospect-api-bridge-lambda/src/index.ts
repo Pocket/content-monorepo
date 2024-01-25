@@ -2,6 +2,12 @@ import { SQSEvent, SQSHandler } from 'aws-lambda';
 import * as Sentry from '@sentry/serverless';
 
 import config from './config';
+import {
+  EventBridgeClient,
+  PutEventsCommand,
+} from '@aws-sdk/client-eventbridge';
+import { SqsProspectSet } from './types';
+import { assert } from 'typia';
 
 Sentry.AWSLambda.init({
   dsn: config.sentry.dsn,
@@ -14,26 +20,27 @@ Sentry.AWSLambda.init({
  * objects
  */
 const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
-  console.log('raw event:');
-  console.log(event);
+  // this is the (odd?) format of an SQS message
+  const body = event.Records[0].body;
+  console.log('body:');
+  console.log(body);
 
-  let json: any;
+  // Validate that body is a SqsProspectSet. If not, throws TypeGuardError to Sentry.
+  const data = JSON.parse(body);
+  assert<SqsProspectSet>(data);
 
-  // is the SQS message valid JSON?
-  try {
-    // this is the (odd?) format of an SQS message
-    json = JSON.parse(event.Records[0].body);
-
-    console.log('parsed event body');
-    console.log(json);
-  } catch (e) {
-    Sentry.captureException(
-      'invalid data provided / sqs event.Records[0].body is not valid JSON.'
-    );
-
-    // no need to do any more processing
-    return;
-  }
+  const putEventsCommand = new PutEventsCommand({
+    Entries: [
+      {
+        EventBusName: config.aws.eventBridge.eventBusName,
+        Source: config.aws.eventBridge.source,
+        DetailType: config.aws.eventBridge.detailType,
+        Detail: body,
+      },
+    ],
+  });
+  const eventBridgeClient = new EventBridgeClient({});
+  await eventBridgeClient.send(putEventsCommand);
 };
 
 // the actual function has to be wrapped in order for sentry to work

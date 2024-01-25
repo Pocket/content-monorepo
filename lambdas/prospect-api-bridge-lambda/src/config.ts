@@ -3,11 +3,12 @@ const config = {
   aws: {
     localEndpoint: process.env.AWS_ENDPOINT,
     region: process.env.AWS_DEFAULT_REGION || 'us-east-1',
-    dynamoDb: {
-      table:
-        process.env.PROSPECT_API_PROSPECTS_TABLE || 'PROAPI-local-Prospects',
-      maxBatchDelete: 25, // this is a dynamo-enforced limit
-      maxAgeBeforeDeletion: 30, // if a prospect has been around more than 30 minutes, it's ripe for deletion
+    eventBridge: {
+      eventBusName:
+        process.env.EVENT_BRIDGE_BUS_NAME ||
+        'PocketEventBridge-local-Shared-Event-Bus',
+      source: 'prospect-events',
+      detailType: 'prospect-generation',
     },
   },
   sentry: {

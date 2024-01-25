@@ -2,7 +2,14 @@
   "extends": "tsconfig/lambda.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "plugins": [
+      {
+        "transform": "typia/lib/transform"
+      }
+    ],
+    "strictNullChecks": true,
+    "strict": true
   },
   "exclude": [
     "node_modules",
@@ -12,6 +19,6 @@
     "jest.setup.js"
   ],
   "include": [
-    "src/**/*.ts",
+    "src/**/*.ts"
   ]
 }

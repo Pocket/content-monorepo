@@ -4,14 +4,21 @@ import { PocketVPC } from '@pocket-tools/terraform-modules';
 import { PocketSQSWithLambdaTarget } from '@pocket-tools/terraform-modules';
 import { LAMBDA_RUNTIMES } from '@pocket-tools/terraform-modules';
 import { DataAwsSsmParameter } from '@cdktf/provider-aws/lib/data-aws-ssm-parameter';
+import { DataAwsRegion } from '@cdktf/provider-aws/lib/data-aws-region';
+import { DataAwsCallerIdentity } from '@cdktf/provider-aws/lib/data-aws-caller-identity';
 
 export class SqsLambdaBridge extends Construct {
   constructor(
     scope: Construct,
     private name: string,
+    dependencies: {
+      region: DataAwsRegion;
+      caller: DataAwsCallerIdentity;
+    },
   ) {
     super(scope, name);
 
+    const { region, caller } = dependencies;
     const vpc = new PocketVPC(this, 'pocket-shared-vpc');
 
     new PocketSQSWithLambdaTarget(this, 'bridge-sqs-lambda', {
@@ -30,8 +37,17 @@ export class SqsLambdaBridge extends Construct {
         timeout: 120,
         memorySizeInMb: 512,
         reservedConcurrencyLimit: 1,
-        executionPolicyStatements: [],
+        executionPolicyStatements: [
+          {
+            actions: ['events:PutEvents'],
+            resources: [
+              `arn:aws:events:${region.name}:${caller.accountId}:event-bus/${config.envVars.eventBusName}`,
+            ],
+            effect: 'Allow',
+          },
+        ],
         environment: {
+          EVENT_BRIDGE_BUS_NAME: config.envVars.eventBusName,
           SENTRY_DSN: this.getSentryDsn(),
           GIT_SHA: this.getGitSha(),
           ENVIRONMENT:

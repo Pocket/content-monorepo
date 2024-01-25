@@ -55,7 +55,7 @@ class ProspectAPI extends TerraformStack {
 
     new SqsLambda(this, 'translation-lambda', dynamodb.prospectsTable);
 
-    new SqsLambdaBridge(this, 'bridge-lambda');
+    new SqsLambdaBridge(this, 'bridge-lambda', { region, caller });
 
     this.createPocketAlbApplication({
       s3: this.createS3Bucket(),
