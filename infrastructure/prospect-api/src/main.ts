@@ -28,8 +28,8 @@ import { CloudwatchLogGroup } from '@cdktf/provider-aws/lib/cloudwatch-log-group
 
 import { config } from './config';
 import { DynamoDB } from './dynamodb';
-import { SqsLambda } from './sqsLambda';
-import { SqsLambdaBridge } from './sqsLambdaBridge';
+import { TranslationSqsLambda } from './translationSqsLambda';
+import { BridgeSqsLambda } from './bridgeSqsLambda';
 
 class ProspectAPI extends TerraformStack {
   constructor(scope: Construct, name: string) {
@@ -53,9 +53,13 @@ class ProspectAPI extends TerraformStack {
     const caller = new DataAwsCallerIdentity(this, 'caller');
     const dynamodb = new DynamoDB(this, 'dynamodb');
 
-    new SqsLambda(this, 'translation-lambda', dynamodb.prospectsTable);
+    new TranslationSqsLambda(
+      this,
+      'translation-lambda',
+      dynamodb.prospectsTable,
+    );
 
-    new SqsLambdaBridge(this, 'bridge-lambda', { region, caller });
+    new BridgeSqsLambda(this, 'bridge-lambda', { region, caller });
 
     this.createPocketAlbApplication({
       s3: this.createS3Bucket(),

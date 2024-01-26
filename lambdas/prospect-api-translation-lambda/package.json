@@ -1,5 +1,5 @@
 {
-  "name": "prospect-api-aws_lambda",
+  "name": "prospect-api-translation-aws_lambda",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",

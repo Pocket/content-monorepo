@@ -85,7 +85,7 @@ importers:
         specifier: 5.3.2
         version: 5.3.2
 
-  lambdas/prospect-api-lambda:
+  lambdas/prospect-api-translation-lambda:
     dependencies:
       '@aws-sdk/client-dynamodb':
         specifier: 3.391.0
