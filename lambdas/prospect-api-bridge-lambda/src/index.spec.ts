@@ -25,6 +25,35 @@ describe('processor', () => {
   afterEach(() => jest.clearAllMocks());
   afterAll(() => jest.restoreAllMocks());
 
+  const sqsProspectSetFixture: SqsProspectSet = {
+    id: 'aa7df642-6bb6-4fed-82bd-03c764d51c6c',
+    version: 3,
+    candidates: [
+      {
+        scheduled_surface_guid: 'NEW_TAB_EN_US',
+        prospect_id: 'a598e9cc-5f8a-5062-aa16-dbca19a45134',
+        url: 'https://science.nasa.gov/directorates/smd/astrophysics-division/how-nasa-chases-and-investigates-bright-cosmic-blips/',
+        prospect_source: 'CONSTRAINT_SCHEDULE',
+        save_count: 438,
+        predicted_topic: 'SCIENCE',
+        rank: 1,
+      },
+      {
+        scheduled_surface_guid: 'NEW_TAB_EN_US',
+        prospect_id: '9cc1ca00-6216-5a12-895b-37c48245fba2',
+        url: 'https://www.scientificamerican.com/article/how-long-does-it-really-take-to-form-a-habit/',
+        prospect_source: 'CONSTRAINT_SCHEDULE',
+        save_count: 0,
+        predicted_topic: 'HEALTH_FITNESS',
+        rank: 2,
+      },
+    ],
+    type: 'prospect',
+    flow: 'ConstraintScheduleProspectsFlow',
+    run: '109321',
+    expires_at: 1706732555,
+  };
+
   it('throws TypeGuardError for invalid input', async () => {
     // Generate an SQSEvent with an invalid body.
     const invalidEvent: SQSEvent = {
@@ -44,7 +73,7 @@ describe('processor', () => {
       Records: [
         {
           ...random<SQSRecord>(),
-          body: JSON.stringify(random<SqsProspectSet>()),
+          body: JSON.stringify(sqsProspectSetFixture),
         },
       ],
     };

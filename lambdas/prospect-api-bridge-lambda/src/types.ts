@@ -27,7 +27,7 @@ export interface SqsProspectSet {
   /**
    * The prospects in this set.
    */
-  candidates: [SqsProspect];
+  candidates: SqsProspect[];
   /**
    * Candidate type. For prospects this is always 'prospect'.
    * Used to distinguish from recommendation candidate sets.
