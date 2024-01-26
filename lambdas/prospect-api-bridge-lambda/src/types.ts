@@ -9,13 +9,24 @@ export interface SqsProspect {
   rank: number;
 }
 
-type ProspectCandidateType = 'prospect';
-
-enum SqsProspectSetVersion {
-  v3 = 3,
+export enum CandidateType {
+  /**
+   * Prospect candidates are items that can be shown to curators for review in the curation admin tool.
+   */
+  PROSPECT = 'prospect',
+  /**
+   * The recommendation candidate set type is _probably_ not used anymore. It was used in the past to generate
+   * recommendation candidate sets in Metaflow for Pocket Home and Pocket Explore Topic Pages.
+   * It's included here to keep the schema
+   */
+  RECOMMENDATION = 'recommendation',
 }
 
-export interface SqsProspectSet {
+export enum CandidateSetVersion {
+  V3 = 3,
+}
+
+export interface CandidateSet {
   /**
    * ID for the prospect candidate set as a whole
    */
@@ -23,16 +34,12 @@ export interface SqsProspectSet {
   /**
    * Used to distinguish SQS schema versions. Currently equal to 3.
    */
-  version: SqsProspectSetVersion;
+  version: CandidateSetVersion;
   /**
    * The prospects in this set.
    */
   candidates: SqsProspect[];
-  /**
-   * Candidate type. For prospects this is always 'prospect'.
-   * Used to distinguish from recommendation candidate sets.
-   */
-  type: ProspectCandidateType;
+  type: CandidateType;
   /**
    * Metaflow flow name
    */
@@ -45,4 +52,11 @@ export interface SqsProspectSet {
    * Unix time in seconds at which the prospect set expires.
    */
   expires_at: number;
+}
+
+export interface ProspectCandidateSet extends Omit<CandidateSet, 'type'> {
+  /**
+   * The type for a prospect candidate set should be 'prospect'.
+   */
+  type: CandidateType.PROSPECT;
 }

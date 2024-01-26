@@ -6,7 +6,7 @@ import {
   EventBridgeClient,
   PutEventsCommand,
 } from '@aws-sdk/client-eventbridge';
-import { SqsProspectSet } from './types';
+import { ProspectCandidateSet } from './types';
 import { assert } from 'typia';
 
 Sentry.AWSLambda.init({
@@ -27,7 +27,7 @@ const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
 
   // Validate that body is a SqsProspectSet. If not, throws TypeGuardError to Sentry.
   const data = JSON.parse(body);
-  assert<SqsProspectSet>(data);
+  assert<ProspectCandidateSet>(data);
 
   const putEventsCommand = new PutEventsCommand({
     Entries: [

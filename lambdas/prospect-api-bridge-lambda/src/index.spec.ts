@@ -2,7 +2,6 @@ import { Context, SQSEvent } from 'aws-lambda';
 import { handler as processor } from './index';
 import { random, TypeGuardError } from 'typia';
 import { SQSRecord } from 'aws-lambda/trigger/sqs';
-import { SqsProspectSet } from './types';
 
 // Mock the EventBridge send method
 const eventBridgeSendMock = jest.fn().mockResolvedValue({});
@@ -25,7 +24,7 @@ describe('processor', () => {
   afterEach(() => jest.clearAllMocks());
   afterAll(() => jest.restoreAllMocks());
 
-  const sqsProspectSetFixture: SqsProspectSet = {
+  const mockProspectSet = {
     id: 'aa7df642-6bb6-4fed-82bd-03c764d51c6c',
     version: 3,
     candidates: [
@@ -54,26 +53,12 @@ describe('processor', () => {
     expires_at: 1706732555,
   };
 
-  it('throws TypeGuardError for invalid input', async () => {
-    // Generate an SQSEvent with an invalid body.
-    const invalidEvent: SQSEvent = {
-      Records: [
-        { ...random<SQSRecord>(), body: JSON.stringify({ invalid: 'foobar' }) },
-      ],
-    };
-
-    // Expect the processor to throw a TypeGuardError
-    await expect(
-      processor(invalidEvent, mockContext, mockCallback),
-    ).rejects.toThrow(TypeGuardError);
-  });
-
-  it('sends a prospect set to EventBridge', async () => {
+  it('sends a valid prospect set to EventBridge', async () => {
     const sqsEvent: SQSEvent = {
       Records: [
         {
           ...random<SQSRecord>(),
-          body: JSON.stringify(sqsProspectSetFixture),
+          body: JSON.stringify(mockProspectSet),
         },
       ],
     };
@@ -94,5 +79,49 @@ describe('processor', () => {
         },
       }),
     );
+  });
+
+  it('throws SyntaxError for invalid JSON', async () => {
+    const invalidEvent: SQSEvent = {
+      Records: [{ ...random<SQSRecord>(), body: 'definitely not json :)' }],
+    };
+
+    await expect(
+      processor(invalidEvent, mockContext, mockCallback),
+    ).rejects.toThrow(SyntaxError);
+  });
+
+  it('throws TypeGuardError for an invalid version', async () => {
+    // Generate an SQSEvent with an invalid body.
+    const invalidEvent: SQSEvent = {
+      Records: [
+        {
+          ...random<SQSRecord>(),
+          body: JSON.stringify({ ...mockProspectSet, version: 123 }),
+        },
+      ],
+    };
+
+    // Expect the processor to throw a TypeGuardError
+    await expect(
+      processor(invalidEvent, mockContext, mockCallback),
+    ).rejects.toThrow(TypeGuardError);
+  });
+
+  it('throws TypeGuardError for an invalid candidate set type', async () => {
+    // Generate an SQSEvent with an invalid body.
+    const invalidEvent: SQSEvent = {
+      Records: [
+        {
+          ...random<SQSRecord>(),
+          body: JSON.stringify({ ...mockProspectSet, type: 'recommendation' }),
+        },
+      ],
+    };
+
+    // Expect the processor to throw a TypeGuardError
+    await expect(
+      processor(invalidEvent, mockContext, mockCallback),
+    ).rejects.toThrow(TypeGuardError);
   });
 });
