@@ -36,7 +36,11 @@ describe('snowplow', () => {
       status_reason_comment: null,
     };
 
-    queueSnowplowEvent(tracker, 'prospect_reviewed', prospect);
+    queueSnowplowEvent(
+      tracker,
+      'prospect_reviewed',
+      prospectWithRemovalReasons,
+    );
 
     // wait a sec * 3
     await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -47,7 +51,7 @@ describe('snowplow', () => {
     expect(allEvents.bad).toEqual(0);
   });
 
-  it('should accept an event with a prospect with statsu reasons and comment', async () => {
+  it('should accept an event with a prospect with status reasons and comment', async () => {
     const emitter = getEmitter();
     const tracker = getTracker(emitter);
 
@@ -57,7 +61,11 @@ describe('snowplow', () => {
       status_reason_comment: 'publisher spread too thin and old content',
     };
 
-    queueSnowplowEvent(tracker, 'prospect_reviewed', prospect);
+    queueSnowplowEvent(
+      tracker,
+      'prospect_reviewed',
+      prospectWithRemovalReasons,
+    );
 
     // wait a sec * 3
     await new Promise((resolve) => setTimeout(resolve, 3000));
