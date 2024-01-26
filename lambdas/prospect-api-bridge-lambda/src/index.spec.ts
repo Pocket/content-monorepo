@@ -52,7 +52,6 @@ describe('processor', () => {
     await processor(sqsEvent, mockContext, mockCallback);
 
     expect(eventBridgeSendMock).toHaveBeenCalledWith(
-      // Use `objectContaining` because the PutEventsCommand() constructor sets some additional attributes.
       expect.objectContaining({
         input: {
           Entries: [
