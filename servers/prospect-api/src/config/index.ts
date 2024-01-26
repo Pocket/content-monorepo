@@ -37,10 +37,10 @@ export default {
     namespace: 'pocket-backend',
     appId: 'pocket-backend-prospect-api',
     schemas: {
-      // TODO: update once kirill's PR lands
-      // https://github.com/Pocket/spec/pull/203
-      prospect: 'iglu:com.pocket/prospect/jsonschema/1-0-0',
-      objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-9',
+      // published 2024-01-26
+      prospect: 'iglu:com.pocket/prospect/jsonschema/1-0-1',
+      // published 2024-01-02
+      objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-16',
     },
   },
 };

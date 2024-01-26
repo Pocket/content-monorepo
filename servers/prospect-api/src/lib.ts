@@ -257,7 +257,7 @@ export const prospectToSnowplowProspect = (
   statusReasons?: string[],
   statusReasonComment?: string,
 ): SnowplowProspect => {
-  return {
+  let snowplowProspect: SnowplowProspect = {
     object_version: 'new',
     prospect_id: prospect.prospectId,
     url: prospect.url,
@@ -278,9 +278,18 @@ export const prospectToSnowplowProspect = (
     prospect_review_status: ProspectReviewStatus.Dismissed,
     reviewed_at: Date.now(),
     reviewed_by: authUserName,
-    status_reasons: statusReasons,
-    status_reason_comment: statusReasonComment,
   };
+
+  // snowplow will not accept null values for the below
+  if (statusReasons) {
+    snowplowProspect.status_reasons = statusReasons;
+  }
+
+  if (statusReasonComment) {
+    snowplowProspect.status_reason_comment = statusReasonComment;
+  }
+
+  return snowplowProspect;
 };
 
 /**
@@ -303,4 +312,17 @@ export const parseReasonsCsv = (reasonCsv: string | null): string[] => {
   }
 
   return reasons;
+};
+
+/**
+ * basic text sanitization function for cleaning free text entered by curators
+ * @param input unsanitized string
+ * @returns sanitized string
+ */
+export const sanitizeText = (input: string): string => {
+  // TODO: verify the below - happening in slack atm
+  const sanitized = input.replace(/[^a-zA-Z0-9 \-.]/g, '');
+
+  // TODO: put the length in config
+  return sanitized.substring(0, 49);
 };

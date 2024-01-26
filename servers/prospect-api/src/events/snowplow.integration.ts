@@ -26,14 +26,37 @@ describe('snowplow', () => {
     expect(allEvents.bad).toEqual(0);
   });
 
-  it('should accept an event with a prospect with status reasons', async () => {
+  it('should accept an event with a prospect with status reasons and no comment', async () => {
     const emitter = getEmitter();
     const tracker = getTracker(emitter);
 
     const prospectWithRemovalReasons: SnowplowProspect = {
       ...prospect,
       status_reasons: ['PUBLISHER', 'OUTDATED'],
-      status_reason_comment: null,
+    };
+
+    queueSnowplowEvent(
+      tracker,
+      'prospect_reviewed',
+      prospectWithRemovalReasons,
+    );
+
+    // wait a sec * 3
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    const allEvents = await getAllSnowplowEvents();
+
+    expect(allEvents.total).toEqual(1);
+    expect(allEvents.bad).toEqual(0);
+  });
+
+  it('should accept an event with a prospect with no status reasons and a comment', async () => {
+    const emitter = getEmitter();
+    const tracker = getTracker(emitter);
+
+    const prospectWithRemovalReasons: SnowplowProspect = {
+      ...prospect,
+      status_reason_comment: 'do read these comments',
     };
 
     queueSnowplowEvent(

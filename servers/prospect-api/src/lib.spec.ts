@@ -423,6 +423,29 @@ describe('lib', () => {
       );
       expect(snowplowProspect.reviewed_by).toEqual('LDAP|User');
     });
+
+    it('should skip adding status reasons to the snowplow entity if null', () => {
+      const ps: Prospect[] = makeProspects(1);
+
+      const snowplowProspect = prospectToSnowplowProspect(
+        ps[0],
+        'LDAP|User',
+        null,
+        null,
+      );
+
+      expect(snowplowProspect.prospect_id).toEqual(ps[0].prospectId);
+      expect(snowplowProspect.scheduled_surface_id).toEqual(
+        ps[0].scheduledSurfaceGuid,
+      );
+      expect(snowplowProspect.prospect_source).toEqual(ps[0].prospectType);
+      expect(snowplowProspect.topic).toEqual(ps[0].topic);
+      expect(snowplowProspect.url).toEqual(ps[0].url);
+      expect(snowplowProspect.created_at).toEqual(ps[0].createdAt);
+      expect(snowplowProspect.status_reasons).toBeUndefined;
+      expect(snowplowProspect.status_reason_comment).toBeUndefined;
+      expect(snowplowProspect.reviewed_by).toEqual('LDAP|User');
+    });
   });
 
   describe('parseReasonsCsv', () => {
