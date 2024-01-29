@@ -93,6 +93,7 @@ enum RemovalReason {
     REDUNDANT
     SET_SIMILARITY
     TIME_SENSITIVE
+    TOPIC
 }
 
 """
