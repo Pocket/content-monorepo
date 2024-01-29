@@ -752,7 +752,7 @@ describe('mutations integration tests', () => {
   dismissProspect mutation and all related tests.
   */
   describe('removeProspect', () => {
-    it('should update a prospect as curated without status reasons', async () => {
+    it('should update a prospect as curated with a single status reason and no comment', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
         ProspectType.SYNDICATED_NEW,
@@ -769,39 +769,7 @@ describe('mutations integration tests', () => {
           variables: {
             data: {
               id: prospect.id,
-            },
-          },
-        });
-
-      // check these first just in case
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data).not.toBeNull();
-
-      // get the prospect directly from the db (as `curated` is not a part of
-      // our graph)
-      const res = await getProspectById(dbClient, prospect.id);
-
-      expect(res?.curated).toEqual(true);
-    });
-
-    it('should update a prospect as curated with a single status reason', async () => {
-      const prospect = createProspect(
-        'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
-        false,
-      );
-
-      await insertProspect(dbClient, prospect);
-
-      const result = await request(app)
-        .post(url)
-        .set(headers)
-        .send({
-          query: print(UPDATE_REMOVE_PROSPECT),
-          variables: {
-            data: {
-              id: prospect.id,
-              reason: 'PUBLISHER',
+              reasons: 'PUBLISHER',
             },
           },
         });
@@ -834,7 +802,7 @@ describe('mutations integration tests', () => {
           variables: {
             data: {
               id: prospect.id,
-              reason: 'PUBLISHER,TOPIC',
+              reasons: 'PUBLISHER,TOPIC',
               reasonComment: 'publisher and topic spread were not good enough',
             },
           },
@@ -851,7 +819,7 @@ describe('mutations integration tests', () => {
       expect(res?.curated).toEqual(true);
     });
 
-    it('should return all properties of an updated prospect', async () => {
+    it('should return all properties of a removed prospect', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
         ProspectType.SYNDICATED_NEW,
@@ -864,9 +832,12 @@ describe('mutations integration tests', () => {
         .post(url)
         .set(headers)
         .send({
-          query: print(UPDATE_DISMISS_PROSPECT),
+          query: print(UPDATE_REMOVE_PROSPECT),
           variables: {
-            id: prospect.id,
+            data: {
+              id: prospect.id,
+              reasons: 'PUBLISHER',
+            },
           },
         });
 
@@ -874,7 +845,7 @@ describe('mutations integration tests', () => {
       expect(result.body.errors).toBeUndefined();
       expect(result.body.data).not.toBeNull();
 
-      const updatedProspect = result.body.data?.dismissProspect;
+      const updatedProspect = result.body.data?.removeProspect;
 
       // internal Prospect type differs from graph Prospect type
       // curated and rank are not exposed via public graph, redact from expectations
@@ -900,9 +871,12 @@ describe('mutations integration tests', () => {
         .post(url)
         .set(headers)
         .send({
-          query: print(UPDATE_DISMISS_PROSPECT),
+          query: print(UPDATE_REMOVE_PROSPECT),
           variables: {
-            id: prospect.id,
+            data: {
+              id: prospect.id,
+              reasons: 'PUBLISHER',
+            },
           },
         });
 
@@ -935,9 +909,12 @@ describe('mutations integration tests', () => {
         .post(url)
         .set(unAuthorizedHeaders)
         .send({
-          query: print(UPDATE_DISMISS_PROSPECT),
+          query: print(UPDATE_REMOVE_PROSPECT),
           variables: {
-            id: prospect.id,
+            data: {
+              id: prospect.id,
+              reasons: 'PUBLISHER',
+            },
           },
         });
 

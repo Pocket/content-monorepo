@@ -168,7 +168,7 @@ export const resolvers = {
       { data },
       { db, userAuth }: Context,
     ): Promise<Prospect | null> => {
-      const { id, reasons, reasonComment } = data;
+      const { id, reasons, reasonComment = null } = data;
 
       // fetch prospect from db first
       const prospect = dynamoItemToProspect(await getProspectById(db, id));
@@ -197,7 +197,9 @@ export const resolvers = {
           prospect,
           userAuth.username,
           parseReasonsCsv(reasons),
-          sanitizeText(reasonComment, config.app.removeReasonMaxLength),
+          reasonComment
+            ? sanitizeText(reasonComment, config.app.removeReasonMaxLength)
+            : null,
         ),
       );
 
