@@ -304,9 +304,12 @@ export const parseReasonsCsv = (reasonCsv: string | null): string[] => {
 
   if (reasonCsv) {
     reasons = reasonCsv.split(',').map((reason) => {
-      // TODO: once reasons are finalized, is it worth validating them here?
-      if (reason.trim().length > 0) {
-        return reason.trim();
+      // TODO: once reasons are finalized, is it worth validating them against an enum here?
+      // for now, just sanitize to be safe
+      const sanitized = sanitizeText(reason, config.app.removeReasonMaxLength);
+
+      if (sanitized.length > 0) {
+        return sanitized;
       }
     });
   }
@@ -319,10 +322,13 @@ export const parseReasonsCsv = (reasonCsv: string | null): string[] => {
  * @param input unsanitized string
  * @returns sanitized string
  */
-export const sanitizeText = (input: string): string => {
-  // TODO: verify the below - happening in slack atm
-  const sanitized = input.replace(/[^a-zA-Z0-9 \-.]/g, '');
+export const sanitizeText = (input: string, maxLength: number): string => {
+  // remove all non-allowed characters and buffering whitespace
+  let sanitized = input.replace(/[^a-zA-Z0-9 \-.!\?]/g, '').trim();
 
-  // TODO: put the length in config
-  return sanitized.substring(0, 49);
+  // collapse more than one consecutive space into a single space
+  sanitized = sanitized.replace(/  +/g, ' ');
+
+  // trim to conform to our max length
+  return sanitized.substring(0, maxLength - 1);
 };

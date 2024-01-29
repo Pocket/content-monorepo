@@ -5,6 +5,7 @@ export default {
   environment: process.env.NODE_ENV || 'development',
   app: {
     prospectBatchSize: 50, // # of prospects we return at once to the client
+    removeReasonMaxLength: 100, // max length of remove reason text we allow
   },
   aws: {
     localEndpoint: process.env.AWS_ENDPOINT,

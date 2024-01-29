@@ -27,6 +27,7 @@ import {
   deDuplicateProspectUrls,
   prospectToSnowplowProspect,
   parseReasonsCsv,
+  sanitizeText,
 } from './lib';
 
 import { GetProspectsFilters, Context } from './types';
@@ -196,7 +197,7 @@ export const resolvers = {
           prospect,
           userAuth.username,
           parseReasonsCsv(reason),
-          reasonComment,
+          sanitizeText(reasonComment, config.app.removeReasonMaxLength),
         ),
       );
 
