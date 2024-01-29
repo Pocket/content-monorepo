@@ -65,6 +65,37 @@ enum RejectionReason {
 }
 
 """
+2024-01-29
+
+these reasons are used when dismissing prospects only for the
+SLATE_SCHEDULER prospect type. this is a preliminary step towards ML
+scheduling items, and this reason set will *likely* be used when removing ML
+scheduled items as well.
+
+these reasons *may* also be used more widely in the prospecting view in the
+future, but would be blocked on removal count going down significantly.
+
+as of today, 2024-01-29, these reasons have been finalized.
+"""
+enum RemovalReason {
+    ARTICLE_QUALITY
+    COMMERCIAL
+    CONTROVERSIAL
+    HEADLINE_QUALITY
+    INAPPROPRIATE
+    NICHE
+    NO_IMAGE
+    ONE_SIDED
+    OUTDATED
+    PAYWALL
+    POLITICAL_OPINION
+    PUBLISHER
+    REDUNDANT
+    SET_SIMILARITY
+    TIME_SENSITIVE
+}
+
+"""
 Prospect types. This enum is not used anywhere in this schema, however it is used
 by the Curation Admin Tools frontend to filter prospects.
 """
