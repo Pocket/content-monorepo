@@ -101,7 +101,7 @@ input RemoveProspectInput {
   """
   A comma-separated list of removal reasons.
   """
-  reasons: String!
+  reasons: String
   """
   Free-text entered by the curator to give further detail to the reason(s) provided.
   """

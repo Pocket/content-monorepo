@@ -168,7 +168,7 @@ export const resolvers = {
       { data },
       { db, userAuth }: Context,
     ): Promise<Prospect | null> => {
-      const { id, reasons, reasonComment = null } = data;
+      const { id, reasons = null, reasonComment = null } = data;
 
       // fetch prospect from db first
       const prospect = dynamoItemToProspect(await getProspectById(db, id));

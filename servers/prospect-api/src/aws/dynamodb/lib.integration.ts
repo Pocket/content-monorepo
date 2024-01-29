@@ -752,6 +752,38 @@ describe('mutations integration tests', () => {
   dismissProspect mutation and all related tests.
   */
   describe('removeProspect', () => {
+    it('should update a prospect as curated without any reason', async () => {
+      const prospect = createProspect(
+        'NEW_TAB_EN_US',
+        ProspectType.SYNDICATED_NEW,
+        false,
+      );
+
+      await insertProspect(dbClient, prospect);
+
+      const result = await request(app)
+        .post(url)
+        .set(headers)
+        .send({
+          query: print(UPDATE_REMOVE_PROSPECT),
+          variables: {
+            data: {
+              id: prospect.id,
+            },
+          },
+        });
+
+      // check these first just in case
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+
+      // get the prospect directly from the db (as `curated` is not a part of
+      // our graph)
+      const res = await getProspectById(dbClient, prospect.id);
+
+      expect(res?.curated).toEqual(true);
+    });
+
     it('should update a prospect as curated with a single status reason and no comment', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
