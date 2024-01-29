@@ -41,6 +41,7 @@ Purpose of some important files in the root of the monorepo:
 
 ## Build
 First, create a local `.env` file and copy the contents of `example.env`.
+Don't forget to use the `node` version configured for this monorepo (`v18`).
 
 To build all services:
 ```
@@ -61,17 +62,49 @@ If there are no changes to the services, `turbo` uses the cached results of the 
 To spin up all services from the root of the monorepo:
 ```
 cd content-monorepo
-docker-compose up --wait
+docker compose up --wait
 pnpm dev
 ```
 This will spin up dependent docker services (detached mode), and run the node ts services.
 
-To spin up a service individually:
+To spin up a service individually, pass the `--filter={service_name}` to the `pnpm` command:
 ```
 cd content-monorepo
-docker-compose up --wait
-cd servers/server1
-npm run dev
+docker compose up --wait
+pnpm build
+pnpm dev --filter=prospect-api
+```
+
+### Unit Tests
+To run all unit tests for all services & packages:
+```
+cd content-monorepo
+pnpm build
+pnpm test
+```
+
+To run unit tests individually per service:
+```
+cd content-monorepo
+pnpm build
+pnpm test --filter=prospect-api
+```
+
+### Integration Tests
+To run all integration tests:
+```
+cd content-monorepo
+docker compose up --wait
+pnpm build
+pnpm test-integrations
+```
+
+To run integration tests for a specific service:
+```
+cd content-monorepo
+docker compose up --wait
+pnpm build
+pnpm test-integrations --filter=prospect-api
 ```
 
 ## DynamoDB
