@@ -75,7 +75,7 @@ pnpm build
 pnpm dev --filter=prospect-api
 ```
 
-Note the GraphQL endpoints can be reached on the ip:port shown at startup.  Each schema can be accessed by add a suffix like:
+Note that the GraphQL endpoints can be reached on the ip:port shown at startup.  For example, `curated-corpus-api` can be reached at:
 http://127.0.0.1:4025
 http://127.0.0.1:4025/admin
 
