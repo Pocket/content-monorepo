@@ -5,6 +5,7 @@ export default {
   environment: process.env.NODE_ENV || 'development',
   app: {
     prospectBatchSize: 50, // # of prospects we return at once to the client
+    removeReasonMaxLength: 100, // max length of remove reason text we allow
   },
   aws: {
     localEndpoint: process.env.AWS_ENDPOINT,
@@ -37,8 +38,10 @@ export default {
     namespace: 'pocket-backend',
     appId: 'pocket-backend-prospect-api',
     schemas: {
-      prospect: 'iglu:com.pocket/prospect/jsonschema/1-0-0',
-      objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-9',
+      // published 2024-01-26
+      prospect: 'iglu:com.pocket/prospect/jsonschema/1-0-1',
+      // published 2024-01-02
+      objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-16',
     },
   },
 };

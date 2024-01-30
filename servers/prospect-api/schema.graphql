@@ -90,6 +90,24 @@ input GetProspectsFilters {
   excludePublisher: String
 }
 
+"""
+Input data for removing a prospect.
+"""
+input RemoveProspectInput {
+  """
+  The GUID of the corresponding Prospect.
+  """
+  id: ID!
+  """
+  A comma-separated list of removal reasons.
+  """
+  reasons: String
+  """
+  Free-text entered by the curator to give further detail to the reason(s) provided.
+  """
+  reasonComment: String
+}
+
 type Query {
   """
   returns a set of at most 20 prospects (number may be smaller depending on available data)
@@ -106,6 +124,8 @@ type Mutation {
   """
   Marks a prospect as 'curated' in the database, preventing it from being displayed for prospecting.
   Returns the prospect if the operation succeeds, and null if not (almost surely due to an incorrect id).
+
+  Called when approving or rejecting a prospect into the corpus.
   """
   updateProspectAsCurated(id: ID!): Prospect
 
@@ -115,6 +135,16 @@ type Mutation {
 
   This is functionally a copy of updateProspectAsCurated for now, but will have differences in
   snowplow reporting down the line.
+
+  This mutation will be replaced by `removeProspect` below.
   """
   dismissProspect(id: ID!): Prospect
+
+  """
+  Marks a prospect as 'curated' in the database, preventing it from being displayed for prospecting.
+  Returns the prospect if the operation succeeds, and null if not (almost surely due to an incorrect id).
+
+  Called when removing a prospect from the list - specifically not approving or rejecting into the corpus.
+  """
+  removeProspect(data: RemoveProspectInput!): Prospect
 }
