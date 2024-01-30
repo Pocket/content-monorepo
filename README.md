@@ -75,6 +75,11 @@ pnpm build
 pnpm dev --filter=prospect-api
 ```
 
+Note the GraphQL endpoints can be reached on the ip:port shown at startup.  Each schema can be accessed by add a suffix like:
+http://127.0.0.1:4025
+http://127.0.0.1:4025/admin
+
+
 ### Unit Tests
 To run all unit tests for all services & packages:
 ```
