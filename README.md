@@ -156,5 +156,5 @@ Navigate to the individual project and use `npm install` to update the item
 Then rebuild from the root of the monorepo with `pnpm`
 ```
 pnpm update
-npm build
+pnpm build
 ```
