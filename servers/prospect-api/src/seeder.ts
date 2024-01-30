@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { faker, fakerDE, fakerES, fakerFR, fakerIT } from '@faker-js/faker';
 import config from './config';
 import {
   dbClient,
@@ -15,6 +15,14 @@ import { CorpusLanguage } from './types';
 // conjure up double the batch size so we get variance
 const prospectsPerCombo = config.app.prospectBatchSize * 2;
 let prospect: Prospect;
+
+const langToFakerLocale = {
+  EN: faker,
+  DE: fakerDE,
+  ES: fakerES,
+  FR: fakerFR,
+  IT: fakerIT,
+}
 
 const buildProspect = (
   surfaceGuid: ScheduledSurface,
@@ -36,6 +44,8 @@ const buildProspect = (
     Object.keys(CorpusLanguage).indexOf(guidLang) == -1
       ? faker.helpers.arrayElement(Object.values(CorpusLanguage))
       : guidLang;
+  const fakerLocale = langToFakerLocale[corpusLang]
+
 
   const imageCat = faker.helpers.arrayElement([
     'city',
@@ -66,14 +76,14 @@ const buildProspect = (
     // at 3:14:07 on january 19, 2038 GMT, this value will exceed the int32 limit 🙃
     createdAt: Math.floor(faker.date.recent().getTime() / 1000),
     // below properties will be populated via client api/parser
-    domain: faker.internet.domainName(),
-    excerpt: faker.lorem.paragraph(),
+    domain: fakerLocale.internet.domainName(),
+    excerpt: fakerLocale.word.words({ count: { min: 1, max: 100 } }),
     imageUrl: `${faker.image.urlLoremFlickr({
       category: imageCat,
     })}?random=${random}&height=640&width=480`,
     language: corpusLang,
     publisher: faker.company.name(),
-    title: faker.lorem.sentence(),
+    title: fakerLocale.word.words({ count: { min: 1, max: 10 } }),
     isSyndicated,
     // only potentially be a collection if it's *not* syndicated
     isCollection: isSyndicated ? false : faker.datatype.boolean(),
