@@ -50,6 +50,7 @@ export enum ProspectType {
   DISMISSED = 'DISMISSED',
   CONSTRAINT_SCHEDULE = 'CONSTRAINT_SCHEDULE',
   SLATE_SCHEDULER = 'SLATE_SCHEDULER',
+  SLATE_SCHEDULER_V2 = 'SLATE_SCHEDULER_V2',
 }
 
 // languages we support in the corpus
@@ -137,6 +138,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.RSS_LOGISTIC_RECENT,
       ProspectType.CONSTRAINT_SCHEDULE,
       ProspectType.SLATE_SCHEDULER,
+      ProspectType.SLATE_SCHEDULER_V2,
     ],
   },
   {
