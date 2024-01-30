@@ -155,6 +155,6 @@ Please refer to the specific README of the service for applying a prisma migrati
 Navigate to the individual project and use `npm install` to update the item
 Then rebuild from the root of the monorepo with `pnpm`
 ```
-npm update
+pnpm update
 npm build
 ```
