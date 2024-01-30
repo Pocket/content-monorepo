@@ -411,8 +411,8 @@ importers:
         version: 6.3.3
     devDependencies:
       '@faker-js/faker':
-        specifier: 6.0.0
-        version: 6.0.0
+        specifier: 8.0.2
+        version: 8.0.2
       '@types/chai-spies':
         specifier: 1.0.3
         version: 1.0.3
@@ -3558,6 +3558,7 @@ packages:
   /@faker-js/faker@6.0.0:
     resolution: {integrity: sha512-10zLCKhp3YEmBuko71ivcMoIZcCLXgQVck6aNswX+AWwaek/L8S3yz9i8m3tHigRkcF6F2vI+qtdtyySHK+bGA==}
     engines: {node: '>=14.0.0', npm: '>=7.0.0'}
+    dev: false
 
   /@faker-js/faker@8.0.2:
     resolution: {integrity: sha512-Uo3pGspElQW91PCvKSIAXoEgAUlRnH29sX2/p89kg7sP1m2PzCufHINd0FhTXQf6DYGiUlVncdSPa2F9wxed2A==}

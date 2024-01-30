@@ -1,4 +1,4 @@
-import faker from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import config from './config';
 import {
   dbClient,
@@ -21,33 +21,36 @@ const buildProspect = (
   prospectType: ProspectType
 ): Prospect => {
   const isSyndicated = faker.datatype.boolean();
+  const random = Math.round(Math.random() * 1000);
 
   // randomize number of authors
-  const authorCount = faker.datatype.number({ min: 1, max: 3 });
+  const authorCount = faker.number.int({ min: 1, max: 3 });
   const authors: string[] = [];
 
   for (let i = 0; i < authorCount; i++) {
-    authors.push(faker.name.findName());
+    authors.push(faker.person.fullName());
   }
 
   return {
-    id: faker.datatype.uuid(),
-    prospectId: faker.datatype.uuid(),
+    id: faker.string.uuid(),
+    prospectId: faker.string.uuid(),
     scheduledSurfaceGuid: surfaceGuid.guid,
-    topic: faker.random.arrayElement(Object.values(Topics)),
+    topic: faker.helpers.arrayElement(Object.values(Topics)),
     prospectType,
     url: faker.internet.url(),
-    saveCount: faker.datatype.number(),
-    rank: faker.datatype.number(),
+    saveCount: faker.number.int(),
+    rank: faker.number.int(),
     // unix timestamp
     // at 3:14:07 on january 19, 2038 GMT, this value will exceed the int32 limit 🙃
     createdAt: Math.floor(faker.date.recent().getTime() / 1000),
     // below properties will be populated via client api/parser
     domain: faker.internet.domainName(),
     excerpt: faker.lorem.paragraph(),
-    imageUrl: faker.image.imageUrl(),
-    language: faker.random.arrayElement(Object.values(CorpusLanguage)),
-    publisher: faker.company.companyName(),
+    imageUrl: `${faker.image.urlLoremFlickr({
+      category: 'nature',
+    })}?random=${random}&height=640&width=480`,
+    language: faker.helpers.arrayElement(Object.values(CorpusLanguage)),
+    publisher: faker.company.name(),
     title: faker.lorem.sentence(),
     isSyndicated,
     // only potentially be a collection if it's *not* syndicated
