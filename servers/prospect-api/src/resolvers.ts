@@ -133,36 +133,6 @@ export const resolvers = {
 
       return updateProspectAsCurated(db, id);
     },
-    dismissProspect: async (
-      parent,
-      { id },
-      { db, userAuth }: Context,
-    ): Promise<Prospect | null> => {
-      // fetch prospect from db first
-      const prospect = dynamoItemToProspect(await getProspectById(db, id));
-
-      // check if user has write access for this mutation
-      if (!userAuth.canWrite(prospect.scheduledSurfaceGuid)) {
-        throw new AuthenticationError('Not authorized for action');
-      }
-
-      // 2022-11-10: event bridge on pause while system stability is improved.
-      // will go back to this code/send when event bridge is ready.
-      // Send the 'Dismiss' event to Pocket event bridge
-      // await sendEventBridgeEvent(prospect, userAuth);
-
-      // in the mean time, send the dismiss event directly to snowplow
-      // initialize snowplow tracker
-      const snowplowEmitter = getEmitter();
-      const snowplowTracker = getTracker(snowplowEmitter);
-      queueSnowplowEvent(
-        snowplowTracker,
-        'prospect_reviewed',
-        prospectToSnowplowProspect(prospect, userAuth.username),
-      );
-
-      return updateProspectAsCurated(db, id);
-    },
     removeProspect: async (
       parent,
       { data },
