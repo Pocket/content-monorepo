@@ -118,8 +118,14 @@ is created.
 To seed the table with data, run the seeding script:
 ``` 
 cd content-monorepo
+pnpm build
 pnpm db:dynamo-seed
 ```  
+
+If you want to delete dynamodb database, restart the docker and re-run the seed
+```
+docker restart content-monorepo-localstack-1
+```
 
 ## Prisma
 Collection-api & curated-corput-api use `prisma` as their ORM, and to setup & seed the tables, some tasks need to be run separately from `docker compose`.
@@ -143,3 +149,12 @@ pnpm prisma db seed
 
 ### Applying migration
 Please refer to the specific README of the service for applying a prisma migration.
+
+
+### Adding a new depenency via pnpm
+Navigate to the individual project and use `npm install` to update the item
+Then rebuld the npmp top level 
+```
+npm update
+npm build
+```

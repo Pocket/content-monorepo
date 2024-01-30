@@ -416,6 +416,9 @@ importers:
       '@types/chai-spies':
         specifier: 1.0.3
         version: 1.0.3
+      '@types/faker':
+        specifier: 6.6.8
+        version: 6.6.8
       '@types/jest':
         specifier: 28.1.7
         version: 28.1.7
@@ -8623,7 +8626,7 @@ packages:
     dependencies:
       semver: 7.5.4
       shelljs: 0.8.5
-      typescript: 5.4.0-dev.20240129
+      typescript: 5.4.0-dev.20240130
     dev: false
 
   /drange@1.1.1:
@@ -15399,8 +15402,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.4.0-dev.20240129:
-    resolution: {integrity: sha512-MCwiuPLBvW2mJYE2/BIwY4xLsLMC+Ov69PFEavtpb5NdGTFcfPoqa++2co9E4GXU7lBjqjDncBs86qjmvcHtDQ==}
+  /typescript@5.4.0-dev.20240130:
+    resolution: {integrity: sha512-LelY/DlG9yPe807IRs7ZYvKp0eGgk4ehYr/9RvQsZg31E7sF3oYz0r44fsvnqxFWCsM11CWOrmY1r+MD5CDMfQ==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
