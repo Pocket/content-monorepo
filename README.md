@@ -153,7 +153,7 @@ Please refer to the specific README of the service for applying a prisma migrati
 
 ### Adding a new depenency via pnpm
 Navigate to the individual project and use `npm install` to update the item
-Then rebuld the npmp top level 
+Then rebuild from the root of the monorepo with `pnpm`
 ```
 npm update
 npm build
