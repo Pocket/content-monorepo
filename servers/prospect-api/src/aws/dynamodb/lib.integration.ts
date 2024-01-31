@@ -16,7 +16,6 @@ import config from '../../config';
 import { getTestServer } from '../../test/admin-server';
 import { GET_PROSPECTS } from '../../test/admin-server/queries.gql';
 import {
-  UPDATE_DISMISS_PROSPECT,
   UPDATE_PROSPECT_AS_CURATED,
   UPDATE_REMOVE_PROSPECT,
 } from '../../test/admin-server/mutations.gql';
@@ -618,138 +617,11 @@ describe('mutations integration tests', () => {
       );
     });
   });
-  describe('dismissProspect', () => {
-    it('should updated a prospect as curated', async () => {
-      const prospect = createProspect(
-        'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
-        false,
-      );
-
-      await insertProspect(dbClient, prospect);
-
-      const result = await request(app)
-        .post(url)
-        .set(headers)
-        .send({
-          query: print(UPDATE_DISMISS_PROSPECT),
-          variables: {
-            id: prospect.id,
-          },
-        });
-
-      // check these first just in case
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data).not.toBeNull();
-
-      // get the prospect directly from the db (as `curated` is not a part of
-      // our graph)
-      const res = await getProspectById(dbClient, prospect.id);
-
-      expect(res?.curated).toEqual(true);
-    });
-
-    it('should return all properties of an updated prospect', async () => {
-      const prospect = createProspect(
-        'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
-        false,
-      );
-
-      await insertProspect(dbClient, prospect);
-
-      const result = await request(app)
-        .post(url)
-        .set(headers)
-        .send({
-          query: print(UPDATE_DISMISS_PROSPECT),
-          variables: {
-            id: prospect.id,
-          },
-        });
-
-      // check these first just in case
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data).not.toBeNull();
-
-      const updatedProspect = result.body.data?.dismissProspect;
-
-      // internal Prospect type differs from graph Prospect type
-      // curated and rank are not exposed via public graph, redact from expectations
-      const expectedProspect: any = { ...prospect };
-      delete expectedProspect.curated;
-      delete expectedProspect.rank;
-      // add expected federated fields that are on graphql schema
-      expectedProspect.approvedCorpusItem = { url: expectedProspect.url };
-
-      expect(updatedProspect).toEqual(expectedProspect);
-    });
-
-    it('should update prospect if the user has the required auth group for a given scheduled surface', async () => {
-      const prospect = createProspect(
-        'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
-        false,
-      );
-
-      await insertProspect(dbClient, prospect);
-
-      const result = await request(app)
-        .post(url)
-        .set(headers)
-        .send({
-          query: print(UPDATE_DISMISS_PROSPECT),
-          variables: {
-            id: prospect.id,
-          },
-        });
-
-      expect(result.body.errors).toBeUndefined();
-
-      expect(result.body.data).not.toBeNull();
-
-      // get the prospect directly from the db (as `curated` is not a part of
-      // our graph)
-      const res = await getProspectById(dbClient, prospect.id);
-
-      expect(res?.curated).toBeTruthy();
-    });
-    it('should throw an error if the user does not have the required auth group for a given scheduled surface', async () => {
-      const prospect = createProspect(
-        'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
-        false,
-      );
-
-      await insertProspect(dbClient, prospect);
-
-      const unAuthorizedHeaders = {
-        ...headers,
-        groups: MozillaAccessGroup.NEW_TAB_CURATOR_DEDE,
-      };
-
-      const result = await request(app)
-        .post(url)
-        .set(unAuthorizedHeaders)
-        .send({
-          query: print(UPDATE_DISMISS_PROSPECT),
-          variables: {
-            id: prospect.id,
-          },
-        });
-
-      expect(result.body.errors).not.toBeUndefined();
-      expect(result.body.errors?.length).toEqual(1);
-      expect(result?.body.errors?.[0].message).toEqual(
-        'Not authorized for action',
-      );
-    });
-  });
-
   /*
   these are currently largely a copy of the dismissProspect tests above. once
   removeProspect is adopted by the curation tools, we will be removing the
   dismissProspect mutation and all related tests.
+  Update: 01.30.2024 - dismissProspect mutation has been removed
   */
   describe('removeProspect', () => {
     it('should update a prospect as curated without any reason', async () => {
