@@ -6,6 +6,10 @@ import { LAMBDA_RUNTIMES } from '@pocket-tools/terraform-modules';
 import { DataAwsSsmParameter } from '@cdktf/provider-aws/lib/data-aws-ssm-parameter';
 import { DataAwsRegion } from '@cdktf/provider-aws/lib/data-aws-region';
 import { DataAwsCallerIdentity } from '@cdktf/provider-aws/lib/data-aws-caller-identity';
+import { IamPolicy } from '@cdktf/provider-aws/lib/iam-policy';
+import { DataAwsIamPolicyDocument } from '@cdktf/provider-aws/lib/data-aws-iam-policy-document';
+import { IamUserPolicyAttachment } from '@cdktf/provider-aws/lib/iam-user-policy-attachment';
+import { IamUser } from '@cdktf/provider-aws/lib/iam-user';
 
 export class BridgeSqsLambda extends Construct {
   constructor(
@@ -21,7 +25,7 @@ export class BridgeSqsLambda extends Construct {
     const { region, caller } = dependencies;
     const vpc = new PocketVPC(this, 'pocket-shared-vpc');
 
-    new PocketSQSWithLambdaTarget(this, 'bridge-sqs-lambda', {
+    const sqsLambda = new PocketSQSWithLambdaTarget(this, 'bridge-sqs-lambda', {
       name: `${config.prefix}-Sqs-Bridge`,
       // batch size is 1 so SQS doesn't get smart and try to combine them
       // (a combined message will mean a skipped candidate set from ML)
@@ -67,6 +71,35 @@ export class BridgeSqsLambda extends Construct {
         },
       },
       tags: config.tags,
+    });
+
+    const iamUserPolicy = new IamPolicy(this, 'iam-sqs-policy', {
+      // TODO: Is this the right name? Use IAM prefix or not?
+      name: `IAM-${config.prefix}-LambdaSQSPolicy`,
+      policy: new DataAwsIamPolicyDocument(this, `iam_sqs_policy`, {
+        statement: [
+          {
+            effect: 'Allow',
+            actions: ['sqs:SendMessage', 'sqs:GetQueueAttributes'],
+            resources: [sqsLambda.sqsQueueResource.arn],
+          },
+        ],
+      }).json,
+      // provider: config.provider,
+      tags: config.tags,
+    });
+
+    const iamUser = new IamUser(this, 'iam_user', {
+      name: `${config.prefix}-Queue-User`,
+      tags: config.tags,
+      // provider: this.config.provider,
+      permissionsBoundary: iamUserPolicy.arn,
+    });
+
+    new IamUserPolicyAttachment(this, 'iam-sqs-user-policy-attachment', {
+      // provider: this.config.provider,
+      policyArn: iamUserPolicy.arn,
+      user: iamUser.name,
     });
   }
 
