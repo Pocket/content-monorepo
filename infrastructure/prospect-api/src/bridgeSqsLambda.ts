@@ -80,7 +80,7 @@ export class BridgeSqsLambda extends Construct {
         statement: [
           {
             effect: 'Allow',
-            actions: ['sqs:SendMessage', 'sqs:GetQueueAttributes'],
+            actions: ['sqs:SendMessage', 'sqs:GetQueueAttributes', 'sqs:GetQueueUrl'],
             resources: [sqsLambda.sqsQueueResource.arn],
           },
         ],
