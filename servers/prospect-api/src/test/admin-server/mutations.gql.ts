@@ -13,12 +13,18 @@ export const UPDATE_PROSPECT_AS_CURATED = gql`
   ${ProspectData}
 `;
 
-/**
- * sample mutations for apollo server integration tests
- */
 export const UPDATE_DISMISS_PROSPECT = gql`
   mutation dismissProspect($id: ID!) {
     dismissProspect(id: $id) {
+      ...ProspectData
+    }
+  }
+  ${ProspectData}
+`;
+
+export const UPDATE_REMOVE_PROSPECT = gql`
+  mutation removeProspect($data: RemoveProspectInput!) {
+    removeProspect(data: $data) {
       ...ProspectData
     }
   }
