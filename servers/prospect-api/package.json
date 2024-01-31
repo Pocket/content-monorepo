@@ -28,9 +28,10 @@
     "supertest": "^6.3.3"
   },
   "devDependencies": {
-    "@faker-js/faker": "6.0.0",
+    "@faker-js/faker": "8.0.2",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
+    "@types/faker": "6.6.8",
     "@types/chai-spies": "1.0.3",
     "@types/jest": "28.1.7",
     "@types/lodash": "4.14.182",

@@ -75,25 +75,26 @@ scheduled items as well.
 these reasons *may* also be used more widely in the prospecting view in the
 future, but would be blocked on removal count going down significantly.
 
-as of today, 2024-01-29, these reasons have been finalized.
+As of today, 2024-01-29, these reasons have been finalized.
+1.31.2024 - Reasons have been modified (https://mozilla.slack.com/archives/C05EVRU1U1X/p1706725778815659?thread_ts=1706719517.894679&cid=C05EVRU1U1X)
 """
 enum RemovalReason {
     ARTICLE_QUALITY
     COMMERCIAL
     CONTROVERSIAL
-    HEADLINE_QUALITY
-    INAPPROPRIATE
+    HED_DEK_QUALITY
+    IMAGE_QUALITY
     NICHE
     NO_IMAGE
     ONE_SIDED
-    OUTDATED
+    PARTISAN
     PAYWALL
-    POLITICAL_OPINION
-    PUBLISHER
-    REDUNDANT
-    SET_SIMILARITY
+    PUBLISH_DATE
+    PUBLISHER_DIVERSITY
+    PUBLISHER_QUALITY
+    SET_DIVERSITY
     TIME_SENSITIVE
-    TOPIC
+    TOPIC_DIVERSITY
 }
 
 """
@@ -116,6 +117,7 @@ enum ProspectType {
     RSS_LOGISTIC_RECENT
     CONSTRAINT_SCHEDULE
     SLATE_SCHEDULER
+    SLATE_SCHEDULER_V2
 }
 
 """

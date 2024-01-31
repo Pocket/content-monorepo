@@ -16,6 +16,7 @@ export enum ProspectType {
   RSS_LOGISTIC_RECENT = 'RSS_LOGISTIC_RECENT',
   CONSTRAINT_SCHEDULE = 'CONSTRAINT_SCHEDULE',
   SLATE_SCHEDULER = 'SLATE_SCHEDULER',
+  SLATE_SCHEDULER_V2 = 'SLATE_SCHEDULER_V2',
 }
 
 export enum MozillaAccessGroup {
@@ -63,6 +64,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.RSS_LOGISTIC_RECENT,
       ProspectType.CONSTRAINT_SCHEDULE,
       ProspectType.SLATE_SCHEDULER,
+      ProspectType.SLATE_SCHEDULER_V2,
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENUS,
   },

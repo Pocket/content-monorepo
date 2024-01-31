@@ -75,6 +75,11 @@ pnpm build
 pnpm dev --filter=prospect-api
 ```
 
+Note that the GraphQL endpoints can be reached on the ip:port shown at startup.  For example, `curated-corpus-api` can be reached at:
+http://127.0.0.1:4025
+http://127.0.0.1:4025/admin
+
+
 ### Unit Tests
 To run all unit tests for all services & packages:
 ```
@@ -113,8 +118,14 @@ is created.
 To seed the table with data, run the seeding script:
 ``` 
 cd content-monorepo
+pnpm build
 pnpm db:dynamo-seed
 ```  
+
+If you want to delete dynamodb database, restart the docker and re-run the seed
+```
+docker restart content-monorepo-localstack-1
+```
 
 ## Prisma
 Collection-api & curated-corput-api use `prisma` as their ORM, and to setup & seed the tables, some tasks need to be run separately from `docker compose`.
@@ -126,7 +137,7 @@ pnpm db:generate-prisma-client
 ```
 
 ### Resetting & Seeding the Databases
-Make sure the `.env` under each service using `prisma` contains the appropriate `DATABSE_URL`.
+Make sure the `.env` under each service using `prisma` contains the appropriate `DATABASE_URL`.
 
 For `curated-corpus-api`: `DATABASE_URL=mysql://root:@localhost:3306/curation_corpus?connect_timeout=300`
 
@@ -138,3 +149,12 @@ pnpm prisma db seed
 
 ### Applying migration
 Please refer to the specific README of the service for applying a prisma migration.
+
+
+### Adding a new depenency via pnpm
+Navigate to the individual project and use `npm install` to update the item
+Then rebuild from the root of the monorepo with `pnpm`
+```
+pnpm update
+pnpm build
+```
