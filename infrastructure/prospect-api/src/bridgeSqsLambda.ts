@@ -1,6 +1,6 @@
 import { Construct } from 'constructs';
 import { config } from './config';
-import { ApplicationSQSQueue, ApplicationSQSQueueProps, PocketVPC } from '@pocket-tools/terraform-modules';
+import { PocketVPC } from '@pocket-tools/terraform-modules';
 import { PocketSQSWithLambdaTarget } from '@pocket-tools/terraform-modules';
 import { LAMBDA_RUNTIMES } from '@pocket-tools/terraform-modules';
 import { DataAwsSsmParameter } from '@cdktf/provider-aws/lib/data-aws-ssm-parameter';
