@@ -6,8 +6,11 @@ import {
   getSortedRankedProspects,
   getRandomizedSortedRankedProspects,
   isValidProspectType,
+  parseReasonsCsv,
+  prospectToSnowplowProspect,
   standardizeLanguage,
   deDuplicateProspectUrls,
+  sanitizeText,
 } from './lib';
 import { Prospect, ProspectType, Topics } from 'prospectapi-common';
 
@@ -17,7 +20,7 @@ const topicsArray = Object.keys(Topics).map((key) => Topics[key]);
 // TODO: refactor into a seeder-type helper for all tests?
 const makeProspects = (
   count: number,
-  options?: Partial<Prospect>
+  options?: Partial<Prospect>,
 ): Prospect[] => {
   const prospects: Prospect[] = [];
 
@@ -52,15 +55,19 @@ describe('lib', () => {
 
   describe('isValidProspectType', () => {
     it('should return true for a valid prospect type', () => {
-      expect(isValidProspectType('NEW_TAB_EN_US', ProspectType.SYNDICATED_NEW))
-        .toBeTruthy();
+      expect(
+        isValidProspectType('NEW_TAB_EN_US', ProspectType.SYNDICATED_NEW),
+      ).toBeTruthy();
 
-      expect(isValidProspectType('NEW_TAB_DE_DE', ProspectType.COUNTS)).toBeTruthy();
+      expect(
+        isValidProspectType('NEW_TAB_DE_DE', ProspectType.COUNTS),
+      ).toBeTruthy();
     });
 
     it('should return false for an invalid prospect type', () => {
-      expect(isValidProspectType('NEW_TAB_DE_DE', ProspectType.SYNDICATED_NEW))
-        .toBeFalsy();
+      expect(
+        isValidProspectType('NEW_TAB_DE_DE', ProspectType.SYNDICATED_NEW),
+      ).toBeFalsy();
     });
   });
 
@@ -277,12 +284,12 @@ describe('lib', () => {
 
       // the two SYNDICATED_NEW prospects should be in ascending order based on their rank
       expect(syndicatedProspects[0].rank).toBeLessThan(
-        syndicatedProspects[1].rank
+        syndicatedProspects[1].rank,
       );
 
       // the two TIMESPENT prospects should be in ascending order based on their rank
       expect(organicTimespentProspects[0].rank).toBeLessThan(
-        organicTimespentProspects[1].rank
+        organicTimespentProspects[1].rank,
       );
     });
 
@@ -373,6 +380,133 @@ describe('lib', () => {
 
       // length of returned array should be 4 after removing 2 duplicates
       expect(deDupedProspects.length).toEqual(4);
+    });
+  });
+
+  describe('prospectToSnowplowProspect', () => {
+    it('should add prospect details and authUserName to the snowplow entity', () => {
+      const ps: Prospect[] = makeProspects(1);
+
+      const snowplowProspect = prospectToSnowplowProspect(ps[0], 'LDAP|User');
+
+      expect(snowplowProspect.prospect_id).toEqual(ps[0].prospectId);
+      expect(snowplowProspect.scheduled_surface_id).toEqual(
+        ps[0].scheduledSurfaceGuid,
+      );
+      expect(snowplowProspect.prospect_source).toEqual(ps[0].prospectType);
+      expect(snowplowProspect.topic).toEqual(ps[0].topic);
+      expect(snowplowProspect.url).toEqual(ps[0].url);
+      expect(snowplowProspect.created_at).toEqual(ps[0].createdAt);
+      expect(snowplowProspect.reviewed_by).toEqual('LDAP|User');
+    });
+
+    it('should add status reasons to the snowplow entity if present', () => {
+      const ps: Prospect[] = makeProspects(1);
+
+      const snowplowProspect = prospectToSnowplowProspect(
+        ps[0],
+        'LDAP|User',
+        ['PUBLISHER', 'TOPIC'],
+        'allow me to explain...',
+      );
+
+      expect(snowplowProspect.prospect_id).toEqual(ps[0].prospectId);
+      expect(snowplowProspect.scheduled_surface_id).toEqual(
+        ps[0].scheduledSurfaceGuid,
+      );
+      expect(snowplowProspect.prospect_source).toEqual(ps[0].prospectType);
+      expect(snowplowProspect.topic).toEqual(ps[0].topic);
+      expect(snowplowProspect.url).toEqual(ps[0].url);
+      expect(snowplowProspect.created_at).toEqual(ps[0].createdAt);
+      expect(snowplowProspect.status_reasons).toEqual(['PUBLISHER', 'TOPIC']);
+      expect(snowplowProspect.status_reason_comment).toEqual(
+        'allow me to explain...',
+      );
+      expect(snowplowProspect.reviewed_by).toEqual('LDAP|User');
+    });
+
+    it('should skip adding status reasons to the snowplow entity if null', () => {
+      const ps: Prospect[] = makeProspects(1);
+
+      const snowplowProspect = prospectToSnowplowProspect(
+        ps[0],
+        'LDAP|User',
+        null,
+        null,
+      );
+
+      expect(snowplowProspect.prospect_id).toEqual(ps[0].prospectId);
+      expect(snowplowProspect.scheduled_surface_id).toEqual(
+        ps[0].scheduledSurfaceGuid,
+      );
+      expect(snowplowProspect.prospect_source).toEqual(ps[0].prospectType);
+      expect(snowplowProspect.topic).toEqual(ps[0].topic);
+      expect(snowplowProspect.url).toEqual(ps[0].url);
+      expect(snowplowProspect.created_at).toEqual(ps[0].createdAt);
+      expect(snowplowProspect.status_reasons).toBeUndefined;
+      expect(snowplowProspect.status_reason_comment).toBeUndefined;
+      expect(snowplowProspect.reviewed_by).toEqual('LDAP|User');
+    });
+  });
+
+  describe('parseReasonsCsv', () => {
+    it('should create an array from multiple elements in a csv', () => {
+      expect(parseReasonsCsv('PUBLISHER,TOPIC')).toEqual([
+        'PUBLISHER',
+        'TOPIC',
+      ]);
+    });
+
+    it('should create an array from a single element', () => {
+      expect(parseReasonsCsv('PUBLISHER')).toEqual(['PUBLISHER']);
+    });
+
+    it('should ignore trailing comma', () => {
+      expect(parseReasonsCsv('PUBLISHER,')).toEqual(['PUBLISHER']);
+    });
+
+    it('should return an empty array if null value', () => {
+      expect(parseReasonsCsv(null)).toEqual([]);
+    });
+
+    it('should return an empty array if empty string', () => {
+      expect(parseReasonsCsv('')).toEqual([]);
+    });
+  });
+
+  describe('sanitizeText', () => {
+    it('should not modify a string when it satisfies our conditions already', () => {
+      const string = 'A string! That conforms. To the regex? YES. 20!';
+
+      expect(sanitizeText(string, 100)).toEqual(string);
+    });
+    it('should remove illegal characters', () => {
+      const string = '<lots>; of & illegal % chars # $ @ * ^ ( ) {} []!';
+
+      expect(sanitizeText(string, 100)).toEqual('lots of illegal chars !');
+    });
+
+    it('should return an empty string if all the characters are illegal', () => {
+      const string = '* (^* &^*#&^ $) #(*>{{}';
+
+      expect(sanitizeText(string, 100)).toEqual('');
+    });
+
+    it('should trim surrounding whitespace', () => {
+      const string = '  i luv 2 buffer my strings with spaces    &*#   ';
+
+      expect(sanitizeText(string, 100)).toEqual(
+        'i luv 2 buffer my strings with spaces',
+      );
+    });
+
+    it('should trim the string to our set max length', () => {
+      const string =
+        'this is a very long string that will be more than one hundred characters. it is a real epic of a comment, which was the style at the time.';
+
+      expect(sanitizeText(string, 100)).toEqual(
+        'this is a very long string that will be more than one hundred characters. it is a real epic of a co',
+      );
     });
   });
 });
