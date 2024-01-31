@@ -15,6 +15,8 @@ import {
 } from '@cdktf/provider-aws/lib/data-aws-sqs-queue';
 import { IamPolicy } from '@cdktf/provider-aws/lib/iam-policy';
 import { IamRole } from '@cdktf/provider-aws/lib/iam-role';
+import { IamUser } from '@cdktf/provider-aws/lib/iam-user';
+import { IamUserPolicyAttachment } from '@cdktf/provider-aws/lib/iam-user-policy-attachment';
 import { IamRolePolicyAttachment } from '@cdktf/provider-aws/lib/iam-role-policy-attachment';
 import { LambdaEventSourceMapping } from '@cdktf/provider-aws/lib/lambda-event-source-mapping';
 import { SqsQueue } from '@cdktf/provider-aws/lib/sqs-queue';
@@ -33,6 +35,7 @@ export interface PocketSQSWithLambdaTargetProps
   batchWindow?: number;
   // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_event_source_mapping#function_response_types
   functionResponseTypes?: string[];
+  configCreateUser?: boolean;
 }
 
 export interface PocketSQSProps {
@@ -49,6 +52,8 @@ export interface PocketSQSProps {
 export class PocketSQSWithLambdaTarget extends PocketVersionedLambda {
   public readonly sqsQueueResource: SqsQueue | DataAwsSqsQueue;
   public readonly applicationSqsQueue: ApplicationSQSQueue;
+  public readonly iamUserPolicy: IamPolicy;
+  public readonly iamUser: IamUser;
 
   constructor(
     scope: Construct,
@@ -78,6 +83,40 @@ export class PocketSQSWithLambdaTarget extends PocketVersionedLambda {
       this.sqsQueueResource,
     );
 
+    if (config.configCreateUser) {
+      this.iamUserPolicy = new IamPolicy(this, 'iam-sqs-policy', {
+        name: `IAM-${this.config.name}-LambdaSQSPolicy`,
+        policy: new DataAwsIamPolicyDocument(this, `iam_sqs_policy`, {
+          statement: [
+            {
+              effect: 'Allow',
+              actions: [
+                'sqs:SendMessage',
+                'sqs:GetQueueAttributes',
+              ],
+              resources: [this.sqsQueueResource.arn],
+            },
+          ],
+        }).json,
+        provider: this.config.provider,
+        tags: this.config.tags,
+      });
+
+      this.iamUser = this.createIamUser({
+        name: `Service-${config.name}-Queue`,
+        tags: config.tags,
+        provider: this.config.provider,
+        permissionsBoundary: this.iamUserPolicy.arn,
+      });
+
+      new IamUserPolicyAttachment(this, 'iam-sqs-user-policy-attachment', {
+        provider: this.config.provider,
+        policyArn: this.iamUserPolicy.arn,
+        user: this.iamUser.name
+      })
+
+    }
+
     this.createEventSourceMapping(this.lambda, this.sqsQueueResource, config);
   }
 
@@ -89,6 +128,16 @@ export class PocketSQSWithLambdaTarget extends PocketVersionedLambda {
     sqsQueueConfig: ApplicationSQSQueueProps,
   ): ApplicationSQSQueue {
     return new ApplicationSQSQueue(this, 'lambda_sqs_queue', sqsQueueConfig);
+  }
+
+  /**
+   * Creates the iam user with access to the sqs queue
+   * @private
+   */
+  private createIamUser(
+      iamUserConfig: ApplicationSQSQueueProps,
+  ): ApplicationSQSQueue {
+    return new IamUser(this, 'iam_user', iamUserConfig);
   }
 
   /**
