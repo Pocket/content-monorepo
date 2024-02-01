@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import config from '../config';
+import config from '../../../servers/prospect-api/src/config';
 import { ProspectReviewStatus, SnowplowProspect } from './types';
 
 export const prospect: SnowplowProspect = {

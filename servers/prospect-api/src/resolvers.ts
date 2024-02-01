@@ -31,8 +31,11 @@ import {
 } from './lib';
 
 import { GetProspectsFilters, Context } from './types';
-//import { sendEventBridgeEvent } from './events/events';
-import { getEmitter, getTracker, queueSnowplowEvent } from './events/snowplow';
+import {
+  getEmitter,
+  getTracker,
+  queueSnowplowEvent,
+} from 'prospectapi-common/events/snowplow';
 
 /**
  * Return an object conforming to the Item graphql definition.

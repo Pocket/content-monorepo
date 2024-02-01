@@ -9,7 +9,10 @@ import {
 
 import config from './config';
 import { CorpusLanguage, SortedRankedProspects } from './types';
-import { ProspectReviewStatus, SnowplowProspect } from './events/types';
+import {
+  ProspectReviewStatus,
+  SnowplowProspect,
+} from 'prospectapi-common/events/types';
 
 /**
  * checks the given new tab GUID to make sure it's valid

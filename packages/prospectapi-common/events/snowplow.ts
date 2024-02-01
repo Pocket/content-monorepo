@@ -12,9 +12,9 @@ import {
 } from '@snowplow/node-tracker';
 import { Response, RequestError } from 'got';
 
-import config from '../config';
+import config from '../../../servers/prospect-api/src/config';
 import { SnowplowProspect } from './types';
-import { serverLogger } from '../express';
+import { serverLogger } from '../../../servers/prospect-api/src/express';
 
 let emitter: Emitter;
 let tracker: Tracker;
@@ -42,7 +42,7 @@ export function getEmitter(): Emitter {
           Sentry.addBreadcrumb({ message: 'Emitter Data', data: error });
           Sentry.captureMessage(`Emitter Error`);
         }
-      }
+      },
     );
   }
 
@@ -60,7 +60,7 @@ export const getTracker = (emitter: Emitter): Tracker => {
       emitter,
       config.snowplow.namespace,
       config.snowplow.appId,
-      true
+      true,
     );
   }
 
@@ -92,7 +92,7 @@ export const generateEvent = (eventName: string): SelfDescribingEvent => {
  * @returns SelfDescribingJson
  */
 export const generateContext = (
-  prospect: SnowplowProspect
+  prospect: SnowplowProspect,
 ): SelfDescribingJson => {
   return {
     schema: config.snowplow.schemas.prospect,
@@ -113,7 +113,7 @@ export const generateContext = (
 export const queueSnowplowEvent = (
   tracker: Tracker,
   eventName: string,
-  prospect: SnowplowProspect
+  prospect: SnowplowProspect,
 ): void => {
   const event = generateEvent(eventName);
   const contexts: SelfDescribingJson[] = [generateContext(prospect)];
