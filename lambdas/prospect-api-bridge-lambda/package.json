@@ -20,7 +20,7 @@
     "typia": "^5.4.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.131",
+    "@types/aws-lambda": "8.10.133",
     "@types/jest": "29.5.11",
     "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
