@@ -76,7 +76,7 @@ these reasons *may* also be used more widely in the prospecting view in the
 future, but would be blocked on removal count going down significantly.
 
 As of today, 2024-01-29, these reasons have been finalized.
-1.31.2024 - Reasons have been modified (https://mozilla.slack.com/archives/C05EVRU1U1X/p1706725778815659?thread_ts=1706719517.894679&cid=C05EVRU1U1X)
+1.31.2024 - Reasons have been modified (https://docs.google.com/spreadsheets/d/1HWLpoiKh-CPXkMKrfHKBSohrR8C8o0StcMucF0C0vEk)
 """
 enum RemovalReason {
     ARTICLE_QUALITY
