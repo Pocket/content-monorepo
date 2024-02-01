@@ -6,7 +6,7 @@
 # Docker build step that creates our 
 # base image used in all steps
 #----------------------------------------
-FROM node:18.18-alpine AS base
+FROM node:20.11-alpine AS base
 
 ARG SCOPE
 ARG PORT
