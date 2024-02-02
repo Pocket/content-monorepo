@@ -8,6 +8,14 @@ import {
   deriveUrlMetadata,
 } from 'prospectapi-common';
 
+import {
+  getEmitter,
+  getTracker,
+  queueSnowplowEvent,
+} from 'prospectapi-common/events/snowplow';
+
+import { prospectToSnowplowProspect } from 'prospectapi-common/events/lib';
+
 import config from './config';
 import { SqsProspect } from './types';
 
@@ -49,6 +57,8 @@ const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
   let errors: string[] = [];
   let prospectsProcessed = 0;
   let prospectsErrored = 0;
+  const snowplowEmitter = getEmitter();
+  const snowplowTracker = getTracker(snowplowEmitter);
 
   // is the SQS message valid JSON?
   try {
@@ -125,6 +135,12 @@ const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
       console.log(`Got url metadata for ${prospect.url}`);
 
       prospect = hydrateProspectMetadata(prospect, urlMetadata);
+
+      queueSnowplowEvent(
+        snowplowTracker,
+        'prospect_created',
+        prospectToSnowplowProspect(prospect),
+      );
 
       await insertProspect(dbClient, prospect);
 
