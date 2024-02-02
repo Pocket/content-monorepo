@@ -15,8 +15,8 @@
   "private": true,
   "dependencies": {
     "@apollo/client": "3.7.16",
-    "@aws-sdk/client-dynamodb": "3.391.0",
-    "@aws-sdk/lib-dynamodb": "3.391.0",
+    "@aws-sdk/client-dynamodb": "3.504.0",
+    "@aws-sdk/lib-dynamodb": "3.504.0",
     "@sentry/node": "6.19.7",
     "@faker-js/faker": "6.3.1",
     "graphql-tag": "2.12.6",
