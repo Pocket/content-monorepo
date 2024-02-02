@@ -55,7 +55,7 @@
     "tsconfig": "workspace:*",
     "@types/faker": "6.6.8",
     "@types/graphql-upload": "8.0.12",
-    "@types/jest": "29.5.11",
+    "@types/jest": "29.5.12",
     "@types/node": "^20.11.6",
     "form-data": "4.0.0",
     "jest": "29.7.0",
