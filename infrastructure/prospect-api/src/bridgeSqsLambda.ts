@@ -36,7 +36,7 @@ export class BridgeSqsLambda extends Construct {
         visibilityTimeoutSeconds: 300,
       },
       lambda: {
-        runtime: LAMBDA_RUNTIMES.NODEJS18,
+        runtime: LAMBDA_RUNTIMES.NODEJS20,
         handler: 'index.handler',
         timeout: 120,
         memorySizeInMb: 512,
