@@ -158,7 +158,7 @@ describe('processor', () => {
       expect(firehoseSendMock).toHaveBeenCalledWith(
         expect.objectContaining({
           input: {
-            DeliveryStreamName: 'MetaflowTools-Dev-firehose',
+            DeliveryStreamName: 'MetaflowTools-Local-1-RecsAPICandidateSet',
             Record: {
               Data: expect.any(Uint8Array),
             },

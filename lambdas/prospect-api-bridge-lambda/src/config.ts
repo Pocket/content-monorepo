@@ -11,7 +11,9 @@ const config = {
       detailType: 'prospect-generation',
     },
     firehose: {
-      deliveryStreamName: process.env.METAFLOW_FIREHOSE_NAME,
+      deliveryStreamName:
+        process.env.METAFLOW_FIREHOSE_NAME ||
+        'MetaflowTools-Local-1-RecsAPICandidateSet',
     },
   },
   sentry: {
