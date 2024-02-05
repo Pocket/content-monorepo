@@ -11,13 +11,7 @@ const config = {
       detailType: 'prospect-generation',
     },
     firehose: {
-      // Firehose is defined for production and development in AWS Metaflow CloudFormation:
-      // https://github.com/Pocket/cloudformation-templates/blob/main/service/MetaflowTools/parameters_prod.json#L92
-      // https://github.com/Pocket/cloudformation-templates/blob/main/service/MetaflowTools/parameters_dev.json#L101
-      deliveryStreamName:
-        process.env.ENVIRONMENT == 'production'
-          ? 'MetaflowTools-Prod-1-RecsAPICandidateSet'
-          : 'MetaflowTools-Dev-firehose',
+      deliveryStreamName: process.env.METAFLOW_FIREHOSE_NAME,
     },
   },
   sentry: {
