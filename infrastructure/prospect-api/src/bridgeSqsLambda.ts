@@ -1,8 +1,10 @@
 import { Construct } from 'constructs';
 import { config } from './config';
-import { PocketVPC } from '@pocket-tools/terraform-modules';
-import { PocketSQSWithLambdaTarget } from '@pocket-tools/terraform-modules';
-import { LAMBDA_RUNTIMES } from '@pocket-tools/terraform-modules';
+import {
+  LAMBDA_RUNTIMES,
+  PocketSQSWithLambdaTarget,
+  PocketVPC,
+} from '@pocket-tools/terraform-modules';
 import { DataAwsSsmParameter } from '@cdktf/provider-aws/lib/data-aws-ssm-parameter';
 import { DataAwsRegion } from '@cdktf/provider-aws/lib/data-aws-region';
 import { DataAwsCallerIdentity } from '@cdktf/provider-aws/lib/data-aws-caller-identity';
@@ -25,6 +27,8 @@ export class BridgeSqsLambda extends Construct {
 
     const { region, caller } = dependencies;
     const vpc = new PocketVPC(this, 'pocket-shared-vpc');
+
+    const eventBridgeArn = `arn:aws:events:${region.name}:${caller.accountId}:event-bus/${config.envVars.eventBusName}`;
 
     const metaflowFirehose = new DataAwsKinesisFirehoseDeliveryStream(
       this,
@@ -51,9 +55,7 @@ export class BridgeSqsLambda extends Construct {
         executionPolicyStatements: [
           {
             actions: ['events:PutEvents'],
-            resources: [
-              `arn:aws:events:${region.name}:${caller.accountId}:event-bus/${config.envVars.eventBusName}`,
-            ],
+            resources: [eventBridgeArn],
             effect: 'Allow',
           },
           {
@@ -64,6 +66,7 @@ export class BridgeSqsLambda extends Construct {
         ],
         environment: {
           EVENT_BRIDGE_BUS_NAME: config.envVars.eventBusName,
+          EVENT_BRIDGE_DETAIL_TYPE: config.envVars.eventDetailType,
           METAFLOW_FIREHOSE_NAME: config.envVars.metaflowFirehoseName,
           SENTRY_DSN: this.getSentryDsn(),
           GIT_SHA: this.getGitSha(),
@@ -87,10 +90,22 @@ export class BridgeSqsLambda extends Construct {
     });
 
     const iamUserPolicy = new IamPolicy(this, 'iam-sqs-policy', {
-      // TODO: Is this the right name? Use IAM prefix or not?
-      name: `IAM-${config.prefix}-LambdaSQSPolicy`,
+      name: `IAM-${config.prefix}-QueuePolicy`,
       policy: new DataAwsIamPolicyDocument(this, `iam_sqs_policy`, {
         statement: [
+          {
+            effect: 'Allow',
+            actions: ['events:PutEvents'],
+            resources: [eventBridgeArn],
+            condition: [
+              // The shared EventBridge processes many types of events. Only allow prospect messages to be sent.
+              {
+                test: 'StringEquals',
+                variable: 'events:detail-type',
+                values: [config.envVars.eventDetailType],
+              },
+            ],
+          },
           {
             effect: 'Allow',
             actions: ['sqs:SendMessage', 'sqs:GetQueueAttributes', 'sqs:GetQueueUrl'],
