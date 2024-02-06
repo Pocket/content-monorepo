@@ -3,8 +3,9 @@ import { handler as processor } from './index';
 import { random, TypeGuardError } from 'typia';
 import { SQSRecord } from 'aws-lambda/trigger/sqs';
 
-// Mock the EventBridge send method
+// Mock the EventBridge and Firehose send methods
 const eventBridgeSendMock = jest.fn().mockResolvedValue({});
+const firehoseSendMock = jest.fn().mockResolvedValue({});
 
 jest.mock('@aws-sdk/client-eventbridge', () => {
   const originalModule = jest.requireActual('@aws-sdk/client-eventbridge');
@@ -13,6 +14,17 @@ jest.mock('@aws-sdk/client-eventbridge', () => {
     ...originalModule,
     EventBridgeClient: jest.fn().mockImplementation(() => ({
       send: eventBridgeSendMock,
+    })),
+  };
+});
+
+jest.mock('@aws-sdk/client-firehose', () => {
+  const originalModule = jest.requireActual('@aws-sdk/client-firehose');
+
+  return {
+    ...originalModule,
+    FirehoseClient: jest.fn().mockImplementation(() => ({
+      send: firehoseSendMock,
     })),
   };
 });
@@ -53,75 +65,112 @@ describe('processor', () => {
     expires_at: 1706732555,
   };
 
-  it('sends a valid prospect set to EventBridge', async () => {
-    const sqsEvent: SQSEvent = {
-      Records: [
-        {
-          ...random<SQSRecord>(),
-          body: JSON.stringify(mockProspectSet),
-        },
-      ],
-    };
+  describe('validation', () => {
+    it('throws SyntaxError for invalid JSON', async () => {
+      const invalidEvent: SQSEvent = {
+        Records: [{ ...random<SQSRecord>(), body: 'definitely not json :)' }],
+      };
 
-    await processor(sqsEvent, mockContext, mockCallback);
+      await expect(
+        processor(invalidEvent, mockContext, mockCallback),
+      ).rejects.toThrow(SyntaxError);
+    });
 
-    expect(eventBridgeSendMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        input: {
-          Entries: [
-            {
-              EventBusName: 'PocketEventBridge-local-Shared-Event-Bus',
-              Source: 'prospect-events',
-              DetailType: 'prospect-generation',
-              Detail: sqsEvent.Records[0].body,
+    it('throws TypeGuardError for an invalid version', async () => {
+      // Generate an SQSEvent with an invalid body.
+      const invalidEvent: SQSEvent = {
+        Records: [
+          {
+            ...random<SQSRecord>(),
+            body: JSON.stringify({ ...mockProspectSet, version: 123 }),
+          },
+        ],
+      };
+
+      // Expect the processor to throw a TypeGuardError
+      await expect(
+        processor(invalidEvent, mockContext, mockCallback),
+      ).rejects.toThrow(TypeGuardError);
+    });
+
+    it('throws TypeGuardError for an invalid candidate set type', async () => {
+      // Generate an SQSEvent with an invalid body.
+      const invalidEvent: SQSEvent = {
+        Records: [
+          {
+            ...random<SQSRecord>(),
+            body: JSON.stringify({ ...mockProspectSet, type: 'recommendation' }),
+          },
+        ],
+      };
+
+      // Expect the processor to throw a TypeGuardError
+      await expect(
+        processor(invalidEvent, mockContext, mockCallback),
+      ).rejects.toThrow(TypeGuardError);
+    });
+  });
+
+  describe('EventBridge', () => {
+    it('sends a valid prospect set to EventBridge', async () => {
+      const sqsEvent: SQSEvent = {
+        Records: [
+          {
+            ...random<SQSRecord>(),
+            body: JSON.stringify(mockProspectSet),
+          },
+        ],
+      };
+
+      await processor(sqsEvent, mockContext, mockCallback);
+
+      expect(eventBridgeSendMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: {
+            Entries: [
+              {
+                EventBusName: 'PocketEventBridge-local-Shared-Event-Bus',
+                Source: 'prospect-events',
+                DetailType: 'prospect-generation',
+                Detail: sqsEvent.Records[0].body,
+              },
+            ],
+          },
+        }),
+      );
+    });
+  });
+
+  describe('Firehose', () => {
+    it('sends the body to Firehose with a newline', async () => {
+      const sqsEvent: SQSEvent = {
+        Records: [
+          {
+            ...random<SQSRecord>(),
+            body: JSON.stringify(mockProspectSet),
+          },
+        ],
+      };
+
+      await processor(sqsEvent, mockContext, mockCallback);
+
+      // Check if Firehose send was called correctly
+      expect(firehoseSendMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: {
+            DeliveryStreamName: 'MetaflowTools-Local-1-RecsAPICandidateSet',
+            Record: {
+              Data: expect.any(Uint8Array),
             },
-          ],
-        },
-      }),
-    );
-  });
+          },
+        }),
+      );
 
-  it('throws SyntaxError for invalid JSON', async () => {
-    const invalidEvent: SQSEvent = {
-      Records: [{ ...random<SQSRecord>(), body: 'definitely not json :)' }],
-    };
-
-    await expect(
-      processor(invalidEvent, mockContext, mockCallback),
-    ).rejects.toThrow(SyntaxError);
-  });
-
-  it('throws TypeGuardError for an invalid version', async () => {
-    // Generate an SQSEvent with an invalid body.
-    const invalidEvent: SQSEvent = {
-      Records: [
-        {
-          ...random<SQSRecord>(),
-          body: JSON.stringify({ ...mockProspectSet, version: 123 }),
-        },
-      ],
-    };
-
-    // Expect the processor to throw a TypeGuardError
-    await expect(
-      processor(invalidEvent, mockContext, mockCallback),
-    ).rejects.toThrow(TypeGuardError);
-  });
-
-  it('throws TypeGuardError for an invalid candidate set type', async () => {
-    // Generate an SQSEvent with an invalid body.
-    const invalidEvent: SQSEvent = {
-      Records: [
-        {
-          ...random<SQSRecord>(),
-          body: JSON.stringify({ ...mockProspectSet, type: 'recommendation' }),
-        },
-      ],
-    };
-
-    // Expect the processor to throw a TypeGuardError
-    await expect(
-      processor(invalidEvent, mockContext, mockCallback),
-    ).rejects.toThrow(TypeGuardError);
+      // Check that the decoded string matches the input body, with a newline added at the end.
+      const callArg = firehoseSendMock.mock.calls[0][0];
+      const sentData = callArg.input.Record.Data;
+      const decodedString = new TextDecoder().decode(sentData);
+      expect(decodedString).toEqual(sqsEvent.Records[0].body + '\n');
+    });
   });
 });

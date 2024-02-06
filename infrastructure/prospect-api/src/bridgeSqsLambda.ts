@@ -10,6 +10,7 @@ import { IamPolicy } from '@cdktf/provider-aws/lib/iam-policy';
 import { DataAwsIamPolicyDocument } from '@cdktf/provider-aws/lib/data-aws-iam-policy-document';
 import { IamUserPolicyAttachment } from '@cdktf/provider-aws/lib/iam-user-policy-attachment';
 import { IamUser } from '@cdktf/provider-aws/lib/iam-user';
+import { DataAwsKinesisFirehoseDeliveryStream } from '@cdktf/provider-aws/lib/data-aws-kinesis-firehose-delivery-stream';
 
 export class BridgeSqsLambda extends Construct {
   constructor(
@@ -25,6 +26,12 @@ export class BridgeSqsLambda extends Construct {
     const { region, caller } = dependencies;
     const vpc = new PocketVPC(this, 'pocket-shared-vpc');
 
+    const metaflowFirehose = new DataAwsKinesisFirehoseDeliveryStream(
+      this,
+      'metaflow-firehose',
+      { name: config.envVars.metaflowFirehoseName },
+    );
+
     const sqsLambda = new PocketSQSWithLambdaTarget(this, 'bridge-sqs-lambda', {
       name: `${config.prefix}-Sqs-Bridge`,
       // batch size is 1 so SQS doesn't get smart and try to combine them
@@ -36,7 +43,7 @@ export class BridgeSqsLambda extends Construct {
         visibilityTimeoutSeconds: 300,
       },
       lambda: {
-        runtime: LAMBDA_RUNTIMES.NODEJS18,
+        runtime: LAMBDA_RUNTIMES.NODEJS20,
         handler: 'index.handler',
         timeout: 120,
         memorySizeInMb: 512,
@@ -49,9 +56,15 @@ export class BridgeSqsLambda extends Construct {
             ],
             effect: 'Allow',
           },
+          {
+            actions: ['firehose:PutRecord'],
+            resources: [metaflowFirehose.arn],
+            effect: 'Allow',
+          },
         ],
         environment: {
           EVENT_BRIDGE_BUS_NAME: config.envVars.eventBusName,
+          METAFLOW_FIREHOSE_NAME: config.envVars.metaflowFirehoseName,
           SENTRY_DSN: this.getSentryDsn(),
           GIT_SHA: this.getGitSha(),
           ENVIRONMENT:
