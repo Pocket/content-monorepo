@@ -58,7 +58,7 @@ const rejectedItem: RejectedCuratedCorpusItem = {
   publisher: 'Octopus Publishing House',
   language: 'EN',
   topic: Topics.EDUCATION,
-  reason: 'PAYWALL,OTHER',
+  reason: 'COMMERCIAL,PAYWALL,OTHER',
   createdAt: new Date(),
   createdBy: 'Amy',
 };
@@ -96,7 +96,7 @@ function assertValidSnowplowApprovedItemEvents(eventContext) {
         publisher: approvedItem.publisher,
         authors:
           approvedItem.authors?.map(
-            (author: ApprovedItemAuthor) => author.name
+            (author: ApprovedItemAuthor) => author.name,
           ) ?? [],
         image_url: approvedItem.imageUrl,
         language: approvedItem.language,
@@ -127,7 +127,7 @@ function assertValidSnowplowRejectedItemEvents(eventContext) {
         title: rejectedItem.title,
         language: rejectedItem.language,
         topic: rejectedItem.topic,
-        rejection_reasons: ['PAYWALL', 'OTHER'],
+        rejection_reasons: ['COMMERCIAL', 'PAYWALL', 'OTHER'],
         created_at: getUnixTimestamp(rejectedItem.createdAt),
         created_by: rejectedItem.createdBy,
       },
@@ -190,7 +190,7 @@ describe('ReviewedItemSnowplowHandler', () => {
         'reviewed_corpus_item_removed',
         'reviewed_corpus_item_rejected',
       ],
-      'reviewed_corpus_item'
+      'reviewed_corpus_item',
     );
   });
 });
