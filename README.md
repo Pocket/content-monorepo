@@ -30,7 +30,7 @@ monorepo /
 		back-end services go here
 	packages
 		internal packages shared between services
-	lambas
+	lambdas
 		service AWS lambdas go here
 ```
 Purpose of some important files in the root of the monorepo:
@@ -41,7 +41,7 @@ Purpose of some important files in the root of the monorepo:
 
 ## Build
 First, create a local `.env` file and copy the contents of `example.env`.
-Don't forget to use the `node` version configured for this monorepo (`v18`).
+Don't forget to use the `node` version configured for this monorepo (`v20`).
 
 To build all services:
 ```
@@ -151,7 +151,7 @@ pnpm prisma db seed
 Please refer to the specific README of the service for applying a prisma migration.
 
 
-### Adding a new depenency via pnpm
+### Adding a new dependency via pnpm
 Navigate to the individual project and use `npm install` to update the item
 Then rebuild from the root of the monorepo with `pnpm`
 ```
