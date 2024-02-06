@@ -4,28 +4,28 @@ scalar Upload
 The outcome of the curators reviewing a prospective story.
 """
 enum CuratedStatus {
-    """
-    Recommend this story for Pocket users. This is first-tier content.
-    """
-    RECOMMENDATION
-    """
-    This story is suitable for our curated corpus. It's a second-tier recommendation.
-    """
-    CORPUS
+  """
+  Recommend this story for Pocket users. This is first-tier content.
+  """
+  RECOMMENDATION
+  """
+  This story is suitable for our curated corpus. It's a second-tier recommendation.
+  """
+  CORPUS
 }
 
 """
 Options for returning items sorted by the supplied field.
 """
 enum OrderBy {
-    """
-    Return items in ascending order.
-    """
-    ASC
-    """
-    Return items in descending order.
-    """
-    DESC
+  """
+  Return items in ascending order.
+  """
+  ASC
+  """
+  Return items in descending order.
+  """
+  DESC
 }
 
 """
@@ -33,22 +33,22 @@ The list of Pocket topics. This enum is not used anywhere in this schema, howeve
 by the Curation Admin Tools frontend to edit curated items.
 """
 enum Topics {
-    BUSINESS
-    CAREER
-    CORONAVIRUS
-    EDUCATION
-    ENTERTAINMENT
-    FOOD
-    GAMING
-    HEALTH_FITNESS
-    PARENTING
-    PERSONAL_FINANCE
-    POLITICS
-    SCIENCE
-    SELF_IMPROVEMENT
-    SPORTS
-    TECHNOLOGY
-    TRAVEL
+  BUSINESS
+  CAREER
+  CORONAVIRUS
+  EDUCATION
+  ENTERTAINMENT
+  FOOD
+  GAMING
+  HEALTH_FITNESS
+  PARENTING
+  PERSONAL_FINANCE
+  POLITICS
+  SCIENCE
+  SELF_IMPROVEMENT
+  SPORTS
+  TECHNOLOGY
+  TRAVEL
 }
 
 """
@@ -56,14 +56,14 @@ Possible reasons for rejecting a prospect. This enum is not used anywhere in thi
 however it is used by the Curation Admin Tools frontend to specify rejection reasons.
 """
 enum RejectionReason {
-    PAYWALL
-    POLITICAL_OPINION
-    OFFENSIVE_MATERIAL
-    TIME_SENSITIVE
-    MISINFORMATION
-    PUBLISHER_QUALITY
-    COMMERCIAL
-    OTHER
+  PAYWALL
+  POLITICAL_OPINION
+  OFFENSIVE_MATERIAL
+  TIME_SENSITIVE
+  MISINFORMATION
+  PUBLISHER_QUALITY
+  COMMERCIAL
+  OTHER
 }
 
 """
@@ -81,22 +81,22 @@ As of today, 2024-01-29, these reasons have been finalized.
 1.31.2024 - Reasons have been modified (https://docs.google.com/spreadsheets/d/1HWLpoiKh-CPXkMKrfHKBSohrR8C8o0StcMucF0C0vEk)
 """
 enum RemovalReason {
-    ARTICLE_QUALITY
-    COMMERCIAL
-    CONTROVERSIAL
-    HED_DEK_QUALITY
-    IMAGE_QUALITY
-    NICHE
-    NO_IMAGE
-    ONE_SIDED
-    PARTISAN
-    PAYWALL
-    PUBLISH_DATE
-    PUBLISHER_DIVERSITY
-    PUBLISHER_QUALITY
-    SET_DIVERSITY
-    TIME_SENSITIVE
-    TOPIC_DIVERSITY
+  ARTICLE_QUALITY
+  COMMERCIAL
+  CONTROVERSIAL
+  HED_DEK_QUALITY
+  IMAGE_QUALITY
+  NICHE
+  NO_IMAGE
+  ONE_SIDED
+  PARTISAN
+  PAYWALL
+  PUBLISH_DATE
+  PUBLISHER_DIVERSITY
+  PUBLISHER_QUALITY
+  SET_DIVERSITY
+  TIME_SENSITIVE
+  TOPIC_DIVERSITY
 }
 
 """
@@ -104,271 +104,271 @@ Prospect types. This enum is not used anywhere in this schema, however it is use
 by the Curation Admin Tools frontend to filter prospects.
 """
 enum ProspectType {
-    TIMESPENT
-    COUNTS
-    SYNDICATED_NEW
-    SYNDICATED_RERUN
-    DOMAIN_ALLOWLIST
-    TOP_SAVED
-    RECOMMENDED
-    COUNTS_MODELED
-    TIMESPENT_MODELED
-    TITLE_URL_MODELED
-    DISMISSED
-    RSS_LOGISTIC
-    RSS_LOGISTIC_RECENT
-    CONSTRAINT_SCHEDULE
-    SLATE_SCHEDULER
-    SLATE_SCHEDULER_V2
+  TIMESPENT
+  COUNTS
+  SYNDICATED_NEW
+  SYNDICATED_RERUN
+  DOMAIN_ALLOWLIST
+  TOP_SAVED
+  RECOMMENDED
+  COUNTS_MODELED
+  TIMESPENT_MODELED
+  TITLE_URL_MODELED
+  DISMISSED
+  RSS_LOGISTIC
+  RSS_LOGISTIC_RECENT
+  CONSTRAINT_SCHEDULE
+  SLATE_SCHEDULER
+  SLATE_SCHEDULER_V2
 }
 
 """
 The source of the corpus item
 """
 enum CorpusItemSource {
-    """
-    Originated as a prospect in the curation admin tool
-    """
-    PROSPECT
-    """
-    Manually entered through the curation admin tool
-    """
-    MANUAL
-    """
-    Imported from the legacy database
-    """
-    BACKFILL
+  """
+  Originated as a prospect in the curation admin tool
+  """
+  PROSPECT
+  """
+  Manually entered through the curation admin tool
+  """
+  MANUAL
+  """
+  Imported from the legacy database
+  """
+  BACKFILL
 }
 
 """
 A Scheduled Surface, including its associated Prospect Types.
 """
 type ScheduledSurface {
-    """
-    The GUID of the Scheduled Surface. Example: 'NEW_TAB_EN_US'.
-    """
-    guid: String!
-    """
-    The display name of the Scheduled Surface. Example 'New Tab (en-US)'.
-    """
-    name: String!
-    """
-    The IANA timezone of the Scheduled Surface, used to determine the start of a day.
-    """
-    ianaTimezone: String!
-    """
-    An array of associated ProspectTypes.
-    """
-    prospectTypes: [ProspectType!]!
+  """
+  The GUID of the Scheduled Surface. Example: 'NEW_TAB_EN_US'.
+  """
+  guid: String!
+  """
+  The display name of the Scheduled Surface. Example 'New Tab (en-US)'.
+  """
+  name: String!
+  """
+  The IANA timezone of the Scheduled Surface, used to determine the start of a day.
+  """
+  ianaTimezone: String!
+  """
+  An array of associated ProspectTypes.
+  """
+  prospectTypes: [ProspectType!]!
 }
 
 """
 A prospective story that has been reviewed by the curators and saved to the corpus.
 """
 type ApprovedCorpusItem @key(fields: "url") {
-    """
-    An alternative primary key in UUID format that is generated on creation.
-    """
-    externalId: ID!
-    """
-    The GUID of the corresponding Prospect ID. Will be empty if the item was manually added.
-    """
-    prospectId: ID
-    """
-    The URL of the story.
-    """
-    url: Url!
-    """
-    The title of the story.
-    """
-    title: String!
-    """
-    The excerpt of the story.
-    """
-    excerpt: String!
-    """
-    The authors associated with this ApprovedCorpusItem.
-    """
-    authors: [CorpusItemAuthor!]!
-    """
-    The outcome of the curators' review.
-    """
-    status: CuratedStatus!
-    """
-    What language this story is in. This is a two-letter code, for example, 'EN' for English.
-    """
-    language: CorpusLanguage!
-    """
-    The name of the online publication that published this story.
-    """
-    publisher: String!
-    """
-    The image URL associated with the story.
-    This is a link to an S3 bucket - the image will have been pre-uploaded to S3 before saving a curated item.
-    """
-    imageUrl: Url!
-    """
-    A topic this story best fits in.
-    Temporarily a string value that will be provided by Prospect API, possibly an enum in the future.
-    """
-    topic: String!
-    """
-    The source of the corpus item.
-    """
-    source: CorpusItemSource!
-    """
-    Whether this story is a Pocket Collection.
-    """
-    isCollection: Boolean!
-    """
-    A flag to ML to not recommend this item long term after it is added to the corpus.
-    Example: a story covering an election, or "The best of 202x" collection.
-    """
-    isTimeSensitive: Boolean!
-    """
-    Whether this item is a syndicated article.
-    """
-    isSyndicated: Boolean!
-    """
-    A Unix timestamp of when the entity was created.
-    """
-    createdAt: Int!
-    """
-    A single sign-on user identifier of the user who created this entity.
-    """
-    createdBy: String!
-    """
-    A Unix timestamp of when the entity was last updated.
-    """
-    updatedAt: Int!
-    """
-    A single sign-on user identifier of the user who last updated this entity. Null on creation.
-    """
-    updatedBy: String
-    """
-    Subquery to get the log of scheduled entries to display for a given Approved Item, most recent first.
-    """
-    scheduledSurfaceHistory(
-        filters: ApprovedCorpusItemScheduledSurfaceHistoryFilters
-    ): [ApprovedCorpusItemScheduledSurfaceHistory!]!
+  """
+  An alternative primary key in UUID format that is generated on creation.
+  """
+  externalId: ID!
+  """
+  The GUID of the corresponding Prospect ID. Will be empty if the item was manually added.
+  """
+  prospectId: ID
+  """
+  The URL of the story.
+  """
+  url: Url!
+  """
+  The title of the story.
+  """
+  title: String!
+  """
+  The excerpt of the story.
+  """
+  excerpt: String!
+  """
+  The authors associated with this ApprovedCorpusItem.
+  """
+  authors: [CorpusItemAuthor!]!
+  """
+  The outcome of the curators' review.
+  """
+  status: CuratedStatus!
+  """
+  What language this story is in. This is a two-letter code, for example, 'EN' for English.
+  """
+  language: CorpusLanguage!
+  """
+  The name of the online publication that published this story.
+  """
+  publisher: String!
+  """
+  The image URL associated with the story.
+  This is a link to an S3 bucket - the image will have been pre-uploaded to S3 before saving a curated item.
+  """
+  imageUrl: Url!
+  """
+  A topic this story best fits in.
+  Temporarily a string value that will be provided by Prospect API, possibly an enum in the future.
+  """
+  topic: String!
+  """
+  The source of the corpus item.
+  """
+  source: CorpusItemSource!
+  """
+  Whether this story is a Pocket Collection.
+  """
+  isCollection: Boolean!
+  """
+  A flag to ML to not recommend this item long term after it is added to the corpus.
+  Example: a story covering an election, or "The best of 202x" collection.
+  """
+  isTimeSensitive: Boolean!
+  """
+  Whether this item is a syndicated article.
+  """
+  isSyndicated: Boolean!
+  """
+  A Unix timestamp of when the entity was created.
+  """
+  createdAt: Int!
+  """
+  A single sign-on user identifier of the user who created this entity.
+  """
+  createdBy: String!
+  """
+  A Unix timestamp of when the entity was last updated.
+  """
+  updatedAt: Int!
+  """
+  A single sign-on user identifier of the user who last updated this entity. Null on creation.
+  """
+  updatedBy: String
+  """
+  Subquery to get the log of scheduled entries to display for a given Approved Item, most recent first.
+  """
+  scheduledSurfaceHistory(
+    filters: ApprovedCorpusItemScheduledSurfaceHistoryFilters
+  ): [ApprovedCorpusItemScheduledSurfaceHistory!]!
 }
 
 """
 A prospective story that has been rejected by the curators.
 """
 type RejectedCorpusItem @key(fields: "url") {
-    """
-    An alternative primary key in UUID format that is generated on creation.
-    """
-    externalId: ID!
-    """
-    The GUID of the corresponding Prospect ID. Will be empty if the item was manually added.
-    """
-    prospectId: ID
-    """
-    The URL of the story.
-    """
-    url: Url!
-    """
-    The title of the story.
-    """
-    title: String
-    """
-    A topic this story best fits in.
-    Temporarily a string value that will be provided by Prospect API, possibly an enum in the future.
-    """
-    topic: String
-    """
-    What language this story is in. This is a two-letter code, for example, 'EN' for English.
-    """
-    language: CorpusLanguage
-    """
-    The name of the online publication that published this story.
-    """
-    publisher: String
-    """
-    Reason why it was rejected. Can be multiple reasons. Will likely be stored either as comma-separated values or JSON.
-    """
-    reason: String!
-    """
-    A Unix timestamp of when the entity was created.
-    """
-    createdAt: Int!
-    """
-    A single sign-on user identifier of the user who created this entity.
-    """
-    createdBy: String!
+  """
+  An alternative primary key in UUID format that is generated on creation.
+  """
+  externalId: ID!
+  """
+  The GUID of the corresponding Prospect ID. Will be empty if the item was manually added.
+  """
+  prospectId: ID
+  """
+  The URL of the story.
+  """
+  url: Url!
+  """
+  The title of the story.
+  """
+  title: String
+  """
+  A topic this story best fits in.
+  Temporarily a string value that will be provided by Prospect API, possibly an enum in the future.
+  """
+  topic: String
+  """
+  What language this story is in. This is a two-letter code, for example, 'EN' for English.
+  """
+  language: CorpusLanguage
+  """
+  The name of the online publication that published this story.
+  """
+  publisher: String
+  """
+  Reason why it was rejected. Can be multiple reasons. Will likely be stored either as comma-separated values or JSON.
+  """
+  reason: String!
+  """
+  A Unix timestamp of when the entity was created.
+  """
+  createdAt: Int!
+  """
+  A single sign-on user identifier of the user who created this entity.
+  """
+  createdBy: String!
 }
 
 """
 An edge in a connection.
 """
 type ApprovedCorpusItemEdge {
-    """
-    A cursor for use in pagination.
-    """
-    cursor: String!
-    """
-    The Approved Item at the end of the edge.
-    """
-    node: ApprovedCorpusItem!
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+  """
+  The Approved Item at the end of the edge.
+  """
+  node: ApprovedCorpusItem!
 }
 
 type ApprovedCorpusImageUrl {
-    """
-    The url of the image stored in the s3 bucket
-    """
-    url: String!
+  """
+  The url of the image stored in the s3 bucket
+  """
+  url: String!
 }
 
 """
 An edge in a connection for RejectedCorpusItem type.
 """
 type RejectedCorpusItemEdge {
-    """
-    A cursor for use in pagination.
-    """
-    cursor: String!
-    """
-    The Rejected Item at the end of the edge.
-    """
-    node: RejectedCorpusItem!
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+  """
+  The Rejected Item at the end of the edge.
+  """
+  node: RejectedCorpusItem!
 }
 
 """
 The connection type for Approved Item.
 """
 type ApprovedCorpusItemConnection {
-    """
-    A list of edges.
-    """
-    edges: [ApprovedCorpusItemEdge!]!
-    """
-    Information to aid in pagination.
-    """
-    pageInfo: PageInfo!
-    """
-    Identifies the total count of Approved Items in the connection.
-    """
-    totalCount: Int!
+  """
+  A list of edges.
+  """
+  edges: [ApprovedCorpusItemEdge!]!
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+  """
+  Identifies the total count of Approved Items in the connection.
+  """
+  totalCount: Int!
 }
 
 """
 The connection type for Rejected Item.
 """
 type RejectedCorpusItemConnection {
-    """
-    A list of edges.
-    """
-    edges: [RejectedCorpusItemEdge!]!
-    """
-    Information to aid in pagination.
-    """
-    pageInfo: PageInfo!
-    """
-    Identifies the total count of Rejected Curated Items in the connection.
-    """
-    totalCount: Int!
+  """
+  A list of edges.
+  """
+  edges: [RejectedCorpusItemEdge!]!
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+  """
+  Identifies the total count of Rejected Curated Items in the connection.
+  """
+  totalCount: Int!
 }
 
 """
@@ -376,114 +376,114 @@ A scheduled entry for an Approved Item to appear on a Scheduled Surface.
 For example, a story that is scheduled to appear on December 31st, 2021 on the New Tab in Firefox for the US audience.
 """
 type ScheduledCorpusItem {
-    """
-    An alternative primary key in UUID format that is generated on creation.
-    """
-    externalId: ID!
-    """
-    A Unix timestamp of when the entity was created.
-    """
-    createdAt: Int!
-    """
-    A single sign-on user identifier of the user who created this entity.
-    """
-    createdBy: String!
-    """
-    A Unix timestamp of when the entity was last updated.
-    """
-    updatedAt: Int!
-    """
-    A single sign-on user identifier of the user who last updated this entity. Null on creation.
-    """
-    updatedBy: String
-    """
-    The date the associated Approved Item is scheduled to appear on a Scheduled Surface.
-    This date is relative to the time zone of the Scheduled Surface. Format: YYYY-MM-DD.
-    """
-    scheduledDate: Date!
-    """
-    The associated Approved Item.
-    """
-    approvedItem: ApprovedCorpusItem!
-    """
-    The GUID of this scheduledSurface to which this item is scheduled. Example: 'NEW_TAB_EN_US'.
-    """
-    scheduledSurfaceGuid: ID!
+  """
+  An alternative primary key in UUID format that is generated on creation.
+  """
+  externalId: ID!
+  """
+  A Unix timestamp of when the entity was created.
+  """
+  createdAt: Int!
+  """
+  A single sign-on user identifier of the user who created this entity.
+  """
+  createdBy: String!
+  """
+  A Unix timestamp of when the entity was last updated.
+  """
+  updatedAt: Int!
+  """
+  A single sign-on user identifier of the user who last updated this entity. Null on creation.
+  """
+  updatedBy: String
+  """
+  The date the associated Approved Item is scheduled to appear on a Scheduled Surface.
+  This date is relative to the time zone of the Scheduled Surface. Format: YYYY-MM-DD.
+  """
+  scheduledDate: Date!
+  """
+  The associated Approved Item.
+  """
+  approvedItem: ApprovedCorpusItem!
+  """
+  The GUID of this scheduledSurface to which this item is scheduled. Example: 'NEW_TAB_EN_US'.
+  """
+  scheduledSurfaceGuid: ID!
 }
 
 """
 The shape of the result returned by the getScheduledCorpusItems query.
 """
 type ScheduledCorpusItemsResult {
-    """
-    The date items are scheduled for, in YYYY-MM-DD format.
-    """
-    scheduledDate: Date!
-    """
-    The number of curated items that are collections for the scheduled date.
-    """
-    collectionCount: Int!
-    """
-    The number of syndicated articles for the scheduled date.
-    """
-    syndicatedCount: Int!
-    """
-    The total number of items for the scheduled date.
-    """
-    totalCount: Int!
-    """
-    An array of items for a given Scheduled Surface
-    """
-    items: [ScheduledCorpusItem!]!
+  """
+  The date items are scheduled for, in YYYY-MM-DD format.
+  """
+  scheduledDate: Date!
+  """
+  The number of curated items that are collections for the scheduled date.
+  """
+  collectionCount: Int!
+  """
+  The number of syndicated articles for the scheduled date.
+  """
+  syndicatedCount: Int!
+  """
+  The total number of items for the scheduled date.
+  """
+  totalCount: Int!
+  """
+  An array of items for a given Scheduled Surface
+  """
+  items: [ScheduledCorpusItem!]!
 }
 
 """
 Available fields for filtering Approved Items.
 """
 input ApprovedCorpusItemFilter {
-    """
-    Optional filter on the URL field. Returns partial matches.
-    """
-    url: Url
-    """
-    Optional filter on the title field. Returns partial matches.
-    """
-    title: String
-    """
-    Optional filter on the topic field.
-    """
-    topic: String
-    """
-    Optional filter on the status of Approved Items.
-    """
-    status: CuratedStatus
-    """
-    Optional filter on the language Approved Items have been classified as.
-    This is a two-letter string, e.g. 'EN' for English or 'DE' for 'German'.
-    """
-    language: CorpusLanguage
+  """
+  Optional filter on the URL field. Returns partial matches.
+  """
+  url: Url
+  """
+  Optional filter on the title field. Returns partial matches.
+  """
+  title: String
+  """
+  Optional filter on the topic field.
+  """
+  topic: String
+  """
+  Optional filter on the status of Approved Items.
+  """
+  status: CuratedStatus
+  """
+  Optional filter on the language Approved Items have been classified as.
+  This is a two-letter string, e.g. 'EN' for English or 'DE' for 'German'.
+  """
+  language: CorpusLanguage
 }
 
 type ApprovedCorpusItemScheduledSurfaceHistory {
-    """
-    An alternative primary key in UUID format that is generated on creation.
-    Note: this is the external ID of the scheduled entry, not the approved item.
-    """
-    externalId: ID!
-    """
-    A single sign-on user identifier of the user who created this entry.
-    """
-    createdBy: String!
-    """
-    The date the associated Approved Item is scheduled to appear on a Scheduled Surface.
-    This date is relative to the time zone of the Scheduled Surface. Format: YYYY-MM-DD.
-    """
-    scheduledDate: Date!
-    """
-    The GUID of the scheduledSurface to which the associated Approved Item is scheduled.
-    Example: 'NEW_TAB_EN_US'.
-    """
-    scheduledSurfaceGuid: ID!
+  """
+  An alternative primary key in UUID format that is generated on creation.
+  Note: this is the external ID of the scheduled entry, not the approved item.
+  """
+  externalId: ID!
+  """
+  A single sign-on user identifier of the user who created this entry.
+  """
+  createdBy: String!
+  """
+  The date the associated Approved Item is scheduled to appear on a Scheduled Surface.
+  This date is relative to the time zone of the Scheduled Surface. Format: YYYY-MM-DD.
+  """
+  scheduledDate: Date!
+  """
+  The GUID of the scheduledSurface to which the associated Approved Item is scheduled.
+  Example: 'NEW_TAB_EN_US'.
+  """
+  scheduledSurfaceGuid: ID!
 }
 
 """
@@ -491,136 +491,136 @@ Available fields for filtering an Approved Item's history of being scheduled ont
 scheduled surfaces.
 """
 input ApprovedCorpusItemScheduledSurfaceHistoryFilters {
-    """
-    The maximum number of results to be returned. Default: 10.
-    """
-    limit: NonNegativeInt
-    """
-    The scheduled surface the results should be filtered to. Omitting this filter will
-    fetch results from all scheduled surfaces.
-    """
-    scheduledSurfaceGuid: ID
+  """
+  The maximum number of results to be returned. Default: 10.
+  """
+  limit: NonNegativeInt
+  """
+  The scheduled surface the results should be filtered to. Omitting this filter will
+  fetch results from all scheduled surfaces.
+  """
+  scheduledSurfaceGuid: ID
 }
 
 """
 Available fields for filtering Rejected Items.
 """
 input RejectedCorpusItemFilter {
-    """
-    Optional filter on the URL field. Returns partial matches.
-    """
-    url: Url
-    """
-    Optional filter on the title field. Returns partial matches.
-    """
-    title: String
-    """
-    Optional filter on the topic field.
-    """
-    topic: String
-    """
-    Optional filter on the language Rejected Curated Items have been classified as.
-    This is a two-letter string, e.g. 'EN' for English or 'DE' for 'German'.
-    """
-    language: CorpusLanguage
+  """
+  Optional filter on the URL field. Returns partial matches.
+  """
+  url: Url
+  """
+  Optional filter on the title field. Returns partial matches.
+  """
+  title: String
+  """
+  Optional filter on the topic field.
+  """
+  topic: String
+  """
+  Optional filter on the language Rejected Curated Items have been classified as.
+  This is a two-letter string, e.g. 'EN' for English or 'DE' for 'German'.
+  """
+  language: CorpusLanguage
 }
 
 """
 Available fields for filtering scheduled items for a given Scheduled Surface.
 """
 input ScheduledCorpusItemsFilterInput {
-    """
-    The GUID of the Scheduled Surface. Example: 'NEW_TAB_EN_US'.
-    """
-    scheduledSurfaceGuid: ID!
-    """
-    Which day to show scheduled items from. Expects a date in YYYY-MM-DD format.
-    """
-    startDate: Date!
-    """
-    To what day to show scheduled items to, inclusive. Expects a date in YYYY-MM-DD format.
-    """
-    endDate: Date!
+  """
+  The GUID of the Scheduled Surface. Example: 'NEW_TAB_EN_US'.
+  """
+  scheduledSurfaceGuid: ID!
+  """
+  Which day to show scheduled items from. Expects a date in YYYY-MM-DD format.
+  """
+  startDate: Date!
+  """
+  To what day to show scheduled items to, inclusive. Expects a date in YYYY-MM-DD format.
+  """
+  endDate: Date!
 }
 
 """
 An author associated with a CorpusItem.
 """
 input CorpusItemAuthorInput {
-    name: String!
-    sortOrder: Int!
+  name: String!
+  sortOrder: Int!
 }
 
 """
 Input data for creating an Approved Item and optionally scheduling this item to appear on a Scheduled Surface.
 """
 input CreateApprovedCorpusItemInput {
-    """
-    The GUID of the corresponding Prospect ID. Will be empty for manually added items.
-    """
-    prospectId: ID
-    """
-    The URL of the Approved Item.
-    """
-    url: Url!
-    """
-    The title of the Approved Item.
-    """
-    title: String!
-    """
-    The excerpt of the Approved Item.
-    """
-    excerpt: String!
-    """
-    A name and sort order for each author.
-    """
-    authors: [CorpusItemAuthorInput!]!
-    """
-    The outcome of the curators' review of the Approved Item.
-    """
-    status: CuratedStatus!
-    """
-    What language this item is in. This is a two-letter code, for example, 'EN' for English.
-    """
-    language: CorpusLanguage!
-    """
-    The name of the online publication that published this story.
-    """
-    publisher: String!
-    """
-    The image URL for this item's accompanying picture.
-    """
-    imageUrl: Url!
-    """
-    A topic this story best fits in.
-    Temporarily a string value that will be provided by Prospect API, possibly an enum in the future.
-    """
-    topic: String!
-    """
-    The source of the corpus item.
-    """
-    source: CorpusItemSource!
-    """
-    Whether this story is a Pocket Collection.
-    """
-    isCollection: Boolean!
-    """
-    A flag to ML to not recommend this item long term after it is added to the corpus.
-    Example: a story covering an election, or "The best of 202x" collection.
-    """
-    isTimeSensitive: Boolean!
-    """
-    Whether this item is a syndicated article.
-    """
-    isSyndicated: Boolean!
-    """
-    Optionally, specify the date this item should be appearing on a Scheduled Surface. Format: YYYY-MM-DD
-    """
-    scheduledDate: Date
-    """
-    Optionally, specify the GUID of the Scheduled Surface this item should be scheduled for.
-    """
-    scheduledSurfaceGuid: ID
+  """
+  The GUID of the corresponding Prospect ID. Will be empty for manually added items.
+  """
+  prospectId: ID
+  """
+  The URL of the Approved Item.
+  """
+  url: Url!
+  """
+  The title of the Approved Item.
+  """
+  title: String!
+  """
+  The excerpt of the Approved Item.
+  """
+  excerpt: String!
+  """
+  A name and sort order for each author.
+  """
+  authors: [CorpusItemAuthorInput!]!
+  """
+  The outcome of the curators' review of the Approved Item.
+  """
+  status: CuratedStatus!
+  """
+  What language this item is in. This is a two-letter code, for example, 'EN' for English.
+  """
+  language: CorpusLanguage!
+  """
+  The name of the online publication that published this story.
+  """
+  publisher: String!
+  """
+  The image URL for this item's accompanying picture.
+  """
+  imageUrl: Url!
+  """
+  A topic this story best fits in.
+  Temporarily a string value that will be provided by Prospect API, possibly an enum in the future.
+  """
+  topic: String!
+  """
+  The source of the corpus item.
+  """
+  source: CorpusItemSource!
+  """
+  Whether this story is a Pocket Collection.
+  """
+  isCollection: Boolean!
+  """
+  A flag to ML to not recommend this item long term after it is added to the corpus.
+  Example: a story covering an election, or "The best of 202x" collection.
+  """
+  isTimeSensitive: Boolean!
+  """
+  Whether this item is a syndicated article.
+  """
+  isSyndicated: Boolean!
+  """
+  Optionally, specify the date this item should be appearing on a Scheduled Surface. Format: YYYY-MM-DD
+  """
+  scheduledDate: Date
+  """
+  Optionally, specify the GUID of the Scheduled Surface this item should be scheduled for.
+  """
+  scheduledSurfaceGuid: ID
 }
 
 """
@@ -628,371 +628,379 @@ Input data for loading an Approved Item via an automated process and optionally 
 this item to appear on a Scheduled Surface.
 """
 input ImportApprovedCorpusItemInput {
-    """
-    The URL of the Approved Item.
-    """
-    url: Url!
-    """
-    The title of the Approved Item.
-    """
-    title: String!
-    """
-    The excerpt of the Approved Item.
-    """
-    excerpt: String!
-    """
-    The outcome of the curators' review of the Approved Item.
-    """
-    status: CuratedStatus!
-    """
-    What language this item is in. This is a two-letter capitalized code, for example, 'EN' for English.
-    """
-    language: CorpusLanguage!
-    """
-    The name of the online publication that published this story.
-    """
-    publisher: String!
-    """
-    The image URL for this item's accompanying picture.
-    """
-    imageUrl: Url!
-    """
-    A topic this story best fits in. The value will be `null` for migrated items that don't have a topic set.
-    """
-    topic: String
-    """
-    The source of the corpus item.
-    """
-    source: CorpusItemSource!
-    """
-    Whether this story is a Pocket Collection.
-    """
-    isCollection: Boolean
-    """
-    Whether this item is a syndicated article.
-    """
-    isSyndicated: Boolean
-    """
-    A Unix timestamp of when the entity was created.
-    """
-    createdAt: Int!
-    """
-    A single sign-on user identifier of the user who created this entity.
-    """
-    createdBy: String!
-    """
-    A Unix timestamp of when the entity was last updated.
-    """
-    updatedAt: Int!
-    """
-    A single sign-on user identifier of the user who last updated this entity.
-    """
-    updatedBy: String!
-    """
-    The date this item should be appearing on a Scheduled Surface. Format: YYYY-MM-DD
-    """
-    scheduledDate: Date!
-    """
-    The GUID of the Scheduled Surface this item should be scheduled for.
-    """
-    scheduledSurfaceGuid: ID!
+  """
+  The URL of the Approved Item.
+  """
+  url: Url!
+  """
+  The title of the Approved Item.
+  """
+  title: String!
+  """
+  The excerpt of the Approved Item.
+  """
+  excerpt: String!
+  """
+  The outcome of the curators' review of the Approved Item.
+  """
+  status: CuratedStatus!
+  """
+  What language this item is in. This is a two-letter capitalized code, for example, 'EN' for English.
+  """
+  language: CorpusLanguage!
+  """
+  The name of the online publication that published this story.
+  """
+  publisher: String!
+  """
+  The image URL for this item's accompanying picture.
+  """
+  imageUrl: Url!
+  """
+  A topic this story best fits in. The value will be `null` for migrated items that don't have a topic set.
+  """
+  topic: String
+  """
+  The source of the corpus item.
+  """
+  source: CorpusItemSource!
+  """
+  Whether this story is a Pocket Collection.
+  """
+  isCollection: Boolean
+  """
+  Whether this item is a syndicated article.
+  """
+  isSyndicated: Boolean
+  """
+  A Unix timestamp of when the entity was created.
+  """
+  createdAt: Int!
+  """
+  A single sign-on user identifier of the user who created this entity.
+  """
+  createdBy: String!
+  """
+  A Unix timestamp of when the entity was last updated.
+  """
+  updatedAt: Int!
+  """
+  A single sign-on user identifier of the user who last updated this entity.
+  """
+  updatedBy: String!
+  """
+  The date this item should be appearing on a Scheduled Surface. Format: YYYY-MM-DD
+  """
+  scheduledDate: Date!
+  """
+  The GUID of the Scheduled Surface this item should be scheduled for.
+  """
+  scheduledSurfaceGuid: ID!
 }
 
 """
 The data that the loadApprovedCuratedCorpusItem mutation returns on success.
 """
 type ImportApprovedCorpusItemPayload {
-    """
-    The approved item, as created by an automated process.
-    """
-    approvedItem: ApprovedCorpusItem!
-    """
-    The scheduled entry that is created by an automated process at the same time.
-    """
-    scheduledItem: ScheduledCorpusItem!
+  """
+  The approved item, as created by an automated process.
+  """
+  approvedItem: ApprovedCorpusItem!
+  """
+  The scheduled entry that is created by an automated process at the same time.
+  """
+  scheduledItem: ScheduledCorpusItem!
 }
 
 """
 Input data for updating an Approved Item.
 """
 input UpdateApprovedCorpusItemInput {
-    """
-    Approved Item ID.
-    """
-    externalId: ID!
-    """
-    The title of the Approved Item.
-    """
-    title: String!
-    """
-    The excerpt of the Approved Item.
-    """
-    excerpt: String!
-    """
-    A name and sort order for each author.
-    """
-    authors: [CorpusItemAuthorInput!]!
-    """
-    The outcome of the curators' review of the Approved Item.
-    """
-    status: CuratedStatus!
-    """
-    What language this item is in. This is a two-letter code, for example, 'EN' for English.
-    """
-    language: CorpusLanguage!
-    """
-    The name of the online publication that published this story.
-    """
-    publisher: String!
-    """
-    The image URL for this item's accompanying picture.
-    """
-    imageUrl: Url!
-    """
-    A topic this story best fits in.
-    Temporarily a string value that will be provided by Prospect API, possibly an enum in the future.
-    """
-    topic: String!
-    """
-    A flag to ML to not recommend this item long term after it is added to the corpus.
-    Example: a story covering an election, or "The best of 202x" collection.
-    """
-    isTimeSensitive: Boolean!
+  """
+  Approved Item ID.
+  """
+  externalId: ID!
+  """
+  The title of the Approved Item.
+  """
+  title: String!
+  """
+  The excerpt of the Approved Item.
+  """
+  excerpt: String!
+  """
+  A name and sort order for each author.
+  """
+  authors: [CorpusItemAuthorInput!]!
+  """
+  The outcome of the curators' review of the Approved Item.
+  """
+  status: CuratedStatus!
+  """
+  What language this item is in. This is a two-letter code, for example, 'EN' for English.
+  """
+  language: CorpusLanguage!
+  """
+  The name of the online publication that published this story.
+  """
+  publisher: String!
+  """
+  The image URL for this item's accompanying picture.
+  """
+  imageUrl: Url!
+  """
+  A topic this story best fits in.
+  Temporarily a string value that will be provided by Prospect API, possibly an enum in the future.
+  """
+  topic: String!
+  """
+  A flag to ML to not recommend this item long term after it is added to the corpus.
+  Example: a story covering an election, or "The best of 202x" collection.
+  """
+  isTimeSensitive: Boolean!
 }
 
 """
 Input data for updating an Approved Item's author data.
 """
 input UpdateApprovedCorpusItemAuthorsInput {
-    """
-    Approved Item ID.
-    """
-    externalId: ID!
-    """
-    A name and sort order for each author.
-    """
-    authors: [CorpusItemAuthorInput!]!
+  """
+  Approved Item ID.
+  """
+  externalId: ID!
+  """
+  A name and sort order for each author.
+  """
+  authors: [CorpusItemAuthorInput!]!
 }
 
 """
 Input data for rejecting an Approved Item.
 """
 input RejectApprovedCorpusItemInput {
-    """
-    Approved Item ID.
-    """
-    externalId: ID!
-    """
-    A comma-separated list of rejection reasons.
-    """
-    reason: String!
+  """
+  Approved Item ID.
+  """
+  externalId: ID!
+  """
+  A comma-separated list of rejection reasons.
+  """
+  reason: String!
 }
 
 """
 Input data for creating a Rejected Item.
 """
 input CreateRejectedCorpusItemInput {
-    """
-    The GUID of the corresponding Prospect ID. Will be empty for manually added item.
-    """
-    prospectId: ID
-    """
-    The URL of the Rejected Item.
-    """
-    url: Url!
-    """
-    The title of the Rejected Item.
-    """
-    title: String
-    """
-    A topic this story best fits in.
-    Temporarily a string value that will be provided by Prospect API, possibly an enum in the future.
-    """
-    topic: String!
-    """
-    What language this item is in. This is a two-letter code, for example, 'EN' for English.
-    """
-    language: CorpusLanguage
-    """
-    The name of the online publication that published this story.
-    """
-    publisher: String
-    """
-    A comma-separated list of rejection reasons.
-    """
-    reason: String!
+  """
+  The GUID of the corresponding Prospect ID. Will be empty for manually added item.
+  """
+  prospectId: ID
+  """
+  The URL of the Rejected Item.
+  """
+  url: Url!
+  """
+  The title of the Rejected Item.
+  """
+  title: String
+  """
+  A topic this story best fits in.
+  Temporarily a string value that will be provided by Prospect API, possibly an enum in the future.
+  """
+  topic: String!
+  """
+  What language this item is in. This is a two-letter code, for example, 'EN' for English.
+  """
+  language: CorpusLanguage
+  """
+  The name of the online publication that published this story.
+  """
+  publisher: String
+  """
+  A comma-separated list of rejection reasons.
+  """
+  reason: String!
 }
 
 """
 Input data for creating a scheduled entry for an Approved Item on a Scheduled Surface.
 """
 input CreateScheduledCorpusItemInput {
-    """
-    The ID of the Approved Item that needs to be scheduled.
-    """
-    approvedItemExternalId: ID!
-    """
-    The GUID of the Scheduled Surface the Approved Item is going to appear on. Example: 'NEW_TAB_EN_US'.
-    """
-    scheduledSurfaceGuid: ID!
-    """
-    The date the associated Approved Item is scheduled to appear on a Scheduled Surface. Format: YYYY-MM-DD.
-    """
-    scheduledDate: Date!
+  """
+  The ID of the Approved Item that needs to be scheduled.
+  """
+  approvedItemExternalId: ID!
+  """
+  The GUID of the Scheduled Surface the Approved Item is going to appear on. Example: 'NEW_TAB_EN_US'.
+  """
+  scheduledSurfaceGuid: ID!
+  """
+  The date the associated Approved Item is scheduled to appear on a Scheduled Surface. Format: YYYY-MM-DD.
+  """
+  scheduledDate: Date!
 }
 
 """
 Input data for rescheduling a scheduled item for a Scheduled Surface.
 """
 input RescheduleScheduledCorpusItemInput {
-    """
-    ID of the scheduled item. A string in UUID format.
-    """
-    externalId: ID!
-    """
-    The new scheduled date for the scheduled item to appear on a Scheduled Surface. Format: YYYY-MM-DD.
-    """
-    scheduledDate: Date!
+  """
+  ID of the scheduled item. A string in UUID format.
+  """
+  externalId: ID!
+  """
+  The new scheduled date for the scheduled item to appear on a Scheduled Surface. Format: YYYY-MM-DD.
+  """
+  scheduledDate: Date!
 }
 
 """
 Input data for deleting a scheduled item for a Scheduled Surface.
 """
 input DeleteScheduledCorpusItemInput {
-    """
-    ID of the scheduled item. A string in UUID format.
-    """
-    externalId: ID!
+  """
+  ID of the scheduled item. A string in UUID format.
+  """
+  externalId: ID!
+  """
+  A comma-separated list of unschedule reasons.
+  """
+  reasons: String
+  """
+  Free-text entered by the curator to give further detail to the reason(s) provided.
+  """
+  reasonComment: String
 }
 
 type Query {
-    """
-    Retrieves a paginated, filterable list of Approved Items.
-    """
-    getApprovedCorpusItems(
-        filters: ApprovedCorpusItemFilter
-        pagination: PaginationInput
-    ): ApprovedCorpusItemConnection!
+  """
+  Retrieves a paginated, filterable list of Approved Items.
+  """
+  getApprovedCorpusItems(
+    filters: ApprovedCorpusItemFilter
+    pagination: PaginationInput
+  ): ApprovedCorpusItemConnection!
 
-    """
-    Retrieves a paginated, filterable list of Rejected Items.
-    """
-    getRejectedCorpusItems(
-        filters: RejectedCorpusItemFilter
-        pagination: PaginationInput
-    ): RejectedCorpusItemConnection!
+  """
+  Retrieves a paginated, filterable list of Rejected Items.
+  """
+  getRejectedCorpusItems(
+    filters: RejectedCorpusItemFilter
+    pagination: PaginationInput
+  ): RejectedCorpusItemConnection!
 
+  """
+  Retrieves a list of Approved Items that are scheduled to appear on a Scheduled Surface.
+  """
+  getScheduledCorpusItems(
     """
-    Retrieves a list of Approved Items that are scheduled to appear on a Scheduled Surface.
+    Required arguments to narrow down scheduled items to a specific Scheduled Surface
+    between the supplied start and end dates.
     """
-    getScheduledCorpusItems(
-        """
-        Required arguments to narrow down scheduled items to a specific Scheduled Surface
-        between the supplied start and end dates.
-        """
-        filters: ScheduledCorpusItemsFilterInput!
-    ): [ScheduledCorpusItemsResult!]!
+    filters: ScheduledCorpusItemsFilterInput!
+  ): [ScheduledCorpusItemsResult!]!
 
+  """
+  Retrieves an approved item with the given URL.
+  """
+  getApprovedCorpusItemByUrl(
     """
-    Retrieves an approved item with the given URL.
+    The URL of the approved item.
     """
-    getApprovedCorpusItemByUrl(
-        """
-        The URL of the approved item.
-        """
-        url: String!
-    ): ApprovedCorpusItem
+    url: String!
+  ): ApprovedCorpusItem
 
+  """
+  Retrieves an approved item with the given external ID.
+  """
+  approvedCorpusItemByExternalId(
     """
-    Retrieves an approved item with the given external ID.
+    ID of the approved item. A string in UUID format.
     """
-    approvedCorpusItemByExternalId(
-        """
-        ID of the approved item. A string in UUID format.
-        """
-        externalId: ID!
-    ): ApprovedCorpusItem
+    externalId: ID!
+  ): ApprovedCorpusItem
 
-    """
-    Retrieves all ScheduledSurfaces available to the given SSO user. Requires an Authorization header.
-    """
-    getScheduledSurfacesForUser: [ScheduledSurface!]!
+  """
+  Retrieves all ScheduledSurfaces available to the given SSO user. Requires an Authorization header.
+  """
+  getScheduledSurfacesForUser: [ScheduledSurface!]!
 
-    """
-    Tool to get OG description of URL that is not yet implemented in parser
-    """
-    getOpenGraphFields(url: Url!): OpenGraphFields
+  """
+  Tool to get OG description of URL that is not yet implemented in parser
+  """
+  getOpenGraphFields(url: Url!): OpenGraphFields
 }
 
 type Mutation {
-    """
-    Creates an Approved Item and optionally schedules it to appear on a Scheduled Surface.
-    """
-    createApprovedCorpusItem(
-        data: CreateApprovedCorpusItemInput!
-    ): ApprovedCorpusItem!
+  """
+  Creates an Approved Item and optionally schedules it to appear on a Scheduled Surface.
+  """
+  createApprovedCorpusItem(
+    data: CreateApprovedCorpusItemInput!
+  ): ApprovedCorpusItem!
 
-    """
-    Lets an automated process create an Approved Item and optionally schedule it to appear
-    on a Scheduled Surface.
-    """
-    importApprovedCorpusItem(
-        data: ImportApprovedCorpusItemInput!
-    ): ImportApprovedCorpusItemPayload!
+  """
+  Lets an automated process create an Approved Item and optionally schedule it to appear
+  on a Scheduled Surface.
+  """
+  importApprovedCorpusItem(
+    data: ImportApprovedCorpusItemInput!
+  ): ImportApprovedCorpusItemPayload!
 
-    """
-    Creates a Rejected Item.
-    """
-    createRejectedCorpusItem(
-        data: CreateRejectedCorpusItemInput!
-    ): RejectedCorpusItem!
+  """
+  Creates a Rejected Item.
+  """
+  createRejectedCorpusItem(
+    data: CreateRejectedCorpusItemInput!
+  ): RejectedCorpusItem!
 
-    """
-    Updates an Approved Item.
-    """
-    updateApprovedCorpusItem(
-        data: UpdateApprovedCorpusItemInput!
-    ): ApprovedCorpusItem!
+  """
+  Updates an Approved Item.
+  """
+  updateApprovedCorpusItem(
+    data: UpdateApprovedCorpusItemInput!
+  ): ApprovedCorpusItem!
 
-    """
-    Updates authors for an Approved Item.
-    """
-    updateApprovedCorpusItemAuthors(
-        data: UpdateApprovedCorpusItemAuthorsInput!
-    ): ApprovedCorpusItem!
+  """
+  Updates authors for an Approved Item.
+  """
+  updateApprovedCorpusItemAuthors(
+    data: UpdateApprovedCorpusItemAuthorsInput!
+  ): ApprovedCorpusItem!
 
-    """
-    Rejects an Approved Item: deletes it from the corpus and creates a Rejected Item instead.
-    """
-    rejectApprovedCorpusItem(
-        data: RejectApprovedCorpusItemInput!
-    ): ApprovedCorpusItem!
+  """
+  Rejects an Approved Item: deletes it from the corpus and creates a Rejected Item instead.
+  """
+  rejectApprovedCorpusItem(
+    data: RejectApprovedCorpusItemInput!
+  ): ApprovedCorpusItem!
 
-    """
-    Creates a Scheduled Surface Scheduled Item.
-    """
-    createScheduledCorpusItem(
-        data: CreateScheduledCorpusItemInput!
-    ): ScheduledCorpusItem!
+  """
+  Creates a Scheduled Surface Scheduled Item.
+  """
+  createScheduledCorpusItem(
+    data: CreateScheduledCorpusItemInput!
+  ): ScheduledCorpusItem!
 
-    """
-    Deletes an item from a Scheduled Surface.
-    """
-    deleteScheduledCorpusItem(
-        data: DeleteScheduledCorpusItemInput!
-    ): ScheduledCorpusItem!
+  """
+  Deletes an item from a Scheduled Surface.
+  """
+  deleteScheduledCorpusItem(
+    data: DeleteScheduledCorpusItemInput!
+  ): ScheduledCorpusItem!
 
-    """
-    Updates the scheduled date of a Scheduled Surface Scheduled Item.
-    """
-    rescheduleScheduledCorpusItem(
-        data: RescheduleScheduledCorpusItemInput!
-    ): ScheduledCorpusItem!
+  """
+  Updates the scheduled date of a Scheduled Surface Scheduled Item.
+  """
+  rescheduleScheduledCorpusItem(
+    data: RescheduleScheduledCorpusItemInput!
+  ): ScheduledCorpusItem!
 
-    """
-    Uploads an image to S3 for an Approved Item
-    """
-    uploadApprovedCorpusItemImage(data: Upload!): ApprovedCorpusImageUrl!
+  """
+  Uploads an image to S3 for an Approved Item
+  """
+  uploadApprovedCorpusItemImage(data: Upload!): ApprovedCorpusImageUrl!
 }
 
 """
@@ -1002,12 +1010,12 @@ not actively required or consumed by admin subgraph
 Only exposed here to avoid conflicts with other admin-subgraph when we extend the field
 """
 type CorpusItem @key(fields: "url") {
-    """
-    The URL of the Approved Item.
-    """
-    url: Url!
+  """
+  The URL of the Approved Item.
+  """
+  url: Url!
 }
 
 type OpenGraphFields {
-    description: String!
+  description: String!
 }

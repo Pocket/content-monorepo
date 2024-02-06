@@ -25,7 +25,7 @@ import { IAdminContext } from '../../context';
 export async function deleteScheduledItem(
   parent,
   { data },
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<ScheduledItem> {
   // Need to fetch the item first to check access privileges.
   // Note that we do not worry here about an extra hit to the DB
@@ -36,7 +36,7 @@ export async function deleteScheduledItem(
 
   if (!item) {
     throw new NotFoundError(
-      `Item with ID of '${data.externalId}' could not be found.`
+      `Item with ID of '${data.externalId}' could not be found.`,
     );
   }
 
@@ -52,6 +52,7 @@ export async function deleteScheduledItem(
   // as the object returned from the database resolver will have the details
   // of the previous update and not the final one (aka the hard delete).
   scheduledItem.updatedBy = context.authenticatedUser.username;
+
   // The date is already in UTC - excellent! The relevant SnowplowHandler class
   // will transform it into a Unix timestamp before sending it as part of the Snowplow
   // event data.
@@ -59,7 +60,7 @@ export async function deleteScheduledItem(
 
   context.emitScheduledCorpusItemEvent(
     ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
-    scheduledItem
+    scheduledItem,
   );
 
   return scheduledItem;
@@ -75,7 +76,7 @@ export async function deleteScheduledItem(
 export async function createScheduledItem(
   parent,
   { data },
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<ScheduledItem> {
   // Check if the user can execute this mutation.
   if (!context.authenticatedUser.canWriteToSurface(data.scheduledSurfaceGuid)) {
@@ -85,7 +86,7 @@ export async function createScheduledItem(
   // Check if the specified Scheduled Surface GUID actually exists.
   if (!scheduledSurfaceAllowedValues.includes(data.scheduledSurfaceGuid)) {
     throw new UserInputError(
-      `Cannot create a scheduled entry with Scheduled Surface GUID of "${data.scheduledSurfaceGuid}".`
+      `Cannot create a scheduled entry with Scheduled Surface GUID of "${data.scheduledSurfaceGuid}".`,
     );
   }
 
@@ -93,12 +94,12 @@ export async function createScheduledItem(
     const scheduledItem = await dbCreateScheduledItem(
       context.db,
       data,
-      context.authenticatedUser.username
+      context.authenticatedUser.username,
     );
 
     context.emitScheduledCorpusItemEvent(
       ScheduledCorpusItemEventType.ADD_SCHEDULE,
-      scheduledItem
+      scheduledItem,
     );
 
     return scheduledItem;
@@ -115,7 +116,7 @@ export async function createScheduledItem(
         } on ${data.scheduledDate.toLocaleString('en-US', {
           dateStyle: 'medium',
           timeZone: 'UTC',
-        })}.`
+        })}.`,
       );
     }
 
@@ -127,7 +128,7 @@ export async function createScheduledItem(
 export async function rescheduleScheduledItem(
   parent,
   { data },
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<ScheduledItem> {
   // Need to fetch the item first to check access privileges.
   // Note that we do not worry here about an extra hit to the DB
@@ -138,7 +139,7 @@ export async function rescheduleScheduledItem(
 
   if (!item) {
     throw new NotFoundError(
-      `Item with ID of '${data.externalId}' could not be found.`
+      `Item with ID of '${data.externalId}' could not be found.`,
     );
   }
 
@@ -151,12 +152,12 @@ export async function rescheduleScheduledItem(
     const rescheduledItem = await dbRescheduleScheduledItem(
       context.db,
       data,
-      context.authenticatedUser.username
+      context.authenticatedUser.username,
     );
 
     context.emitScheduledCorpusItemEvent(
       ScheduledCorpusItemEventType.RESCHEDULE,
-      rescheduledItem
+      rescheduledItem,
     );
 
     return rescheduledItem;
@@ -173,8 +174,8 @@ export async function rescheduleScheduledItem(
           {
             dateStyle: 'medium',
             timeZone: 'UTC',
-          }
-        )}.`
+          },
+        )}.`,
       );
     }
 
