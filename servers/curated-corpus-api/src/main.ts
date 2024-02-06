@@ -24,6 +24,6 @@ initItemEventHandlers(curatedCorpusEventEmitter, [
     `🚀 Public server is ready at http://localhost:${config.app.port}${publicUrl}`
   );
   serverLogger.info(
-    `🚀 Admin server is eady at http://localhost:${config.app.port}${adminUrl}`
+    `🚀 Admin server is ready at http://localhost:${config.app.port}${adminUrl}`
   );
 })();

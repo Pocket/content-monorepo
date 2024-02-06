@@ -31,7 +31,7 @@ yarn-error.log*
 .vercel
 
 # InteliJ
-.idea/
+.idea
 
 # Pocket
 dist
