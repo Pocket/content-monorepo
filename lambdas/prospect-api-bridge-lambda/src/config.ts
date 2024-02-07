@@ -8,7 +8,7 @@ const config = {
         process.env.EVENT_BRIDGE_BUS_NAME ||
         'PocketEventBridge-local-Shared-Event-Bus',
       source: 'prospect-events',
-      detailType: 'prospect-generation',
+      detailType: process.env.EVENT_BRIDGE_DETAIL_TYPE || 'prospect-generation',
     },
     firehose: {
       deliveryStreamName:

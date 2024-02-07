@@ -52,6 +52,7 @@ export const config = {
   },
   envVars: {
     eventBusName: `PocketEventBridge-${environment}-Shared-Event-Bus`,
+    eventDetailType: 'prospect-generation',
     metaflowFirehoseName,
     snowplowEndpoint,
   },
