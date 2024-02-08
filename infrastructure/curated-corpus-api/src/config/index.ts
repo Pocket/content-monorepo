@@ -12,7 +12,7 @@ const githubConnectionArn = isDev
   : 'arn:aws:codestar-connections:us-east-1:996905175585:connection/5fa5aa2b-a2d2-43e3-ab5a-72ececfc1870';
 const snowplowEndpoint = isDev
   ? 'com-getpocket-prod1.mini.snplow.net'
-  : 'com-getpocket-prod1.collector.snplow.net';
+  : 'd.getpocket.com';
 
 const rds = {
   minCapacity: isDev ? 1 : 8,
