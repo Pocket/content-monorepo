@@ -18,7 +18,7 @@ if (process.env.NODE_ENV === 'development') {
 
 const snowplowEndpoint = isDev
   ? 'com-getpocket-prod1.mini.snplow.net'
-  : 'com-getpocket-prod1.collector.snplow.net';
+  : 'd.getpocket.com';
 
 // Firehose infra-as-code is defined in AWS Metaflow CloudFormation for production and development, respectively:
 // https://github.com/Pocket/cloudformation-templates/blob/main/service/MetaflowTools/parameters_prod.json#L92
