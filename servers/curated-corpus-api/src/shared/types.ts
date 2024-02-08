@@ -200,6 +200,7 @@ export enum CorpusItemSource {
   PROSPECT = 'PROSPECT', //  originated as a prospect in the curation admin tool
   MANUAL = 'MANUAL', // manually entered through the curation admin tool
   BACKFILL = 'BACKFILL', // imported from the legacy database
+  ML = 'ML', // created by ML
 }
 // End Pocket shared data
 

@@ -1,3 +1,4 @@
+import * as prisma from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import { DateTime } from 'luxon';
 import {
@@ -19,14 +20,14 @@ import { UserInputError } from '@pocket-tools/apollo-utils';
  */
 export async function getScheduledItems(
   db: PrismaClient,
-  filters: ScheduledItemFilterInput
+  filters: ScheduledItemFilterInput,
 ): Promise<ScheduledItemsResult[]> {
-  const { scheduledSurfaceGuid, startDate, endDate } = filters;
+  const { scheduledSurfaceGuid } = filters;
 
   // validate scheduledSurfaceGuid
   if (!scheduledSurfaceAllowedValues.includes(scheduledSurfaceGuid)) {
     throw new UserInputError(
-      `${scheduledSurfaceGuid} is not a valid Scheduled Surface GUID`
+      `${scheduledSurfaceGuid} is not a valid Scheduled Surface GUID`,
     );
   }
 
@@ -35,13 +36,7 @@ export async function getScheduledItems(
     // we need to order by scheduleDate first, as we perform a programmatic
     // groupBy below on that field
     orderBy: [{ scheduledDate: 'asc' }, { updatedAt: 'asc' }],
-    where: {
-      scheduledSurfaceGuid: { equals: scheduledSurfaceGuid },
-      scheduledDate: {
-        gte: new Date(startDate),
-        lte: new Date(endDate),
-      },
-    },
+    where: constructWhereClauseFromFilters(filters),
     include: {
       approvedItem: {
         include: {
@@ -69,15 +64,15 @@ export async function getScheduledItems(
       return {
         scheduledDate,
         collectionCount: items.filter(
-          (item) => item.approvedItem.isCollection === true
+          (item) => item.approvedItem.isCollection === true,
         ).length,
         syndicatedCount: items.filter(
-          (item) => item.approvedItem.isSyndicated === true
+          (item) => item.approvedItem.isSyndicated === true,
         ).length,
         totalCount: items.length,
         items: items,
       };
-    }
+    },
   );
 
   return results;
@@ -94,7 +89,7 @@ export async function getScheduledItems(
 export async function getItemsForScheduledSurface(
   db: PrismaClient,
   id: string,
-  date: string
+  date: string,
 ): Promise<ScheduledSurfaceItem[]> {
   // Get a flat array of scheduled items from Prisma
   const items = await db.scheduledItem.findMany({
@@ -136,7 +131,7 @@ export async function getItemsForScheduledSurface(
  */
 export async function getScheduledItemByUniqueAttributes(
   db: PrismaClient,
-  data
+  data,
 ): Promise<ScheduledItem | null> {
   return db.scheduledItem.findUnique({
     where: {
@@ -157,3 +152,31 @@ export async function getScheduledItemByUniqueAttributes(
     },
   });
 }
+
+/**
+ * Convert the GraphQL filter input variables for scheduled items into a 'where' clause
+ * that Prisma expects to receive.
+ *
+ * @param filters
+ */
+const constructWhereClauseFromFilters = (
+  filters: ScheduledItemFilterInput,
+): prisma.Prisma.ScheduledItemWhereInput => {
+  if (!filters) return {};
+
+  const { scheduledSurfaceGuid, startDate, endDate, source } = filters;
+
+  const defaultWhereClause = {
+    scheduledSurfaceGuid: { equals: scheduledSurfaceGuid },
+    scheduledDate: {
+      gte: new Date(startDate),
+      lte: new Date(endDate),
+    },
+  };
+
+  if (!source) {
+    return defaultWhereClause;
+  }
+
+  return { ...defaultWhereClause, source };
+};

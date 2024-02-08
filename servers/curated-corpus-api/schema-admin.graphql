@@ -138,6 +138,10 @@ enum CorpusItemSource {
   Imported from the legacy database
   """
   BACKFILL
+  """
+  Created by ML
+  """
+  ML
 }
 
 """
@@ -409,6 +413,10 @@ type ScheduledCorpusItem {
   The GUID of this scheduledSurface to which this item is scheduled. Example: 'NEW_TAB_EN_US'.
   """
   scheduledSurfaceGuid: ID!
+  """
+  Source of the Scheduled Item. Nullable. Could be one of: MANUAL or ML
+  """
+  source: CorpusItemSource
 }
 
 """
@@ -541,6 +549,10 @@ input ScheduledCorpusItemsFilterInput {
   To what day to show scheduled items to, inclusive. Expects a date in YYYY-MM-DD format.
   """
   endDate: Date!
+  """
+  Source of the Scheduled Item. Nullable. Could be one of: MANUAL or ML
+  """
+  source: CorpusItemSource
 }
 
 """
@@ -839,6 +851,10 @@ input CreateScheduledCorpusItemInput {
   The date the associated Approved Item is scheduled to appear on a Scheduled Surface. Format: YYYY-MM-DD.
   """
   scheduledDate: Date!
+  """
+  Source of the Scheduled Item. Nullable. Could be one of: MANUAL or ML
+  """
+  source: CorpusItemSource
 }
 
 """

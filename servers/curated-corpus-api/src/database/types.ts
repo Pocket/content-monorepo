@@ -133,6 +133,7 @@ export type ScheduledItemFilterInput = {
   scheduledSurfaceGuid: string;
   startDate: string;
   endDate: string;
+  source?: CorpusItemSource.MANUAL | CorpusItemSource.ML;
 };
 
 export type DeleteScheduledItemInput = {
@@ -143,6 +144,7 @@ export type CreateScheduledItemInput = {
   approvedItemExternalId: string;
   scheduledSurfaceGuid: string;
   scheduledDate: string;
+  source?: CorpusItemSource.MANUAL | CorpusItemSource.ML;
 };
 
 export type RescheduleScheduledItemInput = {
