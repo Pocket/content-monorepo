@@ -23,29 +23,29 @@ export const createProspect = (
   curated = false,
 ): Prospect => {
   // randomize number of authors
-  const authorCount = faker.datatype.number({ min: 1, max: 3 });
+  const authorCount = faker.number.int({ min: 1, max: 3 });
   const authors: string[] = [];
 
   for (let i = 0; i < authorCount; i++) {
-    authors.push(faker.name.findName());
+    authors.push(faker.person.fullName());
   }
 
   return {
-    id: faker.datatype.uuid(),
-    prospectId: faker.datatype.uuid(),
+    id: faker.string.uuid(),
+    prospectId: faker.string.uuid(),
     scheduledSurfaceGuid,
-    topic: faker.random.arrayElement(topicsArray),
+    topic: faker.helpers.arrayElement(topicsArray),
     prospectType,
     url: faker.internet.url(),
-    rank: faker.datatype.number(),
-    saveCount: faker.datatype.number(),
+    rank: faker.number.int({ min: 1, max: 100000 }),
+    saveCount: faker.number.int({ min: 1, max: 100000000 }),
     curated,
     createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
     domain: faker.internet.domainName(),
     excerpt: faker.lorem.paragraph(),
     imageUrl: faker.internet.url(),
-    language: faker.random.arrayElement(Object.values(CorpusLanguage)),
-    publisher: faker.random.arrayElement([
+    language: faker.helpers.arrayElement(Object.values(CorpusLanguage)),
+    publisher: faker.helpers.arrayElement([
       'The New York Times',
       'The Atlantic',
       'The Guardian',
