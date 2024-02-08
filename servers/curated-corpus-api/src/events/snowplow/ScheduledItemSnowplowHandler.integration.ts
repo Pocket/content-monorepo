@@ -16,7 +16,11 @@ import { ScheduledItemSnowplowHandler } from './ScheduledItemSnowplowHandler';
 import { tracker } from './tracker';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import { getUnixTimestamp } from '../../shared/utils';
-import { CorpusItemSource, Topics } from '../../shared/types';
+import {
+  CorpusItemSource,
+  ScheduledCorpusItemStatus,
+  Topics,
+} from '../../shared/types';
 import { getScheduledSurfaceByGuid } from '../../shared/utils';
 import { ScheduledItem } from '../../database/types';
 
@@ -60,7 +64,15 @@ const scheduledCorpusItem: ScheduledItem = {
 };
 
 const scheduledEventData: ScheduledCorpusItemPayload = {
-  scheduledCorpusItem,
+  scheduledCorpusItem: {
+    ...scheduledCorpusItem,
+    generated_by: CorpusItemSource.MANUAL,
+    // in the real world this should match the event type, but it's fine to
+    // hard-code here just to ensure the value is making it to snowplow
+    status: ScheduledCorpusItemStatus.REMOVED,
+    reasons: ['TOPIC', 'PUBLISHER'],
+    reasonComment: 'why did i rescheudle this? see above',
+  },
 };
 
 function assertValidSnowplowScheduledItemEvents(data) {
@@ -79,15 +91,19 @@ function assertValidSnowplowScheduledItemEvents(data) {
         scheduled_at: getUnixTimestamp(scheduledCorpusItem.scheduledDate),
         scheduled_surface_id: scheduledCorpusItem.scheduledSurfaceGuid,
         scheduled_surface_name: getScheduledSurfaceByGuid(
-          scheduledCorpusItem.scheduledSurfaceGuid
+          scheduledCorpusItem.scheduledSurfaceGuid,
         )?.name,
         scheduled_surface_iana_timezone: getScheduledSurfaceByGuid(
-          scheduledCorpusItem.scheduledSurfaceGuid
+          scheduledCorpusItem.scheduledSurfaceGuid,
         )?.ianaTimezone,
         created_at: getUnixTimestamp(scheduledCorpusItem.createdAt),
         created_by: scheduledCorpusItem.createdBy,
         updated_at: getUnixTimestamp(scheduledCorpusItem.updatedAt),
         updated_by: scheduledCorpusItem.updatedBy,
+        generated_by: CorpusItemSource.MANUAL,
+        status: 'removed',
+        status_reasons: ['TOPIC', 'PUBLISHER'],
+        status_reason_comment: 'why did i rescheudle this? see above',
       },
     },
   ]);
@@ -125,16 +141,16 @@ describe('ScheduledItemSnowplowHandler', () => {
     const goodEvents = await getGoodSnowplowEvents();
 
     assertValidSnowplowScheduledItemEvents(
-      goodEvents[0].rawEvent.parameters.cx
+      goodEvents[0].rawEvent.parameters.cx,
     );
     assertValidSnowplowScheduledItemEvents(
-      goodEvents[1].rawEvent.parameters.cx
+      goodEvents[1].rawEvent.parameters.cx,
     );
 
     assertValidSnowplowObjectUpdateEvents(
       goodEvents.map((goodEvent) => goodEvent.rawEvent.parameters.ue_px),
       ['scheduled_corpus_item_added', 'scheduled_corpus_item_removed'],
-      'scheduled_corpus_item'
+      'scheduled_corpus_item',
     );
   });
 });

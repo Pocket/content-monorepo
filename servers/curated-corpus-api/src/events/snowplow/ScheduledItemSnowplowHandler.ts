@@ -25,7 +25,7 @@ export class ScheduledItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
   constructor(
     protected emitter: CuratedCorpusEventEmitter,
     protected tracker: Tracker,
-    events: string[]
+    events: string[],
   ) {
     super(emitter, tracker, events);
   }
@@ -34,14 +34,16 @@ export class ScheduledItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
    * @param data
    */
   async process(
-    data: ScheduledCorpusItemPayload & BaseEventData
+    data: ScheduledCorpusItemPayload & BaseEventData,
   ): Promise<void> {
     const event = buildSelfDescribingEvent({
       event: ScheduledItemSnowplowHandler.generateItemUpdateEvent(data),
     });
+
     const context = await ScheduledItemSnowplowHandler.generateEventContext(
-      data
+      data,
     );
+
     await super.track(event, context);
   }
 
@@ -49,13 +51,13 @@ export class ScheduledItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
    * @private
    */
   private static async generateEventContext(
-    data: ScheduledCorpusItemPayload
+    data: ScheduledCorpusItemPayload,
   ): Promise<SelfDescribingJson[]> {
     return [await ScheduledItemSnowplowHandler.generateItemContext(data)];
   }
 
   private static generateItemUpdateEvent(
-    data: ScheduledCorpusItemPayload & BaseEventData
+    data: ScheduledCorpusItemPayload & BaseEventData,
   ): CuratedCorpusItemUpdateEvent {
     return {
       schema: config.snowplow.schemas.objectUpdate,
@@ -70,7 +72,7 @@ export class ScheduledItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
    * @private
    */
   private static async generateItemContext(
-    data: ScheduledCorpusItemPayload
+    data: ScheduledCorpusItemPayload,
   ): Promise<ScheduledCorpusItemContext> {
     const result: ScheduledCorpusItemPayload = await data;
 
@@ -90,12 +92,16 @@ export class ScheduledItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
         created_by: item.createdBy,
         updated_at: getUnixTimestamp(item.updatedAt),
         updated_by: item.updatedBy ?? undefined,
+        status_reasons: item.reasons ?? undefined,
+        status_reason_comment: item.reasonComment ?? undefined,
+        generated_by: item.generated_by ?? undefined,
+        status: item.status ?? undefined,
       },
     };
 
     // Get the ScheduledSurface info
     const scheduledSurface = getScheduledSurfaceByGuid(
-      item.scheduledSurfaceGuid
+      item.scheduledSurfaceGuid,
     );
 
     if (scheduledSurface) {
