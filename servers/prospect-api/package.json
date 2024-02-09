@@ -28,16 +28,17 @@
     "supertest": "^6.3.3"
   },
   "devDependencies": {
-    "@faker-js/faker": "8.4.0",
+    "@faker-js/faker": "8.0.2",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*",
+    "@types/faker": "6.6.8",
     "@types/chai-spies": "1.0.3",
     "@types/jest": "29.5.12",
     "@types/lodash": "4.14.182",
-    "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
     "lodash": "4.17.21",
     "nodemon": "2.0.22",
-    "ts-jest": "29.1.2",
-    "tsconfig": "workspace:*"
+    "ts-jest": "29.1.2"
   },
   "files": [
     "dist",
