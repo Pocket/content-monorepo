@@ -6,6 +6,7 @@ import {
   createScheduledItemHelper,
 } from './createScheduledItemHelper';
 import { faker } from '@faker-js/faker';
+import { ScheduledItemSource } from '../../shared/types';
 
 const db = new PrismaClient();
 
@@ -49,6 +50,7 @@ describe('createScheduledItemHelper', () => {
       scheduledDate: '2022-01-01T00:00:00.000Z',
       approvedItem,
       scheduledSurfaceGuid: scheduledSurfaceGuid,
+      source: ScheduledItemSource.MANUAL,
     };
 
     const item: ScheduledItem = await createScheduledItemHelper(db, data);
@@ -58,5 +60,6 @@ describe('createScheduledItemHelper', () => {
     expect(item.scheduledSurfaceGuid).toBe(scheduledSurfaceGuid);
     expect(item.createdBy).toBe(data.createdBy);
     expect(item.scheduledDate.toISOString()).toBe(data.scheduledDate);
+    expect(item.source).toBe('MANUAL');
   });
 });
