@@ -23,7 +23,11 @@ import { getUnixTimestamp } from '../fields/UnixTimestamp';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../events/init';
 import { ScheduledCorpusItemEventType } from '../../../events/types';
 import { DateTime } from 'luxon';
-import { ACCESS_DENIED_ERROR, MozillaAccessGroup } from '../../../shared/types';
+import {
+  ACCESS_DENIED_ERROR,
+  MozillaAccessGroup,
+  ScheduledItemSource,
+} from '../../../shared/types';
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
 
@@ -83,10 +87,10 @@ describe('mutations: ScheduledItem', () => {
 
       // And there is the correct error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `Cannot create a scheduled entry with Scheduled Surface GUID of "RECSAPI".`
+        `Cannot create a scheduled entry with Scheduled Surface GUID of "RECSAPI".`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // Check that the ADD_SCHEDULE event was not fired
@@ -116,9 +120,46 @@ describe('mutations: ScheduledItem', () => {
 
       // And there is the correct error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `Cannot create a scheduled entry: Approved Item with id "not-a-valid-id-at-all" does not exist.`
+        `Cannot create a scheduled entry: Approved Item with id "not-a-valid-id-at-all" does not exist.`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual('NOT_FOUND');
+
+      // Check that the ADD_SCHEDULE event was not fired
+      expect(eventTracker).toHaveBeenCalledTimes(0);
+    });
+
+    it('should fail on invalid optional source value', async () => {
+      // Set up event tracking
+      const eventTracker = jest.fn();
+      eventEmitter.on(ScheduledCorpusItemEventType.ADD_SCHEDULE, eventTracker);
+
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'A test story',
+      });
+      const input: CreateScheduledItemInput = {
+        approvedItemExternalId: approvedItem.externalId,
+        scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+        scheduledDate: '2100-01-01',
+      };
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(CREATE_SCHEDULED_ITEM),
+          variables: { data: { ...input, source: 'INCORRECTSOURCE' } },
+        });
+
+      expect(result.body.data).toBeUndefined();
+      expect(result.body.errors).not.toBeUndefined();
+
+      // And there is the correct error from the resolvers
+      expect(result.body.errors?.[0].message).toContain(
+        'Variable "$data" got invalid value "INCORRECTSOURCE" at "data.source"; Value "INCORRECTSOURCE" does not exist in "ScheduledItemSource" enum.',
+      );
+      expect(result.body.errors?.[0].extensions?.code).toEqual(
+        'BAD_USER_INPUT',
+      );
 
       // Check that the ADD_SCHEDULE event was not fired
       expect(eventTracker).toHaveBeenCalledTimes(0);
@@ -143,14 +184,14 @@ describe('mutations: ScheduledItem', () => {
       // This is the date format for the GraphQL mutation.
       const scheduledDate = DateTime.fromJSDate(
         existingScheduledEntry.scheduledDate,
-        { zone: 'utc' }
+        { zone: 'utc' },
       ).toFormat('yyyy-MM-dd');
 
       // And this human-readable (and cross-locale understandable) format
       // is used in the error message we're anticipating to get.
       const displayDate = DateTime.fromJSDate(
         existingScheduledEntry.scheduledDate,
-        { zone: 'utc' }
+        { zone: 'utc' },
       ).toFormat('MMM d, y');
 
       // Set up the input for the mutation that contains the exact same values
@@ -173,10 +214,10 @@ describe('mutations: ScheduledItem', () => {
 
       // Expecting to see a custom error message from the resolver
       expect(result.body.errors?.[0].message).toContain(
-        `This story is already scheduled to appear on NEW_TAB_EN_US on ${displayDate}.`
+        `This story is already scheduled to appear on NEW_TAB_EN_US on ${displayDate}.`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // Check that the ADD_SCHEDULE event was not fired
@@ -216,7 +257,7 @@ describe('mutations: ScheduledItem', () => {
 
       // Expect these to match the input values
       expect(new Date(scheduledItem.scheduledDate)).toStrictEqual(
-        new Date(input.scheduledDate)
+        new Date(input.scheduledDate),
       );
 
       // Finally, let's compare the returned ApprovedItem object to our inputs.
@@ -238,7 +279,7 @@ describe('mutations: ScheduledItem', () => {
       expect(getUnixTimestamp(createdAt)).toEqual(createdAtReturned);
       expect(getUnixTimestamp(updatedAt)).toEqual(updatedAtReturned);
       expect(otherApprovedItemProps).toMatchObject(
-        otherReturnedApprovedItemProps
+        otherReturnedApprovedItemProps,
       );
 
       // check authors
@@ -262,11 +303,11 @@ describe('mutations: ScheduledItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ScheduledCorpusItemEventType.ADD_SCHEDULE
+        ScheduledCorpusItemEventType.ADD_SCHEDULE,
       );
       // 3- Event has the right entity passed to it.
       expect(
-        await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId,
       ).toEqual(scheduledItem.externalId);
     });
 
@@ -369,6 +410,44 @@ describe('mutations: ScheduledItem', () => {
       // And no errors, too!
       expect(result.body.errors).toBeUndefined();
     });
+
+    it('should succeed when optional source variable is passed with correct value', async () => {
+      const headers = {
+        name: 'Test User',
+        username: 'test.user@test.com',
+        groups: `group1,group2,${MozillaAccessGroup.NEW_TAB_CURATOR_ENUS}`,
+      };
+
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'A test story',
+      });
+
+      const input: CreateScheduledItemInput = {
+        approvedItemExternalId: approvedItem.externalId,
+        scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+        scheduledDate: '2100-01-01',
+        source: ScheduledItemSource.MANUAL,
+      };
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(CREATE_SCHEDULED_ITEM),
+          variables: { data: input },
+        });
+
+      // Hooray! There is data
+      expect(result.body.data).not.toBeNull();
+
+      // assert that the correct source value is returned on successful creation
+      expect(result.body.data.createScheduledCorpusItem.source).toEqual(
+        'MANUAL',
+      );
+
+      // And no errors, too!
+      expect(result.body.errors).toBeUndefined();
+    });
   });
 
   describe('deleteScheduledCorpusItem mutation', () => {
@@ -377,7 +456,7 @@ describe('mutations: ScheduledItem', () => {
       const eventTracker = jest.fn();
       eventEmitter.on(
         ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
-        eventTracker
+        eventTracker,
       );
 
       const input: DeleteScheduledItemInput = {
@@ -396,7 +475,7 @@ describe('mutations: ScheduledItem', () => {
 
       // And there is the correct error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `Item with ID of '${input.externalId}' could not be found.`
+        `Item with ID of '${input.externalId}' could not be found.`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual('NOT_FOUND');
 
@@ -409,7 +488,7 @@ describe('mutations: ScheduledItem', () => {
       const eventTracker = jest.fn();
       eventEmitter.on(
         ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
-        eventTracker
+        eventTracker,
       );
 
       const approvedItem = await createApprovedItemHelper(db, {
@@ -440,14 +519,14 @@ describe('mutations: ScheduledItem', () => {
       expect(returnedItem.updatedBy).toEqual(headers.username);
 
       expect(returnedItem.createdAt).toEqual(
-        getUnixTimestamp(scheduledItem.createdAt)
+        getUnixTimestamp(scheduledItem.createdAt),
       );
       expect(returnedItem.updatedAt).toBeCloseTo(
-        getUnixTimestamp(scheduledItem.updatedAt)
+        getUnixTimestamp(scheduledItem.updatedAt),
       );
 
       expect(new Date(returnedItem.scheduledDate)).toStrictEqual(
-        scheduledItem.scheduledDate
+        scheduledItem.scheduledDate,
       );
 
       // Finally, let's compare the returned ApprovedItem object to our inputs.
@@ -469,7 +548,7 @@ describe('mutations: ScheduledItem', () => {
       expect(getUnixTimestamp(createdAt)).toEqual(createdAtReturned);
       expect(getUnixTimestamp(updatedAt)).toEqual(updatedAtReturned);
       expect(otherApprovedItemProps).toMatchObject(
-        otherReturnedApprovedItemProps
+        otherReturnedApprovedItemProps,
       );
 
       // check authors
@@ -493,11 +572,11 @@ describe('mutations: ScheduledItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ScheduledCorpusItemEventType.REMOVE_SCHEDULE
+        ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
       );
       // 3- Event has the right entity passed to it.
       expect(
-        await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId,
       ).toEqual(scheduledItem.externalId);
     });
 
@@ -622,7 +701,7 @@ describe('mutations: ScheduledItem', () => {
 
       // And there is the correct error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `Item with ID of '${input.externalId}' could not be found.`
+        `Item with ID of '${input.externalId}' could not be found.`,
       );
 
       expect(result.body.errors?.[0].extensions?.code).toEqual('NOT_FOUND');
@@ -670,11 +749,11 @@ describe('mutations: ScheduledItem', () => {
       expect(returnedItem.updatedBy).toEqual(headers.username);
 
       expect(returnedItem.createdAt).toEqual(
-        getUnixTimestamp(scheduledItem.createdAt)
+        getUnixTimestamp(scheduledItem.createdAt),
       );
 
       expect(returnedItem.updatedAt).toEqual(
-        getUnixTimestamp(scheduledItem.updatedAt)
+        getUnixTimestamp(scheduledItem.updatedAt),
       );
 
       expect(returnedItem.scheduledDate).toEqual('2050-05-05');
@@ -698,7 +777,7 @@ describe('mutations: ScheduledItem', () => {
       expect(getUnixTimestamp(createdAt)).toEqual(createdAtReturned);
       expect(getUnixTimestamp(updatedAt)).toEqual(updatedAtReturned);
       expect(otherApprovedItemProps).toMatchObject(
-        otherReturnedApprovedItemProps
+        otherReturnedApprovedItemProps,
       );
 
       // check authors
@@ -722,11 +801,11 @@ describe('mutations: ScheduledItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ScheduledCorpusItemEventType.RESCHEDULE
+        ScheduledCorpusItemEventType.RESCHEDULE,
       );
       // 3- Event has the right entity passed to it.
       expect(
-        await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId,
       ).toEqual(scheduledItem.externalId);
     });
 
@@ -770,7 +849,7 @@ describe('mutations: ScheduledItem', () => {
       expect(result.body.data).toBeNull();
 
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // Check that the ADD_SCHEDULE event was not fired

@@ -3,7 +3,7 @@ import {
   CuratedStatus,
   ScheduledItem as ScheduledItemModel,
 } from '@prisma/client';
-import { CorpusItemSource } from '../shared/types';
+import { CorpusItemSource, ScheduledItemSource } from '../shared/types';
 
 export type ImportApprovedItemInput = {
   url: string;
@@ -133,7 +133,7 @@ export type ScheduledItemFilterInput = {
   scheduledSurfaceGuid: string;
   startDate: string;
   endDate: string;
-  source?: CorpusItemSource.MANUAL | CorpusItemSource.ML;
+  source?: ScheduledItemSource;
 };
 
 export type DeleteScheduledItemInput = {
@@ -144,7 +144,7 @@ export type CreateScheduledItemInput = {
   approvedItemExternalId: string;
   scheduledSurfaceGuid: string;
   scheduledDate: string;
-  source?: CorpusItemSource.MANUAL | CorpusItemSource.ML;
+  source?: ScheduledItemSource;
 };
 
 export type RescheduleScheduledItemInput = {

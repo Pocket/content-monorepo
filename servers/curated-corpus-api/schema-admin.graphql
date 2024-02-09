@@ -145,6 +145,20 @@ enum CorpusItemSource {
 }
 
 """
+The source of the Scheduled item. This is a subset of the above CorpusItemSource enum.
+"""
+enum ScheduledItemSource {
+  """
+  Manually entered through the curation admin tool
+  """
+  MANUAL
+  """
+  Created by ML
+  """
+  ML
+}
+
+"""
 A Scheduled Surface, including its associated Prospect Types.
 """
 type ScheduledSurface {
@@ -416,7 +430,7 @@ type ScheduledCorpusItem {
   """
   Source of the Scheduled Item. Nullable. Could be one of: MANUAL or ML
   """
-  source: CorpusItemSource
+  source: ScheduledItemSource
 }
 
 """
@@ -552,7 +566,7 @@ input ScheduledCorpusItemsFilterInput {
   """
   Source of the Scheduled Item. Nullable. Could be one of: MANUAL or ML
   """
-  source: CorpusItemSource
+  source: ScheduledItemSource
 }
 
 """
@@ -854,7 +868,7 @@ input CreateScheduledCorpusItemInput {
   """
   Source of the Scheduled Item. Nullable. Could be one of: MANUAL or ML
   """
-  source: CorpusItemSource
+  source: ScheduledItemSource
 }
 
 """
