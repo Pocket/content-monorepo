@@ -119,9 +119,11 @@ export async function rescheduleScheduledItem(
 }
 
 /**
- * TODO
+ * Construct the data object based on input parameters provided
  *
- * @param filters
+ * @param approvedItemId
+ * @param inputData
+ * @param username
  */
 const constructCreateScheduleItemData = (
   approvedItemId: number,
