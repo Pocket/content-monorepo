@@ -18,18 +18,18 @@
     "@aws-sdk/client-dynamodb": "3.504.0",
     "@aws-sdk/lib-dynamodb": "3.504.0",
     "@sentry/node": "6.19.7",
-    "@faker-js/faker": "6.3.1",
-    "graphql-tag": "2.12.6",
     "cross-fetch": "3.1.5",
     "fetch-retry": "5.0.6",
+    "graphql-tag": "2.12.6",
     "tldts": "5.7.87"
   },
   "devDependencies": {
-    "eslint-config-custom": "workspace:*",
-    "tsconfig": "workspace:*",
+    "@faker-js/faker": "8.4.0",
     "@types/jest": "29.5.12",
-    "msw": "2.1.2",
+    "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
-    "ts-jest": "29.1.2"
+    "msw": "2.1.2",
+    "ts-jest": "29.1.2",
+    "tsconfig": "workspace:*"
   }
 }
