@@ -22,4 +22,3 @@ export {
   getProspectById,
 } from './dynamodb';
 export { dbClient } from './dynamodb-client';
-export { createProspect } from './test/helpers';
