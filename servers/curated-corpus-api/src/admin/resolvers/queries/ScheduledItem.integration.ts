@@ -14,7 +14,7 @@ import { MozillaAccessGroup, ScheduledItemSource } from '../../../shared/types';
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
 
-describe.skip('queries: ScheduledCorpusItem', () => {
+describe('queries: ScheduledCorpusItem', () => {
   let app: Express.Application;
   let server: ApolloServer<IAdminContext>;
   let graphQLUrl: string;
