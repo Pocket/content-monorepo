@@ -54,7 +54,7 @@ import { getApprovedItemByExternalId } from '../../../database/queries/ApprovedI
 export async function createApprovedItem(
   parent,
   { data },
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<ApprovedItem> {
   const { scheduledDate, scheduledSurfaceGuid, ...approvedItemData } = data;
 
@@ -78,26 +78,26 @@ export async function createApprovedItem(
     !scheduledSurfaceAllowedValues.includes(scheduledSurfaceGuid)
   ) {
     throw new UserInputError(
-      `Cannot create a scheduled entry with Scheduled Surface GUID of "${data.scheduledSurfaceGuid}".`
+      `Cannot create a scheduled entry with Scheduled Surface GUID of "${data.scheduledSurfaceGuid}".`,
     );
   }
 
   // validate topic is a valid enum
   if (!Object.values(Topics).includes(approvedItemData.topic)) {
     throw new UserInputError(
-      `Cannot create a corpus item with the topic "${approvedItemData.topic}".`
+      `Cannot create a corpus item with the topic "${approvedItemData.topic}".`,
     );
   }
 
   const approvedItem = await dbCreateApprovedItem(
     context.db,
     approvedItemData,
-    context.authenticatedUser.username
+    context.authenticatedUser.username,
   );
 
   context.emitReviewedCorpusItemEvent(
     ReviewedCorpusItemEventType.ADD_ITEM,
-    approvedItem
+    approvedItem,
   );
 
   if (scheduledDate && scheduledSurfaceGuid) {
@@ -111,12 +111,14 @@ export async function createApprovedItem(
         scheduledSurfaceGuid,
         scheduledDate,
       },
-      context.authenticatedUser.username
+      context.authenticatedUser.username,
     );
 
     context.emitScheduledCorpusItemEvent(
       ScheduledCorpusItemEventType.ADD_SCHEDULE,
-      scheduledItem
+      {
+        scheduledCorpusItem: scheduledItem,
+      },
     );
   }
 
@@ -134,7 +136,7 @@ export async function createApprovedItem(
 export async function updateApprovedItem(
   parent,
   { data },
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<ApprovedItem> {
   // Check if the user can perform this mutation
   if (!context.authenticatedUser.canWriteToCorpus()) {
@@ -144,7 +146,7 @@ export async function updateApprovedItem(
   // validate topic is a valid enum
   if (!Object.values(Topics).includes(data.topic)) {
     throw new UserInputError(
-      `Cannot create a corpus item with the topic "${data.topic}".`
+      `Cannot create a corpus item with the topic "${data.topic}".`,
     );
   }
 
@@ -153,7 +155,7 @@ export async function updateApprovedItem(
   // to fetch the entire object.
   const existingItem = await getApprovedItemByExternalId(
     context.db,
-    data.externalId
+    data.externalId,
   );
 
   // Remove the old author(s) from the DB records before we run the update function
@@ -168,12 +170,12 @@ export async function updateApprovedItem(
   const approvedItem = await dbUpdateApprovedItem(
     context.db,
     data,
-    context.authenticatedUser.username
+    context.authenticatedUser.username,
   );
 
   context.emitReviewedCorpusItemEvent(
     ReviewedCorpusItemEventType.UPDATE_ITEM,
-    approvedItem
+    approvedItem,
   );
 
   return approvedItem;
@@ -190,7 +192,7 @@ export async function updateApprovedItem(
 export async function updateApprovedItemAuthors(
   parent,
   { data },
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<ApprovedItem> {
   // Check if the user can perform this mutation
   if (!context.authenticatedUser.canWriteToCorpus()) {
@@ -201,7 +203,7 @@ export async function updateApprovedItemAuthors(
   // to fetch the entire object.
   const existingItem = await getApprovedItemByExternalId(
     context.db,
-    data.externalId
+    data.externalId,
   );
 
   // Remove the old author(s) from the DB records before we run the update function
@@ -218,13 +220,13 @@ export async function updateApprovedItemAuthors(
   const approvedItem = await dbUpdateApprovedItemAuthors(
     context.db,
     data,
-    context.authenticatedUser.username
+    context.authenticatedUser.username,
   );
 
   // Emit the update item event
   context.emitReviewedCorpusItemEvent(
     ReviewedCorpusItemEventType.UPDATE_ITEM,
-    approvedItem
+    approvedItem,
   );
 
   return approvedItem;
@@ -241,7 +243,7 @@ export async function updateApprovedItemAuthors(
 export async function rejectApprovedItem(
   parent,
   { data },
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<ApprovedItem> {
   // check if user is not authorized to reject an item
   if (!context.authenticatedUser.canWriteToCorpus()) {
@@ -277,7 +279,7 @@ export async function rejectApprovedItem(
   const rejectedItem = await createRejectedItem(
     context.db,
     input,
-    context.authenticatedUser.username
+    context.authenticatedUser.username,
   );
 
   // Let Snowplow know we've deleted something from the curated corpus.
@@ -292,13 +294,13 @@ export async function rejectApprovedItem(
   // Now emit the event with the updated Approved Item data.
   context.emitReviewedCorpusItemEvent(
     ReviewedCorpusItemEventType.REMOVE_ITEM,
-    approvedItem
+    approvedItem,
   );
 
   // Let Snowplow know that an entry was added to the Rejected Items table.
   context.emitReviewedCorpusItemEvent(
     ReviewedCorpusItemEventType.REJECT_ITEM,
-    rejectedItem
+    rejectedItem,
   );
 
   return approvedItem;
@@ -316,7 +318,7 @@ export async function rejectApprovedItem(
 export async function uploadApprovedItemImage(
   parent,
   { data },
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<ApprovedItemS3ImageUrl> {
   // check if user is allowed to upload images
   if (!context.authenticatedUser.canWriteToCorpus()) {
@@ -339,7 +341,7 @@ export async function uploadApprovedItemImage(
 export async function importApprovedItem(
   parent,
   { data }: { data: ImportApprovedCorpusItemInput },
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<ImportApprovedCorpusItemPayload> {
   // Check if user is authorized to import an item
   if (!context.authenticatedUser.canWriteToCorpus()) {
@@ -357,16 +359,16 @@ export async function importApprovedItem(
 
     approvedItem = await dbImportApprovedItem(
       context.db,
-      toDbApprovedItemInput(data)
+      toDbApprovedItemInput(data),
     );
     context.emitReviewedCorpusItemEvent(
       ReviewedCorpusItemEventType.ADD_ITEM,
-      approvedItem
+      approvedItem,
     );
   } catch (e) {
     approvedItem = (await getApprovedItemByUrl(
       context.db,
-      data.url
+      data.url,
     )) as ApprovedItem;
 
     // If there's an invalid image, stop here and throw an exception
@@ -386,11 +388,13 @@ export async function importApprovedItem(
       toDbScheduledItemInput({
         ...data,
         approvedItemId: approvedItem.id,
-      })
+      }),
     );
     context.emitScheduledCorpusItemEvent(
       ScheduledCorpusItemEventType.ADD_SCHEDULE,
-      scheduledItem
+      {
+        scheduledCorpusItem: scheduledItem,
+      },
     );
   } catch (e) {
     scheduledItem = (await getScheduledItemByUniqueAttributes(context.db, {
@@ -412,7 +416,7 @@ export async function importApprovedItem(
  * @param data
  */
 function toDbApprovedItemInput(
-  data: ImportApprovedCorpusItemInput
+  data: ImportApprovedCorpusItemInput,
 ): ImportApprovedItemInput {
   return {
     title: data.title,
@@ -439,7 +443,7 @@ function toDbApprovedItemInput(
  * @param data
  */
 function toDbScheduledItemInput(
-  data: ImportApprovedCorpusItemInput & { approvedItemId: number }
+  data: ImportApprovedCorpusItemInput & { approvedItemId: number },
 ): ImportScheduledItemInput {
   return {
     approvedItemId: data.approvedItemId,

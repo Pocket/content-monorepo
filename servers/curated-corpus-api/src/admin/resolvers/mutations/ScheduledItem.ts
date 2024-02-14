@@ -1,12 +1,23 @@
+import { parseReasonsCsv, sanitizeText } from 'content-common';
+
+import config from '../../../config';
+
 import {
   deleteScheduledItem as dbDeleteScheduledItem,
   createScheduledItem as dbCreateScheduledItem,
   rescheduleScheduledItem as dbRescheduleScheduledItem,
 } from '../../../database/mutations';
 import { ScheduledItem } from '../../../database/types';
-import { ACCESS_DENIED_ERROR } from '../../../shared/types';
+import {
+  ACCESS_DENIED_ERROR,
+  CorpusItemSource,
+  ScheduledCorpusItemStatus,
+} from '../../../shared/types';
 import { scheduledSurfaceAllowedValues } from '../../../shared/utils';
-import { ScheduledCorpusItemEventType } from '../../../events/types';
+import {
+  ScheduledCorpusItemEventType,
+  ScheduledCorpusItemPayload,
+} from '../../../events/types';
 import {
   AuthenticationError,
   UserInputError,
@@ -48,19 +59,37 @@ export async function deleteScheduledItem(
   // Access allowed, proceed as normal from this point on.
   const scheduledItem = await dbDeleteScheduledItem(context.db, data);
 
-  // Before we send the event to Snowplow, update the `updatedBy` and `updatedAt` fields
-  // as the object returned from the database resolver will have the details
-  // of the previous update and not the final one (aka the hard delete).
-  scheduledItem.updatedBy = context.authenticatedUser.username;
-
   // The date is already in UTC - excellent! The relevant SnowplowHandler class
   // will transform it into a Unix timestamp before sending it as part of the Snowplow
   // event data.
   scheduledItem.updatedAt = new Date();
 
+  // Before we send the event to Snowplow, update the `updatedBy` and `updatedAt` fields
+  // as the object returned from the database resolver will have the details
+  // of the previous update and not the final one (aka the hard delete).
+  scheduledItem.updatedBy = context.authenticatedUser.username;
+
+  // build an extended copy of the returned scheduledItem which will include
+  // additional event tracking info
+  const scheduledItemForEvents: ScheduledCorpusItemPayload = {
+    scheduledCorpusItem: {
+      ...scheduledItem,
+      status: ScheduledCorpusItemStatus.REMOVED,
+      // hard-coded to manual for now. once MC-645 is complete, this should be pulled from
+      // the `scheduledItem.source` property.
+      generated_by: CorpusItemSource.MANUAL,
+      // get reasons and reason comment (these may both be null. they're only
+      // supplied when a scheduled item is deleted for a limited set of surfaces)
+      reasons: parseReasonsCsv(data.reasons, config.app.removeReasonMaxLength),
+      reasonComment: data.reasonComment
+        ? sanitizeText(data.reasonComment, config.app.removeReasonMaxLength)
+        : null,
+    },
+  };
+
   context.emitScheduledCorpusItemEvent(
     ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
-    scheduledItem,
+    scheduledItemForEvents,
   );
 
   return scheduledItem;
@@ -99,7 +128,9 @@ export async function createScheduledItem(
 
     context.emitScheduledCorpusItemEvent(
       ScheduledCorpusItemEventType.ADD_SCHEDULE,
-      scheduledItem,
+      {
+        scheduledCorpusItem: scheduledItem,
+      },
     );
 
     return scheduledItem;
@@ -157,7 +188,9 @@ export async function rescheduleScheduledItem(
 
     context.emitScheduledCorpusItemEvent(
       ScheduledCorpusItemEventType.RESCHEDULE,
-      rescheduledItem,
+      {
+        scheduledCorpusItem: rescheduledItem,
+      },
     );
 
     return rescheduledItem;

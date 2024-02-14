@@ -33,6 +33,7 @@ export default {
       maxAllowedResults: 100,
       scheduledSurfaceHistory: 10,
     },
+    removeReasonMaxLength: 100,
     upload: {
       maxSize: 10000000, // in bytes => 10MB
       maxFiles: 10,
@@ -81,7 +82,7 @@ export default {
       reviewedCorpusItem:
         'iglu:com.pocket/reviewed_corpus_item/jsonschema/1-0-4',
       scheduledCorpusItem:
-        'iglu:com.pocket/scheduled_corpus_item/jsonschema/1-0-2',
+        'iglu:com.pocket/scheduled_corpus_item/jsonschema/1-0-4',
     },
   },
 };

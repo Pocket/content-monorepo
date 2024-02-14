@@ -4,7 +4,7 @@ import Express from 'express';
 import { BaseContext } from '@apollo/server';
 import { PrismaClient, RejectedCuratedCorpusItem } from '@prisma/client';
 import { client } from '../database/client';
-import { ApprovedItem, ScheduledItem } from '../database/types';
+import { ApprovedItem } from '../database/types';
 import { CuratedCorpusEventEmitter } from '../events/curatedCorpusEventEmitter';
 import {
   ReviewedCorpusItemEventType,
@@ -44,12 +44,12 @@ export interface IAdminContext {
 
   emitReviewedCorpusItemEvent(
     event: ReviewedCorpusItemEventType,
-    reviewedCorpusItem: ApprovedItem | RejectedCuratedCorpusItem
+    reviewedCorpusItem: ApprovedItem | RejectedCuratedCorpusItem,
   ): void;
 
   emitScheduledCorpusItemEvent(
     event: ScheduledCorpusItemEventType,
-    scheduledCorpusItem: ScheduledItem
+    scheduledCorpusItem: ScheduledCorpusItemPayload,
   ): void;
 }
 
@@ -60,7 +60,7 @@ export class AdminContextManager implements IAdminContext {
       db: PrismaClient;
       s3: S3;
       eventEmitter: CuratedCorpusEventEmitter;
-    }
+    },
   ) {}
 
   get db(): IAdminContext['db'] {
@@ -82,7 +82,7 @@ export class AdminContextManager implements IAdminContext {
     const accessGroups = groups ? groups.split(',') : [];
 
     const hasFullAccess = accessGroups.includes(
-      MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL
+      MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL,
     );
     const hasReadOnly = accessGroups.includes(MozillaAccessGroup.READONLY);
 
@@ -139,7 +139,7 @@ export class AdminContextManager implements IAdminContext {
 
   emitReviewedCorpusItemEvent(
     event: ReviewedCorpusItemEventType,
-    reviewedCorpusItem: ApprovedItem | RejectedCuratedCorpusItem
+    reviewedCorpusItem: ApprovedItem | RejectedCuratedCorpusItem,
   ): void {
     this.eventEmitter.emitEvent<ReviewedCorpusItemPayload>(event, {
       reviewedCorpusItem,
@@ -148,11 +148,12 @@ export class AdminContextManager implements IAdminContext {
 
   emitScheduledCorpusItemEvent(
     event: ScheduledCorpusItemEventType,
-    scheduledCorpusItem: ScheduledItem
+    scheduledCorpusItem: ScheduledCorpusItemPayload,
   ): void {
-    this.eventEmitter.emitEvent<ScheduledCorpusItemPayload>(event, {
+    this.eventEmitter.emitEvent<ScheduledCorpusItemPayload>(
+      event,
       scheduledCorpusItem,
-    });
+    );
   }
 }
 

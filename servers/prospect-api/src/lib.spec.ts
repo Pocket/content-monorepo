@@ -6,11 +6,9 @@ import {
   getSortedRankedProspects,
   getRandomizedSortedRankedProspects,
   isValidProspectType,
-  parseReasonsCsv,
   prospectToSnowplowProspect,
   standardizeLanguage,
   deDuplicateProspectUrls,
-  sanitizeText,
 } from './lib';
 import { Prospect, ProspectType, Topics } from 'prospectapi-common';
 
@@ -446,67 +444,6 @@ describe('lib', () => {
       expect(snowplowProspect.status_reasons).toBeUndefined;
       expect(snowplowProspect.status_reason_comment).toBeUndefined;
       expect(snowplowProspect.reviewed_by).toEqual('LDAP|User');
-    });
-  });
-
-  describe('parseReasonsCsv', () => {
-    it('should create an array from multiple elements in a csv', () => {
-      expect(parseReasonsCsv('PUBLISHER,TOPIC')).toEqual([
-        'PUBLISHER',
-        'TOPIC',
-      ]);
-    });
-
-    it('should create an array from a single element', () => {
-      expect(parseReasonsCsv('PUBLISHER')).toEqual(['PUBLISHER']);
-    });
-
-    it('should ignore trailing comma', () => {
-      expect(parseReasonsCsv('PUBLISHER,')).toEqual(['PUBLISHER']);
-    });
-
-    it('should return an empty array if null value', () => {
-      expect(parseReasonsCsv(null)).toEqual([]);
-    });
-
-    it('should return an empty array if empty string', () => {
-      expect(parseReasonsCsv('')).toEqual([]);
-    });
-  });
-
-  describe('sanitizeText', () => {
-    it('should not modify a string when it satisfies our conditions already', () => {
-      const string = 'A string! That conforms. To the regex? YES. 20!';
-
-      expect(sanitizeText(string, 100)).toEqual(string);
-    });
-    it('should remove illegal characters', () => {
-      const string = '<lots>; of & illegal % chars # $ @ * ^ ( ) {} []!';
-
-      expect(sanitizeText(string, 100)).toEqual('lots of illegal chars !');
-    });
-
-    it('should return an empty string if all the characters are illegal', () => {
-      const string = '* (^* &^*#&^ $) #(*>{{}';
-
-      expect(sanitizeText(string, 100)).toEqual('');
-    });
-
-    it('should trim surrounding whitespace', () => {
-      const string = '  i luv 2 buffer my strings with spaces    &*#   ';
-
-      expect(sanitizeText(string, 100)).toEqual(
-        'i luv 2 buffer my strings with spaces',
-      );
-    });
-
-    it('should trim the string to our set max length', () => {
-      const string =
-        'this is a very long string that will be more than one hundred characters. it is a real epic of a comment, which was the style at the time.';
-
-      expect(sanitizeText(string, 100)).toEqual(
-        'this is a very long string that will be more than one hundred characters. it is a real epic of a co',
-      );
     });
   });
 });
