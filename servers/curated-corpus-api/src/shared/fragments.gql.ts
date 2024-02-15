@@ -50,6 +50,7 @@ export const ScheduledItemData = gql`
     updatedAt
     updatedBy
     scheduledDate
+    source
     approvedItem {
       ...CuratedItemData
     }

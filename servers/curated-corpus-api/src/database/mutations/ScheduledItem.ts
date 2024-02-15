@@ -20,7 +20,12 @@ export async function createScheduledItem(
   data: CreateScheduledItemInput,
   username: string,
 ): Promise<ScheduledItem> {
-  const { approvedItemExternalId, scheduledSurfaceGuid, scheduledDate } = data;
+  const {
+    approvedItemExternalId,
+    scheduledSurfaceGuid,
+    scheduledDate,
+    source,
+  } = data;
 
   const approvedItem = await db.approvedItem.findUnique({
     where: { externalId: approvedItemExternalId },
@@ -38,6 +43,7 @@ export async function createScheduledItem(
       scheduledSurfaceGuid,
       scheduledDate,
       createdBy: username,
+      source,
     },
     include: {
       approvedItem: {
