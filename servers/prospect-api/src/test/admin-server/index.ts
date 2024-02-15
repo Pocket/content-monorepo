@@ -4,8 +4,13 @@ import express from 'express';
 import http from 'http';
 import { expressMiddleware } from '@apollo/server/express4';
 import { startApolloServer } from '../../server';
+import {ApolloServer} from "@apollo/server";
 
-export const getTestServer = async (port) => {
+export const getTestServer: (port) => Promise<{
+  app: express.Express;
+  apolloServer: ApolloServer<AdminAPIUserContext>;
+  url: string
+}> = async (port) => {
   // initialize express with exposed httpServer so that it may be
   // provided to drain plugin for graceful shutdown.
   const app = express();
