@@ -430,7 +430,7 @@ type ScheduledCorpusItem {
   """
   Source of the Scheduled Item. Could be one of: MANUAL or ML
   """
-  source: ScheduledItemSource!
+  source: ScheduledItemSource
 }
 
 """
