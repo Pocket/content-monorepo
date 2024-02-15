@@ -23,7 +23,11 @@ import { getUnixTimestamp } from '../fields/UnixTimestamp';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../events/init';
 import { ScheduledCorpusItemEventType } from '../../../events/types';
 import { DateTime } from 'luxon';
-import { ACCESS_DENIED_ERROR, MozillaAccessGroup } from '../../../shared/types';
+import {
+  ACCESS_DENIED_ERROR,
+  MozillaAccessGroup,
+  ScheduledItemSource,
+} from '../../../shared/types';
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
 
@@ -68,6 +72,7 @@ describe('mutations: ScheduledItem', () => {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'RECSAPI',
         scheduledDate: '2100-01-01',
+        source: ScheduledItemSource.MANUAL,
       };
 
       const result = await request(app)
@@ -102,6 +107,7 @@ describe('mutations: ScheduledItem', () => {
         approvedItemExternalId: 'not-a-valid-id-at-all',
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
+        source: ScheduledItemSource.MANUAL,
       };
 
       const result = await request(app)
@@ -159,6 +165,7 @@ describe('mutations: ScheduledItem', () => {
         approvedItemExternalId: item.externalId,
         scheduledSurfaceGuid: existingScheduledEntry.scheduledSurfaceGuid,
         scheduledDate,
+        source: ScheduledItemSource.MANUAL,
       };
 
       const result = await request(app)
@@ -196,6 +203,7 @@ describe('mutations: ScheduledItem', () => {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
+        source: ScheduledItemSource.MANUAL,
       };
 
       const result = await request(app)
@@ -285,6 +293,7 @@ describe('mutations: ScheduledItem', () => {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
+        source: ScheduledItemSource.MANUAL,
       };
 
       const result = await request(app)
@@ -319,6 +328,7 @@ describe('mutations: ScheduledItem', () => {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
+        source: ScheduledItemSource.MANUAL,
       };
 
       const result = await request(app)
@@ -353,6 +363,7 @@ describe('mutations: ScheduledItem', () => {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
+        source: ScheduledItemSource.MANUAL,
       };
 
       const result = await request(app)

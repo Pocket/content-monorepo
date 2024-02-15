@@ -9,7 +9,7 @@ import config from '../config';
 import { getUnixTimestamp } from '../shared/utils';
 import { ApprovedItem } from '../database/types';
 import { CuratedStatus, RejectedCuratedCorpusItem } from '@prisma/client';
-import { CorpusItemSource, Topics } from '../shared/types';
+import { CorpusItemSource, ScheduledItemSource, Topics } from '../shared/types';
 
 describe('CuratedCorpusEventEmitter', () => {
   const emitter = new CuratedCorpusEventEmitter();
@@ -18,11 +18,11 @@ describe('CuratedCorpusEventEmitter', () => {
   const handler = jest.fn();
 
   Object.values(ReviewedCorpusItemEventType).forEach((event: string) =>
-    emitter.on(event, handler)
+    emitter.on(event, handler),
   );
 
   Object.values(ScheduledCorpusItemEventType).forEach((event: string) =>
-    emitter.on(event, handler)
+    emitter.on(event, handler),
   );
 
   const approvedItem: ApprovedItem = {
@@ -66,6 +66,7 @@ describe('CuratedCorpusEventEmitter', () => {
       updatedBy: null,
       scheduledDate: new Date(),
       approvedItem: approvedItem,
+      source: ScheduledItemSource.MANUAL,
     },
   };
 
@@ -88,7 +89,7 @@ describe('CuratedCorpusEventEmitter', () => {
     // Event is emitted synchronously so don't need to wait
     emitter.emitEvent(
       ReviewedCorpusItemEventType.ADD_ITEM,
-      approvedItemPayload
+      approvedItemPayload,
     );
     const expectedData = {
       ...approvedItemPayload,
@@ -105,7 +106,7 @@ describe('CuratedCorpusEventEmitter', () => {
     // Event is emitted synchronously so don't need to wait
     emitter.emitEvent(
       ReviewedCorpusItemEventType.UPDATE_ITEM,
-      approvedItemPayload
+      approvedItemPayload,
     );
     const expectedData = {
       ...approvedItemPayload,
@@ -122,7 +123,7 @@ describe('CuratedCorpusEventEmitter', () => {
     // Event is emitted synchronously so don't need to wait
     emitter.emitEvent(
       ReviewedCorpusItemEventType.REMOVE_ITEM,
-      approvedItemPayload
+      approvedItemPayload,
     );
     const expectedData = {
       ...approvedItemPayload,
@@ -170,7 +171,7 @@ describe('CuratedCorpusEventEmitter', () => {
   it('should emit an ADD_SCHEDULE event with expected data', () => {
     emitter.emitEvent(
       ScheduledCorpusItemEventType.ADD_SCHEDULE,
-      scheduledItemPayload
+      scheduledItemPayload,
     );
     const expectedData = {
       ...scheduledItemPayload,
@@ -186,7 +187,7 @@ describe('CuratedCorpusEventEmitter', () => {
   it('should emit a REMOVE_SCHEDULE event with expected data', () => {
     emitter.emitEvent(
       ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
-      scheduledItemPayload
+      scheduledItemPayload,
     );
     const expectedData = {
       ...scheduledItemPayload,

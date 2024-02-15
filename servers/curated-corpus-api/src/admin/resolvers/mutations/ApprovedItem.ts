@@ -110,6 +110,8 @@ export async function createApprovedItem(
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid,
         scheduledDate,
+        //TODO: Once the 'source' property is made to be required on the CreateScheduledInput type,
+        //we'd have to pass in a value here. Need to figure out the logic for that if it needs to be ML / MANUAL.
       },
       context.authenticatedUser.username,
     );

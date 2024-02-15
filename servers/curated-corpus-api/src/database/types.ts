@@ -143,7 +143,7 @@ export type CreateScheduledItemInput = {
   approvedItemExternalId: string;
   scheduledSurfaceGuid: string;
   scheduledDate: string;
-  source: ScheduledItemSource;
+  source?: ScheduledItemSource; //TODO: make this required
 };
 
 export type RescheduleScheduledItemInput = {
