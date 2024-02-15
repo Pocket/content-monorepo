@@ -862,9 +862,9 @@ input CreateScheduledCorpusItemInput {
   """
   scheduledDate: Date!
   """
-  Source of the Scheduled Item. Non-nullable. Could be one of: MANUAL or ML
+  Source of the Scheduled Item. Could be one of: MANUAL or ML
   """
-  source: ScheduledItemSource!
+  source: ScheduledItemSource
 }
 
 """
