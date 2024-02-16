@@ -29,7 +29,7 @@
     "supertest": "^6.3.3"
   },
   "devDependencies": {
-    "@faker-js/faker": "8.4.0",
+    "@faker-js/faker": "8.4.1",
     "@types/chai-spies": "1.0.3",
     "@types/jest": "29.5.12",
     "@types/lodash": "4.14.182",

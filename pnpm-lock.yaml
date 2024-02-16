@@ -201,8 +201,8 @@ importers:
         version: 5.7.87
     devDependencies:
       '@faker-js/faker':
-        specifier: 8.4.0
-        version: 8.4.0
+        specifier: 8.4.1
+        version: 8.4.1
       '@types/jest':
         specifier: 29.5.12
         version: 29.5.12
@@ -310,8 +310,8 @@ importers:
         specifier: ^3.341.0
         version: 3.496.0
       '@faker-js/faker':
-        specifier: 8.4.0
-        version: 8.4.0
+        specifier: 8.4.1
+        version: 8.4.1
       '@types/graphql-upload':
         specifier: 8.0.12
         version: 8.0.12
@@ -380,8 +380,8 @@ importers:
         version: 6.3.3
     devDependencies:
       '@faker-js/faker':
-        specifier: 8.4.0
-        version: 8.4.0
+        specifier: 8.4.1
+        version: 8.4.1
       '@types/chai-spies':
         specifier: 1.0.3
         version: 1.0.3
@@ -2888,8 +2888,8 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
-  /@faker-js/faker@8.4.0:
-    resolution: {integrity: sha512-htW87352wzUCdX1jyUQocUcmAaFqcR/w082EC8iP/gtkF0K+aKcBp0hR5Arb7dzR8tQ1TrhE9DNa5EbJELm84w==}
+  /@faker-js/faker@8.4.1:
+    resolution: {integrity: sha512-XQ3cU+Q8Uqmrbf2e0cIC/QN43sTBSC8KF12u29Mb47tWrt2hAgBXSgpZMj4Ao8Uk0iJcU99QsOCaIL8934obCg==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0, npm: '>=6.14.13'}
     dev: true
 
@@ -7327,7 +7327,7 @@ packages:
     dependencies:
       semver: 7.5.4
       shelljs: 0.8.5
-      typescript: 5.4.0-dev.20240207
+      typescript: 5.4.0-dev.20240216
     dev: false
 
   /drange@1.1.1:
@@ -13658,8 +13658,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.4.0-dev.20240207:
-    resolution: {integrity: sha512-BD7gF4QnjiTzOPqstgkgBxANkltT6VsZS6gFjXf7haPWTgrcebvCNQr1yGazb0o18RVtNXeHs6lDbXKqhJhiQQ==}
+  /typescript@5.4.0-dev.20240216:
+    resolution: {integrity: sha512-7BzXktZ/k5MKVGH9g7dErlRV5WLo1D+Zpae6cW3aL2/gyvG2uWkz54vLy3ICKo5j+Qtu/j1mTitMIiE24n1HLg==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
