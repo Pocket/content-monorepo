@@ -32,7 +32,7 @@
     "@faker-js/faker": "8.4.1",
     "@types/chai-spies": "1.0.3",
     "@types/jest": "29.5.12",
-    "@types/lodash": "4.14.182",
+    "@types/lodash": "4.14.202",
     "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
     "lodash": "4.17.21",
