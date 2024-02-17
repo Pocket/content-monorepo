@@ -8,8 +8,9 @@ import {
   insertProspect,
   getProspectById,
   truncateDb,
-  createProspect,
 } from 'prospectapi-common';
+
+import { createProspect } from 'prospectapi-common/test/helpers';
 
 import config from '../../config';
 
