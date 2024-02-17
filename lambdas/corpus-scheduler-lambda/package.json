@@ -5,10 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "test-dev": "jest \"\\.spec\\.ts\"",
+    "test": "jest \"\\.spec\\.ts\"",
     "watch": "tsc -w & nodemon",
     "dev": "npm run build && npm run watch",
-    "test-integrations-dev": "jest \"\\.integration\\.ts\" --runInBand",
     "lint": "eslint --fix-dry-run \"src/**/*.ts\"",
     "format": "eslint --fix \"src/**/*.ts\""
   },
@@ -18,10 +17,13 @@
     "@aws-sdk/client-lambda": "3.504.0",
     "@aws-sdk/client-secrets-manager": "^3.509.0",
     "@sentry/serverless": "7.95.0",
+    "aws-sdk-client-mock": "^3.0.1",
     "curated-corpus-api": "workspace:*",
+    "i": "^0.3.7",
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.5",
     "node-fetch": "^2.6.7",
+    "npm": "^10.4.0",
     "prospectapi-common": "workspace:*"
   },
   "devDependencies": {
