@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "8.4.1",
-    "@types/chai-spies": "1.0.3",
+    "@types/chai-spies": "1.0.6",
     "@types/jest": "29.5.12",
     "@types/lodash": "4.14.182",
     "eslint-config-custom": "workspace:*",
