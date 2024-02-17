@@ -24,7 +24,7 @@
     "tldts": "5.7.87"
   },
   "devDependencies": {
-    "@faker-js/faker": "8.4.0",
+    "@faker-js/faker": "8.4.1",
     "@types/jest": "29.5.12",
     "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",

@@ -10,6 +10,8 @@ import {
   getProspectById,
 } from 'prospectapi-common';
 
+import { parseReasonsCsv, sanitizeText } from 'content-common';
+
 import {
   getProspects,
   updateProspectAsCurated,
@@ -26,8 +28,6 @@ import {
   findAndLogTrueDuplicateProspects,
   deDuplicateProspectUrls,
   prospectToSnowplowProspect,
-  parseReasonsCsv,
-  sanitizeText,
 } from './lib';
 
 import { GetProspectsFilters, Context } from './types';
@@ -166,7 +166,7 @@ export const resolvers = {
         prospectToSnowplowProspect(
           prospect,
           userAuth.username,
-          parseReasonsCsv(reasons),
+          parseReasonsCsv(reasons, config.app.removeReasonMaxLength),
           reasonComment
             ? sanitizeText(reasonComment, config.app.removeReasonMaxLength)
             : null,

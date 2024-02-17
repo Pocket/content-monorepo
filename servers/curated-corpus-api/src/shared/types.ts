@@ -203,6 +203,13 @@ export enum CorpusItemSource {
 }
 // End Pocket shared data
 
+// snowplow-dictated enum for the status of a scheduled corpus item
+export enum ScheduledCorpusItemStatus {
+  ADDED = 'added',
+  REMOVED = 'removed',
+  RESCHEDULED = 'rescheduled',
+}
+
 export type ApprovedItemS3ImageUrl = {
   url: string;
 };

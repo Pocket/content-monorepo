@@ -83,10 +83,10 @@ describe('mutations: ScheduledItem', () => {
 
       // And there is the correct error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `Cannot create a scheduled entry with Scheduled Surface GUID of "RECSAPI".`
+        `Cannot create a scheduled entry with Scheduled Surface GUID of "RECSAPI".`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // Check that the ADD_SCHEDULE event was not fired
@@ -116,7 +116,7 @@ describe('mutations: ScheduledItem', () => {
 
       // And there is the correct error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `Cannot create a scheduled entry: Approved Item with id "not-a-valid-id-at-all" does not exist.`
+        `Cannot create a scheduled entry: Approved Item with id "not-a-valid-id-at-all" does not exist.`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual('NOT_FOUND');
 
@@ -143,14 +143,14 @@ describe('mutations: ScheduledItem', () => {
       // This is the date format for the GraphQL mutation.
       const scheduledDate = DateTime.fromJSDate(
         existingScheduledEntry.scheduledDate,
-        { zone: 'utc' }
+        { zone: 'utc' },
       ).toFormat('yyyy-MM-dd');
 
       // And this human-readable (and cross-locale understandable) format
       // is used in the error message we're anticipating to get.
       const displayDate = DateTime.fromJSDate(
         existingScheduledEntry.scheduledDate,
-        { zone: 'utc' }
+        { zone: 'utc' },
       ).toFormat('MMM d, y');
 
       // Set up the input for the mutation that contains the exact same values
@@ -173,10 +173,10 @@ describe('mutations: ScheduledItem', () => {
 
       // Expecting to see a custom error message from the resolver
       expect(result.body.errors?.[0].message).toContain(
-        `This story is already scheduled to appear on NEW_TAB_EN_US on ${displayDate}.`
+        `This story is already scheduled to appear on NEW_TAB_EN_US on ${displayDate}.`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // Check that the ADD_SCHEDULE event was not fired
@@ -216,7 +216,7 @@ describe('mutations: ScheduledItem', () => {
 
       // Expect these to match the input values
       expect(new Date(scheduledItem.scheduledDate)).toStrictEqual(
-        new Date(input.scheduledDate)
+        new Date(input.scheduledDate),
       );
 
       // Finally, let's compare the returned ApprovedItem object to our inputs.
@@ -238,7 +238,7 @@ describe('mutations: ScheduledItem', () => {
       expect(getUnixTimestamp(createdAt)).toEqual(createdAtReturned);
       expect(getUnixTimestamp(updatedAt)).toEqual(updatedAtReturned);
       expect(otherApprovedItemProps).toMatchObject(
-        otherReturnedApprovedItemProps
+        otherReturnedApprovedItemProps,
       );
 
       // check authors
@@ -262,11 +262,11 @@ describe('mutations: ScheduledItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ScheduledCorpusItemEventType.ADD_SCHEDULE
+        ScheduledCorpusItemEventType.ADD_SCHEDULE,
       );
       // 3- Event has the right entity passed to it.
       expect(
-        await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId,
       ).toEqual(scheduledItem.externalId);
     });
 
@@ -377,7 +377,7 @@ describe('mutations: ScheduledItem', () => {
       const eventTracker = jest.fn();
       eventEmitter.on(
         ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
-        eventTracker
+        eventTracker,
       );
 
       const input: DeleteScheduledItemInput = {
@@ -396,7 +396,7 @@ describe('mutations: ScheduledItem', () => {
 
       // And there is the correct error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `Item with ID of '${input.externalId}' could not be found.`
+        `Item with ID of '${input.externalId}' could not be found.`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual('NOT_FOUND');
 
@@ -409,7 +409,7 @@ describe('mutations: ScheduledItem', () => {
       const eventTracker = jest.fn();
       eventEmitter.on(
         ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
-        eventTracker
+        eventTracker,
       );
 
       const approvedItem = await createApprovedItemHelper(db, {
@@ -426,7 +426,13 @@ describe('mutations: ScheduledItem', () => {
         .set(headers)
         .send({
           query: print(DELETE_SCHEDULED_ITEM),
-          variables: { data: { externalId: scheduledItem.externalId } },
+          variables: {
+            data: {
+              externalId: scheduledItem.externalId,
+              reasons: 'PUBLISHER,TOPIC',
+              reasonComment: 'test comment',
+            },
+          },
         });
 
       // The shape of the Prisma objects the above helpers return doesn't quite match
@@ -435,19 +441,20 @@ describe('mutations: ScheduledItem', () => {
       // of the right shape (if it's ever implemented), laborious property-by-property
       // comparison is the go.
       const returnedItem = result.body.data?.deleteScheduledCorpusItem;
+
       expect(returnedItem.externalId).toEqual(scheduledItem.externalId);
       expect(returnedItem.createdBy).toEqual(scheduledItem.createdBy);
       expect(returnedItem.updatedBy).toEqual(headers.username);
 
       expect(returnedItem.createdAt).toEqual(
-        getUnixTimestamp(scheduledItem.createdAt)
+        getUnixTimestamp(scheduledItem.createdAt),
       );
       expect(returnedItem.updatedAt).toBeCloseTo(
-        getUnixTimestamp(scheduledItem.updatedAt)
+        getUnixTimestamp(scheduledItem.updatedAt),
       );
 
       expect(new Date(returnedItem.scheduledDate)).toStrictEqual(
-        scheduledItem.scheduledDate
+        scheduledItem.scheduledDate,
       );
 
       // Finally, let's compare the returned ApprovedItem object to our inputs.
@@ -469,7 +476,7 @@ describe('mutations: ScheduledItem', () => {
       expect(getUnixTimestamp(createdAt)).toEqual(createdAtReturned);
       expect(getUnixTimestamp(updatedAt)).toEqual(updatedAtReturned);
       expect(otherApprovedItemProps).toMatchObject(
-        otherReturnedApprovedItemProps
+        otherReturnedApprovedItemProps,
       );
 
       // check authors
@@ -493,11 +500,11 @@ describe('mutations: ScheduledItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ScheduledCorpusItemEventType.REMOVE_SCHEDULE
+        ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
       );
       // 3- Event has the right entity passed to it.
       expect(
-        await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId,
       ).toEqual(scheduledItem.externalId);
     });
 
@@ -622,7 +629,7 @@ describe('mutations: ScheduledItem', () => {
 
       // And there is the correct error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `Item with ID of '${input.externalId}' could not be found.`
+        `Item with ID of '${input.externalId}' could not be found.`,
       );
 
       expect(result.body.errors?.[0].extensions?.code).toEqual('NOT_FOUND');
@@ -670,11 +677,11 @@ describe('mutations: ScheduledItem', () => {
       expect(returnedItem.updatedBy).toEqual(headers.username);
 
       expect(returnedItem.createdAt).toEqual(
-        getUnixTimestamp(scheduledItem.createdAt)
+        getUnixTimestamp(scheduledItem.createdAt),
       );
 
       expect(returnedItem.updatedAt).toEqual(
-        getUnixTimestamp(scheduledItem.updatedAt)
+        getUnixTimestamp(scheduledItem.updatedAt),
       );
 
       expect(returnedItem.scheduledDate).toEqual('2050-05-05');
@@ -698,7 +705,7 @@ describe('mutations: ScheduledItem', () => {
       expect(getUnixTimestamp(createdAt)).toEqual(createdAtReturned);
       expect(getUnixTimestamp(updatedAt)).toEqual(updatedAtReturned);
       expect(otherApprovedItemProps).toMatchObject(
-        otherReturnedApprovedItemProps
+        otherReturnedApprovedItemProps,
       );
 
       // check authors
@@ -722,11 +729,11 @@ describe('mutations: ScheduledItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ScheduledCorpusItemEventType.RESCHEDULE
+        ScheduledCorpusItemEventType.RESCHEDULE,
       );
       // 3- Event has the right entity passed to it.
       expect(
-        await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId,
       ).toEqual(scheduledItem.externalId);
     });
 
@@ -770,7 +777,7 @@ describe('mutations: ScheduledItem', () => {
       expect(result.body.data).toBeNull();
 
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // Check that the ADD_SCHEDULE event was not fired

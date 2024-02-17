@@ -1,5 +1,8 @@
 // Helper types and enums used in the schema
-import { CorpusItemSource } from '../../shared/types';
+import {
+  CorpusItemSource,
+  ScheduledCorpusItemStatus,
+} from '../../shared/types';
 
 export type RejectionReason = { reason: string };
 
@@ -199,4 +202,20 @@ export type ScheduledCorpusItem = {
    * The curator who most recently updated the scheduled surface feed schedule.
    */
   updated_by?: string;
+  /**
+   * The list of reasons why the curator set the current status for the scheduled_corpus_item.
+   */
+  status_reasons?: string[];
+  /**
+   * An optional text field for the curator to provide more information about a change in status.
+   */
+  status_reason_comment?: string;
+  /**
+   * The method by which this item was generated. Possible values include ML and MANUAL.
+   */
+  generated_by?: CorpusItemSource;
+  /**
+   * The status of the scheduled_corpus_item, as decided by a curator.
+   */
+  status?: ScheduledCorpusItemStatus;
 };

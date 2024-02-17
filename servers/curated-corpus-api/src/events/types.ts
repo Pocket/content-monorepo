@@ -3,6 +3,7 @@ import {
   ScheduledItem as ScheduledItemModel,
 } from '@prisma/client';
 import { ScheduledItem, CorpusItem, ApprovedItem } from '../database/types';
+import { CorpusItemSource, ScheduledCorpusItemStatus } from '../shared/types';
 
 export enum ReviewedCorpusItemEventType {
   ADD_ITEM = 'ADD_ITEM',
@@ -39,7 +40,16 @@ export type ReviewedCorpusItemPayload = {
 
 // Data for the events that are fired on updates to Scheduled Surface schedule
 export type ScheduledCorpusItemPayload = {
-  scheduledCorpusItem: ScheduledItem;
+  scheduledCorpusItem: ScheduledItem & {
+    // will only be present when unscheduling an item from a limited set of
+    // surfaces. these inform ML of why an item was unscheduled.
+    reasons?: string[];
+    reasonComment?: string;
+    // the method by which this item was generated (MANUAL or ML, for a scheduled item)
+    generated_by?: CorpusItemSource;
+    // the status of the scheduled_corpus_item, as decided by a curator.
+    status?: ScheduledCorpusItemStatus;
+  };
 };
 
 // Base interface for events sent to event bus

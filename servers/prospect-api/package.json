@@ -24,14 +24,15 @@
     "@pocket-tools/apollo-utils": "3.0.0",
     "@pocket-tools/ts-logger": "^1.2.4",
     "@snowplow/node-tracker": "^3.5.0",
+    "content-common": "workspace:*",
     "prospectapi-common": "workspace:*",
     "supertest": "^6.3.3"
   },
   "devDependencies": {
-    "@faker-js/faker": "8.4.0",
+    "@faker-js/faker": "8.4.1",
     "@types/chai-spies": "1.0.3",
     "@types/jest": "29.5.12",
-    "@types/lodash": "4.14.182",
+    "@types/lodash": "4.14.202",
     "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
     "lodash": "4.17.21",
