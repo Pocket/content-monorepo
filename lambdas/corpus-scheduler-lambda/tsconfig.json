@@ -1,6 +1,7 @@
 {
   "extends": "tsconfig/lambda.json",
   "compilerOptions": {
+    "resolveJsonModule": true,
     "outDir": "dist",
     "rootDir": "src"
   },

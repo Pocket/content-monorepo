@@ -1,5 +1,4 @@
 import { CreateApprovedItemInput } from 'curated-corpus-api/src/database/types';
-
 export interface ScheduledCandidate {
     scheduledCandidateId: string;
     scheduledCorpusItem: ScheduledCorpusItem;

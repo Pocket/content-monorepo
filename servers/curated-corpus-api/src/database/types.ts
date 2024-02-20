@@ -64,7 +64,7 @@ export type ApprovedItemAuthor = {
  * These properties are the same for both createApprovedItem and updateApprovedItem
  * mutations.
  */
-export type ApprovedItemRequiredInput = {
+type ApprovedItemRequiredInput = {
   prospectId?: string;
   title: string;
   excerpt: string;

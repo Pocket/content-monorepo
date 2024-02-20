@@ -7,7 +7,6 @@
     "esModuleInterop": true,
     "noEmitHelpers": true,
     "importHelpers": true,
-    "removeComments": true,
-    "resolveJsonModule": true
+    "removeComments": true
   }
 }
