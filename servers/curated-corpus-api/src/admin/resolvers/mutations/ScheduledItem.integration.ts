@@ -221,6 +221,7 @@ describe('mutations: ScheduledItem', () => {
       expect(scheduledItem.createdAt).not.toBeNull();
       expect(scheduledItem.updatedAt).not.toBeNull();
       expect(scheduledItem.createdBy).toEqual(headers.username);
+      expect(scheduledItem.source).toEqual(ScheduledItemSource.MANUAL);
 
       // Expect these to match the input values
       expect(new Date(scheduledItem.scheduledDate)).toStrictEqual(

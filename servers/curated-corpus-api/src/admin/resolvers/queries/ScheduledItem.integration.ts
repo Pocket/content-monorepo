@@ -10,7 +10,7 @@ import {
   createScheduledItemHelper,
 } from '../../../test/helpers';
 import { GET_SCHEDULED_ITEMS } from './sample-queries.gql';
-import { MozillaAccessGroup } from '../../../shared/types';
+import { MozillaAccessGroup, ScheduledItemSource } from '../../../shared/types';
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
 
@@ -62,6 +62,8 @@ describe('queries: ScheduledCorpusItem', () => {
           scheduledSurfaceGuid: 'NEW_TAB_EN_US',
           approvedItem,
           scheduledDate: new Date('2025-05-05').toISOString(),
+          source:
+            i % 2 === 0 ? ScheduledItemSource.MANUAL : ScheduledItemSource.ML,
         });
       }
     });
@@ -116,6 +118,8 @@ describe('queries: ScheduledCorpusItem', () => {
       expect(resultArray[0].syndicatedCount).toBeDefined();
       expect(resultArray[0].totalCount).toBeDefined();
       expect(resultArray[0].scheduledDate).toBeDefined();
+      // we don't have the source property on the first batch of test items
+      expect(resultArray[0].source).not.toBeDefined();
 
       // Check the first item in the first group
       const firstItem = resultArray[0].items[0];
@@ -135,6 +139,43 @@ describe('queries: ScheduledCorpusItem', () => {
       expect(firstItem.approvedItem.excerpt).toBeDefined();
       expect(firstItem.approvedItem.imageUrl).toBeDefined();
       expect(firstItem.approvedItem.createdBy).toBeDefined();
+    });
+
+    it('should return all scheduled items with half being MANUAL and half being ML', async () => {
+      // make a request for scheduled items
+      const scheduledItems = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(GET_SCHEDULED_ITEMS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+              startDate: '2000-01-01',
+              endDate: '2025-05-05',
+            },
+          },
+        });
+
+      // Good to check this here before we get into actual return values
+      expect(scheduledItems.body.errors).toBeUndefined();
+      expect(scheduledItems.body.data).not.toBeNull();
+
+      // should be 10 total items
+      const resultArray = scheduledItems.body.data?.getScheduledCorpusItems;
+      expect(resultArray[0].totalCount).toEqual(10);
+
+      // filter out MANUAL items
+      const manualScheduledItems = resultArray[0].items.filter(
+        (item) => item.source === ScheduledItemSource.MANUAL,
+      );
+      expect(manualScheduledItems.length).toEqual(5);
+
+      // filter out ML items
+      const mlScheduledItems = resultArray[0].items.filter(
+        (item) => item.source === ScheduledItemSource.ML,
+      );
+      expect(mlScheduledItems.length).toEqual(5);
     });
 
     it('should group scheduled items by date', async () => {
@@ -216,7 +257,7 @@ describe('queries: ScheduledCorpusItem', () => {
 
       expect(result.body.errors?.length).toEqual(1);
       expect(result.body.errors?.[0].message).toEqual(
-        'not-a-valid-id-by-any-means is not a valid Scheduled Surface GUID'
+        'not-a-valid-id-by-any-means is not a valid Scheduled Surface GUID',
       );
     });
 
@@ -240,7 +281,7 @@ describe('queries: ScheduledCorpusItem', () => {
 
       expect(result.body.errors?.length).toEqual(1);
       expect(result.body.errors?.[0].message).toEqual(
-        ' is not a valid Scheduled Surface GUID'
+        ' is not a valid Scheduled Surface GUID',
       );
     });
   });
