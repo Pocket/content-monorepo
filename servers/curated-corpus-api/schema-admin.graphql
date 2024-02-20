@@ -621,6 +621,14 @@ input CreateApprovedCorpusItemInput {
   Optionally, specify the GUID of the Scheduled Surface this item should be scheduled for.
   """
   scheduledSurfaceGuid: ID
+  """
+  A comma-separated list of reasons for manually adding an item (only supplied when `source` is MANUAL).
+  """
+  reasons: String
+  """
+  Free-text entered by the curator to give further detail to the reason(s) provided.
+  """
+  reasonComment: String
 }
 
 """
