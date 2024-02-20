@@ -19,7 +19,6 @@
     "@sentry/serverless": "7.95.0",
     "aws-sdk-client-mock": "^3.0.1",
     "curated-corpus-api": "workspace:*",
-    "i": "^0.3.7",
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.5",
     "node-fetch": "^2.6.7",
