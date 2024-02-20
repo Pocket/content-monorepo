@@ -51,6 +51,7 @@ workflows:
           aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
           aws-region: Dev_AWS_DEFAULT_REGION
           scope: corpus-scheduler-aws_lambda
+          s3-bucket: pocket-corpusschedulerlambda-dev-sqs
           requires:
             - corpus_scheduler_lambda_infrastructure_apply_dev
 
@@ -63,6 +64,7 @@ workflows:
           codedeploy-app-name: CorpusSchedulerLambda-Dev-Sqs
           codedeploy-group-name: CorpusSchedulerLambda-Dev-Sqs
           function-name: CorpusSchedulerLambda-Dev-Sqs-Function
+          s3-bucket: pocket-corpusschedulerlambda-dev-sqs
           requires:
             - corpus_scheduler_build_lambda_dev
 
@@ -114,6 +116,7 @@ workflows:
           aws-secret-access-key: Prod_AWS_SECRET_ACCESS_KEY
           aws-region: Prod_AWS_DEFAULT_REGION
           scope: corpus-scheduler-aws_lambda
+          s3-bucket: pocket-corpusschedulerlambda-prod-sqs
           requires:
             - corpus_scheduler_lambda_infrastructure_apply_prod
 
@@ -126,6 +129,7 @@ workflows:
           codedeploy-app-name: CorpusSchedulerLambda-Prod-Sqs
           codedeploy-group-name: CorpusSchedulerLambda-Prod-Sqs
           function-name: CorpusSchedulerLambda-Prod-Sqs-Function
+          s3-bucket: pocket-corpusschedulerlambda-prod-sqs
           requires:
             - corpus_scheduler_build_lambda_prod
 
