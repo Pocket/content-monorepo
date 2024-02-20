@@ -10,6 +10,7 @@ Sentry.AWSLambda.init({
     dsn: config.app.sentry.dsn,
     release: config.app.sentry.release,
     environment: config.app.environment,
+    serverName: config.app.name,
 });
 // temp log statements
 console.log('corpus scheduler lambda')
