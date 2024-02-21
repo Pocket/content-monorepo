@@ -36,7 +36,7 @@ describe('content-common', () => {
 
   describe('sanitizeText', () => {
     it('should not modify a string when it satisfies our conditions already', () => {
-      const string = 'A string! That conforms. To the regex? YES. 20!';
+      const string = 'A string! That conforms. To the regex? YES_IT_DOES. 20!';
 
       expect(sanitizeText(string, maxStringLength)).toEqual(string);
     });
