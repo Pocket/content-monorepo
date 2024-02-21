@@ -26,7 +26,7 @@ export async function getApprovedCorpusItems() {
     try {
         //admin api requires jwt token to fetch to add a scheduledItem
         const bearerToken = 'Bearer '.concat(
-            generateJwt(await getCorpusSchedulerLambdaPrivateKey()),
+            generateJwt(await getCorpusSchedulerLambdaPrivateKey(config.jwt.key)),
         );
         res = await fetch(config.AdminApi, {
             method: 'post',

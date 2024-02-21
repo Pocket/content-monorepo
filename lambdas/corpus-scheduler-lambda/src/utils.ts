@@ -54,11 +54,11 @@ export function generateJwt(privateKey) {
  * https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-secrets-manager/classes/getsecretvaluecommand.html
  * referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/secretManager.ts
  */
-export async function getCorpusSchedulerLambdaPrivateKey() {
+export async function getCorpusSchedulerLambdaPrivateKey(secretId: string) {
     try {
         const secret = await smClient.send(
             new GetSecretValueCommand({
-                SecretId: config.jwt.key,
+                SecretId: secretId,
             }),
         );
 

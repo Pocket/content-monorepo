@@ -75,7 +75,7 @@ describe('utils', function () {
     describe('getCorpusSchedulerLambdaPrivateKey', () => {
         it('should get the CorpusSchedulerLambda/Dev/JWT_KEY secret from SecretsManager', async () => {
             ssmMock.on(GetSecretValueCommand).resolves({SecretString: JSON.stringify({my_secret_key: 'my_secret_value'})});
-            const privateKey = await getCorpusSchedulerLambdaPrivateKey();
+            const privateKey = await getCorpusSchedulerLambdaPrivateKey('secret_key');
             expect(privateKey.my_secret_key).toEqual('my_secret_value');
         });
     });

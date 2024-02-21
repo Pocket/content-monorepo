@@ -43,6 +43,7 @@ const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
     }
 };
 // TEMP: for running the lambda handler locally
+// Remove after automating item scheduling
 // const sqsEvent: SQSEvent = event as unknown as SQSEvent;
 // processor(sqsEvent, null, null);
 
