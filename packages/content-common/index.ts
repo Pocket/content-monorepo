@@ -36,7 +36,7 @@ export const parseReasonsCsv = (
  */
 export const sanitizeText = (input: string, maxLength: number): string => {
   // remove all non-allowed characters and buffering whitespace
-  let sanitized = input.replace(/[^a-zA-Z0-9 \-.!?]/g, '').trim();
+  let sanitized = input.replace(/[^a-zA-Z0-9_ \-.!?]/g, '').trim();
 
   // collapse more than one consecutive space into a single space
   sanitized = sanitized.replace(/  +/g, ' ');
