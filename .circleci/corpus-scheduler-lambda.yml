@@ -39,6 +39,7 @@ workflows:
           stack-output-path: infrastructure/corpus-scheduler-lambda/cdktf.out/stacks/corpus-scheduler-lambda-wrapper
           resource-class: pocket/default-dev
           workspace: Dev
+          save_app_spec: false
           apply: true
           dev: true
 
@@ -104,6 +105,7 @@ workflows:
           stack-output-path: infrastructure/corpus-scheduler-lambda/cdktf.out/stacks/corpus-scheduler-lambda-wrapper
           resource-class: pocket/default-prod
           workspace: Prod
+          save_app_spec: false
           apply: true
           dev: false
 
