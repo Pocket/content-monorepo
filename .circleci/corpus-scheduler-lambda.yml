@@ -62,8 +62,8 @@ workflows:
           for: corpus_scheduler_lambda
           name: corpus_scheduler_code_deploy_lambda_dev
           resource-class: pocket/default-dev
-          codedeploy-app-name: CorpusSchedulerLambda-Dev-Sqs
-          codedeploy-group-name: CorpusSchedulerLambda-Dev-Sqs
+          codedeploy-app-name: CorpusSchedulerLambda-Dev-SQS-Lambda
+          codedeploy-group-name: CorpusSchedulerLambda-Dev-SQS-Lambda
           function-name: CorpusSchedulerLambda-Dev-SQS-Function
           s3-bucket: pocket-corpusschedulerlambda-dev-sqs
           requires:
@@ -128,8 +128,8 @@ workflows:
           for: corpus_scheduler_lambda
           name: corpus_scheduler_code_deploy_lambda_prod
           resource-class: pocket/default-prod
-          codedeploy-app-name: CorpusSchedulerLambda-Prod-Sqs
-          codedeploy-group-name: CorpusSchedulerLambda-Prod-Sqs
+          codedeploy-app-name: CorpusSchedulerLambda-Prod-SQS-Lambda
+          codedeploy-group-name: CorpusSchedulerLambda-Prod-SQS-Lambda
           function-name: CorpusSchedulerLambda-Prod-SQS-Function
           s3-bucket: pocket-corpusschedulerlambda-prod-sqs
           requires:
