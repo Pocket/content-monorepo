@@ -19,8 +19,8 @@ importers:
   infrastructure/corpus-scheduler-lambda:
     dependencies:
       '@pocket-tools/terraform-modules':
-        specifier: 5.5.0
-        version: 5.5.0(ink@3.2.0)(react@17.0.2)
+        specifier: 5.8.1
+        version: 5.8.1(ink@3.2.0)(react@17.0.2)
     devDependencies:
       eslint-config-custom:
         specifier: workspace:*
@@ -32,8 +32,8 @@ importers:
   infrastructure/curated-corpus-api:
     dependencies:
       '@pocket-tools/terraform-modules':
-        specifier: 5.5.0
-        version: 5.5.0(ink@3.2.0)(react@17.0.2)
+        specifier: 5.8.1
+        version: 5.8.1(ink@3.2.0)(react@17.0.2)
     devDependencies:
       eslint-config-custom:
         specifier: workspace:*
@@ -45,8 +45,8 @@ importers:
   infrastructure/prospect-api:
     dependencies:
       '@pocket-tools/terraform-modules':
-        specifier: 5.5.0
-        version: 5.5.0(ink@3.2.0)(react@17.0.2)
+        specifier: 5.8.1
+        version: 5.8.1(ink@3.2.0)(react@17.0.2)
     devDependencies:
       eslint-config-custom:
         specifier: workspace:*
@@ -2778,7 +2778,7 @@ packages:
     dependencies:
       '@babel/code-frame': 7.23.5
       '@babel/parser': 7.23.9
-      '@babel/types': 7.23.6
+      '@babel/types': 7.23.9
     dev: false
 
   /@babel/template@7.23.9:
@@ -4119,8 +4119,8 @@ packages:
       - typescript
     dev: false
 
-  /@pocket-tools/terraform-modules@5.5.0(ink@3.2.0)(react@17.0.2):
-    resolution: {integrity: sha512-/J6J5ATNxeLnpW8PZkjh/5uUxL3FH8D+LUcazxcpzxaPjpYcLal16TyhJzlbearoicNtBQ9/KCsqjfDpSZuIDA==}
+  /@pocket-tools/terraform-modules@5.8.1(ink@3.2.0)(react@17.0.2):
+    resolution: {integrity: sha512-OldtWKzsWn4k13NNZXw8lJNRDNgwnzgvH5DT+LvBG7P46/ZETS94JL4rSBH4/h+XQY8vN1LIiry9E+SAM94OAA==}
     dependencies:
       '@cdktf/provider-archive': 10.0.1(cdktf@0.20.3)(constructs@10.3.0)
       '@cdktf/provider-aws': 19.3.0(cdktf@0.20.3)(constructs@10.3.0)
@@ -7901,7 +7901,7 @@ packages:
     dependencies:
       semver: 7.6.0
       shelljs: 0.8.5
-      typescript: 5.4.0-dev.20240220
+      typescript: 5.5.0-dev.20240221
     dev: false
 
   /drange@1.1.1:
@@ -8054,8 +8054,8 @@ packages:
   /es-get-iterator@1.1.3:
     resolution: {integrity: sha512-sPZmqHBe6JIiTfN5q2pEi//TwxmAFHwj/XEuYjTuse78i8KxaqMTTzxPoFKuzRpDpTJ+0NAbpfenkmH2rePtuw==}
     dependencies:
-      call-bind: 1.0.5
-      get-intrinsic: 1.2.2
+      call-bind: 1.0.7
+      get-intrinsic: 1.2.4
       has-symbols: 1.0.3
       is-arguments: 1.1.1
       is-map: 2.0.2
@@ -9906,8 +9906,8 @@ packages:
     resolution: {integrity: sha512-8Q7EARjzEnKpt/PCD7e1cgUS0a6X8u5tdSiMqXhojOdoV9TsMsiO+9VLC5vAmO8N7/GmXn7yjR8qnA6bVAEzfA==}
     engines: {node: '>= 0.4'}
     dependencies:
-      call-bind: 1.0.5
-      has-tostringtag: 1.0.0
+      call-bind: 1.0.7
+      has-tostringtag: 1.0.1
     dev: false
 
   /is-array-buffer@3.0.2:
@@ -10779,7 +10779,7 @@ packages:
       '@jsii/check-node': 1.93.0
       '@jsii/spec': 1.94.0
       clone: 2.1.2
-      codemaker: 1.93.0
+      codemaker: 1.94.0
       commonmark: 0.30.0
       escape-string-regexp: 4.0.0
       fs-extra: 10.1.0
@@ -10860,7 +10860,7 @@ packages:
       chalk: 4.1.2
       commonmark: 0.30.0
       fast-glob: 3.3.2
-      jsii: 5.3.2
+      jsii: 5.3.20
       semver: 7.6.0
       semver-intersect: 1.5.0
       stream-json: 1.8.0
@@ -10890,7 +10890,7 @@ packages:
     dependencies:
       fs-extra: 9.1.0
       jsii: 5.2.44
-      jsii-pacmak: 1.93.0
+      jsii-pacmak: 1.94.0
       ncp: 2.0.0
       yargs: 15.4.1
     transitivePeerDependencies:
@@ -10931,7 +10931,7 @@ packages:
       downlevel-dts: 0.11.0
       fast-deep-equal: 3.1.3
       log4js: 6.9.1
-      semver: 7.5.4
+      semver: 7.6.0
       semver-intersect: 1.5.0
       sort-json: 2.0.1
       spdx-license-list: 6.8.0
@@ -10997,7 +10997,7 @@ packages:
       downlevel-dts: 0.11.0
       fast-deep-equal: 3.1.3
       log4js: 6.9.1
-      semver: 7.5.4
+      semver: 7.6.0
       semver-intersect: 1.5.0
       sort-json: 2.0.1
       spdx-license-list: 6.8.0
@@ -11777,7 +11777,7 @@ packages:
     resolution: {integrity: sha512-uPEjtyh2tFEvWYt4Jw7McOD5FPcHkcxm/tHZc5PWaDB3JYq0rGFUbgaAK+CT5pYpQddBfsZVWI08OwoRfdfbcQ==}
     engines: {node: '>=10'}
     dependencies:
-      semver: 7.5.4
+      semver: 7.6.0
     dev: false
 
   /node-abort-controller@3.1.1:
@@ -12009,7 +12009,7 @@ packages:
     resolution: {integrity: sha512-3cyDsyHgtmi7I7DfSSI2LDp6SK2lwvtbg0p0R1e0RvTqF5ceGx+K2dfSjm1bKDMVCFEDAQvy+o8c6a7VujOddw==}
     engines: {node: '>= 0.4'}
     dependencies:
-      call-bind: 1.0.5
+      call-bind: 1.0.7
       define-properties: 1.2.1
     dev: false
 
@@ -14317,8 +14317,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.4.0-dev.20240220:
-    resolution: {integrity: sha512-mUiEcRGUeqXn0/xKi0K01LrBOJ4D1zbn5oVpvofeuo/QUTS/y4+r46h34STyDGMc2KnMYJcWUt2XMalady2J1A==}
+  /typescript@5.5.0-dev.20240221:
+    resolution: {integrity: sha512-zAZKYmbJjrjtMiLRDk2y6cDrzziF/ahV0u2ISZ/ZyInDBy/XFIC4R9baJphn6iC004KhdSEKGwy9s+HheBwUlA==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
@@ -14555,7 +14555,7 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       available-typed-arrays: 1.0.6
-      call-bind: 1.0.5
+      call-bind: 1.0.7
       for-each: 0.3.3
       gopd: 1.0.1
       has-tostringtag: 1.0.1
