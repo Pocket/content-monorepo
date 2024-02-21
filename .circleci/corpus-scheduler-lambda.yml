@@ -1,0 +1,160 @@
+workflows:
+  corpus-scheduler-lambda:
+    jobs:
+      ######
+      # Every PR Jobs
+      ######
+      - build_lambda:
+          <<: *not_dev_main
+          context: pocket
+          for: corpus_scheduler_lambda
+          name: corpus_scheduler_build_lambda
+          aws-access-key-id: Dev_AWS_ACCESS_KEY
+          aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
+          aws-region: Dev_AWS_DEFAULT_REGION
+          scope: corpus-scheduler-aws_lambda
+
+      - infrastructure:
+          <<: *not_dev_main
+          context: pocket
+          for: corpus_scheduler_lambda
+          name: corpus_scheduler_lambda_infrastructure_plan_prod
+          scope: corpus-scheduler-lambda-cdk
+          stack-output-path: infrastructure/corpus-scheduler-lambda/cdktf.out/stacks/corpus-scheduler-lambda-wrapper
+          resource-class: pocket/default-prod
+          workspace: Prod
+          dev: false
+          apply: false
+
+      ######
+      # Dev Branch Deployment (Dev Environment)
+      ######
+
+      - infrastructure:
+          <<: *only_dev
+          context: pocket
+          for: corpus_scheduler_lambda
+          name: corpus_scheduler_lambda_infrastructure_apply_dev
+          scope: corpus-scheduler-lambda-cdk
+          stack-output-path: infrastructure/corpus-scheduler-lambda/cdktf.out/stacks/corpus-scheduler-lambda-wrapper
+          resource-class: pocket/default-dev
+          workspace: Dev
+          save_app_spec: false
+          apply: true
+          dev: true
+
+      - build_lambda:
+          <<: *only_dev
+          context: pocket
+          for: corpus_scheduler_lambda
+          name: corpus_scheduler_build_lambda_dev
+          aws-access-key-id: Dev_AWS_ACCESS_KEY
+          aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
+          aws-region: Dev_AWS_DEFAULT_REGION
+          scope: corpus-scheduler-aws_lambda
+          s3-bucket: pocket-corpusschedulerlambda-dev-sqs
+          requires:
+            - corpus_scheduler_lambda_infrastructure_apply_dev
+
+      - code_deploy_lambda:
+          <<: *only_dev
+          context: pocket
+          for: corpus_scheduler_lambda
+          name: corpus_scheduler_code_deploy_lambda_dev
+          resource-class: pocket/default-dev
+          codedeploy-app-name: CorpusSchedulerLambda-Dev-SQS-Lambda
+          codedeploy-group-name: CorpusSchedulerLambda-Dev-SQS-Lambda
+          function-name: CorpusSchedulerLambda-Dev-SQS-Function
+          s3-bucket: pocket-corpusschedulerlambda-dev-sqs
+          requires:
+            - corpus_scheduler_build_lambda_dev
+
+      # Notify sentry of dev deployment
+      - sentry_release_notification:
+          <<: *only_dev
+          name: corpus_scheduler_lambda_sentry-release-notification-dev
+          context: pocket
+          for: corpus_scheduler_lambda
+          sentry_project_name: corpus-scheduler-lambda
+          sentry_env: development
+          sentry_org: pocket
+          requires:
+            - corpus_scheduler_code_deploy_lambda_dev
+
+      # Setup params we may use in Lambdas
+      - setup_deploy_params:
+          <<: *only_dev
+          name: corpus_scheduler_lambda_deploy-params-dev
+          aws_access_key_id: Dev_AWS_ACCESS_KEY
+          aws_secret_access_key: Dev_AWS_SECRET_ACCESS_KEY
+          context: pocket
+          env: Dev
+          service_name: CorpusSchedulerLambda
+          requires:
+            - corpus_scheduler_code_deploy_lambda_dev
+
+      ######
+      # Main Branch Deployment (Prod Environment)
+      ######
+      - infrastructure:
+          <<: *only_main
+          context: pocket
+          for: corpus_scheduler_lambda
+          name: corpus_scheduler_lambda_infrastructure_apply_prod
+          scope: corpus-scheduler-lambda-cdk
+          stack-output-path: infrastructure/corpus-scheduler-lambda/cdktf.out/stacks/corpus-scheduler-lambda-wrapper
+          resource-class: pocket/default-prod
+          workspace: Prod
+          save_app_spec: false
+          apply: true
+          dev: false
+
+      - build_lambda:
+          <<: *only_main
+          context: pocket
+          for: corpus_scheduler_lambda
+          name: corpus_scheduler_build_lambda_prod
+          aws-access-key-id: Prod_AWS_ACCESS_KEY
+          aws-secret-access-key: Prod_AWS_SECRET_ACCESS_KEY
+          aws-region: Prod_AWS_DEFAULT_REGION
+          scope: corpus-scheduler-aws_lambda
+          s3-bucket: pocket-corpusschedulerlambda-prod-sqs
+          requires:
+            - corpus_scheduler_lambda_infrastructure_apply_prod
+
+      - code_deploy_lambda:
+          <<: *only_main
+          context: pocket
+          for: corpus_scheduler_lambda
+          name: corpus_scheduler_code_deploy_lambda_prod
+          resource-class: pocket/default-prod
+          codedeploy-app-name: CorpusSchedulerLambda-Prod-SQS-Lambda
+          codedeploy-group-name: CorpusSchedulerLambda-Prod-SQS-Lambda
+          function-name: CorpusSchedulerLambda-Prod-SQS-Function
+          s3-bucket: pocket-corpusschedulerlambda-prod-sqs
+          requires:
+            - corpus_scheduler_build_lambda_prod
+
+      # Notify sentry of main deployment
+      - sentry_release_notification:
+          <<: *only_main
+          name:  corpus_scheduler_lambda_sentry-release-notification-prod
+          context: pocket
+          for: corpus_scheduler_lambda
+          sentry_project_name: corpus-scheduler-lambda
+          sentry_env: production
+          sentry_org: pocket
+          requires:
+            - corpus_scheduler_code_deploy_lambda_prod
+
+      # Setup params we may use in Lambdas
+      - setup_deploy_params:
+          <<: *only_main
+          name: corpus_scheduler_lambda_deploy-params-prod
+          aws_access_key_id: Prod_AWS_ACCESS_KEY
+          aws_secret_access_key: Prod_AWS_SECRET_ACCESS_KEY
+          context: pocket
+          env: Prod
+          service_name: CorpusSchedulerLambda
+          requires:
+            - corpus_scheduler_code_deploy_lambda_prod

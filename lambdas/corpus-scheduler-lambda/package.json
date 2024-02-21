@@ -1,23 +1,27 @@
 {
-  "name": "prospect-api-bridge-aws_lambda",
+  "name": "corpus-scheduler-aws_lambda",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
     "build": "rm -rf dist && tsc",
     "test": "jest \"\\.spec\\.ts\"",
+    "watch": "tsc -w & nodemon",
+    "dev": "npm run build && npm run watch",
     "lint": "eslint --fix-dry-run \"src/**/*.ts\"",
-    "format": "eslint --fix \"src/**/*.ts\"",
-    "prepare": "ts-patch install && typia patch"
+    "format": "eslint --fix \"src/**/*.ts\""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-eventbridge": "3.504.0",
-    "@aws-sdk/client-firehose": "^3.504.0",
     "@aws-sdk/client-lambda": "3.504.0",
+    "@aws-sdk/client-secrets-manager": "^3.509.0",
     "@sentry/serverless": "7.95.0",
-    "typia": "^5.4.0"
+    "aws-sdk-client-mock": "^3.0.1",
+    "content-common": "workspace:*",
+    "jsonwebtoken": "^9.0.2",
+    "jwk-to-pem": "^2.0.5",
+    "node-fetch": "^2.6.7"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.133",
@@ -25,10 +29,7 @@
     "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
     "ts-jest": "29.1.2",
-    "ts-node": "^10.9.2",
-    "ts-patch": "^3.1.2",
-    "tsconfig": "workspace:*",
-    "typescript": "5.3.3"
+    "tsconfig": "workspace:*"
   },
   "files": [
     "dist",
