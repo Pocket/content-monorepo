@@ -1,5 +1,5 @@
 {
-  "name": "curated-corpus-api-cdk",
+  "name": "corpus-scheduler-lambda-cdk",
   "version": "1.0.0",
   "main": "dist/main.js",
   "types": "dist/main.ts",

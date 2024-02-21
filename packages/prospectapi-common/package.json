@@ -14,7 +14,7 @@
   "license": "ISC",
   "private": true,
   "dependencies": {
-    "@apollo/client": "3.7.16",
+    "@apollo/client": "3.9.5",
     "@aws-sdk/client-dynamodb": "3.504.0",
     "@aws-sdk/lib-dynamodb": "3.504.0",
     "@sentry/node": "6.19.7",
