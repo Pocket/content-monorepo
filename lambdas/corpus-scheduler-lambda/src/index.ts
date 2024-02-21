@@ -2,9 +2,9 @@ import { SQSEvent, SQSHandler } from 'aws-lambda';
 import * as Sentry from '@sentry/serverless';
 
 import config from './config';
-// import event from './event.json';
+import event from './event.json';
 import { getApprovedCorpusItems } from "./createApprovedCorpusItem";
-import {ScheduledCandidate} from "./types";
+import {ScheduledCandidate, ScheduledCandidates} from "./types";
 
 Sentry.AWSLambda.init({
     dsn: config.app.sentry.dsn,
@@ -21,9 +21,11 @@ console.log('corpus scheduler lambda')
 const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
     for await (const record of event.Records) {
         try {
-            const parsedMessage: ScheduledCandidate = JSON.parse(record.body);
-            // temp log statements
-            console.log('parsedMessage: ', parsedMessage);
+            const parsedMessage: ScheduledCandidates = JSON.parse(record.body);
+            // traverse through the parsed candidates array
+            for(const candidate of parsedMessage.candidates) {
+                console.log('candidate: ', candidate);
+            }
             // TODO: validate & map input (https://mozilla-hub.atlassian.net/browse/MC-648)
             // Wait, don't overwhelm the API
             await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -44,8 +46,8 @@ const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
 };
 // TEMP: for running the lambda handler locally
 // Remove after automating item scheduling
-// const sqsEvent: SQSEvent = event as unknown as SQSEvent;
-// processor(sqsEvent, null, null);
+const sqsEvent: SQSEvent = event as unknown as SQSEvent;
+processor(sqsEvent, null, null);
 
 // the actual function has to be wrapped in order for sentry to work
 export const handler = Sentry.AWSLambda.wrapHandler(processor);
