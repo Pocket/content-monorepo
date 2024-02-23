@@ -8,6 +8,7 @@ import { App, S3Backend, TerraformStack } from 'cdktf';
 import { PocketVPC } from '@pocket-tools/terraform-modules';
 import { config } from './config';
 import { CorpusSchedulerSQSLambda } from './corpusSchedulerLambda';
+import { MlIamUserPolicy } from './iam';
 
 class CorpusSchedulerLambdaWraper extends TerraformStack {
   constructor(scope: Construct, name: string) {
@@ -27,10 +28,16 @@ class CorpusSchedulerLambdaWraper extends TerraformStack {
 
     const pocketVPC = new PocketVPC(this, 'pocket-vpc');
 
-    new CorpusSchedulerSQSLambda(
+    const sqsLambda = new CorpusSchedulerSQSLambda(
       this,
       'corpus-scheduler-sqs-lambda',
       pocketVPC,
+    );
+
+    new MlIamUserPolicy(
+      this,
+      'corpus-scheduler-ml-user-policy',
+      sqsLambda.sqsQueue,
     );
   }
 }
