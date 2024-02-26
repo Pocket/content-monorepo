@@ -2,6 +2,11 @@ import {
   AuthenticationError,
   UserInputError,
 } from '@pocket-tools/apollo-utils';
+import { fromUnixTime } from 'date-fns';
+
+import { parseReasonsCsv, sanitizeText } from 'content-common';
+
+import config from '../../../config';
 import {
   createApprovedItem as dbCreateApprovedItem,
   createRejectedItem,
@@ -14,6 +19,7 @@ import {
 } from '../../../database/mutations';
 import { getApprovedItemByUrl } from '../../../database/queries';
 import {
+  ApprovedCorpusItemPayload,
   ReviewedCorpusItemEventType,
   ScheduledCorpusItemEventType,
 } from '../../../events/types';
@@ -38,7 +44,6 @@ import {
 } from '../../../database/types';
 import { IAdminContext } from '../../context';
 import { getScheduledItemByUniqueAttributes } from '../../../database/queries/ScheduledItem';
-import { fromUnixTime } from 'date-fns';
 import { InvalidImageUrl } from '../../aws/errors';
 import { getApprovedItemByExternalId } from '../../../database/queries/ApprovedItem';
 
@@ -95,9 +100,31 @@ export async function createApprovedItem(
     context.authenticatedUser.username,
   );
 
+  // build the payload for event emission
+  // contains properties not stored in this service's db
+  const approvedItemForEvents: ApprovedCorpusItemPayload = {
+    ...approvedItem,
+    // get reasons and reason comment. (these may both be null. they're only
+    // supplied when an item was added manually for limited surfaces.)
+    manualAdditionReasons: parseReasonsCsv(
+      data.manualAdditionReasons,
+      config.app.removeReasonMaxLength,
+    ),
+    // eslint cannot decide what it wants below - it complains about
+    // indentation no matter what i do, so i'm skipping it 🙃
+    /* eslint-disable */
+    manualAdditionReasonsComment: data.reasonComment
+      ? sanitizeText(
+          data.manualAdditionReasonComment,
+          config.app.removeReasonMaxLength,
+        )
+      : null,
+    /* eslint-enable */
+  };
+
   context.emitReviewedCorpusItemEvent(
     ReviewedCorpusItemEventType.ADD_ITEM,
-    approvedItem,
+    approvedItemForEvents,
   );
 
   if (scheduledDate && scheduledSurfaceGuid) {
