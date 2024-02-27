@@ -17,7 +17,7 @@ interface CreateScheduledItemHelperOptionalInput {
   createdBy: string;
   scheduledSurfaceGuid: string;
   scheduledDate: string;
-  source: ScheduledItemSource; //TODO: remove this and move it to the required interface
+  source: ScheduledItemSource;
 }
 
 // the input type the helper function expects - a combo of required and optional parameters
@@ -43,6 +43,7 @@ export async function createScheduledItemHelper(
       faker.date.soon({ days: 7 }).toISOString(),
       faker.date.recent({ days: 7 }).toISOString(),
     ]),
+    source: ScheduledItemSource.MANUAL,
     scheduledSurfaceGuid: 'NEW_TAB_EN_US',
   };
 

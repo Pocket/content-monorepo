@@ -31,6 +31,7 @@ export type ImportScheduledItemInput = {
   createdBy: string;
   updatedAt: Date;
   updatedBy: string;
+  source: ScheduledItemSource;
 };
 
 export type PaginationInput = {
@@ -143,7 +144,7 @@ export type CreateScheduledItemInput = {
   approvedItemExternalId: string;
   scheduledSurfaceGuid: string;
   scheduledDate: string;
-  source?: ScheduledItemSource; //TODO: make this required
+  source: ScheduledItemSource;
 };
 
 export type RescheduleScheduledItemInput = {

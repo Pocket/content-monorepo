@@ -1,7 +1,4 @@
-import {
-  AuthenticationError,
-  UserInputError,
-} from '@pocket-tools/apollo-utils';
+import { AuthenticationError, UserInputError } from '@pocket-tools/apollo-utils';
 import {
   createApprovedItem as dbCreateApprovedItem,
   createRejectedItem,
@@ -10,23 +7,18 @@ import {
   importApprovedItem as dbImportApprovedItem,
   importScheduledItem,
   updateApprovedItem as dbUpdateApprovedItem,
-  updateApprovedItemAuthors as dbUpdateApprovedItemAuthors,
+  updateApprovedItemAuthors as dbUpdateApprovedItemAuthors
 } from '../../../database/mutations';
 import { getApprovedItemByUrl } from '../../../database/queries';
-import {
-  ReviewedCorpusItemEventType,
-  ScheduledCorpusItemEventType,
-} from '../../../events/types';
+import { ReviewedCorpusItemEventType, ScheduledCorpusItemEventType } from '../../../events/types';
 import { uploadImageToS3, uploadImageToS3FromUrl } from '../../aws/upload';
-import {
-  ImportApprovedCorpusItemInput,
-  ImportApprovedCorpusItemPayload,
-} from '../types';
+import { ImportApprovedCorpusItemInput, ImportApprovedCorpusItemPayload } from '../types';
 import {
   ACCESS_DENIED_ERROR,
   ApprovedItemS3ImageUrl,
   RejectionReason,
-  Topics,
+  ScheduledItemSource,
+  Topics
 } from '../../../shared/types';
 import { scheduledSurfaceAllowedValues } from '../../../shared/utils';
 import {
@@ -34,7 +26,7 @@ import {
   CreateRejectedItemInput,
   ImportApprovedItemInput,
   ImportScheduledItemInput,
-  ScheduledItem,
+  ScheduledItem
 } from '../../../database/types';
 import { IAdminContext } from '../../context';
 import { getScheduledItemByUniqueAttributes } from '../../../database/queries/ScheduledItem';
@@ -110,8 +102,8 @@ export async function createApprovedItem(
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid,
         scheduledDate,
-        //TODO: Once the 'source' property is made to be required on the CreateScheduledInput type,
-        //we'd have to pass in a value here. Need to figure out the logic for that if it needs to be ML / MANUAL.
+        // TODO: Pass in value from query argument.
+        source: ScheduledItemSource.MANUAL,
       },
       context.authenticatedUser.username,
     );
@@ -455,5 +447,6 @@ function toDbScheduledItemInput(
     createdBy: data.createdBy,
     updatedAt: fromUnixTime(data.updatedAt),
     updatedBy: data.updatedBy,
+    source: data.scheduledSource,
   };
 }

@@ -57,17 +57,17 @@ model RejectedCuratedCorpusItem {
 }
 
 model ScheduledItem {
-  id                   Int                  @id @default(autoincrement())
-  externalId           String               @unique @default(uuid()) @db.VarChar(255)
+  id                   Int                 @id @default(autoincrement())
+  externalId           String              @unique @default(uuid()) @db.VarChar(255)
   approvedItemId       Int
-  createdAt            DateTime             @default(now())
-  createdBy            String               @db.VarChar(255)
-  updatedAt            DateTime             @updatedAt
-  updatedBy            String?              @db.VarChar(255)
-  scheduledDate        DateTime             @db.Date
-  scheduledSurfaceGuid String               @db.VarChar(50)
-  approvedItem         ApprovedItem         @relation(fields: [approvedItemId], references: [id])
-  source               ScheduledItemSource?
+  createdAt            DateTime            @default(now())
+  createdBy            String              @db.VarChar(255)
+  updatedAt            DateTime            @updatedAt
+  updatedBy            String?             @db.VarChar(255)
+  scheduledDate        DateTime            @db.Date
+  scheduledSurfaceGuid String              @db.VarChar(50)
+  approvedItem         ApprovedItem        @relation(fields: [approvedItemId], references: [id])
+  source               ScheduledItemSource
 
   @@unique([approvedItemId, scheduledSurfaceGuid, scheduledDate], name: "ItemScheduledSurfaceDate")
   @@index([scheduledSurfaceGuid])

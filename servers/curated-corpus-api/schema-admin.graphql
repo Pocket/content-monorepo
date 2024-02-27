@@ -695,6 +695,10 @@ input ImportApprovedCorpusItemInput {
   """
   source: CorpusItemSource!
   """
+  The source of the corpus item.
+  """
+  scheduledSource: ScheduledItemSource!
+  """
   Whether this story is a Pocket Collection.
   """
   isCollection: Boolean

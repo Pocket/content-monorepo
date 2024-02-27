@@ -1,23 +1,21 @@
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
-import { PrismaClient } from '@prisma/client';
+import { CuratedStatus, PrismaClient } from '@prisma/client';
 import { client } from '../../../database/client';
 import FormData from 'form-data';
-import { CuratedStatus } from '@prisma/client';
 import {
   clearDb,
   createApprovedItemHelper,
   createRejectedCuratedCorpusItemHelper,
-  createScheduledItemHelper,
+  createScheduledItemHelper
 } from '../../../test/helpers';
 import {
   CREATE_APPROVED_ITEM,
   IMPORT_APPROVED_ITEM,
   REJECT_APPROVED_ITEM,
   UPDATE_APPROVED_ITEM,
-  UPDATE_APPROVED_ITEM_AUTHORS,
-  // UPLOAD_APPROVED_ITEM_IMAGE,
+  UPDATE_APPROVED_ITEM_AUTHORS
 } from './sample-mutations.gql';
 import {
   ApprovedItem,
@@ -25,21 +23,14 @@ import {
   CreateApprovedItemInput,
   RejectApprovedItemInput,
   UpdateApprovedItemAuthorsInput,
-  UpdateApprovedItemInput,
+  UpdateApprovedItemInput
 } from '../../../database/types';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../events/init';
-import {
-  ReviewedCorpusItemEventType,
-  ScheduledCorpusItemEventType,
-} from '../../../events/types';
+import { ReviewedCorpusItemEventType, ScheduledCorpusItemEventType } from '../../../events/types';
 import Upload from 'graphql-upload/Upload.js';
 import { createReadStream, unlinkSync, writeFileSync } from 'fs';
 import { GET_REJECTED_ITEMS } from '../queries/sample-queries.gql';
-import {
-  CorpusItemSource,
-  MozillaAccessGroup,
-  Topics,
-} from '../../../shared/types';
+import { CorpusItemSource, MozillaAccessGroup, ScheduledItemSource, Topics } from '../../../shared/types';
 import { ImportApprovedCorpusItemInput } from '../types';
 import nock from 'nock';
 import { startServer } from '../../../express';
@@ -1085,6 +1076,7 @@ describe('mutations: ApprovedItem', () => {
       publisher: 'Convective Cloud',
       topic: Topics.TECHNOLOGY,
       source: CorpusItemSource.BACKFILL,
+      scheduledSource: ScheduledItemSource.MANUAL,
       isCollection: false,
       isSyndicated: false,
       createdAt: 1647312676,

@@ -4,30 +4,18 @@ import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '@prisma/client';
 import { client } from '../../../database/client';
 
-import {
-  clearDb,
-  createApprovedItemHelper,
-  createScheduledItemHelper,
-} from '../../../test/helpers';
-import {
-  CREATE_SCHEDULED_ITEM,
-  DELETE_SCHEDULED_ITEM,
-  RESCHEDULE_SCHEDULED_ITEM,
-} from './sample-mutations.gql';
+import { clearDb, createApprovedItemHelper, createScheduledItemHelper } from '../../../test/helpers';
+import { CREATE_SCHEDULED_ITEM, DELETE_SCHEDULED_ITEM, RESCHEDULE_SCHEDULED_ITEM } from './sample-mutations.gql';
 import {
   CreateScheduledItemInput,
   DeleteScheduledItemInput,
-  RescheduleScheduledItemInput,
+  RescheduleScheduledItemInput
 } from '../../../database/types';
 import { getUnixTimestamp } from '../fields/UnixTimestamp';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../events/init';
 import { ScheduledCorpusItemEventType } from '../../../events/types';
 import { DateTime } from 'luxon';
-import {
-  ACCESS_DENIED_ERROR,
-  MozillaAccessGroup,
-  ScheduledItemSource,
-} from '../../../shared/types';
+import { ACCESS_DENIED_ERROR, MozillaAccessGroup, ScheduledItemSource } from '../../../shared/types';
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
 
@@ -144,6 +132,7 @@ describe('mutations: ScheduledItem', () => {
       const existingScheduledEntry = await createScheduledItemHelper(db, {
         approvedItem: item,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+        source: ScheduledItemSource.MANUAL,
       });
 
       // This is the date format for the GraphQL mutation.
@@ -431,6 +420,7 @@ describe('mutations: ScheduledItem', () => {
       const scheduledItem = await createScheduledItemHelper(db, {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         approvedItem,
+        source: ScheduledItemSource.MANUAL,
       });
 
       const result = await request(app)
@@ -534,6 +524,7 @@ describe('mutations: ScheduledItem', () => {
       const scheduledItem = await createScheduledItemHelper(db, {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         approvedItem,
+        source: ScheduledItemSource.MANUAL,
       });
 
       const result = await request(app)
@@ -567,6 +558,7 @@ describe('mutations: ScheduledItem', () => {
       const scheduledItem = await createScheduledItemHelper(db, {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         approvedItem,
+        source: ScheduledItemSource.MANUAL,
       });
 
       const result = await request(app)
@@ -600,6 +592,7 @@ describe('mutations: ScheduledItem', () => {
       const scheduledItem = await createScheduledItemHelper(db, {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         approvedItem,
+        source: ScheduledItemSource.MANUAL,
       });
 
       const result = await request(app)
@@ -663,6 +656,7 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         approvedItem,
         scheduledDate: new Date(2050, 4, 4).toISOString(),
+        source: ScheduledItemSource.MANUAL,
       });
 
       const result = await request(app)
@@ -764,12 +758,14 @@ describe('mutations: ScheduledItem', () => {
         approvedItem: item,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: new Date(2050, 4, 4).toISOString(),
+        source: ScheduledItemSource.MANUAL,
       });
 
       const existingScheduledEntry2 = await createScheduledItemHelper(db, {
         approvedItem: item,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: new Date(2050, 4, 5).toISOString(),
+        source: ScheduledItemSource.MANUAL,
       });
 
       // try to reschedule the second entry for the same date as the first
@@ -811,6 +807,7 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         approvedItem,
         scheduledDate: new Date(2050, 4, 4).toISOString(),
+        source: ScheduledItemSource.MANUAL,
       });
 
       const result = await request(app)
@@ -850,6 +847,7 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         approvedItem,
         scheduledDate: new Date(2050, 4, 4).toISOString(),
+        source: ScheduledItemSource.MANUAL,
       });
 
       const result = await request(app)
@@ -889,6 +887,7 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         approvedItem,
         scheduledDate: new Date(2050, 4, 4).toISOString(),
+        source: ScheduledItemSource.MANUAL,
       });
 
       const result = await request(app)
