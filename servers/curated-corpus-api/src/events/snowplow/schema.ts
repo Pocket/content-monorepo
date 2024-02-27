@@ -69,6 +69,15 @@ export type ReviewedCorpusItem = {
    */
   loaded_from?: CorpusItemSource;
   /**
+   * The reason a curator added the item manually. Filled-in if loaded_from is
+   * set to MANUAL, null for other loaded_from values.
+   */
+  manually_loaded_reasons?: string[];
+  /**
+   * An optional comment added by the curator when adding an item manually.
+   */
+  manually_loaded_reason_comment?: string;
+  /**
    * The decision by the curator on the item’s validity for the curated corpus.
    */
   corpus_review_status: CorpusReviewStatus;
