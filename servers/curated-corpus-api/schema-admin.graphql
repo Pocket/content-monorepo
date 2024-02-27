@@ -646,7 +646,7 @@ input CreateApprovedCorpusItemInput {
   """
   Optionally, specify the source of the scheduled item.
   """
-  scheduledSource: CorpusItemSource
+  scheduledSource: ScheduledItemSource
   """
   A comma-separated list of reasons for manually adding an item (only supplied when `source` is MANUAL).
   """
