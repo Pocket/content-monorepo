@@ -255,6 +255,7 @@ describe('mutations: ApprovedItem', () => {
       // extra inputs
       input.scheduledDate = '2100-01-01';
       input.scheduledSurfaceGuid = 'NEW_TAB_EN_US';
+      input.scheduledSource = 'ML';
 
       const result = await request(app)
         .post(graphQLUrl)
@@ -274,6 +275,7 @@ describe('mutations: ApprovedItem', () => {
       // input values from the input before comparison.
       delete input.scheduledDate;
       delete input.scheduledSurfaceGuid;
+      delete input.scheduledSource;
       expect(result.body.data?.createApprovedCorpusItem).toMatchObject(input);
 
       // The `createdBy` field should now be the SSO username of the user

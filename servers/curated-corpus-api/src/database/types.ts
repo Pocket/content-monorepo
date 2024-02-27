@@ -89,6 +89,7 @@ export type CreateApprovedItemInput = ApprovedItemRequiredInput & {
   // on a Scheduled Surface at the same time.
   scheduledDate?: string;
   scheduledSurfaceGuid?: string;
+  scheduledSource?: string;
 };
 
 export type UpdateApprovedItemInput = Omit<
