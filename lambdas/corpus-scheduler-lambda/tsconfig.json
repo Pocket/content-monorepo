@@ -15,6 +15,7 @@
   "exclude": [
     "node_modules",
     "**/*.spec.ts",
+    "**/testHelpers.ts",
     "**/*.integration.ts",
     "jest.config.js",
     "jest.setup.js"

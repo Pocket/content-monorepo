@@ -7,7 +7,7 @@ import {
 import config from './config';
 import {mockClient} from 'aws-sdk-client-mock';
 import {GetSecretValueCommand, SecretsManagerClient,} from '@aws-sdk/client-secrets-manager';
-import {ApprovedItemAuthor, CorpusItemSource} from 'content-common/dist/types';
+import {ApprovedItemAuthor, CorpusItemSource} from 'content-common/types';
 import {CorpusLanguage} from 'prospectapi-common';
 import {createScheduledCandidate, expectedOutput, parserItem} from './testHelpers';
 
