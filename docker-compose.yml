@@ -10,7 +10,7 @@ services:
       - TZ=UTC
 
   localstack:
-    image: localstack/localstack:3.0.2
+    image: localstack/localstack:3.1.0@sha256:9d278167f2b7fda866b8bbe2a077a3fcf2e2f704b024fa76211c7c468428f977
     ports:
       - '4566:4566'
     volumes:

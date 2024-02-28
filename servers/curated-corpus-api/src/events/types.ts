@@ -33,9 +33,19 @@ export type BaseEventData = {
   version: string; // semver (e.g. 1.2.33)
 };
 
+// Data for approved items
+export type ApprovedCorpusItemPayload = ApprovedItem & {
+  // for some surfaces, curators will provide at least one reason and
+  // optionally a comment when manually adding a corpus item.
+  // the purpose here is for ML to know *why* items are manually added
+  // in an effort to improve their modeling.
+  manualAdditionReasons?: string[];
+  manualAdditionReasonsComment?: string;
+};
+
 // Data for the events that are fired on changes to curated items
 export type ReviewedCorpusItemPayload = {
-  reviewedCorpusItem: ApprovedItem | RejectedCuratedCorpusItem;
+  reviewedCorpusItem: ApprovedCorpusItemPayload | RejectedCuratedCorpusItem;
 };
 
 // Data for the events that are fired on updates to Scheduled Surface schedule

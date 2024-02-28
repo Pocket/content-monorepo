@@ -19,6 +19,7 @@ import { getUnixTimestamp } from '../../shared/utils';
 import {
   CorpusItemSource,
   ScheduledCorpusItemStatus,
+  ScheduledItemSource,
   Topics,
 } from '../../shared/types';
 import { getScheduledSurfaceByGuid } from '../../shared/utils';
@@ -38,6 +39,7 @@ const scheduledCorpusItem: ScheduledItem = {
   createdBy: 'Amy',
   updatedAt: new Date(),
   updatedBy: 'Amy',
+  source: ScheduledItemSource.MANUAL,
 
   approvedItem: {
     id: 123,

@@ -113,19 +113,15 @@ export class BridgeSqsLambda extends Construct {
           },
         ],
       }).json,
-      // provider: config.provider,
       tags: config.tags,
     });
 
     const iamUser = new IamUser(this, 'iam_user', {
       name: `${config.prefix}-Queue-User`,
       tags: config.tags,
-      // provider: this.config.provider,
-      permissionsBoundary: iamUserPolicy.arn,
     });
 
     new IamUserPolicyAttachment(this, 'iam-sqs-user-policy-attachment', {
-      // provider: this.config.provider,
       policyArn: iamUserPolicy.arn,
       user: iamUser.name,
     });

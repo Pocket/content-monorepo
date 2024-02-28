@@ -1,7 +1,11 @@
 import { CuratedStatus } from '@prisma/client';
 import { EventBusHandler } from './EventBusHandler';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
-import { CorpusItemSource, Topics } from '../../shared/types';
+import {
+  CorpusItemSource,
+  ScheduledItemSource,
+  Topics,
+} from '../../shared/types';
 import { ScheduledItem } from '../../database/types';
 import * as Sentry from '@sentry/node';
 import { EventBridgeClient } from '@aws-sdk/client-eventbridge';
@@ -30,6 +34,7 @@ const scheduledCorpusItem: ScheduledItem = {
   createdBy: 'Amy',
   updatedAt: new Date(1648225373000),
   updatedBy: 'Amy',
+  source: ScheduledItemSource.MANUAL,
 
   approvedItem: {
     id: 123,
@@ -57,14 +62,14 @@ const scheduledCorpusItem: ScheduledItem = {
 
 describe('EventBusHandler', () => {
   const clientStub: jest.SpyInstance = jest
-      .spyOn(EventBridgeClient.prototype, 'send')
-      .mockImplementation(() => Promise.resolve({ FailedEntryCount: 0 }));
+    .spyOn(EventBridgeClient.prototype, 'send')
+    .mockImplementation(() => Promise.resolve({ FailedEntryCount: 0 }));
   const sentryStub: jest.SpyInstance = jest
-      .spyOn(Sentry, 'captureException')
-      .mockImplementation(() => '');
+    .spyOn(Sentry, 'captureException')
+    .mockImplementation(() => '');
   const serverLoggerErrorStub: jest.SpyInstance = jest
-      .spyOn(serverLogger, 'error')
-      .mockImplementation(() => Promise.resolve());
+    .spyOn(serverLogger, 'error')
+    .mockImplementation(() => Promise.resolve());
   const emitter = new CuratedCorpusEventEmitter();
   new EventBusHandler(emitter);
   const scheduledEventData: ScheduledCorpusItemPayload = {
@@ -116,7 +121,7 @@ describe('EventBusHandler', () => {
       expect(serverLoggerErrorStub).toHaveBeenCalledTimes(0);
       // Listener was registered on event
       expect(
-        emitter.listeners(ReviewedCorpusItemEventType.UPDATE_ITEM).length
+        emitter.listeners(ReviewedCorpusItemEventType.UPDATE_ITEM).length,
       ).toBe(1);
       // Event was sent to Event Bus
       expect(clientStub).toHaveBeenCalledTimes(1);
@@ -130,7 +135,7 @@ describe('EventBusHandler', () => {
         DetailType: config.eventBridge.updateApprovedItemEventType,
       });
       expect(JSON.parse(sendCommand.Entries[0]['Detail'])).toEqual(
-        expectedEvent
+        expectedEvent,
       );
     });
   });
@@ -203,16 +208,16 @@ describe('EventBusHandler', () => {
           DetailType: eventType,
         });
         expect(JSON.parse(sendCommand.Entries[0]['Detail'])).toEqual(
-          expectedEvent
+          expectedEvent,
         );
-      }
+      },
     );
   });
   it('should log error if any events fail to send', async () => {
     clientStub.mockRestore();
     jest
-        .spyOn(EventBridgeClient.prototype, 'send')
-        .mockImplementationOnce(() => Promise.resolve({ FailedEntryCount: 1 }));
+      .spyOn(EventBridgeClient.prototype, 'send')
+      .mockImplementationOnce(() => Promise.resolve({ FailedEntryCount: 1 }));
     emitter.emit(ScheduledCorpusItemEventType.ADD_SCHEDULE, {
       ...scheduledEventData,
       eventType: ScheduledCorpusItemEventType.ADD_SCHEDULE,
@@ -221,11 +226,11 @@ describe('EventBusHandler', () => {
     await setTimeout(100);
     expect(sentryStub).toHaveBeenCalledTimes(1);
     expect(sentryStub.mock.calls[0][0].message).toContain(
-      `Failed to send event 'add-scheduled-item' to event bus`
+      `Failed to send event 'add-scheduled-item' to event bus`,
     );
     expect(serverLoggerErrorStub).toHaveBeenCalledTimes(1);
     expect(serverLoggerErrorStub.mock.calls[0][0]).toEqual(
-      `sendEvent: Failed to send event to event bus`
+      `sendEvent: Failed to send event to event bus`,
     );
   });
 });
