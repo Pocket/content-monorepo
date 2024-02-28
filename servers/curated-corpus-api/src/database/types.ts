@@ -88,6 +88,9 @@ export type CreateApprovedItemInput = ApprovedItemRequiredInput & {
   // on a Scheduled Surface at the same time.
   scheduledDate?: string;
   scheduledSurfaceGuid?: string;
+  // This is an optional property that may or may not be present at the time
+  // a corpus item is saved in the datastore
+  datePublished?: string;
 };
 
 export type UpdateApprovedItemInput = Omit<

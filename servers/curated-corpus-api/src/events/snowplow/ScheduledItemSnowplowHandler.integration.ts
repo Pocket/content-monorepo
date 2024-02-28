@@ -48,6 +48,7 @@ const scheduledCorpusItem: ScheduledItem = {
     title: 'Everything you need to know about React',
     excerpt: 'Something here',
     publisher: 'Octopus Publishing House',
+    datePublished: null,
     imageUrl: 'https://test.com/image.png',
     language: 'EN',
     topic: Topics.EDUCATION,

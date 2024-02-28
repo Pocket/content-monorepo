@@ -27,6 +27,7 @@ model ApprovedItem {
   status          CuratedStatus        @default(CORPUS)
   language        String               @db.VarChar(2)
   publisher       String               @db.VarChar(255)
+  datePublished   DateTime?            @db.DateTime
   imageUrl        String               @db.VarChar(500)
   topic           String?              @db.VarChar(255)
   isCollection    Boolean              @default(false)

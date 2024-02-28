@@ -36,6 +36,7 @@ const approvedItem: ApprovedItem = {
     { name: 'Mary Shelley', sortOrder: 2 },
   ],
   publisher: 'Octopus Publishing House',
+  datePublished: null,
   imageUrl: 'https://test.com/image.png',
   language: 'EN',
   topic: Topics.EDUCATION,
