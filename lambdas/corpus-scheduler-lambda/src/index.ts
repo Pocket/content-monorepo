@@ -31,7 +31,6 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<SQSBatchRe
             // if scheduled surface found in enum & env is dev, process candidates
             if (Object.values(AllowedScheduledSurfaces).includes('NEW_TAB_EN_US' as AllowedScheduledSurfaces.NewTabEnUs) && config.app.isDev) {
                 await processSQSMessages(record);
-
             }
             // if env is not dev, don't process candidates (for now)
             if (!config.app.isDev) {
