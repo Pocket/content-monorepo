@@ -10,6 +10,33 @@ export enum CorpusItemSource {
     ML = 'ML', // created by ML
 }
 
+export enum CorpusLanguage {
+    EN = 'EN',
+    DE = 'DE',
+    ES = 'ES',
+    FR = 'FR',
+    IT = 'IT',
+}
+
+export enum Topics {
+    BUSINESS = 'BUSINESS',
+    CAREER = 'CAREER',
+    CORONAVIRUS = 'CORONAVIRUS',
+    EDUCATION = 'EDUCATION',
+    ENTERTAINMENT = 'ENTERTAINMENT',
+    FOOD = 'FOOD',
+    GAMING = 'GAMING',
+    HEALTH_FITNESS = 'HEALTH_FITNESS',
+    PARENTING = 'PARENTING',
+    PERSONAL_FINANCE = 'PERSONAL_FINANCE',
+    POLITICS = 'POLITICS',
+    SCIENCE = 'SCIENCE',
+    SELF_IMPROVEMENT = 'SELF_IMPROVEMENT',
+    SPORTS = 'SPORTS',
+    TECHNOLOGY = 'TECHNOLOGY',
+    TRAVEL = 'TRAVEL',
+}
+
 export enum CuratedStatus {
     RECOMMENDATION = 'RECOMMENDATION',
     CORPUS = 'CORPUS'
@@ -39,4 +66,17 @@ export type CreateApprovedItemInput = ApprovedItemRequiredInput & {
     // on a Scheduled Surface at the same time.
     scheduledDate?: string;
     scheduledSurfaceGuid?: string;
+};
+
+export interface UrlMetadata {
+    url: string;
+    imageUrl?: string;
+    publisher?: string;
+    title?: string;
+    excerpt?: string;
+    language?: string;
+    isSyndicated?: boolean;
+    isCollection?: boolean;
+    // authors is a comma separated string
+    authors?: string;
 };

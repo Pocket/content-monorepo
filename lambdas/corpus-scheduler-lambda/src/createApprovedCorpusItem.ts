@@ -1,7 +1,7 @@
 import config from './config';
 import fetch from 'node-fetch';
 import { generateJwt, getCorpusSchedulerLambdaPrivateKey } from './utils';
-import {CreateApprovedItemInput} from 'content-common/types';
+import {CreateApprovedItemInput, UrlMetadata} from 'content-common/dist/types';
 export async function createApprovedCorpusItem(data: CreateApprovedItemInput) {
     const mutation = `
     mutation CreateApprovedCorpusItem($data: CreateApprovedCorpusItemInput!) {
@@ -50,4 +50,39 @@ export async function createApprovedCorpusItem(data: CreateApprovedItemInput) {
         throw new Error(`createApprovedCorpusItem mutation failed: ${result.errors[0].message}`)
     }
     return result;
+}
+
+export async function fetchUrlMetadata(
+    url: string,
+): Promise<UrlMetadata> {
+    const query = `
+      query getUrlMetadata($url: String!) {
+        getUrlMetadata(url: $url) {
+            url
+            title
+            publisher
+            language
+            isSyndicated
+            isCollection
+            imageUrl
+            excerpt
+            authors
+        }
+      }`;
+
+    const variables = { url };
+
+    const res = await fetch(config.AdminApi, {
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query, variables }),
+    });
+    const result = await res.json();
+    if(!result.data && result.errors.length > 0) {
+        throw new Error(`getUrlMetadata query failed: ${result.errors[0].message}`)
+    }
+
+    return result.data.getUrlMetadata;
 }

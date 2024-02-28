@@ -1,6 +1,5 @@
 import {ScheduledCandidate} from './types';
-import {CorpusItemSource} from 'content-common/types';
-import {Topics} from 'prospectapi-common';
+import {CorpusItemSource, Topics} from 'content-common/dist/types';
 import {assert} from 'typia';
 
 /**

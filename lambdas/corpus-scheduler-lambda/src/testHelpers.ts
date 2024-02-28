@@ -1,6 +1,5 @@
 import {ScheduledCandidate, ScheduledCandidates} from './types';
-import {CorpusItemSource, CreateApprovedItemInput, CuratedStatus} from 'content-common/types';
-import {CorpusLanguage, Topics, UrlMetadata} from 'prospectapi-common';
+import {CorpusItemSource, CreateApprovedItemInput, CuratedStatus, CorpusLanguage, Topics, UrlMetadata} from 'content-common/dist/types';
 
 export const createScheduledCandidates = (candidates: ScheduledCandidate[]): ScheduledCandidates => {
     return {

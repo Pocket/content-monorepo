@@ -1,5 +1,5 @@
-import {CorpusLanguage, Topics} from 'prospectapi-common';
-import { CuratedStatus, CorpusItemSource } from  'content-common/types';
+import { CuratedStatus, CorpusItemSource, CorpusLanguage, Topics } from  'content-common/types';
+
 export interface ScheduledCandidates {
     candidates: ScheduledCandidate[];
 }

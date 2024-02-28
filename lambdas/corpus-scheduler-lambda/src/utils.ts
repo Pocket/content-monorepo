@@ -8,12 +8,11 @@ const jwt = require('jsonwebtoken');
 const jwkToPem = require('jwk-to-pem');
 import config from './config';
 import {validateCandidate} from './validation';
-import {ApprovedItemAuthor, CreateApprovedItemInput} from 'content-common/types';
-import {CorpusLanguage, deriveUrlMetadata, UrlMetadata} from 'prospectapi-common';
+import {ApprovedItemAuthor, CreateApprovedItemInput, CorpusLanguage, UrlMetadata} from 'content-common/dist/types';
 import {ScheduledCandidate, ScheduledCandidates} from './types';
 import {assert} from 'typia';
 import {SQSRecord} from 'aws-lambda';
-import {createApprovedCorpusItem} from './createApprovedCorpusItem';
+import {createApprovedCorpusItem, fetchUrlMetadata} from './createApprovedCorpusItem';
 
 // Secrets Manager Client
 const smClient = new SecretsManagerClient({ region: config.aws.region });
@@ -92,7 +91,7 @@ export const mapAuthorToApprovedItemAuthor = (authors: string[]): ApprovedItemAu
 /**
  * Creates a scheduled item to send to createApprovedCorpusItem mutation
  * @param candidate ScheduledCandidate received from Metaflow
- * @param itemMetadata UrlMetadata item from deriveUrlMetadata
+ * @param itemMetadata UrlMetadata item from Parser
  * @return CreateApprovedItemInput
  */
 export const mapScheduledCandidateInputToCreateApprovedItemInput = async (candidate: ScheduledCandidate, itemMetadata: UrlMetadata): Promise<CreateApprovedItemInput> => {
@@ -109,9 +108,9 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (candid
         // validate candidate
         validateCandidate(candidate, topic, source, title, excerpt, imageUrl);
 
-        // the following fields are from primary source = Parser (deriveUrlMetadata)
+        // the following fields are from primary source = Parser
         const publisher = itemMetadata.publisher as string;
-        //Metaflow only grabs the first author even if there are more than 1 authors present, so grab authors from deriveUrlMetadata
+        //Metaflow only grabs the first author even if there are more than 1 authors present, so grab authors from Parser
         const authors = mapAuthorToApprovedItemAuthor(itemMetadata.authors!.split(','));
 
         const itemToSchedule: CreateApprovedItemInput = {
@@ -151,7 +150,8 @@ export const processSQSMessages = async(record: SQSRecord): Promise<void> => {
         // traverse through the parsed candidates array
         for (const candidate of parsedMessage.candidates) {
             // get metadata from Parser (used to fill in some data fields not provided by Metaflow)
-            const parserMetadata = await deriveUrlMetadata(candidate.scheduled_corpus_item.url);
+            const parserMetadata = await fetchUrlMetadata(candidate.scheduled_corpus_item.url);
+            console.log('parserMetadata: ', parserMetadata);
             // map Metaflow input to CreateApprovedItemInput
             const createApprovedItemInput = await mapScheduledCandidateInputToCreateApprovedItemInput(candidate, parserMetadata);
             // call createApprovedCorpusItem mutation

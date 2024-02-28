@@ -16,7 +16,7 @@ const config = {
         region: process.env.REGION || 'us-east-1',
     },
     AdminApi: isDev
-        ? process.env.ADMIN_API_URI || 'https://admin-api.getpocket.dev'
+        ? process.env.ADMIN_API_URI || 'http://localhost:4027'
         : process.env.ADMIN_API_URI || 'https://admin-api.getpocket.com',
     jwt: {
         key: process.env.JWT_KEY || 'CorpusSchedulerLambda/Dev/JWT_KEY',

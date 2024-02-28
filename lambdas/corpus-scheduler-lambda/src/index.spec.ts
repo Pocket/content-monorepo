@@ -5,7 +5,7 @@ import config from './config';
 import {Callback, Context, SQSEvent} from 'aws-lambda';
 import * as CuratedCorpusApi from './createApprovedCorpusItem';
 import {createScheduledCandidate, createScheduledCandidates} from './testHelpers';
-import {CorpusLanguage} from 'prospectapi-common';
+import {CorpusItemSource, CorpusLanguage, CuratedStatus, Topics} from 'content-common/dist/types';
 
 describe('corpus scheduler lambda', () => {
     const scheduledCandidate = createScheduledCandidate(
@@ -31,6 +31,25 @@ describe('corpus scheduler lambda', () => {
         it('returns batch item failure if curated-corpus-api has error, with partial success', async () => {
             expect(Utils.generateJwt('fake-jwt')).toEqual('test-jwt');
             nock(config.AdminApi)
+                .post('/') //parser / prospect-api call
+                .reply(200, {
+                    data: {
+                        getUrlMetadata: {
+                            url: 'https://fake-url.com',
+                            title: 'Fake title',
+                            excerpt: 'fake excerpt',
+                            status: CuratedStatus.RECOMMENDATION,
+                            language: 'EN',
+                            publisher: 'POLITICO',
+                            authors: 'Fake Author',
+                            imageUrl: 'https://fake-image-url.com',
+                            topic: Topics.SELF_IMPROVEMENT,
+                            source: CorpusItemSource.ML,
+                            isCollection: false,
+                            isSyndicated: false,
+                        },
+                    },
+                })
                 .post('/') //curated-corpus-api call for first event
                 .reply(200, {
                     data: {
@@ -78,6 +97,25 @@ describe('corpus scheduler lambda', () => {
 
             //nock the curatedCorpusApi call
             nock(config.AdminApi)
+                .post('/') //parser / prospect-api call
+                .reply(200, {
+                    data: {
+                        getUrlMetadata: {
+                            url: 'https://fake-url.com',
+                            title: 'Fake title',
+                            excerpt: 'fake excerpt',
+                            status: CuratedStatus.RECOMMENDATION,
+                            language: 'EN',
+                            publisher: 'POLITICO',
+                            authors: 'Fake Author',
+                            imageUrl: 'https://fake-image-url.com',
+                            topic: Topics.SELF_IMPROVEMENT,
+                            source: CorpusItemSource.ML,
+                            isCollection: false,
+                            isSyndicated: false,
+                        },
+                    },
+                })
                 .post('/') //curated-corpus-api call
                 .reply(200, {
                     data: {

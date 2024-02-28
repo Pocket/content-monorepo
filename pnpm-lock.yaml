@@ -78,9 +78,6 @@ importers:
       node-fetch:
         specifier: ^2.6.7
         version: 2.7.0
-      prospectapi-common:
-        specifier: workspace:*
-        version: link:../../packages/prospectapi-common
       typia:
         specifier: ^5.4.0
         version: 5.4.0(typescript@5.3.3)

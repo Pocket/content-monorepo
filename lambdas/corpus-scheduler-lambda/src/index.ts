@@ -1,7 +1,7 @@
-import {SQSEvent, SQSHandler, SQSBatchItemFailure, SQSBatchResponse} from 'aws-lambda';
+import {SQSEvent, SQSHandler, SQSBatchItemFailure, SQSBatchResponse, Context, Callback} from 'aws-lambda';
 import * as Sentry from '@sentry/serverless';
 import config from './config';
-// import event from './event.json';
+import event from './event.json';
 import {processSQSMessages} from "./utils";
 
 Sentry.AWSLambda.init({
@@ -47,5 +47,7 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<SQSBatchRe
     }
     return { batchItemFailures: failedItems };
 };
+const sqsEvent: SQSEvent = event as unknown as SQSEvent;
+processor(sqsEvent, null as unknown as Context, null as unknown as Callback);
 // the actual function has to be wrapped in order for sentry to work
 export const handler = Sentry.AWSLambda.wrapHandler(processor);
