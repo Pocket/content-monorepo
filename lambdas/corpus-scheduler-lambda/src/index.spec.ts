@@ -84,8 +84,8 @@ describe('corpus scheduler lambda', () => {
         }, 7000);
 
         it('returns no batch item failures if curated-corpus-api request is successful', async () => {
-            // mock graphQlApiCalls mutation
-            jest.spyOn(CuratedCorpusApi, 'graphQlApiCalls').mockReturnValue(Promise.resolve({
+            // mock createApprovedCorpusItems mutation
+            jest.spyOn(CuratedCorpusApi, 'createApprovedCorpusItem').mockReturnValue(Promise.resolve({
                 data: {
                     createApprovedCorpusItem: {
                         externalId: 'fake-external-id',

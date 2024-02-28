@@ -2,7 +2,12 @@ import config from './config';
 import fetch from 'node-fetch';
 import { generateJwt, getCorpusSchedulerLambdaPrivateKey } from './utils';
 import {CreateApprovedItemInput, UrlMetadata} from 'content-common/dist/types';
-export async function graphQlApiCalls(data: CreateApprovedItemInput) {
+
+/**
+ * Calls the createApprovedCorpusItem mutation in curated-corpus-api.
+ * @param data
+ */
+export async function createApprovedCorpusItem(data: CreateApprovedItemInput) {
     const mutation = `
     mutation CreateApprovedCorpusItem($data: CreateApprovedCorpusItemInput!) {
       createApprovedCorpusItem(data: $data) {
@@ -52,6 +57,10 @@ export async function graphQlApiCalls(data: CreateApprovedItemInput) {
     return result;
 }
 
+/**
+ * Calls the getUrlMetadata query from prospect-api/parser.
+ * @param url the url to get the metadata for
+ */
 export async function fetchUrlMetadata(
     url: string,
 ): Promise<UrlMetadata> {
