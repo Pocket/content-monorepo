@@ -24,8 +24,9 @@ export class CorpusSchedulerSQSLambda extends Construct {
       'corpus-scheduler-sqs-lambda',
       {
         name: `${config.prefix}-SQS`,
-        // set batchSize to something reasonable
-        batchSize: 20,
+        // batch size is 1 so SQS doesn't get smart and try to combine them
+        // (a combined message will mean a skipped candidate set from ML)
+        batchSize: 1,
         batchWindow: 60,
         sqsQueue: {
           visibilityTimeoutSeconds: 150,
