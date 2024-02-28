@@ -12,7 +12,7 @@ import {ApprovedItemAuthor, CreateApprovedItemInput, CorpusLanguage, UrlMetadata
 import {ScheduledCandidate, ScheduledCandidates} from './types';
 import {assert} from 'typia';
 import {SQSRecord} from 'aws-lambda';
-import {createApprovedCorpusItem, fetchUrlMetadata} from './createApprovedCorpusItem';
+import {graphQlApiCalls, fetchUrlMetadata} from './graphQlApiCalls';
 
 // Secrets Manager Client
 const smClient = new SecretsManagerClient({ region: config.aws.region });
@@ -89,7 +89,7 @@ export const mapAuthorToApprovedItemAuthor = (authors: string[]): ApprovedItemAu
 }
 
 /**
- * Creates a scheduled item to send to createApprovedCorpusItem mutation
+ * Creates a scheduled item to send to graphQlApiCalls mutation
  * @param candidate ScheduledCandidate received from Metaflow
  * @param itemMetadata UrlMetadata item from Parser
  * @return CreateApprovedItemInput
@@ -141,7 +141,7 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (candid
 
 /**
  * Process each record from SQS. Transforms Metaflow input into CreateApprovedItemInput & calls the
- * createApprovedCorpusItem mutation
+ * graphQlApiCalls mutation
  * @param record an SQSRecord
  */
 export const processSQSMessages = async(record: SQSRecord): Promise<void> => {
@@ -154,10 +154,10 @@ export const processSQSMessages = async(record: SQSRecord): Promise<void> => {
             console.log('parserMetadata: ', parserMetadata);
             // map Metaflow input to CreateApprovedItemInput
             const createApprovedItemInput = await mapScheduledCandidateInputToCreateApprovedItemInput(candidate, parserMetadata);
-            // call createApprovedCorpusItem mutation
+            // call graphQlApiCalls mutation
             // Wait, don't overwhelm the API
             await new Promise((resolve) => setTimeout(resolve, 2000));
-            const createdItem = await createApprovedCorpusItem(createApprovedItemInput);
+            const createdItem = await graphQlApiCalls(createApprovedItemInput);
             console.log(
                 `CreateApprovedCorpusItem MUTATION OUTPUT: externalId: ${
                     createdItem.data.createApprovedCorpusItem.externalId

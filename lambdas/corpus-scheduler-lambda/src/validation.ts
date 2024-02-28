@@ -13,15 +13,6 @@ import {assert} from 'typia';
 // }
 
 /**
- * Validates the topic. Should be in the Topics enum or '' for topic not in Topics.
- * @param topic topic to be validated
- * @return Topics or ''
- */
-const validateTopic = (topic: Topics | ' '): Topics | ' ' => {
-    return (Object.values(Topics).includes(topic as any)) ? topic : ' ';
-}
-
-/**
  * Validates the source. Should be 'ML'. Reject item if a different source.
  * @param candidate ScheduledCandidate received from Metaflow
  * @param source source to be validated
@@ -67,8 +58,6 @@ export function validateCandidate (candidate: ScheduledCandidate, topic: Topics 
     assert<ScheduledCandidate>(candidate);
     // validate scheduled_corpus_item.source
     validateSource(candidate, source);
-    // validate scheduled_corpus_item.topic Topic
-    candidate.scheduled_corpus_item.topic = validateTopic(topic);
     // validate title, excerpt, imageUrl
     validateTitleExcerptImageUrl(candidate, title, excerpt, imageUrl);
 }

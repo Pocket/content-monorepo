@@ -3,7 +3,7 @@ import * as Utils from './utils';
 import nock from 'nock';
 import config from './config';
 import {Callback, Context, SQSEvent} from 'aws-lambda';
-import * as CuratedCorpusApi from './createApprovedCorpusItem';
+import * as CuratedCorpusApi from './graphQlApiCalls';
 import {createScheduledCandidate, createScheduledCandidates} from './testHelpers';
 import {CorpusItemSource, CorpusLanguage, CuratedStatus, Topics} from 'content-common/dist/types';
 
@@ -84,8 +84,8 @@ describe('corpus scheduler lambda', () => {
         }, 7000);
 
         it('returns no batch item failures if curated-corpus-api request is successful', async () => {
-            // mock createApprovedCorpusItem mutation
-            jest.spyOn(CuratedCorpusApi, 'createApprovedCorpusItem').mockReturnValue(Promise.resolve({
+            // mock graphQlApiCalls mutation
+            jest.spyOn(CuratedCorpusApi, 'graphQlApiCalls').mockReturnValue(Promise.resolve({
                 data: {
                     createApprovedCorpusItem: {
                         externalId: 'fake-external-id',

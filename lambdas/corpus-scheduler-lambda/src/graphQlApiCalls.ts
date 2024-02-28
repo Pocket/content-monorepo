@@ -2,7 +2,7 @@ import config from './config';
 import fetch from 'node-fetch';
 import { generateJwt, getCorpusSchedulerLambdaPrivateKey } from './utils';
 import {CreateApprovedItemInput, UrlMetadata} from 'content-common/dist/types';
-export async function createApprovedCorpusItem(data: CreateApprovedItemInput) {
+export async function graphQlApiCalls(data: CreateApprovedItemInput) {
     const mutation = `
     mutation CreateApprovedCorpusItem($data: CreateApprovedCorpusItemInput!) {
       createApprovedCorpusItem(data: $data) {

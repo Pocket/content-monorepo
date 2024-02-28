@@ -14,7 +14,6 @@ export const createScheduledCandidate = (title?: string, excerpt?: string, image
             status: CuratedStatus.RECOMMENDATION,
             source: source || CorpusItemSource.ML,
             topic: Topics.SELF_IMPROVEMENT,
-            created_by: 'ML',
             scheduled_date: '2024-02-22',
             scheduled_surface_guid: 'NEW_TAB_EN_US',
             title: title,
