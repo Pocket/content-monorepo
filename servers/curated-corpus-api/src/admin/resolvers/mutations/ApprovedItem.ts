@@ -63,7 +63,12 @@ export async function createApprovedItem(
   { data },
   context: IAdminContext,
 ): Promise<ApprovedItem> {
-  const { scheduledDate, scheduledSurfaceGuid, ...approvedItemData } = data;
+  const {
+    scheduledDate,
+    scheduledSurfaceGuid,
+    scheduledSource,
+    ...approvedItemData
+  } = data;
 
   // If this item is being created and scheduled at the same time,
   // the user needs write access to the relevant scheduled surface.
@@ -82,6 +87,7 @@ export async function createApprovedItem(
   if (
     scheduledDate &&
     scheduledSurfaceGuid &&
+    scheduledSource &&
     !scheduledSurfaceAllowedValues.includes(scheduledSurfaceGuid)
   ) {
     throw new UserInputError(
@@ -129,7 +135,7 @@ export async function createApprovedItem(
     approvedItemForEvents,
   );
 
-  if (scheduledDate && scheduledSurfaceGuid) {
+  if (scheduledDate && scheduledSurfaceGuid && scheduledSource) {
     // Note that we create a scheduled item but don't return it
     // in the mutation response. Need to evaluate if we do need to return it
     // alongside the approved item.
@@ -139,8 +145,7 @@ export async function createApprovedItem(
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid,
         scheduledDate,
-        //TODO: Once the 'source' property is made to be required on the CreateScheduledInput type,
-        //we'd have to pass in a value here. Need to figure out the logic for that if it needs to be ML / MANUAL.
+        source: scheduledSource,
       },
       context.authenticatedUser.username,
     );
@@ -484,5 +489,6 @@ function toDbScheduledItemInput(
     createdBy: data.createdBy,
     updatedAt: fromUnixTime(data.updatedAt),
     updatedBy: data.updatedBy,
+    source: data.scheduledSource,
   };
 }

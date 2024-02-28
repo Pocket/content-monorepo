@@ -68,7 +68,7 @@ model ScheduledItem {
   scheduledDate        DateTime             @db.Date
   scheduledSurfaceGuid String               @db.VarChar(50)
   approvedItem         ApprovedItem         @relation(fields: [approvedItemId], references: [id])
-  source               ScheduledItemSource?
+  source               ScheduledItemSource
 
   @@unique([approvedItemId, scheduledSurfaceGuid, scheduledDate], name: "ItemScheduledSurfaceDate")
   @@index([scheduledSurfaceGuid])
