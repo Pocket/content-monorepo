@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const jwkToPem = require('jwk-to-pem');
 import config from './config';
 import {validateCandidate} from './validation';
-import {ApprovedItemAuthor, CreateApprovedItemInput} from 'content-common/dist/types';
+import {ApprovedItemAuthor, CreateApprovedItemInput} from 'content-common/types';
 import {CorpusLanguage, deriveUrlMetadata, UrlMetadata} from 'prospectapi-common';
 import {ScheduledCandidate, ScheduledCandidates} from './types';
 import {assert} from 'typia';

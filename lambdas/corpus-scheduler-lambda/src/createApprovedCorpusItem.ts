@@ -1,7 +1,7 @@
 import config from './config';
 import fetch from 'node-fetch';
 import { generateJwt, getCorpusSchedulerLambdaPrivateKey } from './utils';
-import {CreateApprovedItemInput} from 'content-common/dist/types';
+import {CreateApprovedItemInput} from 'content-common/types';
 export async function createApprovedCorpusItem(data: CreateApprovedItemInput) {
     const mutation = `
     mutation CreateApprovedCorpusItem($data: CreateApprovedCorpusItemInput!) {

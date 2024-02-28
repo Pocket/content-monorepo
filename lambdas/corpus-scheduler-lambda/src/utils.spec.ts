@@ -7,7 +7,7 @@ import {
 import config from './config';
 import {mockClient} from 'aws-sdk-client-mock';
 import {GetSecretValueCommand, SecretsManagerClient,} from '@aws-sdk/client-secrets-manager';
-import {ApprovedItemAuthor} from 'content-common/dist/types';
+import {ApprovedItemAuthor, CorpusItemSource} from 'content-common/dist/types';
 import {CorpusLanguage} from 'prospectapi-common';
 import {createScheduledCandidate, expectedOutput, parserItem} from './testHelpers';
 
@@ -139,6 +139,25 @@ describe('utils', function () {
                 mapScheduledCandidateInputToCreateApprovedItemInput(badScheduledCandidate, parserItem)
             ).rejects.toThrow(`failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
             `Reason: Error: Error on typia.assert(): invalid type on $input.scheduled_corpus_item.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT" | undefined)`);
+        });
+        it('should throw Error on ScheduleCandidate if source is not ML', async () => {
+            const badScheduledCandidate = createScheduledCandidate(
+                'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+                'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+                'https://fake-image-url.com',
+                CorpusLanguage.EN,
+                ['Rebecca Jennings'],
+                undefined,
+                CorpusItemSource.MANUAL
+            );
+
+            await expect(
+                mapScheduledCandidateInputToCreateApprovedItemInput(badScheduledCandidate, parserItem)
+            ).rejects.toThrow(Error);
+            await expect(
+                mapScheduledCandidateInputToCreateApprovedItemInput(badScheduledCandidate, parserItem)
+            ).rejects.toThrow(`failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
+                `Reason: Error: invalid source (MANUAL) for a4b5d99c-4c1b-4d35-bccf-6455c8df07b0`);
         });
         it('should throw Error on CreateApprovedItemInput if field types are wrong', async () => {
             const scheduledCandidate = createScheduledCandidate(

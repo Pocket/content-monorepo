@@ -1,5 +1,5 @@
 import {ScheduledCandidate, ScheduledCandidates} from './types';
-import {CorpusItemSource, CreateApprovedItemInput, CuratedStatus} from 'content-common/dist/types';
+import {CorpusItemSource, CreateApprovedItemInput, CuratedStatus} from 'content-common/types';
 import {CorpusLanguage, Topics, UrlMetadata} from 'prospectapi-common';
 
 export const createScheduledCandidates = (candidates: ScheduledCandidate[]): ScheduledCandidates => {
@@ -7,13 +7,13 @@ export const createScheduledCandidates = (candidates: ScheduledCandidate[]): Sch
         candidates: candidates
     };
 }
-export const createScheduledCandidate = (title?: string, excerpt?: string, imageUrl?: string, language?: CorpusLanguage, authors?: string[], url?:string): ScheduledCandidate => {
+export const createScheduledCandidate = (title?: string, excerpt?: string, imageUrl?: string, language?: CorpusLanguage, authors?: string[], url?:string, source?: CorpusItemSource): ScheduledCandidate => {
     return {
         scheduled_corpus_candidate_id: 'a4b5d99c-4c1b-4d35-bccf-6455c8df07b0',
         scheduled_corpus_item: {
             url: url || 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
             status: CuratedStatus.RECOMMENDATION,
-            source: CorpusItemSource.MANUAL,
+            source: source || CorpusItemSource.ML,
             topic: Topics.SELF_IMPROVEMENT,
             created_by: 'ML',
             scheduled_date: '2024-02-22',
@@ -55,7 +55,7 @@ export const expectedOutput: CreateApprovedItemInput = {
     authors: [ { name: 'Rebecca Jennings', sortOrder: 1 } ],
     imageUrl: 'https://fake-image-url.com',
     topic: Topics.SELF_IMPROVEMENT,
-    source: CorpusItemSource.MANUAL,
+    source: CorpusItemSource.ML,
     isCollection: false,
     isSyndicated: false,
     isTimeSensitive: false,

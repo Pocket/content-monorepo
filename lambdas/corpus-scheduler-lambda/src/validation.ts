@@ -29,7 +29,7 @@ const validateTopic = (topic: Topics | ' '): Topics | ' ' => {
  * @return CorpusItemSource
  */
 function validateSource (candidate: ScheduledCandidate, source: CorpusItemSource) {
-    if (source !== 'MANUAL') {
+    if (source !== 'ML') {
         throw new Error(`invalid source (${source}) for ${candidate.scheduled_corpus_candidate_id}`);
     }
 }
