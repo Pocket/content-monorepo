@@ -9,7 +9,8 @@
     "watch": "tsc -w & nodemon",
     "dev": "npm run build && npm run watch",
     "lint": "eslint --fix-dry-run \"src/**/*.ts\"",
-    "format": "eslint --fix \"src/**/*.ts\""
+    "format": "eslint --fix \"src/**/*.ts\"",
+    "prepare": "ts-patch install && typia patch"
   },
   "author": "",
   "license": "ISC",
@@ -21,7 +22,9 @@
     "content-common": "workspace:*",
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.5",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "typia": "^5.4.0",
+    "prospectapi-common": "workspace:*"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.133",

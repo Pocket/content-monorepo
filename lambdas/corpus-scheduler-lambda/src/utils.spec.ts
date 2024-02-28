@@ -1,12 +1,18 @@
-import {generateJwt, getCorpusSchedulerLambdaPrivateKey} from './utils';
-import config from './config';
-import jwt from 'jsonwebtoken';
-import jwkToPem from 'jwk-to-pem';
-import { mockClient } from 'aws-sdk-client-mock';
 import {
-    GetSecretValueCommand,
-    SecretsManagerClient,
-} from '@aws-sdk/client-secrets-manager';
+    generateJwt,
+    getCorpusSchedulerLambdaPrivateKey,
+    mapAuthorToApprovedItemAuthor,
+    mapScheduledCandidateInputToCreateApprovedItemInput
+} from './utils';
+import config from './config';
+import {mockClient} from 'aws-sdk-client-mock';
+import {GetSecretValueCommand, SecretsManagerClient,} from '@aws-sdk/client-secrets-manager';
+import {ApprovedItemAuthor} from 'content-common/dist/types';
+import {CorpusLanguage} from 'prospectapi-common';
+import {createScheduledCandidate, expectedOutput, parserItem} from './testHelpers';
+
+const jwt = require('jsonwebtoken');
+const jwkToPem = require('jwk-to-pem');
 
 // Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
 describe('utils', function () {
@@ -58,7 +64,7 @@ describe('utils', function () {
 
             const result = jwt.verify(token, jwkToPem(testPublicKey), {
                 complete: true,
-            }) as jwt.Jwt;
+            });
 
             const payload = result.payload;
 
@@ -77,6 +83,80 @@ describe('utils', function () {
             ssmMock.on(GetSecretValueCommand).resolves({SecretString: JSON.stringify({my_secret_key: 'my_secret_value'})});
             const privateKey = await getCorpusSchedulerLambdaPrivateKey('secret_key');
             expect(privateKey.my_secret_key).toEqual('my_secret_value');
+        });
+    });
+    describe('mapAuthorToApprovedItemAuthor', () => {
+        it('should create an ApprovedItemAuthor[] from a string array of author names', async () => {
+            const authors = mapAuthorToApprovedItemAuthor(['Rose Essential', 'Floral Street']);
+            const expectedAuthors: ApprovedItemAuthor[] = [
+                {
+                    name: 'Rose Essential',
+                    sortOrder: 1
+                },
+                {
+                    name: 'Floral Street',
+                    sortOrder: 2
+                }
+            ]
+            expect(authors).toEqual(expectedAuthors);
+        });
+    });
+    describe('mapScheduledCandidateInputToCreateApprovedItemInput', () => {
+        it('should map correctly a ScheduledCandidate to CreateApprovedItemInput', async () => {
+            const scheduledCandidate = createScheduledCandidate(
+                'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+                'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+                'https://fake-image-url.com',
+                CorpusLanguage.EN,
+                ['Rebecca Jennings']
+            );
+            const output = await mapScheduledCandidateInputToCreateApprovedItemInput(scheduledCandidate, parserItem);
+            expect(output).toEqual(expectedOutput);
+        });
+        it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on Parser fields for undefined optional ScheduledCandidate fields', async () => {
+            // all optional fields are undefined and should be taken from the Parser
+            const scheduledCandidate = createScheduledCandidate();
+            expect(scheduledCandidate.scheduled_corpus_item.title).toBeUndefined();
+            expect(scheduledCandidate.scheduled_corpus_item.excerpt).toBeUndefined();
+            expect(scheduledCandidate.scheduled_corpus_item.language).toBeUndefined();
+            expect(scheduledCandidate.scheduled_corpus_item.authors).toBeUndefined();
+            expect(scheduledCandidate.scheduled_corpus_item.image_url).toBeUndefined();
+            const output = await mapScheduledCandidateInputToCreateApprovedItemInput(scheduledCandidate, parserItem);
+            expect(output).toEqual(expectedOutput);
+        });
+        it('should throw Error on ScheduleCandidate if field types are wrong', async () => {
+            const badScheduledCandidate = createScheduledCandidate(
+                undefined,
+                undefined,
+                undefined,
+                'en' as CorpusLanguage, // should be 'EN', typia assert should fail
+            );
+
+            await expect(
+                mapScheduledCandidateInputToCreateApprovedItemInput(badScheduledCandidate, parserItem)
+            ).rejects.toThrow(Error);
+            await expect(
+                mapScheduledCandidateInputToCreateApprovedItemInput(badScheduledCandidate, parserItem)
+            ).rejects.toThrow(`failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
+            `Reason: Error: Error on typia.assert(): invalid type on $input.scheduled_corpus_item.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT" | undefined)`);
+        });
+        it('should throw Error on CreateApprovedItemInput if field types are wrong', async () => {
+            const scheduledCandidate = createScheduledCandidate(
+                'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+                'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+                'https://fake-image-url.com',
+                CorpusLanguage.EN,
+                ['Rebecca Jennings']
+            );
+            parserItem.publisher = 1 as unknown as string; // force publisher to be the wrong type to trigger an Error
+
+            await expect(
+                mapScheduledCandidateInputToCreateApprovedItemInput(scheduledCandidate, parserItem)
+            ).rejects.toThrow(Error);
+            await expect(
+                mapScheduledCandidateInputToCreateApprovedItemInput(scheduledCandidate, parserItem)
+            ).rejects.toThrow(`failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
+            `Reason: Error: Error on typia.assert(): invalid type on $input.publisher, expect to be string`);
         });
     });
 });

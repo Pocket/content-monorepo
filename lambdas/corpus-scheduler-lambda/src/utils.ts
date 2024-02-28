@@ -2,9 +2,16 @@ import {
     GetSecretValueCommand,
     SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
-import jwt from 'jsonwebtoken';
-import jwkToPem from 'jwk-to-pem';
+const jwt = require('jsonwebtoken');
+const jwkToPem = require('jwk-to-pem');
 import config from './config';
+import {validateCandidate} from './validation';
+import {ApprovedItemAuthor, CreateApprovedItemInput} from 'content-common/dist/types';
+import {CorpusLanguage, deriveUrlMetadata, UrlMetadata} from 'prospectapi-common';
+import {ScheduledCandidate, ScheduledCandidates} from './types';
+import {assert} from 'typia';
+import {SQSRecord} from 'aws-lambda';
+import {createApprovedCorpusItem} from './createApprovedCorpusItem';
 
 // Secrets Manager Client
 const smClient = new SecretsManagerClient({ region: config.aws.region });
@@ -28,7 +35,7 @@ type JwtPayload = {
  * https://www.npmjs.com/package/jsonwebtoken
  * referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.ts
  */
-export function generateJwt(privateKey) {
+export function generateJwt(privateKey: any) {
     const now = Math.round(Date.now() / 1000);
 
     const payload: JwtPayload = {
@@ -66,5 +73,100 @@ export async function getCorpusSchedulerLambdaPrivateKey(secretId: string) {
         return JSON.parse(privateKey);
     } catch (e) {
         throw new Error('unable to fetch private key' + e);
+    }
+}
+
+/**
+ * Creates an array of ApprovedItemAuthor from a comma separated string of authors
+ * @param authors comma separated string of authors ordered by contribution (from the Parser)
+ * @return ApprovedItemAuthor[]
+ */
+export const mapAuthorToApprovedItemAuthor = (authors: string[]): ApprovedItemAuthor[] => {
+    return authors.map((author, index) => {
+        return {name: author, sortOrder: index + 1}
+    });
+}
+
+/**
+ * Creates a scheduled item to send to createApprovedCorpusItem mutation
+ * @param candidate ScheduledCandidate received from Metaflow
+ * @param itemMetadata UrlMetadata item from deriveUrlMetadata
+ * @return CreateApprovedItemInput
+ */
+export const mapScheduledCandidateInputToCreateApprovedItemInput = async (candidate: ScheduledCandidate, itemMetadata: UrlMetadata): Promise<CreateApprovedItemInput> => {
+    try {
+        // the following fields are from primary source = Metaflow, fallback on Parser input
+        const title = (candidate.scheduled_corpus_item.title ? candidate.scheduled_corpus_item.title : itemMetadata.title) as string;
+        const excerpt = (candidate.scheduled_corpus_item.excerpt ? candidate.scheduled_corpus_item.excerpt : itemMetadata.excerpt) as string;
+        const source = candidate.scheduled_corpus_item.source;
+        const topic = candidate.scheduled_corpus_item.topic;
+        // using toUpperCase on language returned from parser, as parser returns 'en' instead of 'EN'
+        const language = (candidate.scheduled_corpus_item.language? candidate.scheduled_corpus_item.language : itemMetadata.language!.toUpperCase() as CorpusLanguage) as string;
+        const imageUrl = (candidate.scheduled_corpus_item.image_url ? candidate.scheduled_corpus_item.image_url : itemMetadata.imageUrl) as string;
+
+        // validate candidate
+        validateCandidate(candidate, topic, source, title, excerpt, imageUrl);
+
+        // the following fields are from primary source = Parser (deriveUrlMetadata)
+        const publisher = itemMetadata.publisher as string;
+        //Metaflow only grabs the first author even if there are more than 1 authors present, so grab authors from deriveUrlMetadata
+        const authors = mapAuthorToApprovedItemAuthor(itemMetadata.authors!.split(','));
+
+        const itemToSchedule: CreateApprovedItemInput = {
+            url: candidate.scheduled_corpus_item.url, // source = Metaflow
+            title: title,
+            excerpt: excerpt,
+            status: candidate.scheduled_corpus_item.status, // source = Metaflow
+            language: language,
+            publisher: publisher,
+            authors: authors,
+            imageUrl: imageUrl,
+            topic: topic,
+            source: source, // source = Metaflow
+            isCollection: itemMetadata.isCollection as boolean, // source = Parser
+            isSyndicated: itemMetadata.isSyndicated as boolean, // source = Parser
+            isTimeSensitive: false,
+            scheduledDate: candidate.scheduled_corpus_item.scheduled_date, // source = Metaflow
+            scheduledSurfaceGuid: candidate.scheduled_corpus_item.scheduled_surface_guid // source = Metaflow
+        }
+        // assert itemToSchedule against CreateApprovedItemInput before sending to mutation
+        assert<CreateApprovedItemInput>(itemToSchedule);
+        return itemToSchedule;
+
+    } catch (e) {
+        throw new Error(`failed to map ${candidate.scheduled_corpus_candidate_id} to CreateApprovedItemInput. Reason: ${e}`);
+    }
+}
+
+/**
+ * Process each record from SQS. Transforms Metaflow input into CreateApprovedItemInput & calls the
+ * createApprovedCorpusItem mutation
+ * @param record an SQSRecord
+ */
+export const processSQSMessages = async(record: SQSRecord): Promise<void> => {
+    try {
+        const parsedMessage: ScheduledCandidates = JSON.parse(record.body);
+        // traverse through the parsed candidates array
+        for (const candidate of parsedMessage.candidates) {
+            // get metadata from Parser (used to fill in some data fields not provided by Metaflow)
+            const parserMetadata = await deriveUrlMetadata(candidate.scheduled_corpus_item.url);
+            // map Metaflow input to CreateApprovedItemInput
+            const createApprovedItemInput = await mapScheduledCandidateInputToCreateApprovedItemInput(candidate, parserMetadata);
+            // call createApprovedCorpusItem mutation
+            // Wait, don't overwhelm the API
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            const createdItem = await createApprovedCorpusItem(createApprovedItemInput);
+            console.log(
+                `CreateApprovedCorpusItem MUTATION OUTPUT: externalId: ${
+                    createdItem.data.createApprovedCorpusItem.externalId
+                }, url: ${createdItem.data.createApprovedCorpusItem.url}, title: ${
+                    createdItem.data.createApprovedCorpusItem.title
+                }`,
+            );
+        }
+    } catch (error) {
+        throw new Error(
+            `processSQSMessages failed: ${error}`,
+        );
     }
 }

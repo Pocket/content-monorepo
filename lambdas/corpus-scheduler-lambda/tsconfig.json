@@ -1,9 +1,16 @@
 {
   "extends": "tsconfig/lambda.json",
   "compilerOptions": {
+    "sourceRoot": "/",
     "resolveJsonModule": true,
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "plugins": [
+      {
+        "transform": "typia/lib/transform"
+      }
+    ],
+    "strict": true
   },
   "exclude": [
     "node_modules",

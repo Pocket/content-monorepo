@@ -5,8 +5,9 @@ const config = {
     app: {
         name: 'Corpus-Scheduler-Lambda',
         environment: environment,
+        isDev: isDev,
         sentry: {
-            dsn: process.env.SENTRY_DSN || 'https://4a07d864f9014dac78bae8adfe5e137b@o28549.ingest.sentry.io/4506712835620864',
+            dsn: process.env.SENTRY_DSN || '',
             release: process.env.GIT_SHA || '',
         },
     },
@@ -21,8 +22,8 @@ const config = {
         key: process.env.JWT_KEY || 'CorpusSchedulerLambda/Dev/JWT_KEY',
         iss: process.env.JWT_ISS || 'https://getpocket.com',
         aud: process.env.JWT_AUD || 'https://admin-api.getpocket.com/',
-        name: 'Corpus Scheduler Lambda User',
-        userId: 'corpus-scheduler-lambda-user',
+        name: 'ML Corpus Scheduler Lambda User',
+        userId: 'ML',
         groups: ['mozilliansorg_pocket_scheduled_surface_curator_full'],
     },
 };

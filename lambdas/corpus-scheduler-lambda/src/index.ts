@@ -1,10 +1,8 @@
-import { SQSEvent, SQSHandler } from 'aws-lambda';
+import {SQSEvent, SQSHandler, SQSBatchItemFailure, SQSBatchResponse} from 'aws-lambda';
 import * as Sentry from '@sentry/serverless';
-
 import config from './config';
-import event from './event.json';
-import { getApprovedCorpusItems } from "./createApprovedCorpusItem";
-import {ScheduledCandidate, ScheduledCandidates} from "./types";
+// import event from './event.json';
+import {processSQSMessages} from "./utils";
 
 Sentry.AWSLambda.init({
     dsn: config.app.sentry.dsn,
@@ -12,42 +10,43 @@ Sentry.AWSLambda.init({
     environment: config.app.environment,
     serverName: config.app.name,
 });
+
+enum AllowedScheduledSurfaces {
+    NewTabEnUs = 'NEW_TAB_EN_US'
+}
 // temp log statements
 console.log('corpus scheduler lambda')
 
 /**
  * @param event data from an SQS message - should be an array of items to create / schedule in corpus
+ * @returns SQSBatchResponse (all failed records)
  */
-const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
+export const processor: SQSHandler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
+    // prevents successful records showing up in the queue if there were some failed records
+    // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting
+    const failedItems: SQSBatchItemFailure[] = [];
+
     for await (const record of event.Records) {
         try {
-            const parsedMessage: ScheduledCandidates = JSON.parse(record.body);
-            // traverse through the parsed candidates array
-            for(const candidate of parsedMessage.candidates) {
-                console.log('candidate: ', candidate);
+            // if scheduled surface found in enum & env is dev, process candidates
+            if (Object.values(AllowedScheduledSurfaces).includes('NEW_TAB_EN_US' as AllowedScheduledSurfaces.NewTabEnUs) && config.app.isDev) {
+                await processSQSMessages(record);
+
             }
-            // TODO: validate & map input (https://mozilla-hub.atlassian.net/browse/MC-648)
-            // Wait, don't overwhelm the API
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            // TEMP: call getApprovedCorpusItems query to test admin api auth
-            // TODO: call createApprovedCorpusItem mutation (https://mozilla-hub.atlassian.net/browse/MC-647)
-            const {data} = await getApprovedCorpusItems();
-            console.log(`QUERY RESULT: totalCount: ${data.getApprovedCorpusItems.totalCount}`);
+            // if env is not dev, don't process candidates (for now)
+            if (!config.app.isDev) {
+                console.log(`candidate scheduling is not allowed in ${config.app.environment} environment`);
+            }
         } catch (error) {
+            console.warn(`Unable to process message -> Reason: ${error}`);
             Sentry.captureException(error);
             Sentry.addBreadcrumb({
-                message: `Failed to query curated-corpus-api. Reason: ${error}`,
+                message: `Unable to process message -> Reason: ${error}`,
             });
-            throw new Error(
-                `Failed to query curated-corpus-api. Reason: ${error}`,
-            );
+            failedItems.push({itemIdentifier: record.messageId})
         }
     }
+    return { batchItemFailures: failedItems };
 };
-// TEMP: for running the lambda handler locally
-// Remove after automating item scheduling
-const sqsEvent: SQSEvent = event as unknown as SQSEvent;
-processor(sqsEvent, null, null);
-
 // the actual function has to be wrapped in order for sentry to work
 export const handler = Sentry.AWSLambda.wrapHandler(processor);

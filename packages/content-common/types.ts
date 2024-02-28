@@ -1,15 +1,15 @@
-type ApprovedItemAuthor = {
+export type ApprovedItemAuthor = {
     name: string;
     sortOrder: number;
 };
 
-enum CorpusItemSource {
+export enum CorpusItemSource {
     PROSPECT = 'PROSPECT', //  originated as a prospect in the curation admin tool
     MANUAL = 'MANUAL', // manually entered through the curation admin tool
     BACKFILL = 'BACKFILL', // imported from the legacy database
 }
 
-enum CuratedStatus {
+export enum CuratedStatus {
     RECOMMENDATION = 'RECOMMENDATION',
     CORPUS = 'CORPUS'
 }
