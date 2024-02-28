@@ -2,7 +2,9 @@ import {
     GetSecretValueCommand,
     SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwt = require('jsonwebtoken');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwkToPem = require('jwk-to-pem');
 import config from './config';
 import {validateCandidate} from './validation';

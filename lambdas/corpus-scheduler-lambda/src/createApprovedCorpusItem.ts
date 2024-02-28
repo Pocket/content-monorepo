@@ -31,13 +31,12 @@ export async function createApprovedCorpusItem(data: CreateApprovedItemInput) {
         }
       }
     }`;
-    let res: fetch.Response;
     //admin api requires jwt token to fetch to add a scheduledItem
     const bearerToken = 'Bearer '.concat(
         generateJwt(await getCorpusSchedulerLambdaPrivateKey(config.jwt.key)),
     );
     const variables = { data };
-    res = await fetch(config.AdminApi, {
+    const res = await fetch(config.AdminApi, {
         method: 'post',
         headers: {
             'Content-Type': 'application/json',

@@ -11,7 +11,9 @@ import {ApprovedItemAuthor, CorpusItemSource} from 'content-common/dist/types';
 import {CorpusLanguage} from 'prospectapi-common';
 import {createScheduledCandidate, expectedOutput, parserItem} from './testHelpers';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwt = require('jsonwebtoken');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwkToPem = require('jwk-to-pem');
 
 // Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
