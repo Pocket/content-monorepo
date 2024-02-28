@@ -1,5 +1,6 @@
 const environment = process.env.ENVIRONMENT || 'development';
 const isDev = environment === 'development';
+const snowplowEndpoint = process.env.SNOWPLOW_ENDPOINT || 'localhost:9090';
 
 const config = {
   app: {
@@ -25,6 +26,20 @@ const config = {
     name: 'ML Corpus Scheduler Lambda User',
     userId: 'ML',
     groups: ['mozilliansorg_pocket_scheduled_surface_curator_full'],
+  },
+  snowplow: {
+    endpoint: snowplowEndpoint,
+    httpProtocol: environment === 'production' ? 'https' : 'http',
+    bufferSize: 1,
+    retries: 3,
+    namespace: 'content-engineering',
+    appId: 'corpus-scheduler-lambda',
+    schemas: {
+      // published 2024-02-28
+      scheduled_corpus_candidate: 'iglu:com.pocket/scheduled_corpus_candidate/jsonschema/1-0-2',
+      // published 2024-02-28
+      objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-17',
+    },
   },
 };
 
