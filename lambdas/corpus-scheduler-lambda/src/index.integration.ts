@@ -13,20 +13,30 @@ import {
   CuratedStatus,
   Topics,
 } from 'content-common';
+import {
+  resetSnowplowEvents,
+  waitForSnowplowEvents,
+} from 'content-common/events/snowplow/test-helpers';
+import { extractScheduledCandidateEntity } from './events/testHelpers';
 
 describe('corpus scheduler lambda', () => {
   const server = setupServer();
 
-  const scheduledCandidate = createScheduledCandidate(
-    'Fake title',
-    'fake excerpt',
-    'https://fake-image-url.com',
-    CorpusLanguage.EN,
-    ['Fake Author'],
-    'https://fake-url.com',
-  );
+  const scheduledCandidate = createScheduledCandidate({
+    title: 'Fake title',
+    excerpt: 'fake excerpt',
+    image_url: 'https://fake-image-url.com',
+    language: CorpusLanguage.EN,
+    authors: ['Fake Author'],
+    url: 'https://fake-url.com',
+  });
 
   const record = createScheduledCandidates([scheduledCandidate]);
+  const fakeEvent = {
+    Records: [{ messageId: '1', body: JSON.stringify(record) }],
+  } as unknown as SQSEvent;
+  const sqsContext = null as unknown as Context;
+  const sqsCallback = null as unknown as Callback;
 
   const getUrlMetadataBody = {
     data: {
@@ -87,7 +97,7 @@ describe('corpus scheduler lambda', () => {
     );
   };
 
-  beforeAll(() => server.listen());
+  beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
@@ -100,6 +110,10 @@ describe('corpus scheduler lambda', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  beforeEach(async () => {
+    await resetSnowplowEvents();
   });
 
   it('returns batch item failure if curated-corpus-api has error, with partial success', async () => {
@@ -128,15 +142,7 @@ describe('corpus scheduler lambda', () => {
     mockGetUrlMetadata();
     mockCreateApprovedCorpusItemOnce({ data: null });
 
-    const fakeEvent = {
-      Records: [{ messageId: '1', body: JSON.stringify(record) }],
-    } as unknown as SQSEvent;
-
-    const actual = await processor(
-      fakeEvent,
-      null as unknown as Context,
-      null as unknown as Callback,
-    );
+    const actual = await processor(fakeEvent, sqsContext, sqsCallback);
 
     expect(actual).toEqual({ batchItemFailures: [{ itemIdentifier: '1' }] });
   }, 7000);
@@ -145,16 +151,31 @@ describe('corpus scheduler lambda', () => {
     mockGetUrlMetadata();
     mockCreateApprovedCorpusItemOnce();
 
-    const fakeEvent = {
-      Records: [{ messageId: '1', body: JSON.stringify(record) }],
-    } as unknown as SQSEvent;
-
-    const actual = await processor(
-      fakeEvent,
-      null as unknown as Context,
-      null as unknown as Callback,
-    );
+    const actual = await processor(fakeEvent, sqsContext, sqsCallback);
 
     expect(actual).toEqual({ batchItemFailures: [] });
+  });
+
+  it('emits a Snowplow event if candidate is successfully processed', async () => {
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItemOnce(createApprovedCorpusItemBody);
+
+    await processor(fakeEvent, sqsContext, sqsCallback);
+
+    // Exactly one Snowplow event should be emitted.
+    const allEvents = await waitForSnowplowEvents();
+    expect(allEvents.bad).toEqual(0);
+    expect(allEvents.good).toEqual(record.candidates.length);
+
+    // Check that the right Snowplow entity that was included with the event.
+    const snowplowEntity = await extractScheduledCandidateEntity();
+    expect(snowplowEntity.approved_corpus_item_external_id).toEqual(
+      createApprovedCorpusItemBody.data.createApprovedCorpusItem.externalId,
+    );
+    expect(snowplowEntity.scheduled_corpus_candidate_id).toEqual(
+      record.candidates[0].scheduled_corpus_candidate_id,
+    );
+    expect(snowplowEntity.error_name).toBeUndefined();
+    expect(snowplowEntity.error_description).toBeUndefined();
   });
 });

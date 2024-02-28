@@ -17,10 +17,6 @@ if (!awsEnvironments.includes(process.env.NODE_ENV ?? '')) {
   s3path = `https://${bucket}.s3.amazonaws.com/`;
 }
 
-// Work out the Snowplow HTTP protocol.
-const snowplowHttpProtocol =
-  process.env.NODE_ENV === 'production' ? 'https' : 'http';
-
 // Environment variables below are set in .aws/src/main.ts
 export default {
   app: {
@@ -69,11 +65,6 @@ export default {
     includeLocalVariables: true,
   },
   snowplow: {
-    endpoint: process.env.SNOWPLOW_ENDPOINT || 'localhost:9090',
-    httpProtocol: snowplowHttpProtocol,
-    bufferSize: 1,
-    retries: 3,
-    namespace: 'pocket-backend',
     appId: 'pocket-backend-curated-corpus-api',
     corpusItemEvents: ReviewedCorpusItemEventType,
     corpusScheduleEvents: ScheduledCorpusItemEventType,

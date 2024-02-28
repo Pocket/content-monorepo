@@ -1,11 +1,11 @@
 import { CuratedStatus, RejectedCuratedCorpusItem } from '@prisma/client';
 import {
-  assertValidSnowplowObjectUpdateEvents,
-  getAllSnowplowEvents,
   getGoodSnowplowEvents,
   parseSnowplowData,
   resetSnowplowEvents,
-} from '../../test/helpers/snowplow';
+  waitForSnowplowEvents,
+} from 'content-common/events/snowplow/test-helpers';
+import { assertValidSnowplowObjectUpdateEvents } from '../../test/helpers/snowplow';
 import config from '../../config';
 import {
   ApprovedCorpusItemPayload,
@@ -174,11 +174,8 @@ describe('ReviewedItemSnowplowHandler', () => {
       eventType: ReviewedCorpusItemEventType.REJECT_ITEM,
     });
 
-    // wait a sec * 3
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
     // make sure we only have good events
-    const allEvents = await getAllSnowplowEvents();
+    const allEvents = await waitForSnowplowEvents();
     expect(allEvents.total).toEqual(4);
     expect(allEvents.good).toEqual(4);
     expect(allEvents.bad).toEqual(0);
@@ -213,11 +210,8 @@ describe('ReviewedItemSnowplowHandler', () => {
         eventType: ReviewedCorpusItemEventType.ADD_ITEM,
       });
 
-      // wait a sec * 3
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
       // make sure we only have good events
-      const allEvents = await getAllSnowplowEvents();
+      const allEvents = await waitForSnowplowEvents();
       expect(allEvents.total).toEqual(1);
       expect(allEvents.good).toEqual(1);
       expect(allEvents.bad).toEqual(0);
@@ -252,11 +246,8 @@ describe('ReviewedItemSnowplowHandler', () => {
         eventType: ReviewedCorpusItemEventType.ADD_ITEM,
       });
 
-      // wait a sec * 3
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
       // make sure we only have good events
-      const allEvents = await getAllSnowplowEvents();
+      const allEvents = await waitForSnowplowEvents();
       expect(allEvents.total).toEqual(1);
       expect(allEvents.good).toEqual(1);
       expect(allEvents.bad).toEqual(0);
@@ -290,11 +281,8 @@ describe('ReviewedItemSnowplowHandler', () => {
         eventType: ReviewedCorpusItemEventType.ADD_ITEM,
       });
 
-      // wait a sec * 3
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
       // make sure we only have good events
-      const allEvents = await getAllSnowplowEvents();
+      const allEvents = await waitForSnowplowEvents();
       expect(allEvents.total).toEqual(1);
       expect(allEvents.good).toEqual(1);
       expect(allEvents.bad).toEqual(0);

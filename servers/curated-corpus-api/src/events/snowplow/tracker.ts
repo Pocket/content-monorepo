@@ -1,23 +1,6 @@
-import {
-  gotEmitter,
-  HttpMethod,
-  HttpProtocol,
-  tracker as snowPlowTracker,
-} from '@snowplow/node-tracker';
+import { getEmitter, getTracker } from 'content-common/events/snowplow';
 import config from '../../config';
 
-const emitter = gotEmitter(
-  config.snowplow.endpoint,
-  config.snowplow.httpProtocol as HttpProtocol,
-  undefined,
-  HttpMethod.POST,
-  config.snowplow.bufferSize,
-  config.snowplow.retries
-);
+const emitter = getEmitter();
 
-export const tracker = snowPlowTracker(
-  emitter,
-  config.snowplow.namespace,
-  config.snowplow.appId,
-  true
-);
+export const tracker = getTracker(emitter, config.snowplow.appId);

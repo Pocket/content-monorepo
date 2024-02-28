@@ -15,9 +15,6 @@ Sentry.AWSLambda.init({
   serverName: config.app.name,
 });
 
-// temp log statements
-console.log('corpus scheduler lambda');
-
 /**
  * @param event data from an SQS message - should be an array of items to create / schedule in corpus
  * @returns SQSBatchResponse (all failed records)

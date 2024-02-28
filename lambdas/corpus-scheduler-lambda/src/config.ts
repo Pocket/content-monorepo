@@ -26,6 +26,17 @@ const config = {
     userId: 'ML',
     groups: ['mozilliansorg_pocket_scheduled_surface_curator_full'],
   },
+  snowplow: {
+    // TODO: Set dev value
+    appId: 'corpus-scheduler-lambda',
+    schemas: {
+      // published 2024-02-28
+      scheduled_corpus_candidate:
+        'iglu:com.pocket/scheduled_corpus_candidate/jsonschema/1-0-2',
+      // published 2024-02-28
+      objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-17',
+    },
+  },
 };
 
 export default config;
