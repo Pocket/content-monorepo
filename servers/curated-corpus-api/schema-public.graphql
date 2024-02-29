@@ -72,6 +72,10 @@ type CorpusItem @key(fields: "id") @key(fields: "url") {
     """
     publisher: String!
     """
+    The publication date for this story.
+    """
+    datePublished: Date
+    """
     The image URL for this item's accompanying picture.
     """
     imageUrl: Url!

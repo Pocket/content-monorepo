@@ -98,6 +98,7 @@ export type UpdateApprovedItemInput = Omit<
   'prospectId' | 'source'
 > & {
   externalId: string;
+  datePublished?: string;
 };
 
 export type UpdateApprovedItemAuthorsInput = {
@@ -158,7 +159,7 @@ export type ApprovedItem = ApprovedItemModel & {
 };
 
 /**
- * CorpusTargetType probably mase more sense to be a union of all Pocket types
+ * CorpusTargetType probably makes more sense to be a union of all Pocket types
  * or entities. An incremental step in that direction was chosen. If we want to
  * expand this approach for more systems then we can figure out how to best
  * accomplish when that utility is defined.

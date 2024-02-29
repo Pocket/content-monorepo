@@ -2,6 +2,7 @@ import {
   AuthenticationError,
   UserInputError,
 } from '@pocket-tools/apollo-utils';
+import { fromUnixTime } from 'date-fns';
 import {
   createApprovedItem as dbCreateApprovedItem,
   createRejectedItem,
@@ -12,7 +13,10 @@ import {
   updateApprovedItem as dbUpdateApprovedItem,
   updateApprovedItemAuthors as dbUpdateApprovedItemAuthors,
 } from '../../../database/mutations';
-import { getApprovedItemByUrl } from '../../../database/queries';
+import {
+  getApprovedItemByUrl,
+  getApprovedItemByExternalId,
+} from '../../../database/queries';
 import {
   ReviewedCorpusItemEventType,
   ScheduledCorpusItemEventType,
@@ -38,9 +42,7 @@ import {
 } from '../../../database/types';
 import { IAdminContext } from '../../context';
 import { getScheduledItemByUniqueAttributes } from '../../../database/queries/ScheduledItem';
-import { fromUnixTime } from 'date-fns';
 import { InvalidImageUrl } from '../../aws/errors';
-import { getApprovedItemByExternalId } from '../../../database/queries/ApprovedItem';
 
 /**
  * Creates an approved curated item with data supplied. Optionally, schedules the freshly
