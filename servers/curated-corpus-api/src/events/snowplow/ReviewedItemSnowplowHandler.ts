@@ -1,5 +1,9 @@
 import { CuratedCorpusSnowplowHandler } from './CuratedCorpusSnowplowHandler';
-import { BaseEventData, ReviewedCorpusItemPayload } from '../types';
+import {
+  ApprovedCorpusItemPayload,
+  BaseEventData,
+  ReviewedCorpusItemPayload,
+} from '../types';
 import { buildSelfDescribingEvent, Tracker } from '@snowplow/node-tracker';
 import { SelfDescribingJson } from '@snowplow/tracker-core';
 import config from '../../config';
@@ -14,7 +18,7 @@ import { getUnixTimestamp } from '../../shared/utils';
 import { CuratedStatus, RejectedCuratedCorpusItem } from '@prisma/client';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import { CorpusItemSource } from '../../shared/types';
-import { ApprovedItem, ApprovedItemAuthor } from '../../database/types';
+import { ApprovedItemAuthor } from '../../database/types';
 
 type CuratedCorpusItemUpdateEvent = Omit<SelfDescribingJson, 'data'> & {
   data: CuratedCorpusItemUpdate;
@@ -28,7 +32,7 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
   constructor(
     protected emitter: CuratedCorpusEventEmitter,
     protected tracker: Tracker,
-    events: string[]
+    events: string[],
   ) {
     super(emitter, tracker, events);
   }
@@ -37,13 +41,13 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
    * @param data
    */
   async process(
-    data: ReviewedCorpusItemPayload & BaseEventData
+    data: ReviewedCorpusItemPayload & BaseEventData,
   ): Promise<void> {
     const event = buildSelfDescribingEvent({
       event: ReviewedItemSnowplowHandler.generateItemUpdateEvent(data),
     });
     const context = await ReviewedItemSnowplowHandler.generateEventContext(
-      data
+      data,
     );
     await super.track(event, context);
   }
@@ -52,13 +56,13 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
    * @private
    */
   private static async generateEventContext(
-    data: ReviewedCorpusItemPayload
+    data: ReviewedCorpusItemPayload,
   ): Promise<SelfDescribingJson[]> {
     return [await ReviewedItemSnowplowHandler.generateItemContext(data)];
   }
 
   private static generateItemUpdateEvent(
-    data: ReviewedCorpusItemPayload & BaseEventData
+    data: ReviewedCorpusItemPayload & BaseEventData,
   ): CuratedCorpusItemUpdateEvent {
     return {
       schema: config.snowplow.schemas.objectUpdate,
@@ -73,7 +77,7 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
    * @private
    */
   private static async generateItemContext(
-    data: ReviewedCorpusItemPayload
+    data: ReviewedCorpusItemPayload,
   ): Promise<ReviewedCorpusItemContext> {
     const result: ReviewedCorpusItemPayload = await data;
     const item = result.reviewedCorpusItem;
@@ -113,13 +117,13 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
     // Additionally, send in everything we have for approved curated items
     if (isApprovedItem) {
       context = ReviewedItemSnowplowHandler.generateApprovedItemContext(
-        item as ApprovedItem,
-        context
+        item as ApprovedCorpusItemPayload,
+        context,
       );
     } else {
       context = ReviewedItemSnowplowHandler.generateRejectedItemContext(
         item as RejectedCuratedCorpusItem,
-        context
+        context,
       );
     }
 
@@ -127,8 +131,8 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
   }
 
   private static generateApprovedItemContext(
-    item: ApprovedItem,
-    context: ReviewedCorpusItemContext
+    item: ApprovedCorpusItemPayload,
+    context: ReviewedCorpusItemContext,
   ): ReviewedCorpusItemContext {
     context.data = {
       ...context.data,
@@ -146,6 +150,9 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
       updated_at: getUnixTimestamp(item.updatedAt),
       updated_by: item.updatedBy ?? undefined,
       loaded_from: item.source as CorpusItemSource,
+      manually_loaded_reasons: item.manualAdditionReasons ?? undefined,
+      manually_loaded_reason_comment:
+        item.manualAdditionReasonsComment ?? undefined,
     };
 
     return context;
@@ -153,7 +160,7 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
 
   private static generateRejectedItemContext(
     item: RejectedCuratedCorpusItem,
-    context: ReviewedCorpusItemContext
+    context: ReviewedCorpusItemContext,
   ): ReviewedCorpusItemContext {
     context.data = {
       ...context.data,

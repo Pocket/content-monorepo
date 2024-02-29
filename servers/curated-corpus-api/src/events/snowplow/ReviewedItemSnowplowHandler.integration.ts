@@ -8,6 +8,7 @@ import {
 } from '../../test/helpers/snowplow';
 import config from '../../config';
 import {
+  ApprovedCorpusItemPayload,
   ReviewedCorpusItemEventType,
   ReviewedCorpusItemPayload,
 } from '../types';
@@ -17,13 +18,13 @@ import { tracker } from './tracker';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import { getUnixTimestamp } from '../../shared/utils';
 import { CorpusItemSource, Topics } from '../../shared/types';
-import { ApprovedItem, ApprovedItemAuthor } from '../../database/types';
+import { ApprovedItemAuthor } from '../../database/types';
 
 /**
  * Use a simple mock item instead of using DB helpers
  * so that these tests can be run in the IDE
  */
-const approvedItem: ApprovedItem = {
+const approvedItem: ApprovedCorpusItemPayload = {
   id: 123,
   externalId: '123-abc',
   prospectId: '456-dfg',
@@ -82,35 +83,36 @@ function assertValidSnowplowReviewedItemEvents(data) {
   }
 }
 
+const approvedItemEventContextData = {
+  object_version: ObjectVersion.NEW,
+  approved_corpus_item_external_id: approvedItem.externalId,
+  prospect_id: approvedItem.prospectId,
+  corpus_review_status: CorpusReviewStatus.RECOMMENDATION,
+  url: approvedItem.url,
+  title: approvedItem.title,
+  excerpt: approvedItem.excerpt,
+  publisher: approvedItem.publisher,
+  authors:
+    approvedItem.authors?.map((author: ApprovedItemAuthor) => author.name) ??
+    [],
+  image_url: approvedItem.imageUrl,
+  language: approvedItem.language,
+  topic: approvedItem.topic,
+  is_collection: approvedItem.isCollection,
+  is_time_sensitive: approvedItem.isTimeSensitive,
+  is_syndicated: approvedItem.isSyndicated,
+  created_at: getUnixTimestamp(approvedItem.createdAt),
+  created_by: approvedItem.createdBy,
+  updated_at: getUnixTimestamp(approvedItem.updatedAt),
+  updated_by: approvedItem.updatedBy,
+  loaded_from: CorpusItemSource.PROSPECT,
+};
+
 function assertValidSnowplowApprovedItemEvents(eventContext) {
   expect(eventContext.data).toMatchObject([
     {
       schema: config.snowplow.schemas.reviewedCorpusItem,
-      data: {
-        object_version: ObjectVersion.NEW,
-        approved_corpus_item_external_id: approvedItem.externalId,
-        prospect_id: approvedItem.prospectId,
-        corpus_review_status: CorpusReviewStatus.RECOMMENDATION,
-        url: approvedItem.url,
-        title: approvedItem.title,
-        excerpt: approvedItem.excerpt,
-        publisher: approvedItem.publisher,
-        authors:
-          approvedItem.authors?.map(
-            (author: ApprovedItemAuthor) => author.name,
-          ) ?? [],
-        image_url: approvedItem.imageUrl,
-        language: approvedItem.language,
-        topic: approvedItem.topic,
-        is_collection: approvedItem.isCollection,
-        is_time_sensitive: approvedItem.isTimeSensitive,
-        is_syndicated: approvedItem.isSyndicated,
-        created_at: getUnixTimestamp(approvedItem.createdAt),
-        created_by: approvedItem.createdBy,
-        updated_at: getUnixTimestamp(approvedItem.updatedAt),
-        updated_by: approvedItem.updatedBy,
-        loaded_from: CorpusItemSource.PROSPECT,
-      },
+      data: approvedItemEventContextData,
     },
   ]);
 }
@@ -137,18 +139,19 @@ function assertValidSnowplowRejectedItemEvents(eventContext) {
 }
 
 describe('ReviewedItemSnowplowHandler', () => {
+  const emitter = new CuratedCorpusEventEmitter();
+  new ReviewedItemSnowplowHandler(emitter, tracker, [
+    ReviewedCorpusItemEventType.ADD_ITEM,
+    ReviewedCorpusItemEventType.UPDATE_ITEM,
+    ReviewedCorpusItemEventType.REMOVE_ITEM,
+    ReviewedCorpusItemEventType.REJECT_ITEM,
+  ]);
+
   beforeEach(async () => {
     await resetSnowplowEvents();
   });
 
   it('should send good events to Snowplow', async () => {
-    const emitter = new CuratedCorpusEventEmitter();
-    new ReviewedItemSnowplowHandler(emitter, tracker, [
-      ReviewedCorpusItemEventType.ADD_ITEM,
-      ReviewedCorpusItemEventType.UPDATE_ITEM,
-      ReviewedCorpusItemEventType.REMOVE_ITEM,
-      ReviewedCorpusItemEventType.REJECT_ITEM,
-    ]);
     // Emit all the events that are relevant for approved curated items
     emitter.emit(ReviewedCorpusItemEventType.ADD_ITEM, {
       ...approvedEventData,
@@ -193,5 +196,84 @@ describe('ReviewedItemSnowplowHandler', () => {
       ],
       'reviewed_corpus_item',
     );
+  });
+
+  describe('manual addition reasons for approved items', () => {
+    it('should send a single manual addition reason with no comment', async () => {
+      const approvedItemWithManualAdditionData: ApprovedCorpusItemPayload = {
+        ...approvedItem,
+        manualAdditionReasons: ['TRENDING'],
+      };
+
+      emitter.emit(ReviewedCorpusItemEventType.ADD_ITEM, {
+        reviewedCorpusItem: approvedItemWithManualAdditionData,
+        eventType: ReviewedCorpusItemEventType.ADD_ITEM,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(1);
+      expect(allEvents.bad).toEqual(0);
+
+      const goodEvents = await getGoodSnowplowEvents();
+
+      const eventContext = parseSnowplowData(
+        goodEvents[0].rawEvent.parameters.cx,
+      );
+
+      expect(eventContext.data).toMatchObject([
+        {
+          schema: config.snowplow.schemas.reviewedCorpusItem,
+          data: {
+            ...approvedItemEventContextData,
+            manually_loaded_reasons: ['TRENDING'],
+          },
+        },
+      ]);
+    });
+
+    it('should send a multiple manual addition reasons with a comment', async () => {
+      const approvedItemWithManualAdditionData: ApprovedCorpusItemPayload = {
+        ...approvedItem,
+        manualAdditionReasons: ['TRENDING', 'FORMAT_DIVERSITY', 'OTHER'],
+        manualAdditionReasonsComment: 'this article had a nice image, too',
+      };
+
+      emitter.emit(ReviewedCorpusItemEventType.ADD_ITEM, {
+        reviewedCorpusItem: approvedItemWithManualAdditionData,
+        eventType: ReviewedCorpusItemEventType.ADD_ITEM,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(1);
+      expect(allEvents.bad).toEqual(0);
+
+      const goodEvents = await getGoodSnowplowEvents();
+
+      const eventContext = parseSnowplowData(
+        goodEvents[0].rawEvent.parameters.cx,
+      );
+
+      expect(eventContext.data).toMatchObject([
+        {
+          schema: config.snowplow.schemas.reviewedCorpusItem,
+          data: {
+            ...approvedItemEventContextData,
+            manually_loaded_reasons: ['TRENDING', 'FORMAT_DIVERSITY', 'OTHER'],
+            manually_loaded_reason_comment:
+              'this article had a nice image, too',
+          },
+        },
+      ]);
+    });
   });
 });

@@ -18,9 +18,14 @@ import { NotFoundError } from '@pocket-tools/apollo-utils';
 export async function createScheduledItem(
   db: PrismaClient,
   data: CreateScheduledItemInput,
-  username: string
+  username: string,
 ): Promise<ScheduledItem> {
-  const { approvedItemExternalId, scheduledSurfaceGuid, scheduledDate } = data;
+  const {
+    approvedItemExternalId,
+    scheduledSurfaceGuid,
+    scheduledDate,
+    source,
+  } = data;
 
   const approvedItem = await db.approvedItem.findUnique({
     where: { externalId: approvedItemExternalId },
@@ -28,7 +33,7 @@ export async function createScheduledItem(
 
   if (!approvedItem) {
     throw new NotFoundError(
-      `Cannot create a scheduled entry: Approved Item with id "${approvedItemExternalId}" does not exist.`
+      `Cannot create a scheduled entry: Approved Item with id "${approvedItemExternalId}" does not exist.`,
     );
   }
 
@@ -38,6 +43,7 @@ export async function createScheduledItem(
       scheduledSurfaceGuid,
       scheduledDate,
       createdBy: username,
+      source,
     },
     include: {
       approvedItem: {
@@ -58,7 +64,7 @@ export async function createScheduledItem(
  */
 export async function importScheduledItem(
   db: PrismaClient,
-  data: ImportScheduledItemInput
+  data: ImportScheduledItemInput,
 ): Promise<ScheduledItem> {
   return db.scheduledItem.create({
     data,
@@ -82,7 +88,7 @@ export async function importScheduledItem(
  */
 export async function deleteScheduledItem(
   db: PrismaClient,
-  data: DeleteScheduledItemInput
+  data: DeleteScheduledItemInput,
 ): Promise<ScheduledItem> {
   return await db.scheduledItem.delete({
     where: {
@@ -103,7 +109,7 @@ export async function deleteScheduledItem(
 export async function rescheduleScheduledItem(
   db: PrismaClient,
   data: RescheduleScheduledItemInput,
-  username: string
+  username: string,
 ): Promise<ScheduledItem> {
   return await db.scheduledItem.update({
     where: { externalId: data.externalId },

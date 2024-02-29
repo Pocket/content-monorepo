@@ -3,7 +3,7 @@ import {
   CuratedStatus,
   ScheduledItem as ScheduledItemModel,
 } from '@prisma/client';
-import { CorpusItemSource } from '../shared/types';
+import { CorpusItemSource, ScheduledItemSource } from '../shared/types';
 
 export type ImportApprovedItemInput = {
   url: string;
@@ -147,6 +147,7 @@ export type CreateScheduledItemInput = {
   approvedItemExternalId: string;
   scheduledSurfaceGuid: string;
   scheduledDate: string;
+  source?: ScheduledItemSource; //TODO: make this required
 };
 
 export type RescheduleScheduledItemInput = {
