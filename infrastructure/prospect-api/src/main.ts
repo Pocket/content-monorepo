@@ -45,7 +45,7 @@ class ProspectAPI extends TerraformStack {
     new RemoteBackend(this, {
       hostname: 'app.terraform.io',
       organization: 'Pocket',
-      workspaces: [{ name: `${config.name}-${config.environment}`, }],
+      workspaces: [{ name: `${config.name}-${config.environment}` }],
     });
 
     new PocketVPC(this, 'pocket-vpc');
@@ -119,7 +119,7 @@ class ProspectAPI extends TerraformStack {
         workspaces: {
           name: 'incident-management',
         },
-      }
+      },
     );
 
     return new PocketPagerDuty(this, 'pagerduty', {
@@ -305,7 +305,7 @@ class ProspectAPI extends TerraformStack {
         retentionInDays: 90,
         skipDestroy: true,
         tags: config.tags,
-      }
+      },
     );
 
     return logGroup.name;

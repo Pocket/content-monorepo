@@ -238,7 +238,7 @@ describe('lib', () => {
       expect(result.id).toBeDefined(); // we trust uuidV4 to work
       expect(result.prospectId).toEqual(expected.prospectId);
       expect(result.scheduledSurfaceGuid).toEqual(
-        expected.scheduledSurfaceGuid
+        expected.scheduledSurfaceGuid,
       );
       expect(result.url).toEqual(expected.url);
       expect(result.prospectType).toEqual(expected.prospectType);
@@ -294,7 +294,7 @@ describe('lib', () => {
       };
 
       expect(expected).toEqual(
-        hydrateProspectMetadata(prospectToHydrate, urlMetadata)
+        hydrateProspectMetadata(prospectToHydrate, urlMetadata),
       );
     });
 
@@ -336,7 +336,7 @@ describe('lib', () => {
       };
 
       expect(expected).toEqual(
-        hydrateProspectMetadata(prospectToHydrate, urlMetadata)
+        hydrateProspectMetadata(prospectToHydrate, urlMetadata),
       );
     });
   });

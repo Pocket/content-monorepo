@@ -17,7 +17,7 @@ import { SqsProspect } from './types';
  * @returns either the array of prospects in the JSON or undefined
  */
 export const getProspectsFromMessageJson = (
-  messageBodyJson: any
+  messageBodyJson: any,
 ): { [key: string]: any }[] | undefined => {
   if (
     messageBodyJson.detail?.candidates &&
@@ -63,7 +63,7 @@ export const hasValidProspectId = (sqsProspect: SqsProspect): boolean => {
  * @returns boolean
  */
 export const hasValidScheduledSurfaceGuid = (
-  sqsProspect: SqsProspect
+  sqsProspect: SqsProspect,
 ): boolean => {
   let valid = false;
 
@@ -128,7 +128,7 @@ export const hasValidProspectSource = (sqsProspect: SqsProspect): boolean => {
       // make sure the prospect type is valid for the feed id
       isValid = ScheduledSurfaces[i].prospectTypes.includes(
         // we'll allow lowercase values. i guess.
-        sqsProspect.prospect_source.toUpperCase() as any
+        sqsProspect.prospect_source.toUpperCase() as any,
       );
       break;
     }
@@ -170,13 +170,13 @@ export const validateProperties = (sqsProspect: SqsProspect): string[] => {
 
   if (!hasValidScheduledSurfaceGuid(sqsProspect)) {
     errors.push(
-      `feed_name '${sqsProspect.scheduled_surface_guid} is not valid.`
+      `feed_name '${sqsProspect.scheduled_surface_guid} is not valid.`,
     );
   }
 
   if (!hasValidPredictedTopic(sqsProspect)) {
     errors.push(
-      `predicted_topic '${sqsProspect.predicted_topic}' is not valid.`
+      `predicted_topic '${sqsProspect.predicted_topic}' is not valid.`,
     );
   }
 
@@ -190,7 +190,7 @@ export const validateProperties = (sqsProspect: SqsProspect): string[] => {
 
   if (!hasValidProspectSource(sqsProspect)) {
     errors.push(
-      `prospect_type '${sqsProspect.prospect_source}' is invalid for the feed_name '${sqsProspect.scheduled_surface_guid}'.`
+      `prospect_type '${sqsProspect.prospect_source}' is invalid for the feed_name '${sqsProspect.scheduled_surface_guid}'.`,
     );
   }
 
@@ -202,7 +202,7 @@ export const validateProperties = (sqsProspect: SqsProspect): string[] => {
 };
 
 export const convertSqsProspectToProspect = (
-  sqsProspect: SqsProspect
+  sqsProspect: SqsProspect,
 ): Prospect => {
   return {
     id: uuidv4(),
@@ -226,7 +226,7 @@ export const convertSqsProspectToProspect = (
  */
 export const hydrateProspectMetadata = (
   prospect: Prospect,
-  urlMetadata: UrlMetadata
+  urlMetadata: UrlMetadata,
 ): Prospect => {
   // Mutating the function argument here to avoid creating
   // more objects and be memory efficient

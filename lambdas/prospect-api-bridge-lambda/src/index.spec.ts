@@ -99,7 +99,10 @@ describe('processor', () => {
         Records: [
           {
             ...random<SQSRecord>(),
-            body: JSON.stringify({ ...mockProspectSet, type: 'recommendation' }),
+            body: JSON.stringify({
+              ...mockProspectSet,
+              type: 'recommendation',
+            }),
           },
         ],
       };
