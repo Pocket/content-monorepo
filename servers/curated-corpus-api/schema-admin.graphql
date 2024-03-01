@@ -644,6 +644,10 @@ input CreateApprovedCorpusItemInput {
   """
   scheduledSurfaceGuid: ID
   """
+  Optionally, specify the source of the Scheduled Item. Could be one of: MANUAL or ML
+  """
+  scheduledSource: ScheduledItemSource
+  """
   A comma-separated list of reasons for manually adding an item (only supplied when `source` is MANUAL).
   """
   manualAdditionReasons: String
