@@ -124,6 +124,25 @@ describe('corpus scheduler lambda', () => {
     expect(actual).toEqual({ batchItemFailures: [{ itemIdentifier: '2' }] });
   }, 7000);
 
+  it('returns batch item failure if curated-corpus-api returns null data', async () => {
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItemOnce({ data: null });
+
+    const fakeEvent = {
+      Records: [
+        { messageId: '1', body: JSON.stringify(record) },
+      ],
+    } as unknown as SQSEvent;
+
+    const actual = await processor(
+      fakeEvent,
+      null as unknown as Context,
+      null as unknown as Callback,
+    );
+
+    expect(actual).toEqual({ batchItemFailures: [{ itemIdentifier: '1' }] });
+  }, 7000);
+
   it('returns no batch item failures if curated-corpus-api request is successful', async () => {
     mockGetUrlMetadata();
     mockCreateApprovedCorpusItemOnce();
