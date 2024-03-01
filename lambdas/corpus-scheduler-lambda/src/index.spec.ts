@@ -1,9 +1,8 @@
+import { graphql, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
 import { processor } from './';
 import * as Utils from './utils';
-import nock from 'nock';
-import config from './config';
 import { Callback, Context, SQSEvent } from 'aws-lambda';
-import * as CuratedCorpusApi from './graphQlApiCalls';
 import {
   createScheduledCandidate,
   createScheduledCandidates,
@@ -16,6 +15,8 @@ import {
 } from 'content-common/types';
 
 describe('corpus scheduler lambda', () => {
+  const server = setupServer();
+
   const scheduledCandidate = createScheduledCandidate(
     'Fake title',
     'fake excerpt',
@@ -24,7 +25,71 @@ describe('corpus scheduler lambda', () => {
     ['Fake Author'],
     'https://fake-url.com',
   );
+
   const record = createScheduledCandidates([scheduledCandidate]);
+
+  const getUrlMetadataBody = {
+    data: {
+      getUrlMetadata: {
+        url: 'https://fake-url.com',
+        title: 'Fake title',
+        excerpt: 'fake excerpt',
+        status: CuratedStatus.RECOMMENDATION,
+        language: 'EN',
+        publisher: 'POLITICO',
+        authors: 'Fake Author',
+        imageUrl: 'https://fake-image-url.com',
+        topic: Topics.SELF_IMPROVEMENT,
+        source: CorpusItemSource.ML,
+        isCollection: false,
+        isSyndicated: false,
+      },
+    },
+  };
+
+  const createApprovedCorpusItemBody = {
+    data: {
+      createApprovedCorpusItem: {
+        externalId: 'fake-external-id',
+        url: 'https://fake-url.com',
+        title: 'Fake title',
+      },
+    },
+  };
+
+  /**
+   * Set up the mock server to return responses for the getUrlMetadata query.
+   * @param responseBody GraphQL response body.
+   */
+  const mockGetUrlMetadata = (responseBody: any = getUrlMetadataBody) => {
+    server.use(
+      graphql.query('getUrlMetadata', () => {
+        return HttpResponse.json(responseBody);
+      }),
+    );
+  };
+
+  /**
+   * Set up the mock server to return responses for the createApprovedCorpusItem mutation.
+   * @param body GraphQL response body.
+   */
+  const mockCreateApprovedCorpusItemOnce = (
+    body: any = createApprovedCorpusItemBody,
+  ) => {
+    server.use(
+      graphql.mutation(
+        'CreateApprovedCorpusItem',
+        () => {
+          return HttpResponse.json(body);
+        },
+        { once: true },
+      ),
+    );
+  };
+
+  beforeAll(() => server.listen());
+  afterEach(() => server.resetHandlers());
+  afterAll(() => server.close());
 
   beforeEach(() => {
     jest.spyOn(Utils, 'generateJwt').mockReturnValue('test-jwt');
@@ -37,131 +102,61 @@ describe('corpus scheduler lambda', () => {
     jest.clearAllMocks();
   });
 
-  describe('lambda handler', () => {
-    it('returns batch item failure if curated-corpus-api has error, with partial success', async () => {
-      expect(Utils.generateJwt('fake-jwt')).toEqual('test-jwt');
-      nock(config.AdminApi)
-        .post('/') //parser / prospect-api call
-        .reply(200, {
-          data: {
-            getUrlMetadata: {
-              url: 'https://fake-url.com',
-              title: 'Fake title',
-              excerpt: 'fake excerpt',
-              status: CuratedStatus.RECOMMENDATION,
-              language: 'EN',
-              publisher: 'POLITICO',
-              authors: 'Fake Author',
-              imageUrl: 'https://fake-image-url.com',
-              topic: Topics.SELF_IMPROVEMENT,
-              source: CorpusItemSource.ML,
-              isCollection: false,
-              isSyndicated: false,
-            },
-          },
-        })
-        .post('/') //curated-corpus-api call for first event
-        .reply(200, {
-          data: {
-            createApprovedCorpusItem: {
-              externalId: 'fake-external-id',
-              url: 'https://fake-url.com',
-              title: 'Fake title',
-            },
-          },
-        })
-        .post('/') // failed curated-corpus-api call for second event
-        .reply(200, { errors: [{ message: 'server bork' }] });
-      const fakeEvent = {
-        Records: [
-          { messageId: '1', body: JSON.stringify(record) },
-          { messageId: '2', body: JSON.stringify(record) },
-        ],
-      } as unknown as SQSEvent;
+  it('returns batch item failure if curated-corpus-api has error, with partial success', async () => {
+    mockGetUrlMetadata();
+    // Note: msw uses handlers in reverse order, so 2nd request will error, and 1st will succeed.
+    mockCreateApprovedCorpusItemOnce({ errors: [{ message: 'server bork' }] });
+    mockCreateApprovedCorpusItemOnce();
 
-      const actual = await processor(
-        fakeEvent,
-        null as unknown as Context,
-        null as unknown as Callback,
-      );
+    const fakeEvent = {
+      Records: [
+        { messageId: '1', body: JSON.stringify(record) },
+        { messageId: '2', body: JSON.stringify(record) },
+      ],
+    } as unknown as SQSEvent;
 
-      expect(actual).toEqual({ batchItemFailures: [{ itemIdentifier: '2' }] });
-    }, 7000);
+    const actual = await processor(
+      fakeEvent,
+      null as unknown as Context,
+      null as unknown as Callback,
+    );
 
-    it('returns batch item failure if curated-corpus-api returns null data', async () => {
-      nock(config.AdminApi).post('/').reply(200, { data: null });
-      const fakeEvent = {
-        Records: [{ messageId: '1', body: JSON.stringify(record) }],
-      } as unknown as SQSEvent;
-      const actual = await processor(
-        fakeEvent,
-        null as unknown as Context,
-        null as unknown as Callback,
-      );
-      expect(actual).toEqual({ batchItemFailures: [{ itemIdentifier: '1' }] });
-    }, 7000);
+    expect(actual).toEqual({ batchItemFailures: [{ itemIdentifier: '2' }] });
+  }, 7000);
 
-    it('returns no batch item failures if curated-corpus-api request is successful', async () => {
-      // mock createApprovedCorpusItems mutation
-      jest.spyOn(CuratedCorpusApi, 'createApprovedCorpusItem').mockReturnValue(
-        Promise.resolve({
-          data: {
-            createApprovedCorpusItem: {
-              externalId: 'fake-external-id',
-              url: 'https://fake-url.com',
-              title: 'Fake title',
-            },
-          },
-        }),
-      );
+  it('returns batch item failure if curated-corpus-api returns null data', async () => {
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItemOnce({ data: null });
 
-      //nock the curatedCorpusApi call
-      nock(config.AdminApi)
-        .post('/') //parser / prospect-api call
-        .reply(200, {
-          data: {
-            getUrlMetadata: {
-              url: 'https://fake-url.com',
-              title: 'Fake title',
-              excerpt: 'fake excerpt',
-              status: CuratedStatus.RECOMMENDATION,
-              language: 'EN',
-              publisher: 'POLITICO',
-              authors: 'Fake Author',
-              imageUrl: 'https://fake-image-url.com',
-              topic: Topics.SELF_IMPROVEMENT,
-              source: CorpusItemSource.ML,
-              isCollection: false,
-              isSyndicated: false,
-            },
-          },
-        })
-        .post('/') //curated-corpus-api call
-        .reply(200, {
-          data: {
-            createApprovedCorpusItem: {
-              externalId: 'fake-external-id',
-              url: 'https://fake-url.com',
-              title: 'Fake title',
-            },
-          },
-        });
+    const fakeEvent = {
+      Records: [
+        { messageId: '1', body: JSON.stringify(record) },
+      ],
+    } as unknown as SQSEvent;
 
-      // create a fake SQS event
-      const fakeEvent = {
-        Records: [{ messageId: '1', body: JSON.stringify(record) }],
-      } as unknown as SQSEvent;
+    const actual = await processor(
+      fakeEvent,
+      null as unknown as Context,
+      null as unknown as Callback,
+    );
 
-      const actual = await processor(
-        fakeEvent,
-        null as unknown as Context,
-        null as unknown as Callback,
-      );
+    expect(actual).toEqual({ batchItemFailures: [{ itemIdentifier: '1' }] });
+  }, 7000);
 
-      // we should get no failed items
-      expect(actual).toEqual({
-        batchItemFailures: [],
-      });
-    }, 7000);
+  it('returns no batch item failures if curated-corpus-api request is successful', async () => {
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItemOnce();
+
+    const fakeEvent = {
+      Records: [{ messageId: '1', body: JSON.stringify(record) }],
+    } as unknown as SQSEvent;
+
+    const actual = await processor(
+      fakeEvent,
+      null as unknown as Context,
+      null as unknown as Callback,
+    );
+
+    expect(actual).toEqual({ batchItemFailures: [] });
   });
 });
