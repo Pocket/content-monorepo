@@ -1,6 +1,15 @@
 import fetch from 'node-fetch';
 import config from './config';
 
+export interface SnowplowMicroEventCounts {
+  /** Total number of Snowplow events received. */
+  total: number;
+  /** Number of valid Snowplow events received. */
+  good: number;
+  /** Number of invalid Snowplow events received. */
+  bad: number;
+}
+
 export async function snowplowRequest(
   path: string,
   post = false,
@@ -14,11 +23,14 @@ export async function snowplowRequest(
   return await response.json();
 }
 
+/**
+ * Resets the event counts in Snowplow Micro.
+ */
 export async function resetSnowplowEvents(): Promise<void> {
   await snowplowRequest('/micro/reset', true);
 }
 
-export async function getAllSnowplowEvents(): Promise<{ [key: string]: any }> {
+export async function getAllSnowplowEvents(): Promise<SnowplowMicroEventCounts> {
   return snowplowRequest('/micro/all');
 }
 
@@ -34,10 +46,17 @@ export function parseSnowplowData(data: string): { [key: string]: any } {
   return JSON.parse(Buffer.from(data, 'base64').toString());
 }
 
+/**
+ * Waits until Snowplow events are received and returns counts.
+ * @param maxWaitTime Maximum time to wait. By default, this is 4 seconds, which is less than the default Jest test
+ * timeout of 5 seconds. In practice Snowplow Micro (running locally) receives events in a few milliseconds.
+ * @param expectedEventCount Waits until this number of events (good or bad) are received.
+ * @return Counts for the number of Snowplow events received (total, good, bad).
+ */
 export async function waitForSnowplowEvents(
-  maxWaitTime: number = 5000,
+  maxWaitTime: number = 4000,
   expectedEventCount: number = 1,
-): Promise<{ [key: string]: any }> {
+): Promise<SnowplowMicroEventCounts> {
   let totalWaitTime = 0;
   // Snowplow tests take about 20ms. waitPeriod is set to half of that to minimize waiting.
   const waitPeriod = 10;

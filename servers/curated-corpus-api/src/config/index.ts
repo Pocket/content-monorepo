@@ -69,11 +69,6 @@ export default {
     includeLocalVariables: true,
   },
   snowplow: {
-    endpoint: process.env.SNOWPLOW_ENDPOINT || 'localhost:9090',
-    httpProtocol: snowplowHttpProtocol,
-    bufferSize: 1,
-    retries: 3,
-    namespace: 'pocket-backend',
     appId: 'pocket-backend-curated-corpus-api',
     corpusItemEvents: ReviewedCorpusItemEventType,
     corpusScheduleEvents: ScheduledCorpusItemEventType,
