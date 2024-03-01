@@ -12,7 +12,7 @@ import {
   CorpusLanguage,
   CuratedStatus,
   Topics,
-} from 'content-common/dist/types';
+} from 'content-common/types';
 
 describe('corpus scheduler lambda', () => {
   const server = setupServer();
