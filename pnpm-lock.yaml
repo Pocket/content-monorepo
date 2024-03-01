@@ -97,6 +97,9 @@ importers:
       jest:
         specifier: 29.7.0
         version: 29.7.0(@types/node@20.11.13)(ts-node@10.9.2)
+      msw:
+        specifier: 2.1.2
+        version: 2.1.2(typescript@5.3.3)
       ts-jest:
         specifier: 29.1.2
         version: 29.1.2(@babel/core@7.23.9)(jest@29.7.0)(typescript@5.3.3)
@@ -8004,7 +8007,7 @@ packages:
     dependencies:
       semver: 7.6.0
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240228
+      typescript: 5.5.0-dev.20240229
     dev: false
 
   /drange@1.1.1:
@@ -11842,7 +11845,7 @@ packages:
       outvariant: 1.4.2
       path-to-regexp: 6.2.1
       strict-event-emitter: 0.5.1
-      type-fest: 4.9.0
+      type-fest: 4.10.1
       typescript: 5.3.3
       yargs: 17.7.2
     dev: true
@@ -14439,12 +14442,6 @@ packages:
   /type-fest@4.10.1:
     resolution: {integrity: sha512-7ZnJYTp6uc04uYRISWtiX3DSKB/fxNQT0B5o1OUeCqiQiwF+JC9+rJiZIDrPrNCLLuTqyQmh4VdQqh/ZOkv9MQ==}
     engines: {node: '>=16'}
-    dev: false
-
-  /type-fest@4.9.0:
-    resolution: {integrity: sha512-KS/6lh/ynPGiHD/LnAobrEFq3Ad4pBzOlJ1wAnJx9N4EYoqFhMfLIBjUT2UEx4wg5ZE+cC1ob6DCSpppVo+rtg==}
-    engines: {node: '>=16'}
-    dev: true
 
   /type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
@@ -14509,8 +14506,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240228:
-    resolution: {integrity: sha512-bdFIn0U4p7+PrnESpBPXDc6jRXynawwVQssEw2Pd2o/Mud34LwGgqHXOgIY5EEmZFPjzT3osXB7VKQP1cdHi3g==}
+  /typescript@5.5.0-dev.20240229:
+    resolution: {integrity: sha512-kxMV/9mfAvW78+JvwKsVFk/J+1zFKML+RKzz1S1ZoLxlQ8eu+75VvEo1pUlbQ1E0kF6lIFOK9fMPBt6HMrA51Q==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
