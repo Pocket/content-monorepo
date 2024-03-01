@@ -22,7 +22,7 @@ export const createScheduledCandidate = (
   language?: CorpusLanguage,
   authors?: string[],
   url?: string,
-  source?: CorpusItemSource,
+  source?: CorpusItemSource.ML,
 ): ScheduledCandidate => {
   return {
     scheduled_corpus_candidate_id: 'a4b5d99c-4c1b-4d35-bccf-6455c8df07b0',

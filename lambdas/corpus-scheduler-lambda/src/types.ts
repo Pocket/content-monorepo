@@ -19,7 +19,7 @@ interface ScheduledCorpusItem {
   url: string;
   status: CuratedStatus;
   // TODO: set source to CorpusItemSource.ML once ML source is added
-  source: CorpusItemSource;
+  source: CorpusItemSource.ML;
   topic: Topics; // Empty string means unknown topic
   scheduled_date: string; // YYYY-MM-DD
   scheduled_surface_guid: string;
