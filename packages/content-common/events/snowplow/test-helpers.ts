@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import config from '../config';
+import config from './config';
 
 export async function snowplowRequest(
   path: string,
@@ -47,7 +47,7 @@ export async function waitForSnowplowEvents(
     if (eventCounts.total >= expectedEventCount) {
       return eventCounts;
     } else {
-      await new Promise(resolve => setTimeout(resolve, waitPeriod));
+      await new Promise((resolve) => setTimeout(resolve, waitPeriod));
       totalWaitTime += waitPeriod;
     }
   }

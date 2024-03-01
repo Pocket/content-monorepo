@@ -1,7 +1,15 @@
-import { resetSnowplowEvents, waitForSnowplowEvents } from './snowplow-test-helpers';
-import { getEmitter, getTracker, queueSnowplowEvent } from './snowplow';
-import { ScheduledCorpusCandidateErrorName, SnowplowScheduledCorpusCandidate } from './types';
+import {
+  resetSnowplowEvents,
+  waitForSnowplowEvents,
+} from 'content-common/events/snowplow/test-helpers';
+import { getEmitter, getTracker } from 'content-common/events/snowplow';
+import { queueSnowplowEvent } from './snowplow';
+import {
+  ScheduledCorpusCandidateErrorName,
+  SnowplowScheduledCorpusCandidate,
+} from './types';
 import { random } from 'typia';
+import config from '../config';
 
 describe('snowplow', () => {
   const mockCandidate = {
@@ -10,7 +18,7 @@ describe('snowplow', () => {
     approved_corpus_item_external_id: 'c43a2aa5-28de-4828-a20e-1fdf60cc4a80',
   };
   const emitter = getEmitter();
-  const tracker = getTracker(emitter);
+  const tracker = getTracker(emitter, config.snowplow.appId);
 
   beforeEach(async () => {
     await resetSnowplowEvents();
@@ -26,7 +34,7 @@ describe('snowplow', () => {
   });
 
   describe('error events', () => {
-    Object.values(ScheduledCorpusCandidateErrorName).forEach(errorName => {
+    Object.values(ScheduledCorpusCandidateErrorName).forEach((errorName) => {
       it(`should emit events with ${errorName} error`, async () => {
         queueSnowplowEvent(tracker, {
           ...mockCandidate,

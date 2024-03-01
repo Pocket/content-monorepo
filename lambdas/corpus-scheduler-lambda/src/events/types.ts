@@ -1,4 +1,4 @@
-import { tags } from "typia";
+import { tags } from 'typia';
 
 // scheduled_corpus_candidate entity
 export type SnowplowScheduledCorpusCandidate = {
@@ -22,7 +22,7 @@ export enum ScheduledCorpusCandidateErrorName {
 }
 
 export type ScheduledCorpusCandidateFeatures = {
-  rank: number & tags.Type<"int64">; // rank is integer in Snowplow schema
+  rank: number & tags.Type<'int64'>; // rank is integer in Snowplow schema
   score: number;
   data_source: string;
   ml_version: string;
