@@ -1,5 +1,4 @@
 import { ScheduledCandidate } from './types';
-import { CorpusItemSource } from 'content-common/types';
 import { assert } from 'typia';
 
 /**
