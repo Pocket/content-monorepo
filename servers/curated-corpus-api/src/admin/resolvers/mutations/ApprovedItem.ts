@@ -17,7 +17,10 @@ import {
   updateApprovedItem as dbUpdateApprovedItem,
   updateApprovedItemAuthors as dbUpdateApprovedItemAuthors,
 } from '../../../database/mutations';
-import { getApprovedItemByUrl } from '../../../database/queries';
+import {
+  getApprovedItemByUrl,
+  getApprovedItemByExternalId,
+} from '../../../database/queries';
 import {
   ApprovedCorpusItemPayload,
   ReviewedCorpusItemEventType,
@@ -45,7 +48,6 @@ import {
 import { IAdminContext } from '../../context';
 import { getScheduledItemByUniqueAttributes } from '../../../database/queries/ScheduledItem';
 import { InvalidImageUrl } from '../../aws/errors';
-import { getApprovedItemByExternalId } from '../../../database/queries/ApprovedItem';
 
 /**
  * Creates an approved curated item with data supplied. Optionally, schedules the freshly

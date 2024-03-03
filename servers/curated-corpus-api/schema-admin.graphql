@@ -221,6 +221,10 @@ type ApprovedCorpusItem @key(fields: "url") {
   """
   publisher: String!
   """
+  The publication date for this story.
+  """
+  datePublished: Date
+  """
   The image URL associated with the story.
   This is a link to an S3 bucket - the image will have been pre-uploaded to S3 before saving a curated item.
   """
@@ -610,6 +614,10 @@ input CreateApprovedCorpusItemInput {
   """
   publisher: String!
   """
+  The publication date for this story.
+  """
+  datePublished: Date
+  """
   The image URL for this item's accompanying picture.
   """
   imageUrl: Url!
@@ -682,6 +690,10 @@ input ImportApprovedCorpusItemInput {
   The name of the online publication that published this story.
   """
   publisher: String!
+  """
+  The publication date for this story.
+  """
+  datePublished: Date
   """
   The image URL for this item's accompanying picture.
   """
@@ -774,6 +786,10 @@ input UpdateApprovedCorpusItemInput {
   The name of the online publication that published this story.
   """
   publisher: String!
+  """
+  The publication date for this story.
+  """
+  datePublished: Date
   """
   The image URL for this item's accompanying picture.
   """

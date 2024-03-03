@@ -54,34 +54,25 @@ GraphQL will throw an error if an unsupported combination of variables is used i
 
 ### Initial Setup
 
-Check out the code and install required packages:
+Please refer to the main README in this monorepo.
 
-```bash
-git clone git@github.com:Pocket/curated-corpus-api.git
-cd curated-corpus-api
-```
-
-Generate the Prisma types (they will live in your `node_modules` folder):
-
-```bash
-npx prisma generate
-```
-
-Start Docker:
-
-```bash
-docker compose up
-```
-
-Once all the Docker containers are up and running, you should be able to reach
+Once the project is up and running, you should be able to reach
 
 - the public API at `http://localhost:4025/`
 - the admin API at `http://localhost:4025/admin`
 
+To run Prisma commands, you will need to create an `.env` file and add a variable for the database connection:
+
+```dotenv
+DATABASE_URL=mysql://root:@mysql:3306/curation_corpus?connect_timeout=300
+```
+
+All the Prisma commands need to be run from the `servers/curated-corpus-api` directory.
+
 Out of the box, the local installation doesn't have any actual data for you to fetch or manipulate through the API. To seed some sample data for your local dev environment, run
 
 ```bash
-docker compose exec app npx prisma migrate reset
+npx prisma migrate reset
 ```
 
 Note that the above command will not be adding to any data you may have added to the database through other means - it will do a complete reset AND apply the seed script located at `src/prisma/seed.ts`.
@@ -114,36 +105,14 @@ If you'd like to experiment with different levels of authorization (e.g. access 
 
 So far we only have integration tests in this repository, and these wipe the database on each run, which means it's ~really tricky~ impossible as yet to have them running in the background in watch mode while you code.
 
-To run integration tests inside Docker, execute the following command:
-
-```bash
-docker compose exec app npm run test-integrations
-```
-
-To run these tests in watch mode, use
-
-```bash
-docker compose exec app npm run test-integration:watch
-```
-
-If you'd like to be able to run and debug integration tests directly in your IDE, run the following command (note that it may prompt you for your `sudo` password to modify your `/etc/hosts` file):
-
-Tests also run fine outside the container if you want to attach a debugger or run individual tests. Connection strings are swapped to use `localhost` instead of docker host names for this case (see `./src/test/setup/jest.setup.js`). There shouldn't be much difference between this and running in a container, but tests **MUST** pass in the container to make it through CI.
-
-```bash
-npm run test-integrations
-```
-
-```bash
-npx jest <path to individual test files>...
-```
+Please refer to the main README for instructions on running the tests for this service.
 
 ## Making changes to the Prisma schema
 
 If you need to change the Prisma schema (in `prisma/schema.prisma`), you'll need to create a migration to ensure the database is in sync. After you have made your changes to `schema.prisma`, run
 
 ```bash
-docker compose exec app npx prisma migrate dev --name some_meaningful_migration_name
+npx prisma migrate dev --name some_meaningful_migration_name
 ```
 
 This will create a migration script in `prisma/migrations` and will automatically run the new migration. This will also re-create your Prisma Typescript types.
@@ -171,5 +140,5 @@ git push -f origin your-branch-name:dev
 There may come a time when you need to reset the Dev environment. For example, if you were testing a schema change and then want to test a different branch _without_ that schema change, the dev database and Prisma schema will be out of sync.
 Another common scenario is the need to reset all test data to the initial seed data provided by the seed script.
 
-To reset the Dev database, [follow the instructions in Confluence](https://getpocket.atlassian.net/wiki/spaces/PE/pages/2938273799/Resetting+Data+for+a+Prisma-based+Subgraph+on+Dev).
+To reset the Dev database, [follow the instructions in Confluence](https://mozilla-hub.atlassian.net/wiki/spaces/PE/pages/390673411/Resetting+Data+for+a+Prisma-based+Subgraph+on+Dev).
 
