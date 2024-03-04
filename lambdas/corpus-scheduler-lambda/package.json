@@ -9,7 +9,8 @@
     "watch": "tsc -w & nodemon",
     "dev": "npm run build && npm run watch",
     "lint": "eslint --fix-dry-run \"src/**/*.ts\"",
-    "format": "eslint --fix \"src/**/*.ts\""
+    "format": "eslint --fix \"src/**/*.ts\"",
+    "prepare": "ts-patch install && typia patch"
   },
   "author": "",
   "license": "ISC",
@@ -17,17 +18,19 @@
     "@aws-sdk/client-lambda": "3.504.0",
     "@aws-sdk/client-secrets-manager": "^3.509.0",
     "@sentry/serverless": "7.95.0",
-    "aws-sdk-client-mock": "^3.0.1",
     "content-common": "workspace:*",
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.5",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "typia": "^5.4.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.133",
     "@types/jest": "29.5.12",
+    "aws-sdk-client-mock": "^3.0.1",
     "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
+    "msw": "2.1.2",
     "ts-jest": "29.1.2",
     "tsconfig": "workspace:*"
   },

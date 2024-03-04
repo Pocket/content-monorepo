@@ -26,7 +26,7 @@ export const getProspectsForDeletion = async (
   dbClient,
   scheduledSurfaceGuid: string,
   prospectType: ProspectType,
-  maxAge: number = config.aws.dynamoDb.maxAgeBeforeDeletion
+  maxAge: number = config.aws.dynamoDb.maxAgeBeforeDeletion,
 ): Promise<Prospect[]> => {
   const now = new Date();
   const cutoffDate = toUnixTimestamp(new Date(now.valueOf() - maxAge * 60000));
@@ -58,7 +58,7 @@ export const getProspectsForDeletion = async (
   //  to ever happen, but we should be alerted in some way if it does.
   if (res.LastEvaluatedKey) {
     Sentry.captureMessage(
-      `method 'getProspectsByScheduledSurfaceGuidAndProspectType' called with '${scheduledSurfaceGuid}' and '${prospectType}' has multiple pages of results that we are not handling!`
+      `method 'getProspectsByScheduledSurfaceGuidAndProspectType' called with '${scheduledSurfaceGuid}' and '${prospectType}' has multiple pages of results that we are not handling!`,
     );
   }
 
@@ -90,12 +90,12 @@ export const getProspectsForDeletion = async (
  */
 export const batchDeleteProspects = async (
   dbClient,
-  prospectIds: string[]
+  prospectIds: string[],
 ): Promise<void> => {
   // basic check
   if (prospectIds.length > config.aws.dynamoDb.maxBatchDelete) {
     throw new Error(
-      `cannot delete more than ${config.aws.dynamoDb.maxBatchDelete} dynamo items at once! you are trying to delete ${prospectIds.length}!`
+      `cannot delete more than ${config.aws.dynamoDb.maxBatchDelete} dynamo items at once! you are trying to delete ${prospectIds.length}!`,
     );
   }
 
@@ -132,13 +132,13 @@ export const batchDeleteProspects = async (
 export const deleteOldProspects = async (
   dbClient,
   scheduledSurfaceGuid: string,
-  prospectType: ProspectType
+  prospectType: ProspectType,
 ): Promise<number> => {
   // retrieve all prospects matching the scheduledSurfaceGuid and prospectType
   const prospectsToDelete = await getProspectsForDeletion(
     dbClient,
     scheduledSurfaceGuid,
-    prospectType
+    prospectType,
   );
 
   let idsToDelete: string[] = [];

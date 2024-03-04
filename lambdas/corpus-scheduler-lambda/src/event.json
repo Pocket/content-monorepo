@@ -3,8 +3,8 @@
     {
       "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
       "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
-      "body": " {\n      \"scheduled_candidate_id\": \"2c2d46c7-7c8e-41b8-86cf-c658d87f5ee5\",\n      \"scheduled_corpus_item\": {\n        \"url\": \"https://www.hollywoodreporter.com/lists/best-movies-21st-century/\",\n        \"title\": \"Hollywood Reporter Critics Pick the 50 Best Films of the 21st Century (So Far)\",\n        \"excerpt\": \"Over the course of a few months, several Zoom meetings, and countless emails, six film critics came together to hash out, and rank, what they consider the greatest films since 2000.\\n\",\n        \"status\": \"RECOMMENDATION\",\n        \"language\": \"EN\",\n        \"publisher\": \"The Hollywood Reporter\",\n        \"image_url\": \"https://www.hollywoodreporter.com/wp-content/uploads/2023/03/2023_03-top50movies-splash-2-FINAL.jpg\",\n        \"topic\": \"ENTERTAINMENT\",\n        \"source\": \"ML\",\n        \"created_by\": \"SchedulerFlow\",\n        \"scheduled_date\": \"2024-02-08\",\n        \"scheduled_surface_guid\": \"NEW_TAB_EN_US\"\n      },\n      \"features\": {\n        \"recency\": \"2024-02-01 13:45\",\n        \"emotion\": \"contemplative\",\n        \"score\": 1239.54,\n        \"rank\": 1\n      }\n    }\n\n",
-    "attributes": {
+      "body": "{\n  \"candidates\": [\n    {\n      \"scheduled_corpus_candidate_id\": \"a4b5d99c-4c1b-4d35-bccf-6455c8df07b0\",\n      \"scheduled_corpus_item\": {\n        \"url\": \"https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948\",\n        \"status\": \"RECOMMENDATION\",\n        \"source\": \"MANUAL\",\n        \"topic\": \"BUSINESS\",\n        \"created_by\": \"ScheduleFlow\",\n        \"scheduled_date\": \"2024-02-22\",\n        \"scheduled_surface_guid\": \"NEW_TAB_EN_US\",\n        \"image_url\": \"https://s3.us-east-1.amazonaws.com/pocket-curatedcorpusapi-prod-images/daa4bed6-c570-4653-aca9-7859747c1186.jpeg\",\n        \"title\": \"‘I’m Not Trying to Cause a Scene. I Just Want to Get Off This Plane.’\",\n        \"excerpt\": \"A former senior Boeing employee on why he still won’t fly on a MAX plane.\",\n        \"authors\": [\n          \"Oriana Pawlyk\"\n        ]\n      },\n      \"features\": {\n        \"domain_prob\": 0.7829,\n        \"age_in_days\": 0.1,\n        \"data_source\": \"prospect\",\n        \"day_of_week\": 2,\n        \"month\": 2,\n        \"open_count\": 10.0,\n        \"save_count\": 0,\n        \"word_count\": 1865.0,\n        \"approval_proba\": 0.98,\n        \"emotion_score\": 1.5376,\n        \"score\": 117.9775,\n        \"rank\": 1,\n        \"ml_version\": \"v0.6\"\n      },\n      \"run_details\": {\n        \"flow_name\": \"ScheduleFlow\",\n        \"run_id\": \"3647\"\n      }\n    }\n  ]\n}",
+      "attributes": {
       "ApproximateReceiveCount": "1",
       "SentTimestamp": "1545082649183",
       "SenderId": "AIDAIENQZJOLO23YVJ4VO",
@@ -19,7 +19,7 @@
     {
       "messageId": "2e1424d4-f796-459a-8184-9c92662be6da",
       "receiptHandle": "AQEBzWwaftRI0KuVm4tP+/7q1rGgNqicHq...",
-      "body": " {\n      \"scheduled_candidate_id\": \"e4da3a6e-796d-4090-bfa7-6ca7b2029270\",\n      \"scheduled_corpus_item\": {\n        \"url\": \"https://www.renemagritte.org/the-lovers-2.jsp\",\n        \"title\": \"The Lovers II, 1928 by Rene Magritte\",\n        \"excerpt\": \"The Lovers II (1928), is an oil on canvas depicting two individuals locked in an embrace\\n\",\n        \"status\": \"RECOMMENDATION\",\n        \"language\": \"EN\",\n        \"publisher\": \"ReneMagritte.org\",\n        \"image_url\": \"https://www.renemagritte.org/assets/img/paintings/the-lovers-2.jpg\",\n        \"topic\": \"ENTERTAINMENT\",\n        \"source\": \"ML\",\n        \"created_by\": \"SchedulerFlow\",\n        \"scheduled_date\": \"2024-02-08\",\n        \"scheduled_surface_guid\": \"NEW_TAB_EN_US\"\n      },\n      \"features\": {\n        \"recency\": \"2024-02-01 13:45\",\n        \"emotion\": \"contemplative\",\n        \"score\": 1239.54,\n        \"rank\": 1\n      }\n    }\n\n",
+      "body": "{\n  \"candidates\": [\n    {\n      \"scheduled_corpus_candidate_id\": \"b4b5d99c-4c1b-4d35-bccf-6455c8df07b3\",\n      \"scheduled_corpus_item\": {\n        \"url\": \"https://www.vox.com/culture/24078524/polyamory-open-marriage-anxiety\",\n        \"status\": \"RECOMMENDATION\",\n        \"source\": \"ML\",\n        \"topic\": \"SELF_IMPROVEMENT\",\n        \"created_by\": \"ScheduleFlow\",\n        \"scheduled_date\": \"2024-02-22\",\n        \"scheduled_surface_guid\": \"NEW_TAB_EN_US\",\n        \"excerpt\": \"In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.\",\n        \"language\": \"EN\"\n      },\n      \"features\": {\n        \"domain_prob\": 0.7829,\n        \"age_in_days\": 0.1,\n        \"data_source\": \"prospect\",\n        \"day_of_week\": 2,\n        \"month\": 2,\n        \"open_count\": 10.0,\n        \"save_count\": 0,\n        \"word_count\": 1865.0,\n        \"approval_proba\": 0.98,\n        \"emotion_score\": 1.5376,\n        \"score\": 117.9775,\n        \"rank\": 1,\n        \"ml_version\": \"v0.6\"\n      },\n      \"run_details\": {\n        \"flow_name\": \"ScheduleFlow\",\n        \"run_id\": \"3647\"\n      }\n    }\n  ]\n}",
       "attributes": {
       "ApproximateReceiveCount": "1",
       "SentTimestamp": "1545082650636",
@@ -31,6 +31,22 @@
     "eventSource": "aws:sqs",
     "eventSourceARN": "arn:aws:sqs:us-east-2:123456789012:my-queue",
     "awsRegion": "us-east-2"
+    },
+    {
+      "messageId": "2e1424d4-f796-459a-8184-9c92662be6da",
+      "receiptHandle": "AQEBzWwaftRI0KuVm4tP+/7q1rGgNqicHq...",
+      "body": "{\n  \"candidates\": [\n    {\n      \"scheduled_corpus_candidate_id\": \"c4b5d99c-4c1b-4d35-bccf-6455c8df07b0\",\n      \"scheduled_corpus_item\": {\n        \"url\": \"https://www.cbsnews.com/news/tax-refund-2024-how-much-is-the-average-refund/\",\n        \"status\": \"RECOMMENDATION\",\n        \"source\": \"ML\",\n        \"topic\": \"PERSONAL_FINANCE\",\n        \"created_by\": \"ScheduleFlow\",\n        \"scheduled_date\": \"2024-02-22\",\n        \"scheduled_surface_guid\": \"BAD_SURFACE\"\n      },\n      \"features\": {\n        \"domain_prob\": 0.7829,\n        \"age_in_days\": 0.1,\n        \"data_source\": \"prospect\",\n        \"day_of_week\": 2,\n        \"month\": 2,\n        \"open_count\": 10.0,\n        \"save_count\": 0,\n        \"word_count\": 1865.0,\n        \"approval_proba\": 0.98,\n        \"emotion_score\": 1.5376,\n        \"score\": 117.9775,\n        \"rank\": 1,\n        \"ml_version\": \"v0.6\"\n      },\n      \"run_details\": {\n        \"flow_name\": \"ScheduleFlow\",\n        \"run_id\": \"3647\"\n      }\n    }\n  ]\n}",
+      "attributes": {
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1545082650636",
+        "SenderId": "AIDAIENQZJOLO23YVJ4VO",
+        "ApproximateFirstReceiveTimestamp": "1545082650649"
+      },
+      "messageAttributes": {},
+      "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
+      "eventSource": "aws:sqs",
+      "eventSourceARN": "arn:aws:sqs:us-east-2:123456789012:my-queue",
+      "awsRegion": "us-east-2"
     }
   ]
 }

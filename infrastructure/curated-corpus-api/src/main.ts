@@ -41,7 +41,7 @@ class CuratedCorpusAPI extends TerraformStack {
     new RemoteBackend(this, {
       hostname: 'app.terraform.io',
       organization: 'Pocket',
-      workspaces: [{ name: `${config.name}-${config.environment}`, }],
+      workspaces: [{ name: `${config.name}-${config.environment}` }],
     });
 
     const caller = new DataAwsCallerIdentity(this, 'caller');
@@ -131,7 +131,7 @@ class CuratedCorpusAPI extends TerraformStack {
         bucket: bucket.id,
         ignorePublicAcls: false,
         restrictPublicBuckets: false,
-      }
+      },
     );
     const ownershipControls = new S3BucketOwnershipControls(
       this,
@@ -141,7 +141,7 @@ class CuratedCorpusAPI extends TerraformStack {
         rule: {
           objectOwnership: 'ObjectWriter',
         },
-      }
+      },
     );
     bucket_with_public_acls.overrideLogicalId(bucket_name);
     ownershipControls.overrideLogicalId(bucket_name);
@@ -187,7 +187,7 @@ class CuratedCorpusAPI extends TerraformStack {
         workspaces: {
           name: 'incident-management',
         },
-      }
+      },
     );
 
     return new PocketPagerDuty(this, 'pagerduty', {
@@ -373,7 +373,7 @@ class CuratedCorpusAPI extends TerraformStack {
         retentionInDays: 90,
         skipDestroy: true,
         tags: config.tags,
-      }
+      },
     );
 
     return logGroup.name;

@@ -6,10 +6,10 @@ import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 // this is the structure of an `Item` as returned by dynamo
 // just a convenience return type
 export type DynamoItem =
-    | {
-  [key: string]: NativeAttributeValue;
-}
-    | undefined;
+  | {
+      [key: string]: NativeAttributeValue;
+    }
+  | undefined;
 
 // we may want to move these enums/types to a more shareable location
 // will refactor if/when needed

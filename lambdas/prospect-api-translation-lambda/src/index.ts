@@ -66,7 +66,7 @@ const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
     }
   } catch (e) {
     Sentry.captureException(
-      'invalid data provided / sqs event.Records[0].body is not valid JSON.'
+      'invalid data provided / sqs event.Records[0].body is not valid JSON.',
     );
 
     // no need to do any more processing
@@ -78,7 +78,7 @@ const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
 
   if (!sqsProspects) {
     Sentry.captureException(
-      'no `candidates` property exists on the SQS JSON, or `candidates` is not an array.'
+      'no `candidates` property exists on the SQS JSON, or `candidates` is not an array.',
     );
 
     // we don't have any prospects, so we're done
@@ -113,11 +113,11 @@ const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
         const deletedCount = await deleteOldProspects(
           dbClient,
           prospect.scheduledSurfaceGuid,
-          prospect.prospectType
+          prospect.prospectType,
         );
 
         console.log(
-          `deleted ${deletedCount} prospects for ${prospect.scheduledSurfaceGuid} / ${prospect.prospectType}`
+          `deleted ${deletedCount} prospects for ${prospect.scheduledSurfaceGuid} / ${prospect.prospectType}`,
         );
       }
       console.log(`Getting url metadata for ${prospect.url}`);
@@ -133,7 +133,7 @@ const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
       // here - dynamo will silently replace the existing entry.
       if (idsProcessed.includes(prospect.id)) {
         Sentry.captureMessage(
-          `${prospect.id} is a duplicate in this ${prospect.scheduledSurfaceGuid} / ${prospect.prospectType} batch!`
+          `${prospect.id} is a duplicate in this ${prospect.scheduledSurfaceGuid} / ${prospect.prospectType} batch!`,
         );
       }
 

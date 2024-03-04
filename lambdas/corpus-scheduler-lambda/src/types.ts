@@ -1,9 +1,34 @@
-import { CreateApprovedItemInput } from 'content-common/types';
+import {
+  CuratedStatus,
+  CorpusItemSource,
+  CorpusLanguage,
+  Topics,
+} from 'content-common/types';
+
+export interface ScheduledCandidates {
+  candidates: ScheduledCandidate[];
+}
 export interface ScheduledCandidate {
-    scheduledCandidateId: string;
-    scheduledCorpusItem: ScheduledCorpusItem;
-    features: { [key: string]: string | number }; // ML controls which features are sent
+  scheduled_corpus_candidate_id: string;
+  scheduled_corpus_item: ScheduledCorpusItem;
+  features: { [key: string]: string | number }; // ML controls which features are sent
+  run_details: { [key: string]: string | number }; // ML controls which run debug info is sent
 }
-export type ScheduledCorpusItem = CreateApprovedItemInput & {
-    createdBy: string;
+
+interface ScheduledCorpusItem {
+  url: string;
+  status: CuratedStatus;
+  // TODO: set source to CorpusItemSource.ML once ML source is added
+  source: CorpusItemSource.ML;
+  topic: Topics; // Empty string means unknown topic
+  scheduled_date: string; // YYYY-MM-DD
+  scheduled_surface_guid: string;
+  title?: string;
+  excerpt?: string;
+  language?: CorpusLanguage;
+  image_url?: string;
+  authors?: string[];
 }
+
+// TODO: add allowed surfaces here to schedule to production
+export const allowedScheduledSurfaces: string[] = [];

@@ -102,10 +102,8 @@ describe('dynamodb', () => {
         prospectIds.push(prospect.id);
       }
 
-      await expect(
-          batchDeleteProspects(dbClient, prospectIds)
-      ).rejects.toThrow(
-          `cannot delete more than ${config.aws.dynamoDb.maxBatchDelete} dynamo items at once! you are trying to delete ${prospectIds.length}!`
+      await expect(batchDeleteProspects(dbClient, prospectIds)).rejects.toThrow(
+        `cannot delete more than ${config.aws.dynamoDb.maxBatchDelete} dynamo items at once! you are trying to delete ${prospectIds.length}!`,
       );
     });
   });
@@ -119,14 +117,15 @@ describe('dynamodb', () => {
 
       // mock date of prospects added from the current batch of SQS messages
       const aFewMinutesAgo = toUnixTimestamp(
-          new Date(now.valueOf() - 3 * 60000)
+        new Date(now.valueOf() - 3 * 60000),
       );
 
       // mock date of prospects added from the previous SQS batch
       const lastMetaflowRun = toUnixTimestamp(
-          new Date(
-              now.valueOf() - (config.aws.dynamoDb.maxAgeBeforeDeletion + 1) * 60000
-          )
+        new Date(
+          now.valueOf() -
+            (config.aws.dynamoDb.maxAgeBeforeDeletion + 1) * 60000,
+        ),
       );
 
       // insert some EN_US/TIMESPENT prospects
@@ -155,9 +154,9 @@ describe('dynamodb', () => {
       }
 
       const res = await getProspectsForDeletion(
-          dbClient,
-          'NEW_TAB_EN_US',
-          ProspectType.TIMESPENT
+        dbClient,
+        'NEW_TAB_EN_US',
+        ProspectType.TIMESPENT,
       );
 
       // only half of the EN_US/TIMESPENT prospects should be returned, as the
@@ -183,14 +182,15 @@ describe('dynamodb', () => {
 
       // mock date of prospects added from the current batch of SQS messages
       const aFewMinutesAgo = toUnixTimestamp(
-          new Date(now.valueOf() - 3 * 60000)
+        new Date(now.valueOf() - 3 * 60000),
       );
 
       // mock date of prospects added from the previous SQS batch
       const lastMetaflowRun = toUnixTimestamp(
-          new Date(
-              now.valueOf() - (config.aws.dynamoDb.maxAgeBeforeDeletion + 1) * 60000
-          )
+        new Date(
+          now.valueOf() -
+            (config.aws.dynamoDb.maxAgeBeforeDeletion + 1) * 60000,
+        ),
       );
 
       let prospectCreatedAt;
@@ -211,11 +211,11 @@ describe('dynamodb', () => {
 
         // fake a set of prospects returned from dynamo
         await insertProspect(
-            dbClient,
-            Object.assign({}, prospect, {
-              id: prospect.id + i,
-              createdAt: prospectCreatedAt,
-            })
+          dbClient,
+          Object.assign({}, prospect, {
+            id: prospect.id + i,
+            createdAt: prospectCreatedAt,
+          }),
         );
       }
 
@@ -237,32 +237,31 @@ describe('dynamodb', () => {
 
         // fake a set of prospects returned from dynamo
         await insertProspect(
-            dbClient,
-            Object.assign({}, prospect, {
-              id: prospect.id + i,
-              // change the prospectType - this should mean they won't be
-              // deleted
-              prospectType: ProspectType.SYNDICATED_NEW,
-              createdAt: prospectCreatedAt,
-            })
+          dbClient,
+          Object.assign({}, prospect, {
+            id: prospect.id + i,
+            // change the prospectType - this should mean they won't be
+            // deleted
+            prospectType: ProspectType.SYNDICATED_NEW,
+            createdAt: prospectCreatedAt,
+          }),
         );
       }
-
 
       // delete!
       // this should delete 6 records
       await deleteOldProspects(
-          dbClient,
-          'NEW_TAB_EN_US',
-          ProspectType.TIMESPENT
+        dbClient,
+        'NEW_TAB_EN_US',
+        ProspectType.TIMESPENT,
       );
 
       // verify delete worked as expected
       // we shouldn't get any results awaiting deletion
       const deleteMeProspects = await getProspectsForDeletion(
-          dbClient,
-          'NEW_TAB_EN_US',
-          ProspectType.TIMESPENT
+        dbClient,
+        'NEW_TAB_EN_US',
+        ProspectType.TIMESPENT,
       );
 
       expect(deleteMeProspects.length).toEqual(0);
@@ -275,9 +274,10 @@ describe('dynamodb', () => {
 
       // mock date of prospects added from an old, deletable SQS batch
       const lastMetaflowRun = toUnixTimestamp(
-          new Date(
-              now.valueOf() - (config.aws.dynamoDb.maxAgeBeforeDeletion + 1) * 60000
-          )
+        new Date(
+          now.valueOf() -
+            (config.aws.dynamoDb.maxAgeBeforeDeletion + 1) * 60000,
+        ),
       );
 
       // ids need to be unique! set this before the for loop
@@ -287,20 +287,20 @@ describe('dynamodb', () => {
       for (let i = 0; i < deletableCountToInsert; i++) {
         // fake a set of prospects returned from dynamo
         await insertProspect(
-            dbClient,
-            Object.assign({}, prospect, {
-              id: prospect.id + i,
-              createdAt: lastMetaflowRun,
-            })
+          dbClient,
+          Object.assign({}, prospect, {
+            id: prospect.id + i,
+            createdAt: lastMetaflowRun,
+          }),
         );
       }
 
       // delete!
       // this should delete all records
       await deleteOldProspects(
-          dbClient,
-          'NEW_TAB_EN_US',
-          ProspectType.TIMESPENT
+        dbClient,
+        'NEW_TAB_EN_US',
+        ProspectType.TIMESPENT,
       );
     });
   });
