@@ -627,6 +627,7 @@ describe('mutations: ScheduledItem', () => {
       const input: RescheduleScheduledItemInput = {
         externalId: 'not-a-valid-ID-string',
         scheduledDate: '2050-05-04',
+        source: ScheduledItemSource.MANUAL,
       };
 
       const result = await request(app)
@@ -663,6 +664,7 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         approvedItem,
         scheduledDate: new Date(2050, 4, 4).toISOString(),
+        source: ScheduledItemSource.ML,
       });
 
       const result = await request(app)
@@ -674,6 +676,7 @@ describe('mutations: ScheduledItem', () => {
             data: {
               externalId: scheduledItem.externalId,
               scheduledDate: '2050-05-05',
+              source: ScheduledItemSource.MANUAL,
             },
           },
         });
@@ -687,6 +690,7 @@ describe('mutations: ScheduledItem', () => {
       expect(returnedItem.externalId).toEqual(scheduledItem.externalId);
       expect(returnedItem.createdBy).toEqual(scheduledItem.createdBy);
       expect(returnedItem.updatedBy).toEqual(headers.username);
+      expect(returnedItem.source).toEqual(ScheduledItemSource.MANUAL);
 
       expect(returnedItem.createdAt).toEqual(
         getUnixTimestamp(scheduledItem.createdAt),
@@ -770,12 +774,14 @@ describe('mutations: ScheduledItem', () => {
         approvedItem: item,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: new Date(2050, 4, 5).toISOString(),
+        source: ScheduledItemSource.MANUAL,
       });
 
       // try to reschedule the second entry for the same date as the first
       const input: RescheduleScheduledItemInput = {
         externalId: existingScheduledEntry2.externalId,
         scheduledDate: '2050-05-04',
+        source: ScheduledItemSource.MANUAL,
       };
 
       const result = await request(app)
@@ -822,6 +828,7 @@ describe('mutations: ScheduledItem', () => {
             data: {
               externalId: scheduledItem.externalId,
               scheduledDate: '2050-05-05',
+              source: ScheduledItemSource.MANUAL,
             },
           },
         });
@@ -861,6 +868,7 @@ describe('mutations: ScheduledItem', () => {
             data: {
               externalId: scheduledItem.externalId,
               scheduledDate: '2050-05-05',
+              source: ScheduledItemSource.MANUAL,
             },
           },
         });
@@ -900,6 +908,7 @@ describe('mutations: ScheduledItem', () => {
             data: {
               externalId: scheduledItem.externalId,
               scheduledDate: '2050-05-05',
+              source: ScheduledItemSource.MANUAL,
             },
           },
         });
