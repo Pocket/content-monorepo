@@ -30,6 +30,5 @@ interface ScheduledCorpusItem {
   authors?: string[];
 }
 
-export enum AllowedScheduledSurfaces {
-  NewTabEnUs = 'NEW_TAB_EN_US',
-}
+// TODO: add allowed surfaces here to schedule to production
+export const allowedScheduledSurfaces: string[] = [];

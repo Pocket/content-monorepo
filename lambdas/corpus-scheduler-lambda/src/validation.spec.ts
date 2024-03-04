@@ -22,26 +22,20 @@ describe('validation', function () {
   describe('validateCandidate', () => {
     it('should throw Error on ScheduleCandidate if source is not ML', async () => {
       const badScheduledCandidate = createScheduledCandidate(
-          'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-          'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-          'https://fake-image-url.com',
-          CorpusLanguage.EN,
-          ['Rebecca Jennings'],
-          undefined,
-          CorpusItemSource.MANUAL as CorpusItemSource.ML,
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+        'https://fake-image-url.com',
+        CorpusLanguage.EN,
+        ['Rebecca Jennings'],
+        undefined,
+        CorpusItemSource.MANUAL as CorpusItemSource.ML,
       );
 
-      await expect(
-          validateCandidate(
-              badScheduledCandidate,
-          ),
-      ).rejects.toThrow(Error);
-      await expect(
-          validateCandidate(
-              badScheduledCandidate,
-          ),
-      ).rejects.toThrow(
-          'Error on typia.assert(): invalid type on $input.scheduled_corpus_item.source, expect to be \"ML\"',
+      await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
+        Error,
+      );
+      await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
+        'Error on typia.assert(): invalid type on $input.scheduled_corpus_item.source, expect to be "ML"',
       );
     });
     it('should throw Error on ScheduleCandidate if types are wrong (language)', async () => {

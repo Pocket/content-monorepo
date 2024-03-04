@@ -13,9 +13,10 @@ import {
   CreateApprovedItemInput,
   CorpusLanguage,
   UrlMetadata,
+  ScheduledItemSource,
 } from 'content-common/types';
 import {
-  AllowedScheduledSurfaces,
+  allowedScheduledSurfaces,
   ScheduledCandidate,
   ScheduledCandidates,
 } from './types';
@@ -155,6 +156,7 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
       imageUrl: imageUrl,
       topic: topic,
       source: source, // source = Metaflow
+      scheduledSource: source as unknown as ScheduledItemSource.ML,
       isCollection: itemMetadata.isCollection as boolean, // source = Parser
       isSyndicated: itemMetadata.isSyndicated as boolean, // source = Parser
       isTimeSensitive: false,
@@ -200,10 +202,12 @@ export const processAndScheduleCandidate = async (
           parserMetadata,
         );
 
-      // if scheduled surface exists in allowed scheduled surfaces, send the candidate to the mutation
+      // if dev & scheduled surface exists in allowed scheduled surfaces, send the candidate to the mutation
+      // TODO: schedule to production
       if (
-        Object.values(AllowedScheduledSurfaces).includes(
-          createApprovedItemInput.scheduledSurfaceGuid as AllowedScheduledSurfaces,
+        config.app.isDev ||
+        allowedScheduledSurfaces.includes(
+          createApprovedItemInput.scheduledSurfaceGuid as string,
         )
       ) {
         // call createApprovedCorpusItem mutation
@@ -215,7 +219,7 @@ export const processAndScheduleCandidate = async (
         );
       } else {
         console.log(
-          `Cannot schedule candidate: ${candidate.scheduled_corpus_candidate_id}. Reason -> ${createApprovedItemInput.scheduledSurfaceGuid} is not a valid scheduled surface.`,
+          `Cannot schedule candidate: ${candidate.scheduled_corpus_candidate_id} for surface ${createApprovedItemInput.scheduledSurfaceGuid}.`,
         );
       }
     } catch (error) {

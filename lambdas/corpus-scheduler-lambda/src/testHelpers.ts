@@ -1,9 +1,10 @@
 import { ScheduledCandidate, ScheduledCandidates } from './types';
 import {
   CorpusItemSource,
+  CorpusLanguage,
   CreateApprovedItemInput,
   CuratedStatus,
-  CorpusLanguage,
+  ScheduledItemSource,
   Topics,
   UrlMetadata,
 } from 'content-common/types';
@@ -75,6 +76,7 @@ export const expectedOutput: CreateApprovedItemInput = {
   imageUrl: 'https://fake-image-url.com',
   topic: Topics.SELF_IMPROVEMENT,
   source: CorpusItemSource.ML,
+  scheduledSource: ScheduledItemSource.ML,
   isCollection: false,
   isSyndicated: false,
   isTimeSensitive: false,

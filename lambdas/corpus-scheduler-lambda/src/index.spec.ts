@@ -129,9 +129,7 @@ describe('corpus scheduler lambda', () => {
     mockCreateApprovedCorpusItemOnce({ data: null });
 
     const fakeEvent = {
-      Records: [
-        { messageId: '1', body: JSON.stringify(record) },
-      ],
+      Records: [{ messageId: '1', body: JSON.stringify(record) }],
     } as unknown as SQSEvent;
 
     const actual = await processor(

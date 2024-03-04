@@ -31,16 +31,7 @@ export const processor: SQSHandler = async (
 
   for await (const record of event.Records) {
     try {
-      // if scheduled surface found in enum & env is dev, process candidates
-      if (config.app.isDev) {
-        await processAndScheduleCandidate(record);
-      }
-      // if env is not dev, don't process candidates (for now)
-      if (!config.app.isDev) {
-        console.log(
-          `candidate scheduling is not allowed in ${config.app.environment} environment`,
-        );
-      }
+      await processAndScheduleCandidate(record);
     } catch (error) {
       console.warn(`Unable to process message -> Reason: ${error}`);
       Sentry.captureException(error);

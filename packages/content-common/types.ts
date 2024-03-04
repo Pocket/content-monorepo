@@ -42,6 +42,11 @@ export enum CuratedStatus {
   CORPUS = 'CORPUS',
 }
 
+export enum ScheduledItemSource {
+  MANUAL = 'MANUAL', // manually entered through the curation admin tool
+  ML = 'ML', // created by ML
+}
+
 type ApprovedItemRequiredInput = {
   prospectId?: string;
   title: string;
@@ -64,8 +69,13 @@ export type CreateApprovedItemInput = ApprovedItemRequiredInput & {
   isSyndicated: boolean;
   // These are optional properties for approving AND scheduling the item
   // on a Scheduled Surface at the same time.
+  // Note that all three must be present to schedule the item.
   scheduledDate?: string;
   scheduledSurfaceGuid?: string;
+  scheduledSource?: ScheduledItemSource;
+  // This is an optional property that may or may not be present at the time
+  // a corpus item is saved in the datastore
+  datePublished?: string;
 };
 
 export interface UrlMetadata {
