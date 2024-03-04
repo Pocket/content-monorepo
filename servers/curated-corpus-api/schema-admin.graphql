@@ -434,7 +434,7 @@ type ScheduledCorpusItem {
   """
   Source of the Scheduled Item. Could be one of: MANUAL or ML
   """
-  source: ScheduledItemSource
+  source: ScheduledItemSource!
 }
 
 """
@@ -742,6 +742,12 @@ input ImportApprovedCorpusItemInput {
   The GUID of the Scheduled Surface this item should be scheduled for.
   """
   scheduledSurfaceGuid: ID!
+  """
+  Source of the Scheduled Item. Could be one of: MANUAL or ML
+
+  This field was added after this import mutation was created. We may need to expand the enum value list if this mutation is used in the future.
+  """
+  scheduledSource: ScheduledItemSource!
 }
 
 """
@@ -892,7 +898,7 @@ input CreateScheduledCorpusItemInput {
   """
   Source of the Scheduled Item. Could be one of: MANUAL or ML
   """
-  source: ScheduledItemSource
+  source: ScheduledItemSource!
 }
 
 """
@@ -907,6 +913,10 @@ input RescheduleScheduledCorpusItemInput {
   The new scheduled date for the scheduled item to appear on a Scheduled Surface. Format: YYYY-MM-DD.
   """
   scheduledDate: Date!
+  """
+  Source of the Scheduled Item. Could be one of: MANUAL or ML
+  """
+  source: ScheduledItemSource!
 }
 
 """

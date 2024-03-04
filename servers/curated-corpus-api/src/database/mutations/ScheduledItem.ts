@@ -116,6 +116,7 @@ export async function rescheduleScheduledItem(
     data: {
       scheduledDate: data.scheduledDate,
       updatedBy: username,
+      source: data.source,
     },
     include: {
       approvedItem: {

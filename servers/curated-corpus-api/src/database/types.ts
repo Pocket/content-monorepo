@@ -27,6 +27,7 @@ export type ImportScheduledItemInput = {
   approvedItemId: number;
   scheduledSurfaceGuid: string;
   scheduledDate: string;
+  source: ScheduledItemSource;
   createdAt: Date;
   createdBy: string;
   updatedAt: Date;
@@ -86,8 +87,10 @@ export type CreateApprovedItemInput = ApprovedItemRequiredInput & {
   isSyndicated: boolean;
   // These are optional properties for approving AND scheduling the item
   // on a Scheduled Surface at the same time.
+  // Note that all three must be present to schedule the item.
   scheduledDate?: string;
   scheduledSurfaceGuid?: string;
+  scheduledSource?: ScheduledItemSource;
   // This is an optional property that may or may not be present at the time
   // a corpus item is saved in the datastore
   datePublished?: string;
@@ -147,12 +150,13 @@ export type CreateScheduledItemInput = {
   approvedItemExternalId: string;
   scheduledSurfaceGuid: string;
   scheduledDate: string;
-  source?: ScheduledItemSource; //TODO: make this required
+  source: ScheduledItemSource;
 };
 
 export type RescheduleScheduledItemInput = {
   externalId: string;
   scheduledDate: string;
+  source: ScheduledItemSource;
 };
 
 export type ApprovedItem = ApprovedItemModel & {

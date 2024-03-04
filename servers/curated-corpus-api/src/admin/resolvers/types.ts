@@ -1,6 +1,6 @@
 import { CuratedStatus, ScheduledItem } from '@prisma/client';
 import { ApprovedItem } from '../../database/types';
-import { CorpusItemSource } from '../../shared/types';
+import { CorpusItemSource, ScheduledItemSource } from '../../shared/types';
 
 export type ImportApprovedCorpusItemPayload = {
   approvedItem: ApprovedItem;
@@ -25,4 +25,5 @@ export type ImportApprovedCorpusItemInput = {
   updatedBy: string;
   scheduledDate: string;
   scheduledSurfaceGuid: string;
+  scheduledSource: ScheduledItemSource;
 };

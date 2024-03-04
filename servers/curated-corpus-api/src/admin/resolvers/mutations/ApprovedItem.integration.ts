@@ -38,6 +38,7 @@ import { GET_REJECTED_ITEMS } from '../queries/sample-queries.gql';
 import {
   CorpusItemSource,
   MozillaAccessGroup,
+  ScheduledItemSource,
   Topics,
 } from '../../../shared/types';
 import { ImportApprovedCorpusItemInput } from '../types';
@@ -309,9 +310,10 @@ describe('mutations: ApprovedItem', () => {
       eventEmitter.on(ReviewedCorpusItemEventType.ADD_ITEM, eventTracker);
       eventEmitter.on(ScheduledCorpusItemEventType.ADD_SCHEDULE, eventTracker);
 
-      // extra inputs
+      // extra inputs - all three must be set to create a scheduled item
       input.scheduledDate = '2100-01-01';
       input.scheduledSurfaceGuid = 'NEW_TAB_EN_US';
+      input.scheduledSource = ScheduledItemSource.ML;
 
       const result = await request(app)
         .post(graphQLUrl)
@@ -331,6 +333,8 @@ describe('mutations: ApprovedItem', () => {
       // input values from the input before comparison.
       delete input.scheduledDate;
       delete input.scheduledSurfaceGuid;
+      delete input.scheduledSource;
+
       expect(result.body.data?.createApprovedCorpusItem).toMatchObject(input);
 
       // The `createdBy` field should now be the SSO username of the user
@@ -368,6 +372,62 @@ describe('mutations: ApprovedItem', () => {
       ).not.toBeNull();
     });
 
+    it('should not create a scheduled item if one of the scheduled properties was not suppplied', async () => {
+      // Set up event tracking
+      const eventTracker = jest.fn();
+      eventEmitter.on(ReviewedCorpusItemEventType.ADD_ITEM, eventTracker);
+      eventEmitter.on(ScheduledCorpusItemEventType.ADD_SCHEDULE, eventTracker);
+
+      // extra inputs - but missing `scheduledSource`!
+      input.scheduledDate = '2100-01-01';
+      input.scheduledSurfaceGuid = 'NEW_TAB_EN_US';
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(CREATE_APPROVED_ITEM),
+          variables: { data: input },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+
+      // Expect to see all the input data we supplied in the Approved Item
+      // returned by the mutation
+
+      // We only return the approved item here, so need to purge the scheduling
+      // input values from the input before comparison.
+      delete input.scheduledDate;
+      delete input.scheduledSurfaceGuid;
+
+      expect(result.body.data?.createApprovedCorpusItem).toMatchObject(input);
+
+      // The `createdBy` field should now be the SSO username of the user
+      // who updated this record
+      expect(result.body.data?.createApprovedCorpusItem.createdBy).toEqual(
+        headers.username,
+      );
+
+      // NB: we don't (yet) return anything for the scheduled item,
+      // but if the mutation does not fall over, that means it has been created
+      // successfully.
+
+      // Check that only the ADD_ITEM and *not* the ADD_SCHEDULE event was fired:
+      // 1 - Only one event was fired!
+      expect(eventTracker).toHaveBeenCalledTimes(1);
+
+      // 2 - Event has the right type.
+      expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
+        ReviewedCorpusItemEventType.ADD_ITEM,
+      );
+
+      // 3- Event has the right entity passed to it.
+      expect(
+        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
+      ).toEqual(result.body.data?.createApprovedCorpusItem.externalId);
+    });
+
     it('should not create a scheduled entry for an approved item with invalid Scheduled Surface GUID supplied', async () => {
       // Set up event tracking
       const eventTracker = jest.fn();
@@ -376,6 +436,7 @@ describe('mutations: ApprovedItem', () => {
       // extra inputs
       input.scheduledDate = '2100-01-01';
       input.scheduledSurfaceGuid = 'RECSAPI';
+      input.scheduledSource = ScheduledItemSource.ML;
 
       const result = await request(app)
         .post(graphQLUrl)
@@ -1198,6 +1259,7 @@ describe('mutations: ApprovedItem', () => {
       updatedBy: 'ad|Mozilla-LDAP|swing',
       scheduledDate: '2022-02-02',
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+      scheduledSource: ScheduledItemSource.MANUAL,
     };
 
     async function expectAddItemEventFired(addItemEventTracker, approvedItem) {
