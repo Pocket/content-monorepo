@@ -79,6 +79,7 @@ describe('shared/utils', () => {
         excerpt: 'An excerpt',
         language: 'EN',
         publisher: 'The Times of Narnia',
+        datePublished: null,
         imageUrl: 'https://test.com/image.png',
         topic: Topics.EDUCATION,
         source: CorpusItemSource.PROSPECT,

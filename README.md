@@ -128,7 +128,7 @@ docker restart content-monorepo-localstack-1
 ```
 
 ## Prisma
-Collection-api & curated-corput-api use `prisma` as their ORM, and to setup & seed the tables, some tasks need to be run separately from `docker compose`.
+Collection API & Curated Corpus API use `prisma` as their ORM, and to set up & seed the tables, some tasks need to be run separately from `docker compose`.
 
 ### Generate Prisma Typescript Types
 ```

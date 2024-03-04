@@ -64,6 +64,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
     imageUrl: 'https://test.com/image.png',
     language: 'DE',
     publisher: 'Convective Cloud',
+    datePublished: '2024-01-02',
     topic: Topics.TECHNOLOGY,
     source: CorpusItemSource.PROSPECT,
     isCollection: false,
@@ -190,6 +191,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
         imageUrl: 'https://test.com/image.png',
         language: 'DE',
         publisher: 'Cloud Factory',
+        datePublished: '2024-02-22',
         topic: Topics.BUSINESS,
         isTimeSensitive: true,
       };
@@ -217,7 +219,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
 
       // External ID should be unchanged
       expect(data?.updateApprovedCorpusItem.externalId).toEqual(
-        item.externalId
+        item.externalId,
       );
 
       // Updated properties should be... updated
@@ -226,7 +228,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
       // The `updatedBy` field should now be the SSO username of the user
       // who updated this record
       expect(data?.updateApprovedCorpusItem.updatedBy).toEqual(
-        headers.username
+        headers.username,
       );
     });
 
@@ -311,18 +313,18 @@ describe('mutations: ApprovedItem - authentication checks', () => {
 
       // External ID should be unchanged
       expect(data?.updateApprovedCorpusItemAuthors.externalId).toEqual(
-        item.externalId
+        item.externalId,
       );
 
       // Updated properties should be... updated
       expect(data?.updateApprovedCorpusItemAuthors.authors).toEqual(
-        input.authors
+        input.authors,
       );
 
       // The `updatedBy` field should now be the SSO username of the user
       // who updated this record
       expect(data?.updateApprovedCorpusItemAuthors.updatedBy).toEqual(
-        headers.username
+        headers.username,
       );
     });
 
@@ -396,7 +398,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
       // On success, mutation should return the deleted approved item.
       // Let's verify the id.
       expect(result.body.data?.rejectApprovedCorpusItem.externalId).toEqual(
-        item.externalId
+        item.externalId,
       );
     });
 

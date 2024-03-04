@@ -90,6 +90,7 @@ describe('mutations: ApprovedItem', () => {
         imageUrl: 'https://test.com/image.png',
         language: 'DE',
         publisher: 'Convective Cloud',
+        datePublished: '2024-02-29',
         topic: Topics.TECHNOLOGY,
         source: CorpusItemSource.PROSPECT,
         isCollection: false,
@@ -121,7 +122,7 @@ describe('mutations: ApprovedItem', () => {
       // The `createdBy` field should now be the SSO username of the user
       // who updated this record
       expect(result.body.data?.createApprovedCorpusItem.createdBy).toEqual(
-        headers.username
+        headers.username,
       );
 
       // Check that the ADD_ITEM event was fired successfully:
@@ -129,11 +130,11 @@ describe('mutations: ApprovedItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ReviewedCorpusItemEventType.ADD_ITEM
+        ReviewedCorpusItemEventType.ADD_ITEM,
       );
       // 3- Event has the right entity passed to it.
       expect(
-        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
       ).toEqual(result.body.data?.createApprovedCorpusItem.externalId);
     });
 
@@ -162,13 +163,13 @@ describe('mutations: ApprovedItem', () => {
       // Expect to see all the input data we supplied in the Approved Item
       // returned by the mutation
       expect(result.body.data?.createApprovedCorpusItem).toMatchObject(
-        inputWithoutProspectId
+        inputWithoutProspectId,
       );
 
       // The `createdBy` field should now be the SSO username of the user
       // who updated this record
       expect(result.body.data?.createApprovedCorpusItem.createdBy).toEqual(
-        headers.username
+        headers.username,
       );
 
       // Check that the ADD_ITEM event was fired successfully:
@@ -176,11 +177,58 @@ describe('mutations: ApprovedItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ReviewedCorpusItemEventType.ADD_ITEM
+        ReviewedCorpusItemEventType.ADD_ITEM,
       );
       // 3- Event has the right entity passed to it.
       expect(
-        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
+      ).toEqual(result.body.data?.createApprovedCorpusItem.externalId);
+    });
+
+    it('should create an approved item without a publication date', async () => {
+      // Set up event tracking
+      const eventTracker = jest.fn();
+      eventEmitter.on(ReviewedCorpusItemEventType.ADD_ITEM, eventTracker);
+
+      // clone the input
+      const inputWithoutDatePublished = { ...input };
+
+      // delete the publication date (not all items will have this data)
+      delete inputWithoutDatePublished.datePublished;
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(CREATE_APPROVED_ITEM),
+          variables: { data: inputWithoutDatePublished },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+
+      // Expect to see all the input data we supplied in the Approved Item
+      // returned by the mutation
+      expect(result.body.data?.createApprovedCorpusItem).toMatchObject(
+        inputWithoutDatePublished,
+      );
+
+      // The `createdBy` field should now be the SSO username of the user
+      // who updated this record
+      expect(result.body.data?.createApprovedCorpusItem.createdBy).toEqual(
+        headers.username,
+      );
+
+      // Check that the ADD_ITEM event was fired successfully:
+      // 1 - Event was fired once!
+      expect(eventTracker).toHaveBeenCalledTimes(1);
+      // 2 - Event has the right type.
+      expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
+        ReviewedCorpusItemEventType.ADD_ITEM,
+      );
+      // 3- Event has the right entity passed to it.
+      expect(
+        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
       ).toEqual(result.body.data?.createApprovedCorpusItem.externalId);
     });
 
@@ -208,12 +256,12 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.errors).not.toBeUndefined();
 
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // And there is the correct error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `An approved item with the URL "${input.url}" already exists`
+        `An approved item with the URL "${input.url}" already exists`,
       );
 
       // Check that the ADD_ITEM event was not fired
@@ -245,10 +293,10 @@ describe('mutations: ApprovedItem', () => {
 
       // And there is the correct error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `A rejected item with the URL "${input.url}" already exists`
+        `A rejected item with the URL "${input.url}" already exists`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // Check that the ADD_ITEM event was not fired
@@ -288,7 +336,7 @@ describe('mutations: ApprovedItem', () => {
       // The `createdBy` field should now be the SSO username of the user
       // who updated this record
       expect(result.body.data?.createApprovedCorpusItem.createdBy).toEqual(
-        headers.username
+        headers.username,
       );
 
       // NB: we don't (yet) return anything for the scheduled item,
@@ -301,22 +349,22 @@ describe('mutations: ApprovedItem', () => {
 
       // 2 - Events have the right types.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ReviewedCorpusItemEventType.ADD_ITEM
+        ReviewedCorpusItemEventType.ADD_ITEM,
       );
       expect(await eventTracker.mock.calls[1][0].eventType).toEqual(
-        ScheduledCorpusItemEventType.ADD_SCHEDULE
+        ScheduledCorpusItemEventType.ADD_SCHEDULE,
       );
 
       // 3- Events have the right entities passed to it.
       expect(
-        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
       ).toEqual(result.body.data?.createApprovedCorpusItem.externalId);
 
       // Since we don't return the scheduled item alongside the curated item
       // in the result of this mutation, there is no exact value to compare it to.
       // Let's just make sure it is there at all.
       expect(
-        await eventTracker.mock.calls[1][0].scheduledCorpusItem.externalId
+        await eventTracker.mock.calls[1][0].scheduledCorpusItem.externalId,
       ).not.toBeNull();
     });
 
@@ -343,10 +391,10 @@ describe('mutations: ApprovedItem', () => {
 
       // And there is the right error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `Cannot create a scheduled entry with Scheduled Surface GUID of "${input.scheduledSurfaceGuid}".`
+        `Cannot create a scheduled entry with Scheduled Surface GUID of "${input.scheduledSurfaceGuid}".`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // Check that the ADD_ITEM event was not fired
@@ -375,10 +423,10 @@ describe('mutations: ApprovedItem', () => {
 
       // And there is the right error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `Cannot create a corpus item with the topic "${input.topic}".`
+        `Cannot create a corpus item with the topic "${input.topic}".`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // Check that the ADD_ITEM event was not fired
@@ -400,10 +448,10 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.data).toBeUndefined();
 
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
       expect(result.body.errors?.[0].message).toContain(
-        'does not exist in "CorpusLanguage" enum.'
+        'does not exist in "CorpusLanguage" enum.',
       );
     });
 
@@ -422,10 +470,10 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.data).toBeUndefined();
 
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
       expect(result.body.errors?.[0].message).toContain(
-        'does not exist in "CorpusLanguage" enum.'
+        'does not exist in "CorpusLanguage" enum.',
       );
     });
   });
@@ -463,6 +511,7 @@ describe('mutations: ApprovedItem', () => {
         imageUrl: 'https://test.com/image.png',
         language: 'DE',
         publisher: 'Cloud Factory',
+        datePublished: '2024-02-24',
         topic: Topics.BUSINESS,
         isTimeSensitive: true,
       };
@@ -487,7 +536,7 @@ describe('mutations: ApprovedItem', () => {
 
       // External ID should be unchanged
       expect(data?.updateApprovedCorpusItem.externalId).toEqual(
-        item.externalId
+        item.externalId,
       );
 
       // Updated properties should be... updated
@@ -496,7 +545,7 @@ describe('mutations: ApprovedItem', () => {
       // The `updatedBy` field should now be the SSO username of the user
       // who updated this record
       expect(data?.updateApprovedCorpusItem.updatedBy).toEqual(
-        headers.username
+        headers.username,
       );
 
       // Check that the UPDATE_ITEM event was fired successfully:
@@ -504,11 +553,67 @@ describe('mutations: ApprovedItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ReviewedCorpusItemEventType.UPDATE_ITEM
+        ReviewedCorpusItemEventType.UPDATE_ITEM,
       );
       // 3- Event has the right entity passed to it.
       expect(
-        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
+      ).toEqual(data?.updateApprovedCorpusItem.externalId);
+    });
+
+    it('should succeed if publication date is not provided', async () => {
+      // Set up event tracking
+      const eventTracker = jest.fn();
+      eventEmitter.on(ReviewedCorpusItemEventType.UPDATE_ITEM, eventTracker);
+
+      // clone the input
+      const inputWithoutDatePublished = { ...input };
+
+      // delete the publication date (not all items will have this data)
+      delete inputWithoutDatePublished.datePublished;
+
+      const res = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(UPDATE_APPROVED_ITEM),
+          variables: { data: inputWithoutDatePublished },
+        });
+
+      // Good to check for any errors before proceeding with the rest of the test
+      expect(res.body.errors).toBeUndefined();
+      const data = res.body.data;
+
+      // External ID should be unchanged
+      expect(data?.updateApprovedCorpusItem.externalId).toEqual(
+        item.externalId,
+      );
+
+      // Updated properties should be... updated
+      expect(data?.updateApprovedCorpusItem).toMatchObject(
+        inputWithoutDatePublished,
+      );
+
+      // Publication date was not provided by the test helper and should
+      // remain empty after this update
+      expect(data?.updateApprovedCorpusItem.datePublished).toBeNull();
+
+      // The `updatedBy` field should now be the SSO username of the user
+      // who updated this record
+      expect(data?.updateApprovedCorpusItem.updatedBy).toEqual(
+        headers.username,
+      );
+
+      // Check that the UPDATE_ITEM event was fired successfully:
+      // 1 - Event was fired once!
+      expect(eventTracker).toHaveBeenCalledTimes(1);
+      // 2 - Event has the right type.
+      expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
+        ReviewedCorpusItemEventType.UPDATE_ITEM,
+      );
+      // 3- Event has the right entity passed to it.
+      expect(
+        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
       ).toEqual(data?.updateApprovedCorpusItem.externalId);
     });
 
@@ -529,10 +634,10 @@ describe('mutations: ApprovedItem', () => {
 
       // And there is the right error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `Cannot create a corpus item with the topic "${input.topic}".`
+        `Cannot create a corpus item with the topic "${input.topic}".`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
     });
 
@@ -551,10 +656,10 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.data).toBeUndefined();
 
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
       expect(result.body.errors?.[0].message).toContain(
-        'does not exist in "CorpusLanguage" enum.'
+        'does not exist in "CorpusLanguage" enum.',
       );
     });
 
@@ -573,10 +678,10 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.data).toBeUndefined();
 
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
       expect(result.body.errors?.[0].message).toContain(
-        'does not exist in "CorpusLanguage" enum.'
+        'does not exist in "CorpusLanguage" enum.',
       );
     });
 
@@ -703,18 +808,18 @@ describe('mutations: ApprovedItem', () => {
 
       // External ID should be unchanged
       expect(data?.updateApprovedCorpusItemAuthors.externalId).toEqual(
-        item.externalId
+        item.externalId,
       );
 
       // Updated properties should be... updated
       expect(data?.updateApprovedCorpusItemAuthors.authors).toEqual(
-        input.authors
+        input.authors,
       );
 
       // The `updatedBy` field should now be the SSO username of the user
       // who updated this record
       expect(data?.updateApprovedCorpusItemAuthors.updatedBy).toEqual(
-        headers.username
+        headers.username,
       );
 
       // Check that the UPDATE_ITEM event was fired successfully:
@@ -722,11 +827,11 @@ describe('mutations: ApprovedItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ReviewedCorpusItemEventType.UPDATE_ITEM
+        ReviewedCorpusItemEventType.UPDATE_ITEM,
       );
       // 3- Event has the right entity passed to it.
       expect(
-        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
       ).toEqual(data?.updateApprovedCorpusItemAuthors.externalId);
     });
   });
@@ -763,13 +868,13 @@ describe('mutations: ApprovedItem', () => {
       // On success, mutation should return the deleted approved item.
       // Let's verify the id.
       expect(
-        resultReject.body.data?.rejectApprovedCorpusItem.externalId
+        resultReject.body.data?.rejectApprovedCorpusItem.externalId,
       ).toEqual(item.externalId);
 
       // The `updatedBy` field should now be the SSO username of the user
       // who updated this record
       expect(
-        resultReject.body.data?.rejectApprovedCorpusItem.updatedBy
+        resultReject.body.data?.rejectApprovedCorpusItem.updatedBy,
       ).toEqual(headers.username);
 
       // There should be a rejected item created. Since we always truncate
@@ -782,17 +887,17 @@ describe('mutations: ApprovedItem', () => {
         .send({ query: print(GET_REJECTED_ITEMS) });
       // There should be one rejected item in there...
       expect(
-        resultGetReject.body.data?.getRejectedCorpusItems.totalCount
+        resultGetReject.body.data?.getRejectedCorpusItems.totalCount,
       ).toEqual(1);
       // ...and its URL should match that of the deleted Approved Item.
       expect(
-        resultGetReject.body.data?.getRejectedCorpusItems.edges[0].node.url
+        resultGetReject.body.data?.getRejectedCorpusItems.edges[0].node.url,
       ).toEqual(item.url);
       // The `createdBy` field should now be the SSO username of the user
       // who updated this record
       expect(
         resultGetReject.body.data?.getRejectedCorpusItems.edges[0].node
-          .createdBy
+          .createdBy,
       ).toEqual(headers.username);
 
       // Check that the REMOVE_ITEM and REJECT_ITEM events were fired successfully.
@@ -800,20 +905,20 @@ describe('mutations: ApprovedItem', () => {
 
       // The REMOVE_ITEM event sends up-to-date info on the Approved Item.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ReviewedCorpusItemEventType.REMOVE_ITEM
+        ReviewedCorpusItemEventType.REMOVE_ITEM,
       );
       expect(
-        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
       ).toEqual(resultReject.body.data?.rejectApprovedCorpusItem.externalId);
 
       // The REJECT_ITEM event sends through the newly created Rejected Item.
       expect(await eventTracker.mock.calls[1][0].eventType).toEqual(
-        ReviewedCorpusItemEventType.REJECT_ITEM
+        ReviewedCorpusItemEventType.REJECT_ITEM,
       );
       expect(
-        await eventTracker.mock.calls[0][0].reviewedCorpusItem.url
+        await eventTracker.mock.calls[0][0].reviewedCorpusItem.url,
       ).toEqual(
-        resultGetReject.body.data?.getRejectedCorpusItems.edges[0].node.url
+        resultGetReject.body.data?.getRejectedCorpusItems.edges[0].node.url,
       );
     });
 
@@ -839,10 +944,10 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.errors).not.toBeUndefined();
 
       expect(result.body.errors?.[0].message).toEqual(
-        `Could not find an approved item with external id of "${input.externalId}".`
+        `Could not find an approved item with external id of "${input.externalId}".`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // Check that the events were not fired
@@ -884,10 +989,10 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.errors).not.toBeUndefined();
 
       expect(result.body.errors?.[0].message).toEqual(
-        `Cannot remove item from approved corpus - scheduled entries exist.`
+        `Cannot remove item from approved corpus - scheduled entries exist.`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'INTERNAL_SERVER_ERROR'
+        'INTERNAL_SERVER_ERROR',
       );
 
       // Check that the events were not fired
@@ -942,7 +1047,7 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.data).toBeNull();
 
       expect(result.body.errors?.[0].message).toContain(
-        ` is not a valid rejection reason.`
+        ` is not a valid rejection reason.`,
       );
     });
 
@@ -970,7 +1075,7 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.data).toBeNull();
 
       expect(result.body.errors?.[0].message).toContain(
-        ` is not a valid rejection reason.`
+        ` is not a valid rejection reason.`,
       );
     });
 
@@ -998,7 +1103,7 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.data).toBeNull();
 
       expect(result.body.errors?.[0].message).toContain(
-        ` is not a valid rejection reason.`
+        ` is not a valid rejection reason.`,
       );
     });
   });
@@ -1069,7 +1174,7 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.errors).toBeUndefined();
       expect(result.body.data).toHaveProperty('uploadApprovedCorpusItemImage');
       expect(result.body.data?.uploadApprovedCorpusItemImage.url).toMatch(
-        integrationTestsS3UrlPattern
+        integrationTestsS3UrlPattern,
       );
     });
   });
@@ -1100,29 +1205,29 @@ describe('mutations: ApprovedItem', () => {
       expect(addItemEventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
       expect(await addItemEventTracker.mock.calls[0][0].eventType).toEqual(
-        ReviewedCorpusItemEventType.ADD_ITEM
+        ReviewedCorpusItemEventType.ADD_ITEM,
       );
       // 3- Event has the right entity passed to it.
       expect(
         await addItemEventTracker.mock.calls[0][0].reviewedCorpusItem
-          .externalId
+          .externalId,
       ).toEqual(approvedItem.externalId);
     }
 
     async function expectScheduleItemEventFired(
       addScheduleEventTracker,
-      scheduledItem
+      scheduledItem,
     ) {
       // 1 - Check that the ADD_SCHEDULE event was fired once
       expect(addScheduleEventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
-      expect(
-        await addScheduleEventTracker.mock.calls[0][0].eventType
-      ).toEqual(ScheduledCorpusItemEventType.ADD_SCHEDULE);
+      expect(await addScheduleEventTracker.mock.calls[0][0].eventType).toEqual(
+        ScheduledCorpusItemEventType.ADD_SCHEDULE,
+      );
       // 3- Event has the right entity passed to it.
       expect(
         await addScheduleEventTracker.mock.calls[0][0].scheduledCorpusItem
-          .externalId
+          .externalId,
       ).toEqual(scheduledItem.externalId);
     }
 
@@ -1140,12 +1245,12 @@ describe('mutations: ApprovedItem', () => {
       addItemEventTracker = jest.fn();
       eventEmitter.on(
         ReviewedCorpusItemEventType.ADD_ITEM,
-        addItemEventTracker
+        addItemEventTracker,
       );
       addScheduleEventTracker = jest.fn();
       eventEmitter.on(
         ScheduledCorpusItemEventType.ADD_SCHEDULE,
-        addScheduleEventTracker
+        addScheduleEventTracker,
       );
 
       headers = {
@@ -1179,18 +1284,18 @@ describe('mutations: ApprovedItem', () => {
       expect(approvedItem.externalId).not.toBeNull();
       expect(scheduledItem.externalId).not.toBeNull();
       expect(scheduledItem.scheduledSurfaceGuid).toEqual(
-        input.scheduledSurfaceGuid
+        input.scheduledSurfaceGuid,
       );
 
       await expectAddItemEventFired(addItemEventTracker, approvedItem);
 
       // Check scheduledItem
       expect(scheduledItem.approvedItem.externalId).toEqual(
-        approvedItem.externalId
+        approvedItem.externalId,
       );
       await expectScheduleItemEventFired(
         addScheduleEventTracker,
-        scheduledItem
+        scheduledItem,
       );
     });
 
@@ -1240,11 +1345,11 @@ describe('mutations: ApprovedItem', () => {
 
       // Check scheduledItem
       expect(scheduledItem.approvedItem.externalId).toEqual(
-        approvedItem.externalId
+        approvedItem.externalId,
       );
       await expectScheduleItemEventFired(
         addScheduleEventTracker,
-        scheduledItem
+        scheduledItem,
       );
     });
 
@@ -1281,7 +1386,7 @@ describe('mutations: ApprovedItem', () => {
 
       // Check scheduledItem
       expect(scheduledItem.approvedItem.externalId).toEqual(
-        approvedItem.externalId
+        approvedItem.externalId,
       );
       // Check that the ADD_SCHEDULE event was not fired
       expect(addScheduleEventTracker).toHaveBeenCalledTimes(0);

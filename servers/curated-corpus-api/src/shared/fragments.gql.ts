@@ -7,6 +7,7 @@ export const CuratedItemData = gql`
     title
     language
     publisher
+    datePublished
     url
     imageUrl
     excerpt

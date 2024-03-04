@@ -29,6 +29,7 @@ export const GET_SCHEDULED_SURFACE_WITH_ITEMS = gql`
             sortOrder
           }
           publisher
+          datePublished
           imageUrl
           image {
             url

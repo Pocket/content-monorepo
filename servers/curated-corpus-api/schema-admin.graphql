@@ -221,6 +221,10 @@ type ApprovedCorpusItem @key(fields: "url") {
   """
   publisher: String!
   """
+  The publication date for this story.
+  """
+  datePublished: Date
+  """
   The image URL associated with the story.
   This is a link to an S3 bucket - the image will have been pre-uploaded to S3 before saving a curated item.
   """
@@ -610,6 +614,10 @@ input CreateApprovedCorpusItemInput {
   """
   publisher: String!
   """
+  The publication date for this story.
+  """
+  datePublished: Date
+  """
   The image URL for this item's accompanying picture.
   """
   imageUrl: Url!
@@ -643,6 +651,10 @@ input CreateApprovedCorpusItemInput {
   Optionally, specify the GUID of the Scheduled Surface this item should be scheduled for.
   """
   scheduledSurfaceGuid: ID
+  """
+  Optionally, specify the source of the Scheduled Item. Could be one of: MANUAL or ML
+  """
+  scheduledSource: ScheduledItemSource
   """
   A comma-separated list of reasons for manually adding an item (only supplied when `source` is MANUAL).
   """
@@ -682,6 +694,10 @@ input ImportApprovedCorpusItemInput {
   The name of the online publication that published this story.
   """
   publisher: String!
+  """
+  The publication date for this story.
+  """
+  datePublished: Date
   """
   The image URL for this item's accompanying picture.
   """
@@ -774,6 +790,10 @@ input UpdateApprovedCorpusItemInput {
   The name of the online publication that published this story.
   """
   publisher: String!
+  """
+  The publication date for this story.
+  """
+  datePublished: Date
   """
   The image URL for this item's accompanying picture.
   """
