@@ -208,6 +208,9 @@ importers:
       jest:
         specifier: 29.7.0
         version: 29.7.0(@types/node@20.11.13)(ts-node@10.9.2)
+      msw:
+        specifier: 2.1.2
+        version: 2.1.2(typescript@5.3.3)
       ts-jest:
         specifier: 29.1.2
         version: 29.1.2(@babel/core@7.23.9)(jest@29.7.0)(typescript@5.3.3)
@@ -7993,7 +7996,7 @@ packages:
     dependencies:
       semver: 7.6.0
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240301
+      typescript: 5.5.0-dev.20240304
     dev: false
 
   /drange@1.1.1:
@@ -14492,8 +14495,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240301:
-    resolution: {integrity: sha512-2d5wSd1gEdj2cI/d6PTglOGPgIszrnI20znF3EyerbO3TNe33q+XVN5LNxVAkllrINCw9dITdfyvbJuA/F5itg==}
+  /typescript@5.5.0-dev.20240304:
+    resolution: {integrity: sha512-nu7H0CgsNe6Q9dJLsRRKB4E7KNBHuhJVJtC6vwC0GNnunJLGh8ZGtEZzcFx+feNnpAC/TWLs/H5EAea1wruBUg==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
