@@ -17,10 +17,6 @@ if (!awsEnvironments.includes(process.env.NODE_ENV ?? '')) {
   s3path = `https://${bucket}.s3.amazonaws.com/`;
 }
 
-// Work out the Snowplow HTTP protocol.
-const snowplowHttpProtocol =
-  process.env.NODE_ENV === 'production' ? 'https' : 'http';
-
 // Environment variables below are set in .aws/src/main.ts
 export default {
   app: {
