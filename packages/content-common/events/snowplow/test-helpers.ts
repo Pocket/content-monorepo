@@ -1,5 +1,9 @@
 import fetch from 'node-fetch';
 import config from './config';
+import {
+  buildSelfDescribingEvent,
+  PayloadBuilder,
+} from '@snowplow/node-tracker';
 
 export interface SnowplowMicroEventCounts {
   /** Total number of Snowplow events received. */
@@ -73,3 +77,22 @@ export async function waitForSnowplowEvents(
 
   return await getAllSnowplowEvents();
 }
+
+/**
+ * Generates an object_update Snowplow event
+ * @param overrideData Optionally, allows the event data to be changed.
+ */
+export const generateObjectUpdateEvent = (
+  overrideData = {},
+): PayloadBuilder => {
+  return buildSelfDescribingEvent({
+    event: {
+      schema: 'iglu:com.pocket/object_update/jsonschema/1-0-17',
+      data: {
+        trigger: 'scheduled_corpus_candidate_generated',
+        object: 'scheduled_corpus_candidate',
+        ...overrideData,
+      },
+    },
+  });
+};

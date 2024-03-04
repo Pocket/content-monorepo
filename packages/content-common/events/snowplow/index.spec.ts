@@ -3,28 +3,7 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { getEmitter, getTracker } from './index';
 import config from './config';
-import {
-  buildSelfDescribingEvent,
-  PayloadBuilder,
-} from '@snowplow/node-tracker';
-import { resetSnowplowEvents, waitForSnowplowEvents } from './test-helpers';
-
-/**
- * Generates an object_update Snowplow event
- * @param overrideData Optionally, allows the event data to be changed.
- */
-const generateObjectUpdateEvent = (overrideData = {}): PayloadBuilder => {
-  return buildSelfDescribingEvent({
-    event: {
-      schema: 'iglu:com.pocket/object_update/jsonschema/1-0-17',
-      data: {
-        trigger: 'scheduled_corpus_candidate_generated',
-        object: 'scheduled_corpus_candidate',
-        ...overrideData,
-      },
-    },
-  });
-};
+import { generateObjectUpdateEvent } from './test-helpers';
 
 describe('Snowplow Tracker', () => {
   const server = setupServer();
@@ -34,27 +13,6 @@ describe('Snowplow Tracker', () => {
   beforeAll(() => server.listen());
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
-
-  beforeEach(async () => {
-    await resetSnowplowEvents();
-  });
-
-  it('should accept a valid object_update event', async () => {
-    tracker.track(generateObjectUpdateEvent());
-
-    const allEvents = await waitForSnowplowEvents();
-
-    expect(allEvents).toEqual({ total: 1, bad: 0, good: 1 });
-  });
-
-  it('should not accept a invalid object_update event', async () => {
-    // 'object' is a required property for the object_update event.
-    tracker.track(generateObjectUpdateEvent({ object: undefined }));
-
-    const allEvents = await waitForSnowplowEvents();
-
-    expect(allEvents).toEqual({ total: 1, bad: 1, good: 0 });
-  });
 
   it('retries and sends a message to Sentry when emitter fails', async () => {
     let snowplowRequestCount = 0;
