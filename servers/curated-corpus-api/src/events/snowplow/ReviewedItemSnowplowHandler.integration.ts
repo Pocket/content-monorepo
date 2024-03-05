@@ -198,6 +198,45 @@ describe('ReviewedItemSnowplowHandler', () => {
     );
   });
 
+  describe('ML sourced approved items', () => {
+    it('should send an approved item with `ML` as the `loaded_from` value', async () => {
+      const approvedItemWithManualAdditionData: ApprovedCorpusItemPayload = {
+        ...approvedItem,
+        source: CorpusItemSource.ML,
+      };
+
+      emitter.emit(ReviewedCorpusItemEventType.ADD_ITEM, {
+        reviewedCorpusItem: approvedItemWithManualAdditionData,
+        eventType: ReviewedCorpusItemEventType.ADD_ITEM,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(1);
+      expect(allEvents.bad).toEqual(0);
+
+      const goodEvents = await getGoodSnowplowEvents();
+
+      const eventContext = parseSnowplowData(
+        goodEvents[0].rawEvent.parameters.cx,
+      );
+
+      expect(eventContext.data).toMatchObject([
+        {
+          schema: config.snowplow.schemas.reviewedCorpusItem,
+          data: {
+            ...approvedItemEventContextData,
+            loaded_from: CorpusItemSource.ML,
+          },
+        },
+      ]);
+    });
+  });
+
   describe('manual addition reasons for approved items', () => {
     it('should send a single manual addition reason with no comment', async () => {
       const approvedItemWithManualAdditionData: ApprovedCorpusItemPayload = {
