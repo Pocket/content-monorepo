@@ -25,7 +25,7 @@
     "typia": "^5.4.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "8.10.133",
+    "@types/aws-lambda": "8.10.134",
     "@types/jest": "29.5.12",
     "aws-sdk-client-mock": "^3.0.1",
     "eslint-config-custom": "workspace:*",
