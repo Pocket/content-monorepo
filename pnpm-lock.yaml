@@ -19,8 +19,8 @@ importers:
   infrastructure/corpus-scheduler-lambda:
     dependencies:
       '@pocket-tools/terraform-modules':
-        specifier: 5.8.4
-        version: 5.8.4(ink@3.2.0)(react@17.0.2)
+        specifier: 5.8.6
+        version: 5.8.6(ink@3.2.0)(react@17.0.2)
     devDependencies:
       eslint-config-custom:
         specifier: workspace:*
@@ -32,8 +32,8 @@ importers:
   infrastructure/curated-corpus-api:
     dependencies:
       '@pocket-tools/terraform-modules':
-        specifier: 5.8.4
-        version: 5.8.4(ink@3.2.0)(react@17.0.2)
+        specifier: 5.8.6
+        version: 5.8.6(ink@3.2.0)(react@17.0.2)
     devDependencies:
       eslint-config-custom:
         specifier: workspace:*
@@ -45,8 +45,8 @@ importers:
   infrastructure/prospect-api:
     dependencies:
       '@pocket-tools/terraform-modules':
-        specifier: 5.8.4
-        version: 5.8.4(ink@3.2.0)(react@17.0.2)
+        specifier: 5.8.6
+        version: 5.8.6(ink@3.2.0)(react@17.0.2)
     devDependencies:
       eslint-config-custom:
         specifier: workspace:*
@@ -3059,8 +3059,8 @@ packages:
       constructs: 10.3.0
     dev: false
 
-  /@cdktf/provider-aws@19.7.0(cdktf@0.20.4)(constructs@10.3.0):
-    resolution: {integrity: sha512-ckLAE1QvwPHia6f1kpMAYdrYS7EFrRYfHih83foouH+JWaO9SeRgVnhZwgmyl7Wj7Rbni0dMCUzdbvmkdl/AYA==}
+  /@cdktf/provider-aws@19.8.0(cdktf@0.20.4)(constructs@10.3.0):
+    resolution: {integrity: sha512-fwaCWNb683JmGUjTYaxoNJNo4uc2Fy4dTTbXchw85tBC0NBKmbovp21nGRqy7wmW+7eUQOSj6mvviglCdzJbeg==}
     engines: {node: '>= 18.12.0'}
     peerDependencies:
       cdktf: ^0.20.0
@@ -3097,8 +3097,8 @@ packages:
       constructs: 10.3.0
     dev: false
 
-  /@cdktf/provider-newrelic@12.2.0(cdktf@0.20.4)(constructs@10.3.0):
-    resolution: {integrity: sha512-lVJ/8uEeO+tV6gFJsDTLnVolrk2MWkXvAlfwhr//9GmE5jgaafW87yySO1C/GTZCVDT9V/0Gguvrfegbs6v9Kw==}
+  /@cdktf/provider-newrelic@12.3.0(cdktf@0.20.4)(constructs@10.3.0):
+    resolution: {integrity: sha512-F/3a6K9ofxwRXrXwV9S0HFtTFOwcbTXre3zZCOmhhyJpmM+shqqmDKpKaCMRJhsbXhGeOku+9H2TzluoWJAFtA==}
     engines: {node: '>= 18.12.0'}
     peerDependencies:
       cdktf: ^0.20.0
@@ -3702,14 +3702,14 @@ packages:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 20.11.19
+      '@types/node': 20.11.22
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       ci-info: 3.9.0
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-changed-files: 29.7.0
-      jest-config: 29.7.0(@types/node@20.11.19)(ts-node@10.9.2)
+      jest-config: 29.7.0(@types/node@20.11.22)(ts-node@10.9.2)
       jest-haste-map: 29.7.0
       jest-message-util: 29.7.0
       jest-regex-util: 29.6.3
@@ -3885,7 +3885,7 @@ packages:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 20.11.19
+      '@types/node': 20.11.22
       '@types/yargs': 17.0.32
       chalk: 4.1.2
 
@@ -4188,13 +4188,13 @@ packages:
       - typescript
     dev: false
 
-  /@pocket-tools/terraform-modules@5.8.4(ink@3.2.0)(react@17.0.2):
-    resolution: {integrity: sha512-Sk+KCP+JmogJ41zeap3uEv9e8+lrWOgAxJ4ZgCJnO4DM32fAtlCMw1JVBEdPTueczCCLk6IyV7P7Wq3nB7YIEA==}
+  /@pocket-tools/terraform-modules@5.8.6(ink@3.2.0)(react@17.0.2):
+    resolution: {integrity: sha512-oGN38sGI4IaSJpREEZPKJ/Z09aqK8T/CBx08Ev6xeALgu0NLm5aN0WxqMfVzQRPMupbQx7+2aD7dblE3do5y5w==}
     dependencies:
       '@cdktf/provider-archive': 10.0.1(cdktf@0.20.4)(constructs@10.3.0)
-      '@cdktf/provider-aws': 19.7.0(cdktf@0.20.4)(constructs@10.3.0)
+      '@cdktf/provider-aws': 19.8.0(cdktf@0.20.4)(constructs@10.3.0)
       '@cdktf/provider-local': 10.0.0(cdktf@0.20.4)(constructs@10.3.0)
-      '@cdktf/provider-newrelic': 12.2.0(cdktf@0.20.4)(constructs@10.3.0)
+      '@cdktf/provider-newrelic': 12.3.0(cdktf@0.20.4)(constructs@10.3.0)
       '@cdktf/provider-null': 10.0.0(cdktf@0.20.4)(constructs@10.3.0)
       '@cdktf/provider-pagerduty': 13.5.0(cdktf@0.20.4)(constructs@10.3.0)
       '@cdktf/provider-time': 10.0.0(cdktf@0.20.4)(constructs@10.3.0)
@@ -5720,11 +5720,6 @@ packages:
 
   /@types/node@20.11.13:
     resolution: {integrity: sha512-5G4zQwdiQBSWYTDAH1ctw2eidqdhMJaNsiIDKHFr55ihz5Trl2qqR8fdrT732yPBho5gkNxXm67OxWFBqX9aPg==}
-    dependencies:
-      undici-types: 5.26.5
-
-  /@types/node@20.11.19:
-    resolution: {integrity: sha512-7xMnVEcZFu0DikYjWOlRq7NTPETrm7teqUT2WkQjrTIkEgUyyGdWsj/Zg8bEJt5TNklzbPD1X3fqfsHw3SpapQ==}
     dependencies:
       undici-types: 5.26.5
 
@@ -7906,7 +7901,7 @@ packages:
     dependencies:
       semver: 7.6.0
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240304
+      typescript: 5.5.0-dev.20240306
     dev: false
 
   /drange@1.1.1:
@@ -8143,10 +8138,6 @@ packages:
       '@esbuild/win32-ia32': 0.19.11
       '@esbuild/win32-x64': 0.19.11
     dev: false
-
-  /escalade@3.1.1:
-    resolution: {integrity: sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw==}
-    engines: {node: '>=6'}
 
   /escalade@3.1.2:
     resolution: {integrity: sha512-ErCHMCae19vR8vQGe50xIsVomy19rg6gFu3+r3jkEO46suLMWBksvVyoGgQV+jOfl84ZSOSlmv6Gxa89PmTGmA==}
@@ -10334,46 +10325,6 @@ packages:
       - babel-plugin-macros
       - supports-color
 
-  /jest-config@29.7.0(@types/node@20.11.19)(ts-node@10.9.2):
-    resolution: {integrity: sha512-uXbpfeQ7R6TZBqI3/TxCU4q4ttk3u0PJeC+E0zbfSoSjq6bJ7buBPxzQPL0ifrkY4DNu4JUdk0ImlBUYi840eQ==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    peerDependencies:
-      '@types/node': '*'
-      ts-node: '>=9.0.0'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      ts-node:
-        optional: true
-    dependencies:
-      '@babel/core': 7.23.9
-      '@jest/test-sequencer': 29.7.0
-      '@jest/types': 29.6.3
-      '@types/node': 20.11.19
-      babel-jest: 29.7.0(@babel/core@7.23.9)
-      chalk: 4.1.2
-      ci-info: 3.9.0
-      deepmerge: 4.3.1
-      glob: 7.2.3
-      graceful-fs: 4.2.11
-      jest-circus: 29.7.0
-      jest-environment-node: 29.7.0
-      jest-get-type: 29.6.3
-      jest-regex-util: 29.6.3
-      jest-resolve: 29.7.0
-      jest-runner: 29.7.0
-      jest-util: 29.7.0
-      jest-validate: 29.7.0
-      micromatch: 4.0.5
-      parse-json: 5.2.0
-      pretty-format: 29.7.0
-      slash: 3.0.0
-      strip-json-comments: 3.1.1
-      ts-node: 10.9.2(@types/node@20.11.22)(typescript@5.3.3)
-    transitivePeerDependencies:
-      - babel-plugin-macros
-      - supports-color
-
   /jest-config@29.7.0(@types/node@20.11.22)(ts-node@10.9.2):
     resolution: {integrity: sha512-uXbpfeQ7R6TZBqI3/TxCU4q4ttk3u0PJeC+E0zbfSoSjq6bJ7buBPxzQPL0ifrkY4DNu4JUdk0ImlBUYi840eQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -10637,7 +10588,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 20.11.13
+      '@types/node': 20.11.22
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -14190,8 +14141,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240304:
-    resolution: {integrity: sha512-nu7H0CgsNe6Q9dJLsRRKB4E7KNBHuhJVJtC6vwC0GNnunJLGh8ZGtEZzcFx+feNnpAC/TWLs/H5EAea1wruBUg==}
+  /typescript@5.5.0-dev.20240306:
+    resolution: {integrity: sha512-8fi3+9qaHf/GQh7oo4X0HDxiWBwzRdGfgyXQlA/qUQ5NBBSbt3LCJFs2nlRBEd9pFBN5RD9Gfzyr0c3b+Ev9+A==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
@@ -14616,7 +14567,7 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       cliui: 8.0.1
-      escalade: 3.1.1
+      escalade: 3.1.2
       get-caller-file: 2.0.5
       require-directory: 2.1.1
       string-width: 4.2.3
