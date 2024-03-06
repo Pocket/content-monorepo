@@ -77,55 +77,58 @@ const scheduledEventData: ScheduledCorpusItemPayload = {
   },
 };
 
+const scheduledItemEventContextData = {
+  object_version: ObjectVersion.NEW,
+  scheduled_corpus_item_external_id: scheduledCorpusItem.externalId,
+  approved_corpus_item_external_id: scheduledCorpusItem.approvedItem.externalId,
+  url: scheduledCorpusItem.approvedItem.url,
+  scheduled_at: getUnixTimestamp(scheduledCorpusItem.scheduledDate),
+  scheduled_surface_id: scheduledCorpusItem.scheduledSurfaceGuid,
+  scheduled_surface_name: getScheduledSurfaceByGuid(
+    scheduledCorpusItem.scheduledSurfaceGuid,
+  )?.name,
+  scheduled_surface_iana_timezone: getScheduledSurfaceByGuid(
+    scheduledCorpusItem.scheduledSurfaceGuid,
+  )?.ianaTimezone,
+  created_at: getUnixTimestamp(scheduledCorpusItem.createdAt),
+  created_by: scheduledCorpusItem.createdBy,
+  updated_at: getUnixTimestamp(scheduledCorpusItem.updatedAt),
+  updated_by: scheduledCorpusItem.updatedBy,
+  generated_by: CorpusItemSource.MANUAL,
+  status: 'removed',
+  status_reasons: ['TOPIC', 'PUBLISHER'],
+  status_reason_comment: 'why did i rescheudle this? see above',
+};
+
 function assertValidSnowplowScheduledItemEvents(data) {
   const eventContext = parseSnowplowData(data);
 
   expect(eventContext.data).toMatchObject([
     {
       schema: config.snowplow.schemas.scheduledCorpusItem,
-      data: {
-        object_version: ObjectVersion.NEW,
-        scheduled_corpus_item_external_id: scheduledCorpusItem.externalId,
-        approved_corpus_item_external_id:
-          scheduledCorpusItem.approvedItem.externalId,
-        url: scheduledCorpusItem.approvedItem.url,
-
-        scheduled_at: getUnixTimestamp(scheduledCorpusItem.scheduledDate),
-        scheduled_surface_id: scheduledCorpusItem.scheduledSurfaceGuid,
-        scheduled_surface_name: getScheduledSurfaceByGuid(
-          scheduledCorpusItem.scheduledSurfaceGuid,
-        )?.name,
-        scheduled_surface_iana_timezone: getScheduledSurfaceByGuid(
-          scheduledCorpusItem.scheduledSurfaceGuid,
-        )?.ianaTimezone,
-        created_at: getUnixTimestamp(scheduledCorpusItem.createdAt),
-        created_by: scheduledCorpusItem.createdBy,
-        updated_at: getUnixTimestamp(scheduledCorpusItem.updatedAt),
-        updated_by: scheduledCorpusItem.updatedBy,
-        generated_by: CorpusItemSource.MANUAL,
-        status: 'removed',
-        status_reasons: ['TOPIC', 'PUBLISHER'],
-        status_reason_comment: 'why did i rescheudle this? see above',
-      },
+      data: scheduledItemEventContextData,
     },
   ]);
 }
 
 describe('ScheduledItemSnowplowHandler', () => {
+  const emitter = new CuratedCorpusEventEmitter();
+
+  new ScheduledItemSnowplowHandler(emitter, tracker, [
+    ScheduledCorpusItemEventType.ADD_SCHEDULE,
+    ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
+  ]);
+
   beforeEach(async () => {
     await resetSnowplowEvents();
   });
 
   it('should send good events to Snowplow on scheduled items', async () => {
-    const emitter = new CuratedCorpusEventEmitter();
-    new ScheduledItemSnowplowHandler(emitter, tracker, [
-      ScheduledCorpusItemEventType.ADD_SCHEDULE,
-      ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
-    ]);
     emitter.emit(ScheduledCorpusItemEventType.ADD_SCHEDULE, {
       ...scheduledEventData,
       eventType: ScheduledCorpusItemEventType.ADD_SCHEDULE,
     });
+
     emitter.emit(ScheduledCorpusItemEventType.REMOVE_SCHEDULE, {
       ...scheduledEventData,
       eventType: ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
@@ -145,6 +148,7 @@ describe('ScheduledItemSnowplowHandler', () => {
     assertValidSnowplowScheduledItemEvents(
       goodEvents[0].rawEvent.parameters.cx,
     );
+
     assertValidSnowplowScheduledItemEvents(
       goodEvents[1].rawEvent.parameters.cx,
     );
@@ -154,5 +158,49 @@ describe('ScheduledItemSnowplowHandler', () => {
       ['scheduled_corpus_item_added', 'scheduled_corpus_item_removed'],
       'scheduled_corpus_item',
     );
+  });
+
+  describe('ML sourced approved items', () => {
+    it('should send an approved item with `ML` as the `generated_by` value', async () => {
+      const scheduledItemWithMlData: ScheduledCorpusItemPayload = {
+        scheduledCorpusItem: {
+          ...scheduledCorpusItem,
+          generated_by: CorpusItemSource.ML,
+          status: ScheduledCorpusItemStatus.REMOVED,
+          reasons: ['TOPIC', 'PUBLISHER'],
+          reasonComment: 'why did i rescheudle this? see above',
+        },
+      };
+
+      emitter.emit(ScheduledCorpusItemEventType.ADD_SCHEDULE, {
+        ...scheduledItemWithMlData,
+        eventType: ScheduledCorpusItemEventType.ADD_SCHEDULE,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(1);
+      expect(allEvents.bad).toEqual(0);
+
+      const goodEvents = await getGoodSnowplowEvents();
+
+      const eventContext = parseSnowplowData(
+        goodEvents[0].rawEvent.parameters.cx,
+      );
+
+      expect(eventContext.data).toMatchObject([
+        {
+          schema: config.snowplow.schemas.scheduledCorpusItem,
+          data: {
+            ...scheduledItemEventContextData,
+            generated_by: CorpusItemSource.ML,
+          },
+        },
+      ]);
+    });
   });
 });
