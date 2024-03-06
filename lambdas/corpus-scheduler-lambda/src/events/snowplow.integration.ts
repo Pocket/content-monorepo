@@ -5,7 +5,7 @@ import {
 import { getEmitter, getTracker } from 'content-common/events/snowplow';
 import { queueSnowplowEvent } from './snowplow';
 import {
-  ScheduledCorpusCandidateErrorName,
+  SnowplowScheduledCorpusCandidateErrorName,
   SnowplowScheduledCorpusCandidate,
 } from './types';
 import { random } from 'typia';
@@ -34,21 +34,23 @@ describe('snowplow', () => {
   });
 
   describe('error events', () => {
-    Object.values(ScheduledCorpusCandidateErrorName).forEach((errorName) => {
-      it(`should emit events with ${errorName} error`, async () => {
-        queueSnowplowEvent(tracker, {
-          ...mockCandidate,
-          scheduled_corpus_item_external_id: undefined,
-          approved_corpus_item_external_id: undefined,
-          error_name: errorName,
-          error_description: `Oh no! A ${errorName} error occurred.`,
+    Object.values(SnowplowScheduledCorpusCandidateErrorName).forEach(
+      (errorName) => {
+        it(`should emit events with ${errorName} error`, async () => {
+          queueSnowplowEvent(tracker, {
+            ...mockCandidate,
+            scheduled_corpus_item_external_id: undefined,
+            approved_corpus_item_external_id: undefined,
+            error_name: errorName,
+            error_description: `Oh no! A ${errorName} error occurred.`,
+          });
+
+          const allEvents = await waitForSnowplowEvents();
+
+          expect(allEvents.total).toEqual(1);
+          expect(allEvents.bad).toEqual(0);
         });
-
-        const allEvents = await waitForSnowplowEvents();
-
-        expect(allEvents.total).toEqual(1);
-        expect(allEvents.bad).toEqual(0);
-      });
-    });
+      },
+    );
   });
 });

@@ -10,12 +10,23 @@ import {
   GetSecretValueCommand,
   SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
-import { ApprovedItemAuthor, CorpusLanguage } from 'content-common/types';
+import {
+  ApprovedItemAuthor,
+  CorpusLanguage,
+  UrlMetadata,
+} from 'content-common/types';
 import {
   createScheduledCandidate,
   expectedOutput,
   parserItem,
 } from './testHelpers';
+import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
+import {
+  getGoodSnowplowEvents,
+  parseSnowplowData,
+  resetSnowplowEvents,
+  waitForSnowplowEvents,
+} from 'content-common/events/snowplow/test-helpers';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwt = require('jsonwebtoken');
@@ -155,22 +166,122 @@ describe('utils', function () {
         CorpusLanguage.EN,
         ['Rebecca Jennings'],
       );
-      parserItem.publisher = 1 as unknown as string; // force publisher to be the wrong type to trigger an Error
+
+      const invalidParserItem: any = {
+        ...parserItem,
+        publisher: 1,
+      };
 
       await expect(
         mapScheduledCandidateInputToCreateApprovedItemInput(
           scheduledCandidate,
-          parserItem,
+          invalidParserItem,
         ),
-      ).rejects.toThrow(Error);
+      ).rejects.toThrow(
+        new Error(
+          `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
+            `Reason: Error: Error on typia.assert(): invalid type on $input.publisher, expect to be string`,
+        ),
+      );
+    });
+    it('should throw Error on CreateApprovedItemInput if image_url is missing', async () => {
+      const scheduledCandidate = createScheduledCandidate(
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+        undefined,
+        CorpusLanguage.EN,
+        ['Rebecca Jennings'],
+      );
+
+      const incompleteParserItem: UrlMetadata = {
+        ...parserItem,
+        imageUrl: undefined,
+      };
+
       await expect(
         mapScheduledCandidateInputToCreateApprovedItemInput(
           scheduledCandidate,
-          parserItem,
+          incompleteParserItem,
         ),
       ).rejects.toThrow(
-        `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
-          `Reason: Error: Error on typia.assert(): invalid type on $input.publisher, expect to be string`,
+        new Error(
+          `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
+            `Reason: Error: Error on typia.assert(): invalid type on $input.imageUrl, expect to be string`,
+        ),
+      );
+    });
+    describe('snowplow integration', () => {
+      beforeEach(async () => {
+        await resetSnowplowEvents();
+      });
+
+      interface MetadataErrorTestCase {
+        candidateKey: string;
+        parserKey: string;
+        expectedSnowplowError: SnowplowScheduledCorpusCandidateErrorName;
+      }
+
+      const metadataErrorTestCases: MetadataErrorTestCase[] = [
+        {
+          candidateKey: 'title',
+          parserKey: 'title',
+          expectedSnowplowError:
+            SnowplowScheduledCorpusCandidateErrorName.MISSING_TITLE,
+        },
+        {
+          candidateKey: 'excerpt',
+          parserKey: 'excerpt',
+          expectedSnowplowError:
+            SnowplowScheduledCorpusCandidateErrorName.MISSING_EXCERPT,
+        },
+        {
+          candidateKey: 'image_url',
+          parserKey: 'imageUrl',
+          expectedSnowplowError:
+            SnowplowScheduledCorpusCandidateErrorName.MISSING_IMAGE,
+        },
+      ];
+
+      metadataErrorTestCases.forEach(
+        ({ candidateKey, parserKey, expectedSnowplowError }) => {
+          it(`should emit a Snowplow event when ${candidateKey} is missing with error_name=${expectedSnowplowError}`, async () => {
+            // Create a ScheduledCandidate with
+            const incompleteCandidate: any = createScheduledCandidate(
+              'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+              'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+              'https://fake-image-url.com',
+              CorpusLanguage.EN,
+              ['Rebecca Jennings'],
+            );
+            incompleteCandidate.scheduled_corpus_item[candidateKey] = undefined;
+
+            const incompleteParserItem: UrlMetadata = {
+              ...parserItem,
+              [parserKey]: undefined,
+            };
+
+            parserItem.imageUrl = undefined; // force publisher to be the wrong type to trigger an Error
+
+            await expect(
+              mapScheduledCandidateInputToCreateApprovedItemInput(
+                incompleteCandidate,
+                incompleteParserItem,
+              ),
+            ).rejects.toThrow(Error);
+
+            const allEvents = await waitForSnowplowEvents();
+            expect(allEvents).toEqual({ total: 1, good: 1, bad: 0 });
+
+            // Check that the right error was emitted.
+            const goodEvents = await getGoodSnowplowEvents();
+            const snowplowContext = parseSnowplowData(
+              goodEvents[0].rawEvent.parameters.cx,
+            );
+            const snowplowEntity = snowplowContext.data[0].data;
+            expect(snowplowEntity.error_name).toEqual(expectedSnowplowError);
+            expect(snowplowEntity.error_description.length).toBeGreaterThan(0);
+          });
+        },
       );
     });
   });

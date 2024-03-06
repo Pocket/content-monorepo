@@ -2,27 +2,33 @@ import {
   GetSecretValueCommand,
   SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const jwt = require('jsonwebtoken');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const jwkToPem = require('jwk-to-pem');
 import config from './config';
 import { validateCandidate } from './validation';
 import {
   ApprovedItemAuthor,
-  CreateApprovedItemInput,
   CorpusLanguage,
-  UrlMetadata,
+  CreateApprovedItemInput,
   ScheduledItemSource,
+  UrlMetadata,
 } from 'content-common/types';
 import {
   allowedScheduledSurfaces,
   ScheduledCandidate,
   ScheduledCandidates,
 } from './types';
-import { assert } from 'typia';
+import { assert, TypeGuardError } from 'typia';
 import { SQSRecord } from 'aws-lambda';
 import { createApprovedCorpusItem, fetchUrlMetadata } from './graphQlApiCalls';
+import {
+  generateSnowplowErrorEntity,
+  queueSnowplowEvent,
+} from './events/snowplow';
+import { getEmitter, getTracker } from 'content-common/events/snowplow';
+import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const jwt = require('jsonwebtoken');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const jwkToPem = require('jwk-to-pem');
 
 // Secrets Manager Client
 const smClient = new SecretsManagerClient({ region: config.aws.region });
@@ -101,6 +107,43 @@ export const mapAuthorToApprovedItemAuthor = (
 };
 
 /**
+ * @param e Error raised by Typia assert<CreateApprovedItemInput>
+ * @return Snowplow error corresponding to e if one exists, otherwise undefined.
+ */
+function mapApprovedItemInputTypiaErrorToSnowplowError(
+  e: TypeGuardError,
+): SnowplowScheduledCorpusCandidateErrorName | undefined {
+  switch (e.path) {
+    case '$input.imageUrl':
+      return SnowplowScheduledCorpusCandidateErrorName.MISSING_IMAGE;
+    case '$input.title':
+      return SnowplowScheduledCorpusCandidateErrorName.MISSING_TITLE;
+    case '$input.excerpt':
+      return SnowplowScheduledCorpusCandidateErrorName.MISSING_EXCERPT;
+  }
+}
+
+/**
+ *
+ * @param e Error raised by Typia assert<CreateApprovedItemInput>
+ * @param candidate
+ */
+function handleApprovedItemInputTypiaError(
+  e: TypeGuardError,
+  candidate: ScheduledCandidate,
+) {
+  const snowplowError = mapApprovedItemInputTypiaErrorToSnowplowError(e);
+  if (snowplowError) {
+    const emitter = getEmitter();
+    const tracker = getTracker(emitter, config.snowplow.appId);
+    queueSnowplowEvent(
+      tracker,
+      generateSnowplowErrorEntity(candidate, snowplowError, e.message),
+    );
+  }
+}
+
+/**
  * Creates a scheduled item to send to createApprovedCorpusItem mutation
  * @param candidate ScheduledCandidate received from Metaflow
  * @param itemMetadata UrlMetadata item from Parser
@@ -168,6 +211,10 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
     assert<CreateApprovedItemInput>(itemToSchedule);
     return itemToSchedule;
   } catch (e) {
+    if (e instanceof TypeGuardError) {
+      handleApprovedItemInputTypiaError(e, candidate);
+    }
+
     throw new Error(
       `failed to map ${candidate.scheduled_corpus_candidate_id} to CreateApprovedItemInput. Reason: ${e}`,
     );

@@ -6,7 +6,11 @@ import {
 } from '@snowplow/node-tracker';
 
 import config from '../config';
-import { SnowplowScheduledCorpusCandidate } from './types';
+import {
+  SnowplowScheduledCorpusCandidateErrorName,
+  SnowplowScheduledCorpusCandidate,
+} from './types';
+import { ScheduledCandidate } from '../types';
 
 /**
  * creates an object_update Snowplow event for scheduled_corpus_candidate
@@ -40,20 +44,35 @@ export const generateContext = (
   };
 };
 
+export const generateSnowplowErrorEntity = (
+  candidate: ScheduledCandidate,
+  errorName: SnowplowScheduledCorpusCandidateErrorName,
+  errorDescription: string,
+): SnowplowScheduledCorpusCandidate => {
+  return {
+    scheduled_corpus_candidate_id: candidate.scheduled_corpus_candidate_id,
+    candidate_url: candidate.scheduled_corpus_item.url,
+    features: candidate.features,
+    run_details: candidate.run_details,
+    error_name: errorName,
+    error_description: errorDescription,
+  };
+};
+
 /**
  * main entry point to snowplow. queues up an event to send.
  *
  * (elsewhere, we tell snowplow to send all queued events.)
  *
  * @param tracker TrackerInterface
- * @param prospect SnowplowProspect
+ * @param entity Entity representing the result of trying to schedule a candidate.
  */
 export const queueSnowplowEvent = (
   tracker: Tracker,
-  prospect: SnowplowScheduledCorpusCandidate,
+  entity: SnowplowScheduledCorpusCandidate,
 ) => {
   const event = generateEvent();
-  const contexts: SelfDescribingJson[] = [generateContext(prospect)];
+  const contexts: SelfDescribingJson[] = [generateContext(entity)];
 
   // reminder - this method is not async and does not directly initiate
   // any http request. it sends the event to a queue internal to the
