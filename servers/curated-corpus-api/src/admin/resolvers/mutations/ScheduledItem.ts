@@ -1,4 +1,8 @@
-import { parseReasonsCsv, sanitizeText } from 'content-common';
+import {
+  CorpusItemSource,
+  parseReasonsCsv,
+  sanitizeText
+} from 'content-common';
 
 import config from '../../../config';
 
@@ -10,7 +14,6 @@ import {
 import { ScheduledItem } from '../../../database/types';
 import {
   ACCESS_DENIED_ERROR,
-  CorpusItemSource,
   ScheduledCorpusItemStatus,
 } from '../../../shared/types';
 import { scheduledSurfaceAllowedValues } from '../../../shared/utils';

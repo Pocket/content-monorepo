@@ -1,7 +1,8 @@
 import { parse } from 'tldts';
 import * as Sentry from '@sentry/node';
 import { getUrlMetadata } from './client-api-proxy';
-import { UrlMetadata, ClientApiItem } from './types';
+import { ClientApiItem } from './types';
+import { UrlMetadata } from 'content-common';
 
 /**
  * helper to convert a JS Date to a unix timestamp. note that this will lose

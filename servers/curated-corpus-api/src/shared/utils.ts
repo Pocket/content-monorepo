@@ -1,10 +1,10 @@
 import { ScheduledSurface, ScheduledSurfaces } from './types';
 import {
   ApprovedItem,
-  ApprovedItemAuthor,
   CorpusItem,
   CorpusTargetType,
 } from '../database/types';
+import { ApprovedItemAuthor } from 'content-common';
 import { parse } from 'url';
 
 /**

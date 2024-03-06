@@ -1,8 +1,6 @@
 // Helper types and enums used in the schema
-import {
-  CorpusItemSource,
-  ScheduledCorpusItemStatus,
-} from '../../shared/types';
+import { ScheduledCorpusItemStatus } from '../../shared/types';
+import { CorpusItemSource } from 'content-common';
 
 export type RejectionReason = { reason: string };
 

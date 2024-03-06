@@ -1,4 +1,4 @@
-import { CorpusItemSource, MozillaAccessGroup, Topics } from './types';
+import { MozillaAccessGroup, Topics } from './types';
 import {
   getCorpusItemFromApprovedItem,
   getScheduledSurfaceByAccessGroup,
@@ -7,7 +7,7 @@ import {
   getPocketPath,
 } from './utils';
 import { ApprovedItem } from '../database/types';
-import { CuratedStatus } from '@prisma/client';
+import { CorpusItemSource, CuratedStatus } from 'content-common';
 
 describe('shared/utils', () => {
   describe('toUtcDateString', () => {

@@ -3,15 +3,12 @@
 // multiple entry points in package.json - so we're kind of stuck with this.
 
 export {
-  CorpusLanguage,
   DynamoItem,
   GetProspectsFilters,
   Prospect,
   ProspectType,
   ScheduledSurfaces,
   ScheduledSurface,
-  Topics,
-  UrlMetadata,
 } from './types';
 export { toUnixTimestamp, deriveUrlMetadata } from './lib';
 export {

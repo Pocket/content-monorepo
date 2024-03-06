@@ -167,6 +167,9 @@ importers:
       '@sentry/serverless':
         specifier: 6.19.7
         version: 6.19.7
+      content-common:
+        specifier: workspace:*
+        version: link:../../packages/content-common
       prospectapi-common:
         specifier: workspace:*
         version: link:../../packages/prospectapi-common
@@ -252,6 +255,9 @@ importers:
       '@sentry/node':
         specifier: 6.19.7
         version: 6.19.7
+      content-common:
+        specifier: workspace:*
+        version: link:../content-common
       cross-fetch:
         specifier: 3.1.5
         version: 3.1.5
@@ -8007,7 +8013,7 @@ packages:
     dependencies:
       semver: 7.6.0
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240229
+      typescript: 5.5.0-dev.20240304
     dev: false
 
   /drange@1.1.1:
@@ -14506,8 +14512,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240229:
-    resolution: {integrity: sha512-kxMV/9mfAvW78+JvwKsVFk/J+1zFKML+RKzz1S1ZoLxlQ8eu+75VvEo1pUlbQ1E0kF6lIFOK9fMPBt6HMrA51Q==}
+  /typescript@5.5.0-dev.20240304:
+    resolution: {integrity: sha512-nu7H0CgsNe6Q9dJLsRRKB4E7KNBHuhJVJtC6vwC0GNnunJLGh8ZGtEZzcFx+feNnpAC/TWLs/H5EAea1wruBUg==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false

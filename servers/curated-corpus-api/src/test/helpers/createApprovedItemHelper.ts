@@ -1,7 +1,11 @@
-import { CuratedStatus, Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { CorpusItemSource } from '../../shared/types';
-import { ApprovedItemAuthor, ApprovedItem } from '../../database/types';
+import { ApprovedItem } from '../../database/types';
+import {
+  ApprovedItemAuthor,
+  CorpusItemSource,
+  CuratedStatus
+} from 'content-common';
 
 // the minimum of data required to create a approved curated item
 interface CreateApprovedItemHelperRequiredInput {

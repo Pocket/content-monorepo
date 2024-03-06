@@ -1,10 +1,10 @@
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
-import { PrismaClient } from '@prisma/client';
+import { ApprovedItem, PrismaClient } from '@prisma/client';
 import { client } from '../../../database/client';
 
-import { ApprovedItem, CuratedStatus } from '@prisma/client';
+import { CuratedStatus } from 'content-common'
 import {
   clearDb,
   createApprovedItemHelper,

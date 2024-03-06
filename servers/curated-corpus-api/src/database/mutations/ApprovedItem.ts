@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import {
   ApprovedItem,
-  CreateApprovedItemInput,
   ImportApprovedItemInput,
   UpdateApprovedItemAuthorsInput,
   UpdateApprovedItemInput,
 } from '../types';
+import { CreateApprovedItemInput } from 'content-common';
 import { UserInputError } from '@pocket-tools/apollo-utils';
 import { checkCorpusUrl } from '../helpers/checkCorpusUrl';
 import { GraphQLError } from 'graphql';

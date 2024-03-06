@@ -1,6 +1,6 @@
 import { validateCandidate } from './validation';
 import { createScheduledCandidate } from './testHelpers';
-import { CorpusItemSource, CorpusLanguage } from 'content-common/types';
+import { CorpusItemSource, CorpusLanguage } from 'content-common';
 
 // Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
 describe('validation', function () {

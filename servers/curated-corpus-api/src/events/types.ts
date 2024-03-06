@@ -3,7 +3,8 @@ import {
   ScheduledItem as ScheduledItemModel,
 } from '@prisma/client';
 import { ScheduledItem, CorpusItem, ApprovedItem } from '../database/types';
-import { CorpusItemSource, ScheduledCorpusItemStatus } from '../shared/types';
+import { ScheduledCorpusItemStatus } from '../shared/types';
+import { CorpusItemSource } from 'content-common';
 
 export enum ReviewedCorpusItemEventType {
   ADD_ITEM = 'ADD_ITEM',

@@ -1,11 +1,11 @@
-import { CuratedStatus, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { clearDb } from './clearDb';
 import {
   createApprovedItemHelper,
   CreateApprovedItemHelperInput,
 } from './createApprovedItemHelper';
-import { CorpusItemSource } from '../../shared/types';
+import { CorpusItemSource, CuratedStatus } from 'content-common';
 
 const db = new PrismaClient();
 

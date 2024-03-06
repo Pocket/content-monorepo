@@ -4,9 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   Prospect,
   ScheduledSurfaces,
-  Topics,
-  UrlMetadata,
 } from 'prospectapi-common';
+import { Topics, UrlMetadata } from 'content-common';
 
 import { SqsProspect } from './types';
 

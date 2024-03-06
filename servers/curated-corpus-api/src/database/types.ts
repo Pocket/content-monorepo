@@ -3,7 +3,12 @@ import {
   CuratedStatus,
   ScheduledItem as ScheduledItemModel,
 } from '@prisma/client';
-import { CorpusItemSource, ScheduledItemSource } from '../shared/types';
+import { ScheduledItemSource } from '../shared/types';
+import {
+  ApprovedItemAuthor,
+  ApprovedItemRequiredInput,
+  CorpusItemSource
+} from 'content-common';
 
 export type ImportApprovedItemInput = {
   url: string;
@@ -54,46 +59,6 @@ export type RejectedCuratedCorpusItemFilter = {
   title?: string;
   topic?: string;
   language?: string;
-};
-
-export type ApprovedItemAuthor = {
-  name: string;
-  sortOrder: number;
-};
-
-/**
- * These properties are the same for both createApprovedItem and updateApprovedItem
- * mutations.
- */
-type ApprovedItemRequiredInput = {
-  prospectId?: string;
-  title: string;
-  excerpt: string;
-  authors: ApprovedItemAuthor[];
-  status: CuratedStatus;
-  language: string;
-  publisher: string;
-  imageUrl: string;
-  topic: string;
-  source: CorpusItemSource;
-  isTimeSensitive: boolean;
-};
-
-export type CreateApprovedItemInput = ApprovedItemRequiredInput & {
-  // These required properties are set once only at creation time
-  // and never changed, so they're not part of the shared input type above.
-  url: string;
-  isCollection: boolean;
-  isSyndicated: boolean;
-  // These are optional properties for approving AND scheduling the item
-  // on a Scheduled Surface at the same time.
-  // Note that all three must be present to schedule the item.
-  scheduledDate?: string;
-  scheduledSurfaceGuid?: string;
-  scheduledSource?: ScheduledItemSource;
-  // This is an optional property that may or may not be present at the time
-  // a corpus item is saved in the datastore
-  datePublished?: string;
 };
 
 export type UpdateApprovedItemInput = Omit<

@@ -1,9 +1,10 @@
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
-import { CorpusLanguage, ProspectType, Prospect } from 'prospectapi-common';
+import { ProspectType, Prospect } from 'prospectapi-common';
+import { CorpusLanguage, Topics } from 'content-common';
 import { BaseContext } from '@apollo/server';
 
 // Re-export CorpusLanguage, used to be part of this file, but moved to common
-export { CorpusLanguage };
+export { CorpusLanguage, Topics };
 
 // this interface aligns with the graphql input type for getProspects query
 export interface GetProspectsFilters {
