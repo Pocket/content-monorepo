@@ -1,7 +1,7 @@
 import config from './config';
 import fetch from 'node-fetch';
 import { generateJwt, getCorpusSchedulerLambdaPrivateKey } from './utils';
-import { CreateApprovedItemInput, UrlMetadata } from 'content-common/types';
+import { CreateApprovedItemInput, UrlMetadata } from 'content-common';
 
 export const sleep = async (ms: number) => {
   await new Promise((resolve) => setTimeout(resolve, ms));

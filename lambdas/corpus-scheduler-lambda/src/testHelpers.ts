@@ -7,7 +7,7 @@ import {
   ScheduledItemSource,
   Topics,
   UrlMetadata,
-} from 'content-common/types';
+} from 'content-common';
 
 export const createScheduledCandidates = (
   candidates: ScheduledCandidate[],

@@ -44,3 +44,5 @@ export const sanitizeText = (input: string, maxLength: number): string => {
   // trim to conform to our max length
   return sanitized.substring(0, maxLength - 1);
 };
+
+export * from './types';

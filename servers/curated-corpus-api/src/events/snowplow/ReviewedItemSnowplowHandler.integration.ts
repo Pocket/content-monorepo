@@ -17,8 +17,11 @@ import { ReviewedItemSnowplowHandler } from './ReviewedItemSnowplowHandler';
 import { tracker } from './tracker';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import { getUnixTimestamp } from '../../shared/utils';
-import { CorpusItemSource, Topics } from '../../shared/types';
-import { ApprovedItemAuthor } from '../../database/types';
+import {
+  ApprovedItemAuthor,
+  CorpusItemSource,
+  Topics
+} from 'content-common';
 
 /**
  * Use a simple mock item instead of using DB helpers

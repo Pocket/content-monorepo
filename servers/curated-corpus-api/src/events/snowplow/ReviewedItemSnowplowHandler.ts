@@ -15,10 +15,13 @@ import {
   ReviewedCorpusItem,
 } from './schema';
 import { getUnixTimestamp } from '../../shared/utils';
-import { CuratedStatus, RejectedCuratedCorpusItem } from '@prisma/client';
+import { RejectedCuratedCorpusItem } from '@prisma/client';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
-import { CorpusItemSource } from '../../shared/types';
-import { ApprovedItemAuthor } from '../../database/types';
+import {
+  ApprovedItemAuthor,
+  CorpusItemSource,
+  CuratedStatus,
+} from 'content-common';
 
 type CuratedCorpusItemUpdateEvent = Omit<SelfDescribingJson, 'data'> & {
   data: CuratedCorpusItemUpdate;

@@ -2,10 +2,9 @@ import { CuratedStatus } from '@prisma/client';
 import { EventBusHandler } from './EventBusHandler';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import {
-  CorpusItemSource,
   ScheduledItemSource,
-  Topics,
 } from '../../shared/types';
+import { CorpusItemSource, Topics } from 'content-common';
 import { ScheduledItem } from '../../database/types';
 import * as Sentry from '@sentry/node';
 import { EventBridgeClient } from '@aws-sdk/client-eventbridge';

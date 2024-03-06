@@ -4,7 +4,6 @@ import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '@prisma/client';
 import { client } from '../../../database/client';
 import FormData from 'form-data';
-import { CuratedStatus } from '@prisma/client';
 import {
   clearDb,
   createApprovedItemHelper,
@@ -21,12 +20,16 @@ import {
 } from './sample-mutations.gql';
 import {
   ApprovedItem,
-  ApprovedItemAuthor,
-  CreateApprovedItemInput,
   RejectApprovedItemInput,
   UpdateApprovedItemAuthorsInput,
   UpdateApprovedItemInput,
 } from '../../../database/types';
+import {
+  ApprovedItemAuthor,
+  CreateApprovedItemInput,
+  CorpusItemSource,
+  CuratedStatus
+} from 'content-common';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../events/init';
 import {
   ReviewedCorpusItemEventType,
@@ -36,7 +39,6 @@ import Upload from 'graphql-upload/Upload.js';
 import { createReadStream, unlinkSync, writeFileSync } from 'fs';
 import { GET_REJECTED_ITEMS } from '../queries/sample-queries.gql';
 import {
-  CorpusItemSource,
   MozillaAccessGroup,
   ScheduledItemSource,
   Topics,

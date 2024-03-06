@@ -2,6 +2,7 @@
 // currently is a confluence doc:
 // https://getpocket.atlassian.net/wiki/spaces/PE/pages/2584150049/Pocket+Shared+Data
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
+import { Topics } from 'content-common';
 
 // this is the structure of an `Item` as returned by dynamo
 // just a convenience return type
@@ -10,27 +11,6 @@ export type DynamoItem =
       [key: string]: NativeAttributeValue;
     }
   | undefined;
-
-// we may want to move these enums/types to a more shareable location
-// will refactor if/when needed
-export enum Topics {
-  BUSINESS = 'BUSINESS',
-  CAREER = 'CAREER',
-  CORONAVIRUS = 'CORONAVIRUS',
-  EDUCATION = 'EDUCATION',
-  ENTERTAINMENT = 'ENTERTAINMENT',
-  FOOD = 'FOOD',
-  GAMING = 'GAMING',
-  HEALTH_FITNESS = 'HEALTH_FITNESS',
-  PARENTING = 'PARENTING',
-  PERSONAL_FINANCE = 'PERSONAL_FINANCE',
-  POLITICS = 'POLITICS',
-  SCIENCE = 'SCIENCE',
-  SELF_IMPROVEMENT = 'SELF_IMPROVEMENT',
-  SPORTS = 'SPORTS',
-  TECHNOLOGY = 'TECHNOLOGY',
-  TRAVEL = 'TRAVEL',
-}
 
 // these values will need to match those listed in the source of truth doc:
 // https://mozilla-hub.atlassian.net/wiki/spaces/PE/pages/390642851/Pocket+Shared+Data#Prospect-Types
@@ -51,15 +31,6 @@ export enum ProspectType {
   CONSTRAINT_SCHEDULE = 'CONSTRAINT_SCHEDULE',
   SLATE_SCHEDULER = 'SLATE_SCHEDULER',
   SLATE_SCHEDULER_V2 = 'SLATE_SCHEDULER_V2',
-}
-
-// languages we support in the corpus
-export enum CorpusLanguage {
-  EN = 'EN',
-  DE = 'DE',
-  ES = 'ES',
-  FR = 'FR',
-  IT = 'IT',
 }
 
 // this is the type used in most of the code and in dynamo
@@ -269,18 +240,4 @@ export type ClientApiItem = {
   topImageUrl?: string;
   collection?: ClientApiCollection;
   authors?: ClientApiAuthor[];
-};
-
-export type UrlMetadata = {
-  url: string;
-  imageUrl?: string;
-  publisher?: string;
-  domain?: string;
-  title?: string;
-  excerpt?: string;
-  language?: string;
-  isSyndicated?: boolean;
-  isCollection?: boolean;
-  // authors is a comma separated string
-  authors?: string;
 };

@@ -167,6 +167,9 @@ importers:
       '@sentry/serverless':
         specifier: 6.19.7
         version: 6.19.7
+      content-common:
+        specifier: workspace:*
+        version: link:../../packages/content-common
       prospectapi-common:
         specifier: workspace:*
         version: link:../../packages/prospectapi-common
@@ -252,6 +255,9 @@ importers:
       '@sentry/node':
         specifier: 6.19.7
         version: 6.19.7
+      content-common:
+        specifier: workspace:*
+        version: link:../content-common
       cross-fetch:
         specifier: 3.1.5
         version: 3.1.5

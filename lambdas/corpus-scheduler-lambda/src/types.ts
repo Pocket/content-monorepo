@@ -3,7 +3,7 @@ import {
   CorpusItemSource,
   CorpusLanguage,
   Topics,
-} from 'content-common/types';
+} from 'content-common';
 
 export interface ScheduledCandidates {
   candidates: ScheduledCandidate[];

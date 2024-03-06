@@ -6,16 +6,18 @@ import { client } from '../../../database/client';
 
 import {
   ApprovedItem,
-  ApprovedItemAuthor,
-  CreateApprovedItemInput,
   RejectApprovedItemInput,
   UpdateApprovedItemAuthorsInput,
   UpdateApprovedItemInput,
 } from '../../../database/types';
-import { CuratedStatus } from '@prisma/client';
+import {
+  ApprovedItemAuthor,
+  CreateApprovedItemInput,
+  CorpusItemSource,
+  CuratedStatus
+} from 'content-common';
 import {
   ACCESS_DENIED_ERROR,
-  CorpusItemSource,
   MozillaAccessGroup,
   Topics,
 } from '../../../shared/types';

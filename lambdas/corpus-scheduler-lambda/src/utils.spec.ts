@@ -10,7 +10,7 @@ import {
   GetSecretValueCommand,
   SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
-import { ApprovedItemAuthor, CorpusLanguage } from 'content-common/types';
+import { ApprovedItemAuthor, CorpusLanguage } from 'content-common';
 import {
   createScheduledCandidate,
   expectedOutput,

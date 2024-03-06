@@ -4,7 +4,8 @@ import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '@prisma/client';
 import { client } from '../../../database/client';
 
-import { ApprovedItem, CuratedStatus } from '@prisma/client';
+import { ApprovedItem } from '@prisma/client';
+import { CuratedStatus } from 'content-common'
 import { ACCESS_DENIED_ERROR, MozillaAccessGroup } from '../../../shared/types';
 import { clearDb, createApprovedItemHelper } from '../../../test/helpers';
 import {

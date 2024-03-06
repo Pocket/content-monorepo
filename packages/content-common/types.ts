@@ -47,7 +47,7 @@ export enum ScheduledItemSource {
   ML = 'ML', // created by ML
 }
 
-type ApprovedItemRequiredInput = {
+export type ApprovedItemRequiredInput = {
   prospectId?: string;
   title: string;
   excerpt: string;
@@ -78,10 +78,12 @@ export type CreateApprovedItemInput = ApprovedItemRequiredInput & {
   datePublished?: string;
 };
 
+// prospect-api
 export interface UrlMetadata {
   url: string;
   imageUrl?: string;
   publisher?: string;
+  domain?: string;
   title?: string;
   excerpt?: string;
   language?: string;

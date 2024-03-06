@@ -7,10 +7,9 @@ import {
   ProspectType,
   ScheduledSurface,
   ScheduledSurfaces,
-  Topics,
   truncateDb,
 } from 'prospectapi-common';
-import { CorpusLanguage } from './types';
+import { CorpusLanguage, Topics } from './types';
 
 // conjure up double the batch size so we get variance
 const prospectsPerCombo = config.app.prospectBatchSize * 2;

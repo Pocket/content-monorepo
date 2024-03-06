@@ -1,17 +1,19 @@
 import * as Sentry from '@sentry/node';
 import {
-  CorpusLanguage,
   Prospect,
   ProspectType,
   ScheduledSurfaces,
-  Topics,
 } from 'prospectapi-common';
 import {
   generateEventBridgePayload,
   sendEvent,
   sendEventBridgeEvent,
 } from './events';
-import { MozillaAccessGroup, UserAuth } from '../types';
+import {
+  CorpusLanguage,
+  MozillaAccessGroup,
+  Topics,
+  UserAuth } from '../types';
 import { EventBridgeEventType, ProspectReviewStatus } from './types';
 import { EventBridgeClient } from '@aws-sdk/client-eventbridge';
 import config from '../config';

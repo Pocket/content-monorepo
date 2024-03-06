@@ -10,7 +10,8 @@ import {
   standardizeLanguage,
   deDuplicateProspectUrls,
 } from './lib';
-import { Prospect, ProspectType, Topics } from 'prospectapi-common';
+import { Prospect, ProspectType } from 'prospectapi-common';
+import { Topics } from './types';
 
 // turn the enum into an array, we can grab a random one easy-peasy
 const topicsArray = Object.keys(Topics).map((key) => Topics[key]);

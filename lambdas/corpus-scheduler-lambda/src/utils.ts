@@ -14,7 +14,7 @@ import {
   CorpusLanguage,
   UrlMetadata,
   ScheduledItemSource,
-} from 'content-common/types';
+} from 'content-common';
 import {
   allowedScheduledSurfaces,
   ScheduledCandidate,
