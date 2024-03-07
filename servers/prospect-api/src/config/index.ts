@@ -1,6 +1,3 @@
-const snowplowHttpProtocol =
-  process.env.NODE_ENV === 'production' ? 'https' : 'http';
-
 export default {
   environment: process.env.NODE_ENV || 'development',
   app: {
