@@ -27,8 +27,9 @@ const config = {
     groups: ['mozilliansorg_pocket_scheduled_surface_curator_full'],
   },
   snowplow: {
-    // TODO: Set dev value
-    appId: 'corpus-scheduler-lambda',
+    // appId should end in '-dev' outside of production such that Dbt can filter events:
+    // https://github.com/Pocket/dbt-snowflake/blob/main/macros/validate_snowplow_app_id.sql
+    appId: isDev ? 'corpus-scheduler-lambda-dev' : 'corpus-scheduler-lambda',
     schemas: {
       // published 2024-02-28
       scheduled_corpus_candidate:

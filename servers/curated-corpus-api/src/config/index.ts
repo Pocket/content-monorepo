@@ -65,7 +65,12 @@ export default {
     includeLocalVariables: true,
   },
   snowplow: {
-    appId: 'pocket-backend-curated-corpus-api',
+    // appId should end in '-dev' outside of production such that Dbt can filter events:
+    // https://github.com/Pocket/dbt-snowflake/blob/main/macros/validate_snowplow_app_id.sql
+    appId:
+      process.env.NODE_ENV === 'production'
+        ? 'curated-corpus-api'
+        : 'curated-corpus-api-dev',
     corpusItemEvents: ReviewedCorpusItemEventType,
     corpusScheduleEvents: ScheduledCorpusItemEventType,
     schemas: {
