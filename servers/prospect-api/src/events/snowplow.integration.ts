@@ -32,7 +32,7 @@ describe('snowplow', () => {
 
     const prospectWithRemovalReasons: SnowplowProspect = {
       ...prospect,
-      status_reasons: ['PUBLISHER', 'OUTDATED'],
+      status_reasons: ['PUBLISHER_DIVERSITY', 'TIME_SENSITIVE'],
     };
 
     queueSnowplowEvent(
@@ -80,7 +80,7 @@ describe('snowplow', () => {
 
     const prospectWithRemovalReasons: SnowplowProspect = {
       ...prospect,
-      status_reasons: ['PUBLISHER', 'OUTDATED'],
+      status_reasons: ['PUBLISHER_DIVERSITY', 'TIME_SENSITIVE'],
       status_reason_comment: 'publisher spread too thin and old content',
     };
 
