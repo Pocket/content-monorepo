@@ -1,7 +1,7 @@
 import config from './config';
 import fetch from 'node-fetch';
 import {
-  CreateApprovedItemInput,
+  CreateApprovedCorpusItemApiInput,
   CreateScheduledItemInput,
   UrlMetadata,
 } from 'content-common';
@@ -21,7 +21,7 @@ export const sleep = async (ms: number) => {
  * @param bearerToken generated bearerToken for admin api
  */
 export async function createApprovedAndScheduledCorpusItem(
-  data: CreateApprovedItemInput,
+  data: CreateApprovedCorpusItemApiInput,
   bearerToken: string,
 ): Promise<ApprovedCorpusItemWithScheduleHistoryOutput> {
   // Wait, don't overwhelm the API

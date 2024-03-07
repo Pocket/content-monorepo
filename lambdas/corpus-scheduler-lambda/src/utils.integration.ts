@@ -1,4 +1,4 @@
-import { mapScheduledCandidateInputToCreateApprovedItemInput } from './utils';
+import { mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput } from './utils';
 import { UrlMetadata } from 'content-common/types';
 import { createScheduledCandidate, parserItem } from './testHelpers';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
@@ -13,7 +13,7 @@ describe('utils integrations', function () {
     await resetSnowplowEvents();
   });
 
-  describe('mapScheduledCandidateInputToCreateApprovedItemInput', () => {
+  describe('mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput', () => {
     describe('error handling', () => {
       interface MetadataErrorTestCase {
         candidateKey: string;
@@ -54,7 +54,7 @@ describe('utils integrations', function () {
             };
 
             await expect(
-              mapScheduledCandidateInputToCreateApprovedItemInput(
+              mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
                 incompleteCandidate,
                 incompleteParserItem,
               ),

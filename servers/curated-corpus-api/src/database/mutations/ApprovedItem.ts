@@ -1,11 +1,11 @@
 import { PrismaClient } from '.prisma/client';
 import {
   ApprovedItem,
+  CreateApprovedItemInput,
   ImportApprovedItemInput,
   UpdateApprovedItemAuthorsInput,
   UpdateApprovedItemInput,
 } from '../types';
-import { CreateApprovedItemInput } from 'content-common';
 import { UserInputError } from '@pocket-tools/apollo-utils';
 import { checkCorpusUrl } from '../helpers/checkCorpusUrl';
 import { GraphQLError } from 'graphql';
@@ -20,7 +20,7 @@ import { GraphQLError } from 'graphql';
 export async function createApprovedItem(
   db: PrismaClient,
   data: CreateApprovedItemInput,
-  username: string
+  username: string,
 ): Promise<ApprovedItem> {
   // Check if an item with this URL has already been created in the Curated Corpus.
   await checkCorpusUrl(db, data.url);
@@ -53,7 +53,7 @@ export async function createApprovedItem(
  */
 export async function importApprovedItem(
   db: PrismaClient,
-  data: ImportApprovedItemInput
+  data: ImportApprovedItemInput,
 ): Promise<ApprovedItem> {
   return db.approvedItem.create({
     data,
@@ -75,7 +75,7 @@ export async function importApprovedItem(
 export async function updateApprovedItem(
   db: PrismaClient,
   data: UpdateApprovedItemInput,
-  username: string
+  username: string,
 ): Promise<ApprovedItem> {
   if (!data.externalId) {
     throw new UserInputError('externalId must be provided.');
@@ -110,7 +110,7 @@ export async function updateApprovedItem(
 export async function updateApprovedItemAuthors(
   db: PrismaClient,
   data: UpdateApprovedItemAuthorsInput,
-  username: string
+  username: string,
 ): Promise<ApprovedItem> {
   if (!data.externalId) {
     throw new UserInputError('externalId must be provided.');
@@ -141,7 +141,7 @@ export async function updateApprovedItemAuthors(
  */
 export async function deleteApprovedItem(
   db: PrismaClient,
-  externalId: string
+  externalId: string,
 ): Promise<ApprovedItem> {
   // Retrieve the Approved Item first as it needs to be
   // returned to the resolver as the result of the mutation.
@@ -157,7 +157,7 @@ export async function deleteApprovedItem(
   // Fail early if item wasn't found.
   if (!approvedItem) {
     throw new UserInputError(
-      `Could not find an approved item with external id of "${externalId}".`
+      `Could not find an approved item with external id of "${externalId}".`,
     );
   }
 
@@ -165,9 +165,10 @@ export async function deleteApprovedItem(
   const scheduledItems = await db.scheduledItem.findMany({
     where: { approvedItemId: approvedItem.id },
   });
+
   if (scheduledItems.length > 0) {
     throw new GraphQLError(
-      `Cannot remove item from approved corpus - scheduled entries exist.`
+      `Cannot remove item from approved corpus - scheduled entries exist.`,
     );
   }
 
@@ -178,7 +179,7 @@ export async function deleteApprovedItem(
     },
   });
 
-  // Hard delete the Approved Item if we got past this point.
+  // Hard delete the Approved Item if we got to this point.
   await db.approvedItem.delete({
     where: { externalId },
   });

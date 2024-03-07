@@ -188,9 +188,10 @@ export enum ManualScheduleReason {
   OTHER = 'OTHER',
 }
 
-export enum ScheduledItemSource {
-  MANUAL = 'MANUAL', // manually entered through the curation admin tool
-  ML = 'ML', // created by ML
+export enum ActionScreen {
+  PROSPECTING = 'PROSPECTING',
+  SCHEDULE = 'SCHEDULE',
+  CORPUS = 'CORPUS',
 }
 // End Pocket shared data
 

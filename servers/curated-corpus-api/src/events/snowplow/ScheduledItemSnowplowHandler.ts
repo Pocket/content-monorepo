@@ -96,6 +96,7 @@ export class ScheduledItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
         status_reason_comment: item.reasonComment ?? undefined,
         generated_by: item.generated_by ?? undefined,
         status: item.status ?? undefined,
+        action_screen: item.action_screen ?? undefined,
       },
     };
 

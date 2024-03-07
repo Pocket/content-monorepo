@@ -6,7 +6,7 @@ import {
 import {
   CorpusItemSource,
   CorpusLanguage,
-  CreateApprovedItemInput,
+  CreateApprovedCorpusItemApiInput,
   CuratedStatus,
   ScheduledItemSource,
   ScheduledSurfaces,
@@ -74,7 +74,7 @@ export const createScheduledCandidate = (
     },
   };
 };
-export const expectedOutput: CreateApprovedItemInput = {
+export const expectedOutput: CreateApprovedCorpusItemApiInput = {
   url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
   title:
     'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',

@@ -2,11 +2,12 @@ import { S3 } from '@aws-sdk/client-s3';
 import { IncomingHttpHeaders } from 'http';
 import Express from 'express';
 import { BaseContext } from '@apollo/server';
-import { PrismaClient, RejectedCuratedCorpusItem } from '.prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { client } from '../database/client';
-import { ApprovedItem } from '../database/types';
 import { CuratedCorpusEventEmitter } from '../events/curatedCorpusEventEmitter';
 import {
+  ApprovedCorpusItemPayload,
+  RejectedCorpusItemPayload,
   ReviewedCorpusItemEventType,
   ReviewedCorpusItemPayload,
   ScheduledCorpusItemEventType,
@@ -44,7 +45,7 @@ export interface IAdminContext {
 
   emitReviewedCorpusItemEvent(
     event: ReviewedCorpusItemEventType,
-    reviewedCorpusItem: ApprovedItem | RejectedCuratedCorpusItem,
+    reviewedCorpusItem: ApprovedCorpusItemPayload | RejectedCorpusItemPayload,
   ): void;
 
   emitScheduledCorpusItemEvent(
@@ -139,7 +140,7 @@ export class AdminContextManager implements IAdminContext {
 
   emitReviewedCorpusItemEvent(
     event: ReviewedCorpusItemEventType,
-    reviewedCorpusItem: ApprovedItem | RejectedCuratedCorpusItem,
+    reviewedCorpusItem: ApprovedCorpusItemPayload | RejectedCorpusItemPayload,
   ): void {
     this.eventEmitter.emitEvent<ReviewedCorpusItemPayload>(event, {
       reviewedCorpusItem,

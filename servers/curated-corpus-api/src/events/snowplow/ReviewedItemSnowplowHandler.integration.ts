@@ -1,5 +1,6 @@
-import { CuratedStatus, RejectedCuratedCorpusItem } from '.prisma/client';
+import { CuratedStatus } from '.prisma/client';
 import {
+  getAllSnowplowEvents,
   getGoodSnowplowEvents,
   parseSnowplowData,
   resetSnowplowEvents,
@@ -9,6 +10,7 @@ import { assertValidSnowplowObjectUpdateEvents } from '../../test/helpers/snowpl
 import config from '../../config';
 import {
   ApprovedCorpusItemPayload,
+  RejectedCorpusItemPayload,
   ReviewedCorpusItemEventType,
   ReviewedCorpusItemPayload,
 } from '../types';
@@ -17,7 +19,12 @@ import { ReviewedItemSnowplowHandler } from './ReviewedItemSnowplowHandler';
 import { tracker } from './tracker';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import { getUnixTimestamp } from '../../shared/utils';
-import { ApprovedItemAuthor, CorpusItemSource, Topics } from 'content-common';
+import {
+  ActionScreen,
+  ApprovedItemAuthor,
+  CorpusItemSource,
+  Topics,
+} from 'content-common';
 
 /**
  * Use a simple mock item instead of using DB helpers
@@ -50,7 +57,7 @@ const approvedItem: ApprovedCorpusItemPayload = {
   updatedBy: 'Amy',
 };
 
-const rejectedItem: RejectedCuratedCorpusItem = {
+const rejectedItem: RejectedCorpusItemPayload = {
   id: 123,
   externalId: '123-abc',
   prospectId: '456-dfg',
@@ -246,6 +253,103 @@ describe('ReviewedItemSnowplowHandler', () => {
           },
         },
       ]);
+    });
+  });
+
+  describe('action screen values', () => {
+    it('should send an action screen value successfully when adding an item', async () => {
+      const approvedItemWithActionScreenData: ApprovedCorpusItemPayload = {
+        ...approvedItem,
+        action_screen: ActionScreen.SCHEDULE,
+      };
+
+      emitter.emit(ReviewedCorpusItemEventType.ADD_ITEM, {
+        reviewedCorpusItem: approvedItemWithActionScreenData,
+        eventType: ReviewedCorpusItemEventType.ADD_ITEM,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(1);
+      expect(allEvents.bad).toEqual(0);
+
+      const goodEvents = await getGoodSnowplowEvents();
+
+      const eventContext = parseSnowplowData(
+        goodEvents[0].rawEvent.parameters.cx,
+      );
+
+      expect(eventContext.data).toMatchObject([
+        {
+          schema: config.snowplow.schemas.reviewedCorpusItem,
+          data: {
+            ...approvedItemEventContextData,
+            action_screen: ActionScreen.SCHEDULE,
+          },
+        },
+      ]);
+    });
+
+    it('should send an action screen value successfully when rejecting an item', async () => {
+      const approvedItemWithActionScreenData: ApprovedCorpusItemPayload = {
+        ...approvedItem,
+        action_screen: ActionScreen.SCHEDULE,
+      };
+
+      emitter.emit(ReviewedCorpusItemEventType.REJECT_ITEM, {
+        reviewedCorpusItem: approvedItemWithActionScreenData,
+        eventType: ReviewedCorpusItemEventType.REJECT_ITEM,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(1);
+      expect(allEvents.bad).toEqual(0);
+
+      const goodEvents = await getGoodSnowplowEvents();
+
+      const eventContext = parseSnowplowData(
+        goodEvents[0].rawEvent.parameters.cx,
+      );
+
+      expect(eventContext.data).toMatchObject([
+        {
+          schema: config.snowplow.schemas.reviewedCorpusItem,
+          data: {
+            ...approvedItemEventContextData,
+            action_screen: ActionScreen.SCHEDULE,
+          },
+        },
+      ]);
+    });
+
+    it('should not send an unknown action screen value successfully', async () => {
+      const approvedItemWithActionScreenData: any = {
+        ...approvedItem,
+        action_screen: 'CHAT',
+      };
+
+      emitter.emit(ReviewedCorpusItemEventType.ADD_ITEM, {
+        reviewedCorpusItem: approvedItemWithActionScreenData,
+        eventType: ReviewedCorpusItemEventType.ADD_ITEM,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(0);
+      expect(allEvents.bad).toEqual(1);
     });
   });
 });

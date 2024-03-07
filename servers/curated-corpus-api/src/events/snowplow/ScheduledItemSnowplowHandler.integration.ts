@@ -1,5 +1,6 @@
 import { CuratedStatus } from '.prisma/client';
 import {
+  getAllSnowplowEvents,
   getGoodSnowplowEvents,
   parseSnowplowData,
   resetSnowplowEvents,
@@ -16,11 +17,8 @@ import { ScheduledItemSnowplowHandler } from './ScheduledItemSnowplowHandler';
 import { tracker } from './tracker';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import { getUnixTimestamp } from '../../shared/utils';
-import {
-  ScheduledCorpusItemStatus,
-  ScheduledItemSource,
-} from '../../shared/types';
-import { CorpusItemSource, Topics } from 'content-common';
+import { ActionScreen, ScheduledCorpusItemStatus } from '../../shared/types';
+import { CorpusItemSource, ScheduledItemSource, Topics } from 'content-common';
 import { getScheduledSurfaceByGuid } from '../../shared/utils';
 import { ScheduledItem } from '../../database/types';
 
@@ -94,7 +92,7 @@ const scheduledItemEventContextData = {
   created_by: scheduledCorpusItem.createdBy,
   updated_at: getUnixTimestamp(scheduledCorpusItem.updatedAt),
   updated_by: scheduledCorpusItem.updatedBy,
-  generated_by: CorpusItemSource.MANUAL,
+  generated_by: ScheduledItemSource.MANUAL,
   status: 'removed',
   status_reasons: ['TOPIC', 'PUBLISHER'],
   status_reason_comment: 'why did i rescheudle this? see above',
@@ -158,7 +156,7 @@ describe('ScheduledItemSnowplowHandler', () => {
   });
 
   describe('ML sourced approved items', () => {
-    it('should send an approved item with `ML` as the `generated_by` value', async () => {
+    it('should schedule an item with `ML` as the `generated_by` value', async () => {
       const scheduledItemWithMlData: ScheduledCorpusItemPayload = {
         scheduledCorpusItem: {
           ...scheduledCorpusItem,
@@ -191,10 +189,127 @@ describe('ScheduledItemSnowplowHandler', () => {
           schema: config.snowplow.schemas.scheduledCorpusItem,
           data: {
             ...scheduledItemEventContextData,
-            generated_by: CorpusItemSource.ML,
+            generated_by: ScheduledItemSource.ML,
           },
         },
       ]);
+    });
+  });
+
+  describe('action_screen values', () => {
+    it('should send an action_screen value when scheduling an item', async () => {
+      const scheduledItemWithMlData: ScheduledCorpusItemPayload = {
+        scheduledCorpusItem: {
+          ...scheduledCorpusItem,
+          generated_by: ScheduledItemSource.ML,
+          status: ScheduledCorpusItemStatus.REMOVED,
+          reasons: ['TOPIC', 'PUBLISHER'],
+          reasonComment: 'why did i rescheudle this? see above',
+          action_screen: ActionScreen.SCHEDULE,
+        },
+      };
+
+      emitter.emit(ScheduledCorpusItemEventType.ADD_SCHEDULE, {
+        ...scheduledItemWithMlData,
+        eventType: ScheduledCorpusItemEventType.ADD_SCHEDULE,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(1);
+      expect(allEvents.bad).toEqual(0);
+
+      const goodEvents = await getGoodSnowplowEvents();
+
+      const eventContext = parseSnowplowData(
+        goodEvents[0].rawEvent.parameters.cx,
+      );
+
+      expect(eventContext.data).toMatchObject([
+        {
+          schema: config.snowplow.schemas.scheduledCorpusItem,
+          data: {
+            ...scheduledItemEventContextData,
+            generated_by: ScheduledItemSource.ML,
+            action_screen: ActionScreen.SCHEDULE,
+          },
+        },
+      ]);
+    });
+
+    it('should not send an action_screen value when scheduling an item', async () => {
+      const scheduledItemWithMlData: ScheduledCorpusItemPayload = {
+        scheduledCorpusItem: {
+          ...scheduledCorpusItem,
+          generated_by: ScheduledItemSource.ML,
+          status: ScheduledCorpusItemStatus.REMOVED,
+          reasons: ['TOPIC', 'PUBLISHER'],
+          reasonComment: 'why did i rescheudle this? see above',
+          // undefined values shouldn't get sent through
+          action_screen: undefined,
+        },
+      };
+
+      emitter.emit(ScheduledCorpusItemEventType.ADD_SCHEDULE, {
+        ...scheduledItemWithMlData,
+        eventType: ScheduledCorpusItemEventType.ADD_SCHEDULE,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(1);
+      expect(allEvents.bad).toEqual(0);
+
+      const goodEvents = await getGoodSnowplowEvents();
+
+      const eventContext = parseSnowplowData(
+        goodEvents[0].rawEvent.parameters.cx,
+      );
+
+      expect(eventContext.data).toMatchObject([
+        {
+          schema: config.snowplow.schemas.scheduledCorpusItem,
+          data: {
+            ...scheduledItemEventContextData,
+            generated_by: ScheduledItemSource.ML,
+          },
+        },
+      ]);
+    });
+
+    it('should not send an unknown action screen value successfully', async () => {
+      const scheduledItemWithMlData: any = {
+        scheduledCorpusItem: {
+          ...scheduledCorpusItem,
+          generated_by: ScheduledItemSource.ML,
+          status: ScheduledCorpusItemStatus.REMOVED,
+          reasons: ['TOPIC', 'PUBLISHER'],
+          reasonComment: 'why did i rescheudle this? see above',
+          action_screen: 'LOGIN',
+        },
+      };
+
+      emitter.emit(ScheduledCorpusItemEventType.ADD_SCHEDULE, {
+        ...scheduledItemWithMlData,
+        eventType: ScheduledCorpusItemEventType.ADD_SCHEDULE,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(0);
+      expect(allEvents.bad).toEqual(1);
     });
   });
 });

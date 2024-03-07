@@ -12,9 +12,9 @@ import {
 } from '../../../database/types';
 import {
   ApprovedItemAuthor,
-  CreateApprovedItemInput,
+  CreateApprovedCorpusItemApiInput,
   CorpusItemSource,
-  CuratedStatus
+  CuratedStatus,
 } from 'content-common';
 import {
   ACCESS_DENIED_ERROR,
@@ -53,7 +53,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
   });
 
   // a standard set of inputs for this mutation
-  const input: CreateApprovedItemInput = {
+  const input: CreateApprovedCorpusItemApiInput = {
     prospectId: '123-abc',
     title: 'Find Out How I Cured My Docker In 2 Days',
     url: 'https://test.com/docker',

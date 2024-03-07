@@ -19,6 +19,7 @@ import {
   getApprovedItemByExternalId,
 } from '../../../database/queries';
 import {
+  ApprovedCorpusItemPayload,
   RejectedCorpusItemPayload,
   ReviewedCorpusItemEventType,
   ScheduledCorpusItemEventType,
@@ -26,7 +27,7 @@ import {
 } from '../../../events/types';
 import { uploadImageToS3, uploadImageToS3FromUrl } from '../../aws/upload';
 import {
-  ImportApprovedCorpusItemInput,
+  ImportApprovedCorpusItemApiInput,
   ImportApprovedCorpusItemPayload,
 } from '../types';
 import {
@@ -66,6 +67,7 @@ export async function createApprovedItem(
     scheduledDate,
     scheduledSurfaceGuid,
     scheduledSource,
+    actionScreen,
     ...approvedItemData
   } = data;
 
@@ -107,9 +109,16 @@ export async function createApprovedItem(
     context.authenticatedUser.username,
   );
 
+  // build the payload for event emission
+  // contains properties not stored in this service's db
+  const approvedItemForEvents: ApprovedCorpusItemPayload = {
+    ...approvedItem,
+    action_screen: actionScreen,
+  };
+
   context.emitReviewedCorpusItemEvent(
     ReviewedCorpusItemEventType.ADD_ITEM,
-    approvedItem,
+    approvedItemForEvents,
   );
 
   if (scheduledDate && scheduledSurfaceGuid && scheduledSource) {
@@ -134,6 +143,7 @@ export async function createApprovedItem(
         ...scheduledItem,
         status: ScheduledCorpusItemStatus.ADDED,
         generated_by: scheduledSource,
+        action_screen: actionScreen,
       },
     };
 
@@ -159,15 +169,17 @@ export async function updateApprovedItem(
   { data },
   context: IAdminContext,
 ): Promise<ApprovedItem> {
+  const { actionScreen, ...updatedItemData } = data;
+
   // Check if the user can perform this mutation
   if (!context.authenticatedUser.canWriteToCorpus()) {
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
 
   // validate topic is a valid enum
-  if (!Object.values(Topics).includes(data.topic)) {
+  if (!Object.values(Topics).includes(updatedItemData.topic)) {
     throw new UserInputError(
-      `Cannot create a corpus item with the topic "${data.topic}".`,
+      `Cannot create a corpus item with the topic "${updatedItemData.topic}".`,
     );
   }
 
@@ -176,7 +188,7 @@ export async function updateApprovedItem(
   // to fetch the entire object.
   const existingItem = await getApprovedItemByExternalId(
     context.db,
-    data.externalId,
+    updatedItemData.externalId,
   );
 
   // Remove the old author(s) from the DB records before we run the update function
@@ -190,13 +202,20 @@ export async function updateApprovedItem(
   // any authors.
   const approvedItem = await dbUpdateApprovedItem(
     context.db,
-    data,
+    updatedItemData,
     context.authenticatedUser.username,
   );
 
+  // build the payload for event emission
+  // contains properties not stored in this service's db
+  const updatedItemForEvents: ApprovedCorpusItemPayload = {
+    ...approvedItem,
+    action_screen: actionScreen,
+  };
+
   context.emitReviewedCorpusItemEvent(
     ReviewedCorpusItemEventType.UPDATE_ITEM,
-    approvedItem,
+    updatedItemForEvents,
   );
 
   return approvedItem;
@@ -266,16 +285,21 @@ export async function rejectApprovedItem(
   { data },
   context: IAdminContext,
 ): Promise<ApprovedItem> {
+  const { actionScreen, ...rejectedItemData } = data;
+
   // check if user is not authorized to reject an item
   if (!context.authenticatedUser.canWriteToCorpus()) {
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
 
-  let approvedItem = await dbDeleteApprovedItem(context.db, data.externalId);
+  let approvedItem = await dbDeleteApprovedItem(
+    context.db,
+    rejectedItemData.externalId,
+  );
 
   // validate reason enum
   // rejection reason comes in as a comma separated string
-  data.reason.split(',').map((reason) => {
+  rejectedItemData.reason.split(',').map((reason) => {
     // remove whitespace in the check below!
     if (!Object.values(RejectionReason).includes(reason.trim())) {
       throw new UserInputError(`"${reason}" is not a valid rejection reason.`);
@@ -293,7 +317,7 @@ export async function rejectApprovedItem(
     topic: approvedItem.topic || '',
     language: approvedItem.language,
     publisher: approvedItem.publisher,
-    reason: data.reason,
+    reason: rejectedItemData.reason,
   };
 
   // Create a Rejected Item. The Prisma function will handle URL uniqueness checks
@@ -307,16 +331,17 @@ export async function rejectApprovedItem(
   // Before that, we need to update the values for the `updatedAt` and `updatedBy`
   // fields for the deleted approved item. Let's take these values from
   // the newly created Rejected Item.
-  approvedItem = {
+  const approvedItemForEvents: ApprovedCorpusItemPayload = {
     ...approvedItem,
     updatedAt: rejectedItem.createdAt,
     updatedBy: rejectedItem.createdBy,
+    action_screen: actionScreen,
   };
 
   // Now emit the event with the updated Approved Item data.
   context.emitReviewedCorpusItemEvent(
     ReviewedCorpusItemEventType.REMOVE_ITEM,
-    approvedItem,
+    approvedItemForEvents,
   );
 
   const rejectedItemPayload: RejectedCorpusItemPayload = {
@@ -324,6 +349,7 @@ export async function rejectApprovedItem(
     // this helps analytics correlate data between the approved items that were rejected
     // and the rejected item. *not* present when rejecting a prospect.
     approvedCorpusItemExternalId: approvedItem.externalId,
+    action_screen: actionScreen,
   };
 
   // Let Snowplow know that an entry was added to the Rejected Items table.
@@ -331,6 +357,11 @@ export async function rejectApprovedItem(
     ReviewedCorpusItemEventType.REJECT_ITEM,
     rejectedItemPayload,
   );
+
+  // finally, for returned data purposes, set the updatedBy value to be the
+  // user that performed this deletion.
+  // (fwiw, i don't know if there's a requirement for this...)
+  approvedItem.updatedBy = context.authenticatedUser.username;
 
   return approvedItem;
 }
@@ -369,7 +400,7 @@ export async function uploadApprovedItemImage(
  */
 export async function importApprovedItem(
   parent,
-  { data }: { data: ImportApprovedCorpusItemInput },
+  { data }: { data: ImportApprovedCorpusItemApiInput },
   context: IAdminContext,
 ): Promise<ImportApprovedCorpusItemPayload> {
   // Check if user is authorized to import an item
@@ -445,7 +476,7 @@ export async function importApprovedItem(
  * @param data
  */
 function toDbApprovedItemInput(
-  data: ImportApprovedCorpusItemInput,
+  data: ImportApprovedCorpusItemApiInput,
 ): ImportApprovedItemInput {
   return {
     title: data.title,
@@ -472,7 +503,7 @@ function toDbApprovedItemInput(
  * @param data
  */
 function toDbScheduledItemInput(
-  data: ImportApprovedCorpusItemInput & { approvedItemId: number },
+  data: ImportApprovedCorpusItemApiInput & { approvedItemId: number },
 ): ImportScheduledItemInput {
   return {
     approvedItemId: data.approvedItemId,

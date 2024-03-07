@@ -47,6 +47,12 @@ export enum ScheduledItemSource {
   ML = 'ML', // created by ML
 }
 
+export enum ActionScreen {
+  PROSPECTING = 'PROSPECTING',
+  SCHEDULE = 'SCHEDULE',
+  CORPUS = 'CORPUS',
+}
+
 export type ApprovedItemRequiredInput = {
   prospectId?: string;
   title: string;
@@ -61,7 +67,8 @@ export type ApprovedItemRequiredInput = {
   isTimeSensitive: boolean;
 };
 
-export type CreateApprovedItemInput = ApprovedItemRequiredInput & {
+// maps to the CreateApprovedCorpusItemInput type in corpus API admin schema
+export type CreateApprovedCorpusItemApiInput = ApprovedItemRequiredInput & {
   // These required properties are set once only at creation time
   // and never changed, so they're not part of the shared input type above.
   url: string;
@@ -76,6 +83,8 @@ export type CreateApprovedItemInput = ApprovedItemRequiredInput & {
   // This is an optional property that may or may not be present at the time
   // a corpus item is saved in the datastore
   datePublished?: string;
+  // Optional value specifying which admin screen the action originated from.
+  actionScreen?: ActionScreen; // non-db, analytics only
 };
 
 export type CreateScheduledItemInput = {
