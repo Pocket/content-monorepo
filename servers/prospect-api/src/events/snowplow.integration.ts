@@ -35,7 +35,7 @@ export const prospect: SnowplowProspect = {
 
 describe('snowplow', () => {
   const emitter = getEmitter();
-  const tracker = getTracker(emitter, config.snowplow.endpoint);
+  const tracker = getTracker(emitter, config.snowplow.appId);
 
   beforeEach(async () => {
     await resetSnowplowEvents();
