@@ -165,7 +165,7 @@ export const resolvers = {
       const snowplowEmitter = getEmitter();
       const snowplowTracker = getTracker(
         snowplowEmitter,
-        config.snowplow.endpoint,
+        config.snowplow.appId,
       );
       queueSnowplowEvent(
         snowplowTracker,
