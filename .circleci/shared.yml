@@ -542,13 +542,14 @@ jobs:
             pnpm --config.shamefully-hoist=true --config.hoist=true --config.node-linker=true --config.symlinks=false --config.shared-workspace-lockfile=false deploy --filter=<< parameters.scope >> --prod pruned
       - run:
           name: Package Lambda
+          # zip -y argument preserves symlinks, which helps stay within the 250 MB unzipped .zip size limit for Lambdas.
           command: |
             cd ~/bug/project/pruned
             cp -r package.json dist/
             cp -r node_modules/ dist/node_modules/
 
             cd dist
-            zip -r9 ~/project/${CIRCLE_SHA1}.zip .
+            zip -r9y ~/project/${CIRCLE_SHA1}.zip .
             mkdir /tmp/artifacts
             cp ~/project/${CIRCLE_SHA1}.zip /tmp/artifacts/
             cd ..
