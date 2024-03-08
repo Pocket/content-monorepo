@@ -110,13 +110,13 @@ importers:
   lambdas/prospect-api-bridge-lambda:
     dependencies:
       '@aws-sdk/client-eventbridge':
-        specifier: 3.504.0
+        specifier: ^3.504.0
         version: 3.504.0
       '@aws-sdk/client-firehose':
         specifier: ^3.504.0
         version: 3.504.0
       '@aws-sdk/client-lambda':
-        specifier: 3.504.0
+        specifier: ^3.504.0
         version: 3.504.0
       '@sentry/serverless':
         specifier: 7.95.0
@@ -968,7 +968,7 @@ packages:
       '@smithy/util-body-length-browser': 2.1.1
       '@smithy/util-body-length-node': 2.2.1
       '@smithy/util-defaults-mode-browser': 2.1.1
-      '@smithy/util-defaults-mode-node': 2.1.1
+      '@smithy/util-defaults-mode-node': 2.2.0
       '@smithy/util-endpoints': 1.1.1
       '@smithy/util-retry': 2.1.1
       '@smithy/util-utf8': 2.1.1
@@ -7901,7 +7901,7 @@ packages:
     dependencies:
       semver: 7.6.0
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240306
+      typescript: 5.5.0-dev.20240308
     dev: false
 
   /drange@1.1.1:
@@ -14141,8 +14141,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240306:
-    resolution: {integrity: sha512-8fi3+9qaHf/GQh7oo4X0HDxiWBwzRdGfgyXQlA/qUQ5NBBSbt3LCJFs2nlRBEd9pFBN5RD9Gfzyr0c3b+Ev9+A==}
+  /typescript@5.5.0-dev.20240308:
+    resolution: {integrity: sha512-HskK9uC+zmt8wS0GYh2EoP2u2nSJELnbD3mjl1VwPlnjxqwyHkAIV+dO9bnIWA0t/KL9Q7hDUzIIYQ15QlJFtg==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
