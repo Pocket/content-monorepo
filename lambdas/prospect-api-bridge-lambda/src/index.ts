@@ -57,17 +57,23 @@ async function sendToEventBridge(body: string) {
  * @param body String to be sent to the Firehose defined in config.
  */
 async function sendToFirehose(body: string) {
-  const firehoseClient = new FirehoseClient({});
-  const putRecordCommand = new PutRecordCommand({
-    DeliveryStreamName: config.aws.firehose.deliveryStreamName, // Ensure this is defined in your config
-    Record: {
-      // Kinesis Data Firehose buffers records before delivering them to the destination. To disambiguate the data blobs
-      // at the destination, we use a newline (\n) delimiter in the data. This mimics put_results in our Metaflow repo:
-      // https://github.com/Pocket/dl-metaflow-jobs/blob/main/jobs/common/utils.py#L200
-      Data: new TextEncoder().encode(`${body}\n`),
-    },
-  });
-  await firehoseClient.send(putRecordCommand);
+  try {
+    const firehoseClient = new FirehoseClient({});
+    const putRecordCommand = new PutRecordCommand({
+      DeliveryStreamName: config.aws.firehose.deliveryStreamName, // Ensure this is defined in your config
+      Record: {
+        // Kinesis Data Firehose buffers records before delivering them to the destination. To disambiguate the data blobs
+        // at the destination, we use a newline (\n) delimiter in the data. This mimics put_results in our Metaflow repo:
+        // https://github.com/Pocket/dl-metaflow-jobs/blob/main/jobs/common/utils.py#L200
+        Data: new TextEncoder().encode(`${body}\n`),
+      },
+    });
+
+    await firehoseClient.send(putRecordCommand);
+  } catch (e) {
+    console.log('failed sending to firehose');
+    console.log(e);
+  }
 }
 
 // the actual function has to be wrapped in order for sentry to work
