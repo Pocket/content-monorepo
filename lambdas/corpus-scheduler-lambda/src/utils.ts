@@ -380,6 +380,7 @@ export const processAndScheduleCandidate = async (
       console.log(`failed to processes candidate: ${error}`);
       Sentry.addBreadcrumb({ message: 'candidate', data: candidate });
       Sentry.captureException(error);
+      await Sentry.flush();
     }
   }
   // Ensure all Snowplow events are emitted before the Lambda exists.

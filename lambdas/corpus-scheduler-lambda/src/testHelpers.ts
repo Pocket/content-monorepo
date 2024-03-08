@@ -1,8 +1,4 @@
-import {
-  ScheduledCandidate,
-  ScheduledCandidates,
-  ScheduledCorpusItem,
-} from './types';
+import { ScheduledCandidate, ScheduledCandidates, ScheduledCorpusItem } from './types';
 import {
   CorpusItemSource,
   CorpusLanguage,
@@ -248,6 +244,30 @@ export const mockSnowplow = (server: SetupServer) => {
       () => {},
     ),
   );
+};
+
+/**
+ * Set up the mock server to mock snowplow endpoint.
+ * @param server
+ */
+export const mockSentry = (server: SetupServer) => {
+  server.use(
+    http.post(new RegExp('https://.+\\.ingest\\.sentry\\.io/api/.*'), () => {}),
+  );
+};
+
+/**
+ * Listens to requests from the mock server, and filters out requests to sentry.io.
+ * @param server
+ */
+export const subscribeToSentryRequests = (server: SetupServer) => {
+  const sentryRequests: Request[] = [];
+  server.events.on('request:start', async ({ request }) => {
+    if (request.url.indexOf('sentry.io') >= 0) {
+      sentryRequests.push(request.clone());
+    }
+  });
+  return sentryRequests;
 };
 
 /**

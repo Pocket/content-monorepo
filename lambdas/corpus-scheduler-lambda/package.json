@@ -4,11 +4,11 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rm -rf dist && tsc",
+    "build": "rm -rf dist && webpack --mode production",
     "test": "jest \"\\.spec\\.ts\"",
     "watch": "tsc -w & nodemon",
     "dev": "npm run build && npm run watch",
-    "test-integrations": "jest \"\\.integration\\.ts\" --runInBand",
+    "test-integrations": "pnpm run build && jest \".integration.ts\" --runInBand && TEST_ENV=DIST jest \".integration.ts\" --runInBand",
     "lint": "eslint --fix-dry-run \"src/**/*.ts\"",
     "format": "eslint --fix \"src/**/*.ts\"",
     "prepare": "ts-patch install && typia patch"
@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "3.529.1",
     "@sentry/serverless": "7.95.0",
     "content-common": "workspace:*",
     "jsonwebtoken": "^9.0.2",
@@ -25,15 +26,18 @@
     "typia": "^5.4.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-secrets-manager": "3.529.1",
     "@types/aws-lambda": "8.10.134",
     "@types/jest": "29.5.12",
     "aws-sdk-client-mock": "^3.0.1",
+    "dotenv": "^16.4.5",
     "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
     "msw": "2.1.2",
     "ts-jest": "29.1.2",
-    "tsconfig": "workspace:*"
+    "ts-loader": "^9.5.1",
+    "tsconfig": "workspace:*",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4"
   },
   "files": [
     "dist",

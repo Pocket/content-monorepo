@@ -16,7 +16,7 @@ services:
     volumes:
       - ./.docker/aws:/etc/localstack/init/ready.d
     environment:
-      SERVICES: s3,dynamodb
+      SERVICES: s3,dynamodb,secretsmanager
       DATA_DIR: /tmp/localstack/data
       DOCKER_HOST: unix:///var/run/docker.sock
       LOCALSTACK_HOST: localstack
