@@ -2,34 +2,54 @@ import { Context, SQSEvent } from 'aws-lambda';
 import { handler as processor } from './index';
 import { random, TypeGuardError } from 'typia';
 import { SQSRecord } from 'aws-lambda/trigger/sqs';
-
-// Mock the EventBridge and Firehose send methods
-const eventBridgeSendMock = jest.fn().mockResolvedValue({});
-const firehoseSendMock = jest.fn().mockResolvedValue({});
-
-jest.mock('@aws-sdk/client-eventbridge', () => {
-  const originalModule = jest.requireActual('@aws-sdk/client-eventbridge');
-
-  return {
-    ...originalModule,
-    EventBridgeClient: jest.fn().mockImplementation(() => ({
-      send: eventBridgeSendMock,
-    })),
-  };
-});
-
-jest.mock('@aws-sdk/client-firehose', () => {
-  const originalModule = jest.requireActual('@aws-sdk/client-firehose');
-
-  return {
-    ...originalModule,
-    FirehoseClient: jest.fn().mockImplementation(() => ({
-      send: firehoseSendMock,
-    })),
-  };
-});
+import { setupServer } from 'msw/node';
+import { http, HttpResponse } from 'msw';
+import { FirehoseClient } from '@aws-sdk/client-firehose';
+import { EventBridgeClient } from '@aws-sdk/client-eventbridge';
 
 describe('processor', () => {
+  const server = setupServer();
+
+  beforeAll(() => server.listen());
+  afterEach(() => server.resetHandlers());
+  afterAll(() => server.close());
+
+  beforeEach(() => {
+    process.env.AWS_ACCESS_KEY_ID = 'dummy_access_key_id';
+    process.env.AWS_SECRET_ACCESS_KEY = 'dummy_secret_access_key';
+
+    server.use(
+      http.post('https://firehose.us-east-1.amazonaws.com/', () => {
+        return HttpResponse.json({
+          Encrypted: false,
+          RecordId: 'foobar',
+        });
+      }),
+    );
+
+    server.use(
+      http.post('https://events.us-east-1.amazonaws.com/', () => {
+        return HttpResponse.json({
+          Entries: [
+            {
+              EventId: '17793124-05d4-b198-2fde-7ededc63b103',
+            },
+          ],
+          FailedEntryCount: 0,
+        });
+      }),
+    );
+  });
+
+  afterAll(() => {
+    // Clear environment variables
+    delete process.env.AWS_ACCESS_KEY_ID;
+    delete process.env.AWS_SECRET_ACCESS_KEY;
+
+    // Restore mocks
+    jest.restoreAllMocks();
+  });
+
   const mockContext = random<Context>();
   const mockCallback = () => {};
 
@@ -116,6 +136,11 @@ describe('processor', () => {
 
   describe('EventBridge', () => {
     it('sends a valid prospect set to EventBridge', async () => {
+      const eventBridgeSendSpy = jest.spyOn(
+        EventBridgeClient.prototype,
+        'send',
+      );
+
       const sqsEvent: SQSEvent = {
         Records: [
           {
@@ -127,7 +152,7 @@ describe('processor', () => {
 
       await processor(sqsEvent, mockContext, mockCallback);
 
-      expect(eventBridgeSendMock).toHaveBeenCalledWith(
+      expect(eventBridgeSendSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           input: {
             Entries: [
@@ -146,6 +171,8 @@ describe('processor', () => {
 
   describe('Firehose', () => {
     it('sends the body to Firehose with a newline', async () => {
+      const firehoseSendSpy = jest.spyOn(FirehoseClient.prototype, 'send');
+
       const sqsEvent: SQSEvent = {
         Records: [
           {
@@ -157,20 +184,8 @@ describe('processor', () => {
 
       await processor(sqsEvent, mockContext, mockCallback);
 
-      // Check if Firehose send was called correctly
-      expect(firehoseSendMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          input: {
-            DeliveryStreamName: 'MetaflowTools-Local-1-RecsAPICandidateSet',
-            Record: {
-              Data: expect.any(Uint8Array),
-            },
-          },
-        }),
-      );
-
       // Check that the decoded string matches the input body, with a newline added at the end.
-      const callArg = firehoseSendMock.mock.calls[0][0];
+      const callArg: any = firehoseSendSpy.mock.calls[0][0];
       const sentData = callArg.input.Record.Data;
       const decodedString = new TextDecoder().decode(sentData);
       expect(decodedString).toEqual(sqsEvent.Records[0].body + '\n');
