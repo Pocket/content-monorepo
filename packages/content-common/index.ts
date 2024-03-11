@@ -46,3 +46,4 @@ export const sanitizeText = (input: string, maxLength: number): string => {
 };
 
 export * from './types';
+export * from './snowplow';

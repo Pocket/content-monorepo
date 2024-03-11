@@ -16,7 +16,7 @@ import {
 import {
   resetSnowplowEvents,
   waitForSnowplowEvents,
-} from 'content-common/events/snowplow/test-helpers';
+} from 'content-common/snowplow/test-helpers';
 import { extractScheduledCandidateEntity } from './events/testHelpers';
 
 describe('corpus scheduler lambda', () => {

@@ -5,7 +5,7 @@ import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 import {
   resetSnowplowEvents,
   waitForSnowplowEvents,
-} from 'content-common/events/snowplow/test-helpers';
+} from 'content-common/snowplow/test-helpers';
 import { extractScheduledCandidateEntity } from './events/testHelpers';
 
 describe('utils integrations', function () {

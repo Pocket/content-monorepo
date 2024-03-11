@@ -1,4 +1,4 @@
-import { getEmitter, getTracker } from 'content-common/events/snowplow';
+import { getEmitter, getTracker } from 'content-common/snowplow';
 import config from '../../config';
 
 const emitter = getEmitter();

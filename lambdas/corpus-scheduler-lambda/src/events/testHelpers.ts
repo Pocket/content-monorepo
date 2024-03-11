@@ -2,7 +2,7 @@ import { SnowplowScheduledCorpusCandidate } from './types';
 import {
   getGoodSnowplowEvents,
   parseSnowplowData,
-} from 'content-common/events/snowplow/test-helpers';
+} from 'content-common/snowplow/test-helpers';
 
 /**
  * @return scheduled_corpus_candidate entity from the last good event sent to Snowplow Micro.

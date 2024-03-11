@@ -20,10 +20,11 @@ import { assert, TypeGuardError } from 'typia';
 import { SQSRecord } from 'aws-lambda';
 import { createApprovedCorpusItem, fetchUrlMetadata } from './graphQlApiCalls';
 import {
-  generateSnowplowErrorEntity, generateSnowplowSuccessEntity,
+  generateSnowplowErrorEntity,
+  generateSnowplowSuccessEntity,
   queueSnowplowEvent,
 } from './events/snowplow';
-import { getEmitter, getTracker } from 'content-common/events/snowplow';
+import { getEmitter, getTracker } from 'content-common/snowplow';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwt = require('jsonwebtoken');

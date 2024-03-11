@@ -4,7 +4,7 @@ import {
   parseSnowplowData,
   resetSnowplowEvents,
   waitForSnowplowEvents,
-} from 'content-common/events/snowplow/test-helpers';
+} from 'content-common/snowplow/test-helpers';
 import { assertValidSnowplowObjectUpdateEvents } from '../../test/helpers/snowplow';
 import config from '../../config';
 import {

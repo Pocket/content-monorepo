@@ -1,8 +1,8 @@
 import {
   waitForSnowplowEvents,
   resetSnowplowEvents,
-} from 'content-common/events/snowplow/test-helpers';
-import { getEmitter, getTracker } from 'content-common/events/snowplow';
+} from 'content-common/snowplow/test-helpers';
+import { getEmitter, getTracker } from 'content-common/snowplow';
 import { queueSnowplowEvent } from './snowplow';
 import { ProspectReviewStatus, SnowplowProspect } from './types';
 import config from '../config';
