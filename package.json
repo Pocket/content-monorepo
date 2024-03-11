@@ -27,6 +27,7 @@
     "dotenv-cli": "latest"
   },
   "devDependencies": {
+    "syncpack": "^12.3.0",
     "turbo": "latest"
   }
 }
