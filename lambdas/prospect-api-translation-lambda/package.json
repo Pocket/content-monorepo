@@ -13,9 +13,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "3.504.0",
-    "@aws-sdk/client-lambda": "3.504.0",
-    "@aws-sdk/lib-dynamodb": "3.504.0",
+    "@aws-sdk/client-dynamodb": "3.529.1",
+    "@aws-sdk/client-lambda": "3.529.1",
+    "@aws-sdk/lib-dynamodb": "3.529.1",
     "@sentry/serverless": "6.19.7",
     "prospectapi-common": "workspace:*",
     "content-common": "workspace:*",

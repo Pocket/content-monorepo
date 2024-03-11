@@ -182,6 +182,7 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
 export const processAndScheduleCandidate = async (
   record: SQSRecord,
 ): Promise<void> => {
+  console.log(record.body);
   const parsedMessage: ScheduledCandidates = JSON.parse(record.body);
 
   // traverse through the parsed candidates array
