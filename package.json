@@ -14,7 +14,10 @@
     "migrate:prisma-reset": "dotenv -- turbo run migrate:prisma-reset",
     "lint": "turbo run lint",
     "format": "turbo run format",
-    "clean": "rm -rf .turbo node_modules packages/**/.turbo packages/**/dist packages/**/node_modules servers/**/logs servers/**/.turbo servers/**/dist servers/**/node_modules lambdas/**/logs lambdas/**/.turbo lambdas/**/dist lambdas/**/node_modules infrastructure/**/dist infrastructure/**/node_modules infrastructure/**/.turbo infrastructure/**/cdktf.out"
+    "list-packages": "syncpack list",
+    "list-mismatches": "syncpack list-mismatches",
+    "fix-mismatches": "syncpack fix-mismatches && pnpm install",
+    "clean": "rm -rf .turbo node_modules ,packages/**/.turbo packages/**/dist packages/**/node_modules servers/**/logs servers/**/.turbo servers/**/dist servers/**/node_modules lambdas/**/logs lambdas/**/.turbo lambdas/**/dist lambdas/**/node_modules infrastructure/**/dist infrastructure/**/node_modules infrastructure/**/.turbo infrastructure/**/cdktf.out"
   },
   "prisma": {
     "seed": "dotenv -- turbo run db:prisma-seed"
@@ -27,6 +30,7 @@
     "dotenv-cli": "latest"
   },
   "devDependencies": {
+    "syncpack": "^12.3.0",
     "turbo": "latest"
   }
 }

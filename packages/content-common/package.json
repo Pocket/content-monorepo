@@ -12,7 +12,6 @@
   "author": "pocket",
   "license": "ISC",
   "private": true,
-  "dependencies": {},
   "devDependencies": {
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",

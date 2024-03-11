@@ -37,7 +37,7 @@
     "@prisma/client": "^4.16.2",
     "@sentry/node": "7.49.0",
     "@sentry/tracing": "7.49.0",
-    "@snowplow/node-tracker": "3.5.0",
+    "@snowplow/node-tracker": "^3.5.0",
     "@types/luxon": "3.4.2",
     "content-common": "workspace:*",
     "cors": "2.8.5",
