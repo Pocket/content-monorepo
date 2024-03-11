@@ -15,8 +15,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-lambda": "^3.529.1",
-    "@aws-sdk/client-secrets-manager": "^3.529.1",
+    "@aws-sdk/client-lambda": "3.529.1",
+    "@aws-sdk/client-secrets-manager": "3.529.1",
     "@sentry/serverless": "7.95.0",
     "content-common": "workspace:*",
     "jsonwebtoken": "^9.0.2",
