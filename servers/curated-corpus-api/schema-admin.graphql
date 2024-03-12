@@ -100,6 +100,22 @@ enum RemovalReason {
 }
 
 """
+Reasons for manually adding a corpus item to a schedule.
+
+This is used by ML downstream to improve their modeling.
+"""
+enum ManualAdditionReason {
+  EVERGREEN
+  FORMAT_DIVERSITY
+  TIME_SENSITIVE_EXPLAINER
+  TIME_SENSITIVE_NEWS
+  PUBLISHER_DIVERSITY
+  TRENDING
+  TOPIC_DIVERSITY
+  UNDER_THE_RADAR
+}
+
+"""
 Prospect types. This enum is not used anywhere in this schema, however it is used
 by the Curation Admin Tools frontend to filter prospects.
 """
@@ -655,14 +671,6 @@ input CreateApprovedCorpusItemInput {
   Optionally, specify the source of the Scheduled Item. Could be one of: MANUAL or ML
   """
   scheduledSource: ScheduledItemSource
-  """
-  A comma-separated list of reasons for manually adding an item (only supplied when `source` is MANUAL).
-  """
-  manualAdditionReasons: String
-  """
-  Free-text entered by the curator to give further detail to the manual addition reason(s) provided.
-  """
-  manualAdditionReasonComment: String
 }
 
 """
@@ -899,6 +907,14 @@ input CreateScheduledCorpusItemInput {
   Source of the Scheduled Item. Could be one of: MANUAL or ML
   """
   source: ScheduledItemSource!
+  """
+  A comma-separated list of reasons for manually scheduling an item. Helps ML improve models for sets of scheduled items.
+  """
+  manualAdditionReasons: String
+  """
+  Free-text entered by the curator to give further detail to the manual addition reason(s) provided.
+  """
+  manualAdditionReasonComment: String
 }
 
 """

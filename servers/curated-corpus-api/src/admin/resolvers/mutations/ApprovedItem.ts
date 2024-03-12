@@ -4,9 +4,6 @@ import {
 } from '@pocket-tools/apollo-utils';
 import { fromUnixTime } from 'date-fns';
 
-import { parseReasonsCsv, sanitizeText } from 'content-common';
-
-import config from '../../../config';
 import {
   createApprovedItem as dbCreateApprovedItem,
   createRejectedItem,
@@ -22,7 +19,6 @@ import {
   getApprovedItemByExternalId,
 } from '../../../database/queries';
 import {
-  ApprovedCorpusItemPayload,
   ReviewedCorpusItemEventType,
   ScheduledCorpusItemEventType,
 } from '../../../events/types';
@@ -108,31 +104,9 @@ export async function createApprovedItem(
     context.authenticatedUser.username,
   );
 
-  // build the payload for event emission
-  // contains properties not stored in this service's db
-  const approvedItemForEvents: ApprovedCorpusItemPayload = {
-    ...approvedItem,
-    // get reasons and reason comment. (these may both be null. they're only
-    // supplied when an item was added manually for limited surfaces.)
-    manualAdditionReasons: parseReasonsCsv(
-      data.manualAdditionReasons,
-      config.app.removeReasonMaxLength,
-    ),
-    // eslint cannot decide what it wants below - it complains about
-    // indentation no matter what i do, so i'm skipping it 🙃
-    /* eslint-disable */
-    manualAdditionReasonsComment: data.reasonComment
-      ? sanitizeText(
-          data.manualAdditionReasonComment,
-          config.app.removeReasonMaxLength,
-        )
-      : null,
-    /* eslint-enable */
-  };
-
   context.emitReviewedCorpusItemEvent(
     ReviewedCorpusItemEventType.ADD_ITEM,
-    approvedItemForEvents,
+    approvedItem,
   );
 
   if (scheduledDate && scheduledSurfaceGuid && scheduledSource) {

@@ -15,7 +15,7 @@ import {
   RESCHEDULE_SCHEDULED_ITEM,
 } from './sample-mutations.gql';
 import {
-  CreateScheduledItemInput,
+  CreateScheduledItemGraphInput,
   DeleteScheduledItemInput,
   RescheduleScheduledItemInput,
 } from '../../../database/types';
@@ -25,6 +25,7 @@ import { ScheduledCorpusItemEventType } from '../../../events/types';
 import { DateTime } from 'luxon';
 import {
   ACCESS_DENIED_ERROR,
+  ManualAdditionReason,
   MozillaAccessGroup,
   ScheduledItemSource,
 } from '../../../shared/types';
@@ -68,7 +69,8 @@ describe('mutations: ScheduledItem', () => {
       const approvedItem = await createApprovedItemHelper(db, {
         title: 'A test story',
       });
-      const input: CreateScheduledItemInput = {
+
+      const input: CreateScheduledItemGraphInput = {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'RECSAPI',
         scheduledDate: '2100-01-01',
@@ -103,11 +105,14 @@ describe('mutations: ScheduledItem', () => {
       const eventTracker = jest.fn();
       eventEmitter.on(ScheduledCorpusItemEventType.ADD_SCHEDULE, eventTracker);
 
-      const input: CreateScheduledItemInput = {
+      const input: CreateScheduledItemGraphInput = {
         approvedItemExternalId: 'not-a-valid-id-at-all',
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
+        manualAdditionReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualAdditionReasonComment:
+          'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -161,11 +166,14 @@ describe('mutations: ScheduledItem', () => {
 
       // Set up the input for the mutation that contains the exact same values
       // as the scheduled entry created above.
-      const input: CreateScheduledItemInput = {
+      const input: CreateScheduledItemGraphInput = {
         approvedItemExternalId: item.externalId,
         scheduledSurfaceGuid: existingScheduledEntry.scheduledSurfaceGuid,
         scheduledDate,
         source: ScheduledItemSource.MANUAL,
+        manualAdditionReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualAdditionReasonComment:
+          'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -199,11 +207,14 @@ describe('mutations: ScheduledItem', () => {
         title: 'A test story',
       });
 
-      const input: CreateScheduledItemInput = {
+      const input: CreateScheduledItemGraphInput = {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
+        manualAdditionReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualAdditionReasonComment:
+          'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -290,11 +301,14 @@ describe('mutations: ScheduledItem', () => {
         title: 'A test story',
       });
 
-      const input: CreateScheduledItemInput = {
+      const input: CreateScheduledItemGraphInput = {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
+        manualAdditionReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualAdditionReasonComment:
+          'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -325,11 +339,14 @@ describe('mutations: ScheduledItem', () => {
         title: 'A test story',
       });
 
-      const input: CreateScheduledItemInput = {
+      const input: CreateScheduledItemGraphInput = {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
+        manualAdditionReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualAdditionReasonComment:
+          'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -360,7 +377,7 @@ describe('mutations: ScheduledItem', () => {
         title: 'A test story',
       });
 
-      const input: CreateScheduledItemInput = {
+      const input: CreateScheduledItemGraphInput = {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',

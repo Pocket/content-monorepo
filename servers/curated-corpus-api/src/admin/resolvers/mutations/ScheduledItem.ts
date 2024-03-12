@@ -1,7 +1,7 @@
 import {
   CorpusItemSource,
   parseReasonsCsv,
-  sanitizeText
+  sanitizeText,
 } from 'content-common';
 
 import config from '../../../config';
@@ -110,6 +110,12 @@ export async function createScheduledItem(
   { data },
   context: IAdminContext,
 ): Promise<ScheduledItem> {
+  const {
+    manaulAdditionReasons,
+    manualAdditionReasonComment,
+    ...scheduledItemData
+  } = data;
+
   // Check if the user can execute this mutation.
   if (!context.authenticatedUser.canWriteToSurface(data.scheduledSurfaceGuid)) {
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
@@ -118,22 +124,46 @@ export async function createScheduledItem(
   // Check if the specified Scheduled Surface GUID actually exists.
   if (!scheduledSurfaceAllowedValues.includes(data.scheduledSurfaceGuid)) {
     throw new UserInputError(
-      `Cannot create a scheduled entry with Scheduled Surface GUID of "${data.scheduledSurfaceGuid}".`,
+      `Cannot create a scheduled entry with Scheduled Surface GUID of "${scheduledItemData.scheduledSurfaceGuid}".`,
     );
   }
 
   try {
     const scheduledItem = await dbCreateScheduledItem(
       context.db,
-      data,
+      scheduledItemData,
       context.authenticatedUser.username,
     );
 
+    // build an extended copy of the returned scheduledItem which will include
+    // additional event tracking info
+    const scheduledItemForEvents: ScheduledCorpusItemPayload = {
+      scheduledCorpusItem: {
+        ...scheduledItem,
+        status: ScheduledCorpusItemStatus.ADDED,
+        generated_by: scheduledItemData.source,
+        // get reasons and reason comment. (these may both be null. they're only
+        // supplied when an item was scheduled manually for limited surfaces.)
+        manualAdditionReasons: parseReasonsCsv(
+          manaulAdditionReasons,
+          config.app.removeReasonMaxLength,
+        ),
+        // eslint cannot decide what it wants below - it complains about
+        // indentation no matter what i do, so i'm skipping it 🙃
+        /* eslint-disable */
+        manualAdditionReasonsComment: manualAdditionReasonComment
+          ? sanitizeText(
+              manualAdditionReasonComment,
+              config.app.removeReasonMaxLength,
+            )
+          : null,
+        /* eslint-enable */
+      },
+    };
+
     context.emitScheduledCorpusItemEvent(
       ScheduledCorpusItemEventType.ADD_SCHEDULE,
-      {
-        scheduledCorpusItem: scheduledItem,
-      },
+      scheduledItemForEvents,
     );
 
     return scheduledItem;
@@ -146,8 +176,8 @@ export async function createScheduledItem(
     ) {
       throw new UserInputError(
         `This story is already scheduled to appear on ${
-          data.scheduledSurfaceGuid
-        } on ${data.scheduledDate.toLocaleString('en-US', {
+          scheduledItemData.scheduledSurfaceGuid
+        } on ${scheduledItemData.scheduledDate.toLocaleString('en-US', {
           dateStyle: 'medium',
           timeZone: 'UTC',
         })}.`,

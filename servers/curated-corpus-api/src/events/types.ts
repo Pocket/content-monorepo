@@ -35,14 +35,8 @@ export type BaseEventData = {
 };
 
 // Data for approved items
-export type ApprovedCorpusItemPayload = ApprovedItem & {
-  // for some surfaces, curators will provide at least one reason and
-  // optionally a comment when manually adding a corpus item.
-  // the purpose here is for ML to know *why* items are manually added
-  // in an effort to improve their modeling.
-  manualAdditionReasons?: string[];
-  manualAdditionReasonsComment?: string;
-};
+// Stub type ready to be extended with non-database properties (for event tracking).
+export type ApprovedCorpusItemPayload = ApprovedItem;
 
 // Data for the events that are fired on changes to curated items
 export type ReviewedCorpusItemPayload = {
@@ -52,12 +46,18 @@ export type ReviewedCorpusItemPayload = {
 // Data for the events that are fired on updates to Scheduled Surface schedule
 export type ScheduledCorpusItemPayload = {
   scheduledCorpusItem: ScheduledItem & {
+    // the method by which this item was generated (MANUAL or ML, for a scheduled item)
+    generated_by?: CorpusItemSource;
+    // for some surfaces, curators will provide at least one reason and
+    // optionally a comment when manually scheduling a corpus item.
+    // the purpose here is for ML to know *why* items are manually scheduled
+    // in an effort to improve their modeling.
+    manualAdditionReasons?: string[];
+    manualAdditionReasonsComment?: string;
     // will only be present when unscheduling an item from a limited set of
     // surfaces. these inform ML of why an item was unscheduled.
     reasons?: string[];
     reasonComment?: string;
-    // the method by which this item was generated (MANUAL or ML, for a scheduled item)
-    generated_by?: CorpusItemSource;
     // the status of the scheduled_corpus_item, as decided by a curator.
     status?: ScheduledCorpusItemStatus;
   };
