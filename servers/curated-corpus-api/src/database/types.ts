@@ -7,7 +7,7 @@ import { ScheduledItemSource } from '../shared/types';
 import {
   ApprovedItemAuthor,
   ApprovedItemRequiredInput,
-  CorpusItemSource
+  CorpusItemSource,
 } from 'content-common';
 
 export type ImportApprovedItemInput = {
@@ -116,6 +116,12 @@ export type CreateScheduledItemInput = {
   scheduledSurfaceGuid: string;
   scheduledDate: string;
   source: ScheduledItemSource;
+};
+
+// type to map to the input coming from the graph mutation
+export type CreateScheduledItemGraphInput = CreateScheduledItemInput & {
+  manualAdditionReasons?: string;
+  manualAdditionReasonComment?: string;
 };
 
 export type RescheduleScheduledItemInput = {
