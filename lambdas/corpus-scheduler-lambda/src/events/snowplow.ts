@@ -80,7 +80,7 @@ export const generateSnowplowSuccessEntity = (
     approved_corpus_item_external_id: approvedCorpusItemId,
     features: candidate.features,
     run_details: candidate.run_details,
-    // TODO: set scheduled_corpus_item_external_id
+    // TODO: [MC-812] set scheduled_corpus_item_external_id when already scheduled.
   };
 };
 

@@ -5,7 +5,8 @@
   "main": "./dist/index.js",
   "exports": {
     ".": "./dist/index.js",
-    "./snowplow": "./dist/snowplow/index.js"
+    "./snowplow": "./dist/snowplow/index.js",
+    "./snowplow/test-helpers": "./dist/snowplow/test-helpers.js"
   },
   "scripts": {
     "build": "rm -rf dist && tsc",
