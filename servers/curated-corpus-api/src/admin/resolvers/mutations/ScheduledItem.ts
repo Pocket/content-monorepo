@@ -111,8 +111,8 @@ export async function createScheduledItem(
   context: IAdminContext,
 ): Promise<ScheduledItem> {
   const {
-    manaulAdditionReasons,
-    manualAdditionReasonComment,
+    manaulScheduleReasons,
+    manualScheduleReasonComment,
     ...scheduledItemData
   } = data;
 
@@ -144,16 +144,16 @@ export async function createScheduledItem(
         generated_by: scheduledItemData.source,
         // get reasons and reason comment. (these may both be null. they're only
         // supplied when an item was scheduled manually for limited surfaces.)
-        manualAdditionReasons: parseReasonsCsv(
-          manaulAdditionReasons,
+        manualScheduleReasons: parseReasonsCsv(
+          manaulScheduleReasons,
           config.app.removeReasonMaxLength,
         ),
         // eslint cannot decide what it wants below - it complains about
         // indentation no matter what i do, so i'm skipping it 🙃
         /* eslint-disable */
-        manualAdditionReasonsComment: manualAdditionReasonComment
+        manualScheduleReasonsComment: manualScheduleReasonComment
           ? sanitizeText(
-              manualAdditionReasonComment,
+              manualScheduleReasonComment,
               config.app.removeReasonMaxLength,
             )
           : null,
