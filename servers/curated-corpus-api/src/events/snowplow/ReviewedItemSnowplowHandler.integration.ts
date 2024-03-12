@@ -17,11 +17,7 @@ import { ReviewedItemSnowplowHandler } from './ReviewedItemSnowplowHandler';
 import { tracker } from './tracker';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import { getUnixTimestamp } from '../../shared/utils';
-import {
-  ApprovedItemAuthor,
-  CorpusItemSource,
-  Topics
-} from 'content-common';
+import { ApprovedItemAuthor, CorpusItemSource, Topics } from 'content-common';
 
 /**
  * Use a simple mock item instead of using DB helpers
@@ -240,6 +236,8 @@ describe('ReviewedItemSnowplowHandler', () => {
     });
   });
 
+  /*
+  TODO: move these tests to ScheduledItemSnowplowHandler.integration.ts in MC-815
   describe('manual addition reasons for approved items', () => {
     it('should send a single manual addition reason with no comment', async () => {
       const approvedItemWithManualAdditionData: ApprovedCorpusItemPayload = {
@@ -318,4 +316,5 @@ describe('ReviewedItemSnowplowHandler', () => {
       ]);
     });
   });
+  */
 });
