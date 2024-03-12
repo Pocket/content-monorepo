@@ -26,6 +26,7 @@ import {
 } from './events/snowplow';
 import { getEmitter, getTracker } from 'content-common/snowplow';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
+import * as Sentry from '@sentry/node';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwt = require('jsonwebtoken');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -141,6 +142,7 @@ function handleApprovedItemInputTypiaError(
       tracker,
       generateSnowplowErrorEntity(candidate, snowplowError, e.message),
     );
+    emitter.flush();
   }
 }
 
@@ -233,6 +235,9 @@ export const processAndScheduleCandidate = async (
   console.log(record.body);
   const parsedMessage: ScheduledCandidates = JSON.parse(record.body);
 
+  const emitter = getEmitter();
+  const tracker = getTracker(emitter, config.snowplow.appId);
+
   // traverse through the parsed candidates array
   for (const candidate of parsedMessage.candidates) {
     try {
@@ -266,8 +271,6 @@ export const processAndScheduleCandidate = async (
         const approvedCorpusItemId =
           createdItem.data.createApprovedCorpusItem.externalId;
 
-        const emitter = getEmitter();
-        const tracker = getTracker(emitter, config.snowplow.appId);
         queueSnowplowEvent(
           tracker,
           generateSnowplowSuccessEntity(candidate, approvedCorpusItemId),
@@ -282,7 +285,14 @@ export const processAndScheduleCandidate = async (
         );
       }
     } catch (error) {
-      throw new Error(`processSQSMessages failed: ${error}`);
+      console.log(`failed to processes candidate: ${error}`);
+      Sentry.addBreadcrumb({ message: 'candidate', data: candidate });
+      Sentry.captureException(error);
     }
   }
+
+  // Ensure all Snowplow events are emitted before the Lambda exists.
+  emitter.flush();
+  // Flush processes the HTTP request in the background, so we need to wait here.
+  await new Promise((resolve) => setTimeout(resolve, 10000));
 };
