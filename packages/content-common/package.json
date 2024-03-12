@@ -3,6 +3,10 @@
   "version": "1.0.1",
   "description": "common code shared between multiple content services",
   "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./snowplow": "./dist/snowplow/index.js"
+  },
   "scripts": {
     "build": "rm -rf dist && tsc",
     "test": "jest \"\\.spec\\.ts\"",
