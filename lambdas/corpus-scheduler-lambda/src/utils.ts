@@ -191,27 +191,27 @@ export const processAndScheduleCandidate = async (
       // 1. validate scheduled candidate from Metaflow
       await validateCandidate(candidate);
 
-      // 2. get metadata from Parser (used to fill in some data fields not provided by Metaflow)
-      const parserMetadata = await fetchUrlMetadata(
-        candidate.scheduled_corpus_item.url,
-      );
-
-      // 3. map Metaflow input to CreateApprovedItemInput
-      const createApprovedItemInput =
-        await mapScheduledCandidateInputToCreateApprovedItemInput(
-          candidate,
-          parserMetadata,
-        );
-
-      // if dev & scheduled surface exists in allowed scheduled surfaces, send the candidate to the mutation
+      // 2. if dev & scheduled surface exists in allowed scheduled surfaces, continue processing
       // TODO: schedule to production
       if (
         config.app.isDev ||
         allowedScheduledSurfaces.includes(
-          createApprovedItemInput.scheduledSurfaceGuid as string,
+          candidate.scheduled_corpus_item.scheduled_surface_guid as string,
         )
       ) {
-        // call createApprovedCorpusItem mutation
+        // 3. get metadata from Parser (used to fill in some data fields not provided by Metaflow)
+        const parserMetadata = await fetchUrlMetadata(
+          candidate.scheduled_corpus_item.url,
+        );
+
+        // 4. map Metaflow input to CreateApprovedItemInput
+        const createApprovedItemInput =
+          await mapScheduledCandidateInputToCreateApprovedItemInput(
+            candidate,
+            parserMetadata,
+          );
+
+        // 5. call createApprovedCorpusItem mutation
         const createdItem = await createApprovedCorpusItem(
           createApprovedItemInput,
         );
@@ -220,7 +220,7 @@ export const processAndScheduleCandidate = async (
         );
       } else {
         console.log(
-          `Cannot schedule candidate: ${candidate.scheduled_corpus_candidate_id} for surface ${createApprovedItemInput.scheduledSurfaceGuid}.`,
+          `Cannot schedule candidate: ${candidate.scheduled_corpus_candidate_id} for surface ${candidate.scheduled_corpus_item.scheduled_surface_guid}.`,
         );
       }
     } catch (error) {
