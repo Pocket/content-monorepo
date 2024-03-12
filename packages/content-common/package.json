@@ -1,6 +1,6 @@
 {
   "name": "content-common",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "common code shared between multiple content services",
   "main": "./dist/index.js",
   "scripts": {
