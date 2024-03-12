@@ -1,9 +1,4 @@
-import {
-  SQSEvent,
-  SQSHandler,
-  SQSBatchItemFailure,
-  SQSBatchResponse,
-} from 'aws-lambda';
+import { SQSEvent, SQSHandler } from 'aws-lambda';
 import * as Sentry from '@sentry/serverless';
 import config from './config';
 import { processAndScheduleCandidate } from './utils';
@@ -17,28 +12,14 @@ Sentry.AWSLambda.init({
 
 /**
  * @param event data from an SQS message - should be an array of items to create / schedule in corpus
- * @returns SQSBatchResponse (all failed records)
+ * @exception Error Raises an exception on error, which causes the batch to be retried.
+ *  Lambda batchSize is 1 to avoid retrying successfully processed records.
  */
-export const processor: SQSHandler = async (
-  event: SQSEvent,
-): Promise<SQSBatchResponse> => {
-  // prevents successful records showing up in the queue if there were some failed records
-  // https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting
-  const failedItems: SQSBatchItemFailure[] = [];
-
+export const processor: SQSHandler = async (event: SQSEvent) => {
+  // We have set batchSize to 1, so the follow for loop is expected to have 1 iteration.
   for await (const record of event.Records) {
-    try {
-      await processAndScheduleCandidate(record);
-    } catch (error) {
-      console.warn(`Unable to process message -> Reason: ${error}`);
-      Sentry.captureException(error);
-      Sentry.addBreadcrumb({
-        message: `Unable to process message -> Reason: ${error}`,
-      });
-      failedItems.push({ itemIdentifier: record.messageId });
-    }
+    await processAndScheduleCandidate(record);
   }
-  return { batchItemFailures: failedItems };
 };
 
 // the actual function has to be wrapped in order for sentry to work

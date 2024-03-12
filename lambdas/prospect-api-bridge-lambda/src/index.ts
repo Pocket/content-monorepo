@@ -50,6 +50,7 @@ async function sendToEventBridge(body: string) {
     ],
   });
   const eventBridgeClient = new EventBridgeClient({});
+
   await eventBridgeClient.send(putEventsCommand);
 }
 
@@ -58,6 +59,7 @@ async function sendToEventBridge(body: string) {
  */
 async function sendToFirehose(body: string) {
   const firehoseClient = new FirehoseClient({});
+
   const putRecordCommand = new PutRecordCommand({
     DeliveryStreamName: config.aws.firehose.deliveryStreamName, // Ensure this is defined in your config
     Record: {
@@ -67,6 +69,7 @@ async function sendToFirehose(body: string) {
       Data: new TextEncoder().encode(`${body}\n`),
     },
   });
+
   await firehoseClient.send(putRecordCommand);
 }
 

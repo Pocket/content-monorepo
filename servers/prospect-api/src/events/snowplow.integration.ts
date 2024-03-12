@@ -53,7 +53,7 @@ describe('snowplow', () => {
   it('should accept an event with a prospect with status reasons and no comment', async () => {
     const prospectWithRemovalReasons: SnowplowProspect = {
       ...prospect,
-      status_reasons: ['PUBLISHER', 'OUTDATED'],
+      status_reasons: ['PUBLISHER_DIVERSITY', 'TIME_SENSITIVE'],
     };
 
     queueSnowplowEvent(
@@ -89,7 +89,7 @@ describe('snowplow', () => {
   it('should accept an event with a prospect with status reasons and comment', async () => {
     const prospectWithRemovalReasons: SnowplowProspect = {
       ...prospect,
-      status_reasons: ['PUBLISHER', 'OUTDATED'],
+      status_reasons: ['PUBLISHER_DIVERSITY', 'TIME_SENSITIVE'],
       status_reason_comment: 'publisher spread too thin and old content',
     };
 

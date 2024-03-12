@@ -116,44 +116,41 @@ describe('corpus scheduler lambda', () => {
     await resetSnowplowEvents();
   });
 
-  it('returns batch item failure if curated-corpus-api has error, with partial success', async () => {
+  it('throws an error if curated-corpus-api has error, with partial success', async () => {
     mockGetUrlMetadata();
-    // Note: msw uses handlers in reverse order, so 2nd request will error, and 1st will succeed.
     mockCreateApprovedCorpusItemOnce({ errors: [{ message: 'server bork' }] });
-    mockCreateApprovedCorpusItemOnce();
 
     const fakeEvent = {
-      Records: [
-        { messageId: '1', body: JSON.stringify(record) },
-        { messageId: '2', body: JSON.stringify(record) },
-      ],
+      Records: [{ messageId: '1', body: JSON.stringify(record) }],
     } as unknown as SQSEvent;
 
-    const actual = await processor(
-      fakeEvent,
-      null as unknown as Context,
-      null as unknown as Callback,
+    await expect(
+      processor(
+        fakeEvent,
+        null as unknown as Context,
+        null as unknown as Callback,
+      ),
+    ).rejects.toThrow(
+      new Error(
+        'processSQSMessages failed: Error: createApprovedCorpusItem mutation failed: server bork',
+      ),
     );
-
-    expect(actual).toEqual({ batchItemFailures: [{ itemIdentifier: '2' }] });
   }, 7000);
 
-  it('returns batch item failure if curated-corpus-api returns null data', async () => {
+  it('throws an error if curated-corpus-api returns null data', async () => {
     mockGetUrlMetadata();
     mockCreateApprovedCorpusItemOnce({ data: null });
 
-    const actual = await processor(fakeEvent, sqsContext, sqsCallback);
-
-    expect(actual).toEqual({ batchItemFailures: [{ itemIdentifier: '1' }] });
+    await expect(processor(fakeEvent, sqsContext, sqsCallback)).rejects.toThrow(
+      Error,
+    );
   }, 7000);
 
-  it('returns no batch item failures if curated-corpus-api request is successful', async () => {
+  it('throws no error if curated-corpus-api request is successful', async () => {
     mockGetUrlMetadata();
     mockCreateApprovedCorpusItemOnce();
 
-    const actual = await processor(fakeEvent, sqsContext, sqsCallback);
-
-    expect(actual).toEqual({ batchItemFailures: [] });
+    await processor(fakeEvent, sqsContext, sqsCallback);
   });
 
   it('emits a Snowplow event if candidate is successfully processed', async () => {

@@ -158,3 +158,8 @@ Then rebuild from the root of the monorepo with `pnpm`
 pnpm update
 pnpm build
 ```
+
+#### aws-sdk versions
+⚠ Keep aws-sdk versions in sync, because AWS sometimes introduces incompatibilities without notice.
+- When adding a new aws-sdk, pin it to the version used throughout the monorepo.
+- When upgrading aws-sdk, upgrade it consistently throughout the monorepo.
