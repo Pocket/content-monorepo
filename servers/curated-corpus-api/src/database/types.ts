@@ -120,8 +120,8 @@ export type CreateScheduledItemInput = {
 
 // type to map to the input coming from the graph mutation
 export type CreateScheduledItemGraphInput = CreateScheduledItemInput & {
-  manualAdditionReasons?: string;
-  manualAdditionReasonComment?: string;
+  manualScheduleReasons?: string;
+  manualScheduleReasonComment?: string;
 };
 
 export type RescheduleScheduledItemInput = {

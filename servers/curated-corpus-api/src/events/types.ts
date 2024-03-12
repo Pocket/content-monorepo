@@ -52,8 +52,8 @@ export type ScheduledCorpusItemPayload = {
     // optionally a comment when manually scheduling a corpus item.
     // the purpose here is for ML to know *why* items are manually scheduled
     // in an effort to improve their modeling.
-    manualAdditionReasons?: string[];
-    manualAdditionReasonsComment?: string;
+    manualScheduleReasons?: string[];
+    manualScheduleReasonsComment?: string;
     // will only be present when unscheduling an item from a limited set of
     // surfaces. these inform ML of why an item was unscheduled.
     reasons?: string[];

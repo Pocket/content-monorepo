@@ -100,11 +100,11 @@ enum RemovalReason {
 }
 
 """
-Reasons for manually adding a corpus item to a schedule.
+Reasons for manually scheduling a corpus item.
 
 This is used by ML downstream to improve their modeling.
 """
-enum ManualAdditionReason {
+enum ManualScheduleReason {
   EVERGREEN
   FORMAT_DIVERSITY
   TIME_SENSITIVE_EXPLAINER
@@ -910,11 +910,11 @@ input CreateScheduledCorpusItemInput {
   """
   A comma-separated list of reasons for manually scheduling an item. Helps ML improve models for sets of scheduled items.
   """
-  manualAdditionReasons: String
+  manualScheduleReasons: String
   """
-  Free-text entered by the curator to give further detail to the manual addition reason(s) provided.
+  Free-text entered by the curator to give further detail to the manual schedule reason(s) provided.
   """
-  manualAdditionReasonComment: String
+  manualScheduleReasonComment: String
 }
 
 """

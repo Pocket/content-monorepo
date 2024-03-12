@@ -110,8 +110,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualAdditionReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
-        manualAdditionReasonComment:
+        manualScheduleReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualScheduleReasonComment:
           'i scheduled this because i thought it would be nice',
       };
 
@@ -171,8 +171,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: existingScheduledEntry.scheduledSurfaceGuid,
         scheduledDate,
         source: ScheduledItemSource.MANUAL,
-        manualAdditionReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
-        manualAdditionReasonComment:
+        manualScheduleReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualScheduleReasonComment:
           'i scheduled this because i thought it would be nice',
       };
 
@@ -212,8 +212,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualAdditionReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
-        manualAdditionReasonComment:
+        manualScheduleReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualScheduleReasonComment:
           'i scheduled this because i thought it would be nice',
       };
 
@@ -306,8 +306,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualAdditionReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
-        manualAdditionReasonComment:
+        manualScheduleReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualScheduleReasonComment:
           'i scheduled this because i thought it would be nice',
       };
 
@@ -344,8 +344,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualAdditionReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
-        manualAdditionReasonComment:
+        manualScheduleReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualScheduleReasonComment:
           'i scheduled this because i thought it would be nice',
       };
 
