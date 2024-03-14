@@ -118,7 +118,7 @@ describe('corpus scheduler lambda', () => {
       ),
     ).rejects.toThrow(
       new Error(
-        'processSQSMessages failed: Error: createApprovedCorpusItem mutation failed: server bork',
+        'processSQSMessages failed for a4b5d99c-4c1b-4d35-bccf-6455c8df07b0: Error: createApprovedCorpusItem mutation failed: server bork',
       ),
     );
   }, 7000);

@@ -190,7 +190,6 @@ export const processAndScheduleCandidate = async (
     try {
       // 1. validate scheduled candidate from Metaflow
       await validateCandidate(candidate);
-
       // 2. if dev & scheduled surface exists in allowed scheduled surfaces, continue processing
       // TODO: schedule to production
       if (
@@ -224,7 +223,7 @@ export const processAndScheduleCandidate = async (
         );
       }
     } catch (error) {
-      throw new Error(`processSQSMessages failed: ${error}`);
+      throw new Error(`processSQSMessages failed for ${candidate.scheduled_corpus_candidate_id}: ${error}`);
     }
   }
 };

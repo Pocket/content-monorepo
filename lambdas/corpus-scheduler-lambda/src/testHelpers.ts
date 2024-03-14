@@ -24,6 +24,7 @@ export const createScheduledCandidate = (
   authors?: string[],
   url?: string,
   source?: CorpusItemSource.ML,
+  scheduledDate?: string,
 ): ScheduledCandidate => {
   return {
     scheduled_corpus_candidate_id: 'a4b5d99c-4c1b-4d35-bccf-6455c8df07b0',
@@ -34,7 +35,7 @@ export const createScheduledCandidate = (
       status: CuratedStatus.RECOMMENDATION,
       source: source || CorpusItemSource.ML,
       topic: Topics.SELF_IMPROVEMENT,
-      scheduled_date: '2024-02-22',
+      scheduled_date: scheduledDate || '2024-02-22',
       scheduled_surface_guid: 'NEW_TAB_EN_US',
       title: title,
       excerpt: excerpt,

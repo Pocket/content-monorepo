@@ -11,6 +11,13 @@ const config = {
       release: process.env.GIT_SHA || '',
     },
   },
+  validation: {
+    MONDAY: 1, // monday is day #1 in the week
+    SATURDAY: 6, // saturday is day #6 in the week
+    SUNDAY: 7, // sunday is day #7 in the week
+    MON_SAT_MIN_DIFF: 14,
+    SUNDAY_MIN_DIFF: 32,
+  },
   aws: {
     localEndpoint: process.env.AWS_ENDPOINT,
     region: process.env.REGION || 'us-east-1',
