@@ -5,17 +5,8 @@ import { DateTime, Settings } from 'luxon';
 
 // Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
 describe('validation', function () {
-  // const now = new Date('2021-01-01 10:20:30');
-  //
-  // beforeAll(() => {
-  //   jest.useFakeTimers({
-  //     now: now,
-  //     advanceTimers: true,
-  //   });
-  // });
-
   afterEach(() => {
-      jest.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   afterAll(() => {
@@ -24,7 +15,7 @@ describe('validation', function () {
   });
   describe('validateScheduledDate', () => {
     it('should throw Error if candidate is scheduled for Monday - Saturday less than 14 hrs in advance', async () => {
-        // Settings.now = jest.fn();
+      // Settings.now = jest.fn();
       // set current time to 2023-12-30 11 AM (PST) (Saturday)
       let currentMockTime = DateTime.fromObject(
         {
@@ -106,7 +97,6 @@ describe('validation', function () {
       ).resolves.not.toThrowError();
     });
     it('should succeed if candidate is scheduled for Monday - Saturday at least 14 hours in advance', async () => {
-        console.log('here');
       // set current time to 2023-12-30 10 AM (PST) (Saturday)
       let currentMockTime = DateTime.fromObject(
         {

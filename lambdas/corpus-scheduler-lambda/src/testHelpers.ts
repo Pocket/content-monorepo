@@ -8,14 +8,16 @@ import {
   Topics,
   UrlMetadata,
 } from 'content-common';
-import {DateTime} from "luxon";
+import { DateTime } from 'luxon';
 
 const defaultScheduledDate = DateTime.fromObject(
-    {},
-    {
-      zone: 'America/Los_Angeles',
-    },
-).plus({ days: 2 }).toISODate();
+  {},
+  {
+    zone: 'America/Los_Angeles',
+  },
+)
+  .plus({ days: 2 })
+  .toISODate();
 export const createScheduledCandidates = (
   candidates: ScheduledCandidate[],
 ): ScheduledCandidates => {
@@ -42,7 +44,7 @@ export const createScheduledCandidate = (
       status: CuratedStatus.RECOMMENDATION,
       source: source || CorpusItemSource.ML,
       topic: Topics.SELF_IMPROVEMENT,
-      scheduled_date: scheduledDate || defaultScheduledDate as string,
+      scheduled_date: scheduledDate || (defaultScheduledDate as string),
       scheduled_surface_guid: 'NEW_TAB_EN_US',
       title: title,
       excerpt: excerpt,

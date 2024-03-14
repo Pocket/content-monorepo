@@ -17,25 +17,20 @@ export const validateScheduledDate = async (
   const currentTime = DateTime.fromObject(
     {},
     {
-      zone: 'America/Los_Angeles',
+      zone: config.validation.timeZone,
     },
   ).toISO();
-  console.log('current time: ', currentTime);
 
   // 2. get the day # of the week for the scheduled date using weekday func from DateTime
-  const scheduledDay = DateTime.fromISO(scheduledDate, {zone: 'America/Los_Angeles'}).weekday;
-
-  console.log('scheduled day: ', scheduledDay);
-  console.log('scheduled date: ', scheduledDate);
-  console.log('DateTime.fromISO(scheduledDate)', DateTime.fromISO(scheduledDate, {zone: 'America/Los_Angeles'}));
+  const scheduledDay = DateTime.fromISO(scheduledDate, {
+    zone: config.validation.timeZone,
+  }).weekday;
 
   // 3. Calculate the time difference between current date & scheduled date in hours
   const timeDifference = Interval.fromDateTimes(
     DateTime.fromISO(currentTime!),
-    DateTime.fromISO(scheduledDate, {zone: 'America/Los_Angeles'}),
+    DateTime.fromISO(scheduledDate, { zone: config.validation.timeZone }),
   ).length('hours');
-
-  console.log('timeDifference: ', timeDifference);
 
   // 4. If scheduled date is for Monday - Saturday, min time diff is 14 hrs
   if (

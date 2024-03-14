@@ -12,6 +12,7 @@ const config = {
     },
   },
   validation: {
+    timeZone: 'America/Los_Angeles',
     MONDAY: 1, // monday is day #1 in the week
     SATURDAY: 6, // saturday is day #6 in the week
     SUNDAY: 7, // sunday is day #7 in the week
