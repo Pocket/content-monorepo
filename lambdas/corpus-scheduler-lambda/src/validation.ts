@@ -20,9 +20,13 @@ export const validateScheduledDate = async (
       zone: 'America/Los_Angeles',
     },
   ).toISO();
+  console.log('curren time: ', currentTime);
 
   // 2. get the day # of the week for the scheduled date using weekday func from DateTime
   const scheduledDay = DateTime.fromISO(scheduledDate).weekday;
+
+  console.log('scheduled day: ', scheduledDay);
+  console.log('scheduled date: ', scheduledDate);
 
   // 3. Calculate the time difference between current date & scheduled date in hours
   const timeDifference = Interval.fromDateTimes(
