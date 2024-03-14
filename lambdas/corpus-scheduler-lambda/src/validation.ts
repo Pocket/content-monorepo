@@ -13,6 +13,9 @@ import config from './config';
 export const validateScheduledDate = async (
   scheduledDate: string,
 ): Promise<void> => {
+  // get the DateTime from an ISO scheduled date string
+  const isoScheduledDateTime = DateTime.fromISO(scheduledDate, { zone: config.validation.timeZone });
+
   // 1. get the current date time for America/Los_Angeles
   const currentTime = DateTime.fromObject(
     {},
@@ -22,14 +25,12 @@ export const validateScheduledDate = async (
   ).toISO();
 
   // 2. get the day # of the week for the scheduled date using weekday func from DateTime
-  const scheduledDay = DateTime.fromISO(scheduledDate, {
-    zone: config.validation.timeZone,
-  }).weekday;
+  const scheduledDay = isoScheduledDateTime.weekday;
 
   // 3. Calculate the time difference between current date & scheduled date in hours
   const timeDifference = Interval.fromDateTimes(
     DateTime.fromISO(currentTime!),
-    DateTime.fromISO(scheduledDate, { zone: config.validation.timeZone }),
+      isoScheduledDateTime,
   ).length('hours');
 
   if (!timeDifference) {
