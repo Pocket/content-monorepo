@@ -196,7 +196,7 @@ export enum RejectionReason {
   OTHER = 'OTHER',
 }
 
-export enum ManualAdditionReason {
+export enum ManualScheduleReason {
   EVERGREEN = 'EVERGREEN',
   FORMAT_DIVERSITY = 'FORMAT_DIVERSITY',
   TIME_SENSITIVE_EXPLAINER = 'TIME_SENSITIVE_EXPLAINER',

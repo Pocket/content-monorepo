@@ -153,10 +153,6 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
       updated_at: getUnixTimestamp(item.updatedAt),
       updated_by: item.updatedBy ?? undefined,
       loaded_from: item.source as CorpusItemSource,
-      // temporarily set to `undefined` until snowplow schema is updated
-      // https://mozilla-hub.atlassian.net/browse/MC-814
-      manually_loaded_reasons: undefined,
-      manually_loaded_reason_comment: undefined,
     };
 
     return context;
