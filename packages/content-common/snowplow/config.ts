@@ -16,7 +16,7 @@ const config = {
     httpProtocol: environment === 'production' ? 'https' : 'http',
     bufferSize: 1,
     retries,
-    namespace: 'content-engineering',
+    namespace: 'pocket-backend',
   },
 };
 
