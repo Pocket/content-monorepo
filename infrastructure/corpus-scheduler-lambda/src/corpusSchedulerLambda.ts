@@ -94,7 +94,7 @@ export class CorpusSchedulerSQSLambda extends Construct {
 
   private getAllowedToSchedule() {
     const allowedToSchedule = new DataAwsSsmParameter(this, 'allowed-to-schedule', {
-      name: `${config.circleCIPrefix}/ALLOWED_TO_SCHEDULE`,
+      name: `/${config.name}/${config.environment}/ALLOWED_TO_SCHEDULE`,
     });
 
     return allowedToSchedule.value;
@@ -102,7 +102,7 @@ export class CorpusSchedulerSQSLambda extends Construct {
 
   private getEnableScheduledDateValidation() {
     const enableScheduledDateValidation = new DataAwsSsmParameter(this, 'enable-scheduled-date-validation', {
-      name: `${config.circleCIPrefix}/ENABLE_SCHEDULED_DATE_VALIDATION`,
+      name: `/${config.name}/${config.environment}/ENABLE_SCHEDULED_DATE_VALIDATION`,
     });
 
     return enableScheduledDateValidation.value;
