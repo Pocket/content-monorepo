@@ -27,12 +27,12 @@ export const validateScheduledDate = async (
 
   console.log('scheduled day: ', scheduledDay);
   console.log('scheduled date: ', scheduledDate);
-  console.log('DateTime.fromISO(scheduledDate)', DateTime.fromISO(scheduledDate));
+  console.log('DateTime.fromISO(scheduledDate)', DateTime.fromISO(scheduledDate, {zone: 'America/Los_Angeles'}));
 
   // 3. Calculate the time difference between current date & scheduled date in hours
   const timeDifference = Interval.fromDateTimes(
     DateTime.fromISO(currentTime!),
-    DateTime.fromISO(scheduledDate),
+    DateTime.fromISO(scheduledDate, {zone: 'America/Los_Angeles'}),
   ).length('hours');
 
   console.log('timeDifference: ', timeDifference);
