@@ -13,8 +13,16 @@ import {
   CuratedStatus,
   Topics,
 } from 'content-common';
+import config from './config';
 
 describe('corpus scheduler lambda', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
   const server = setupServer();
 
   const scheduledCandidate = createScheduledCandidate(
@@ -138,6 +146,44 @@ describe('corpus scheduler lambda', () => {
         null as unknown as Callback,
       ),
     ).rejects.toThrow(Error);
+  }, 7000);
+
+  it('should not start scheduling if enableScheduledDateValidation is false', async () => {
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItemOnce({ data: null });
+
+    // mock the config.app.enableScheduledDateValidation
+    jest.replaceProperty(config, 'app', {
+      name: 'Corpus-Scheduler-Lambda',
+      environment: 'test',
+      isDev: true,
+      sentry: {
+        dsn: '',
+        release: '',
+      },
+      allowedToSchedule: 'false',
+      enableScheduledDateValidation: 'true',
+    });
+
+    // spy on console.log
+    const consoleLogSpy = jest.spyOn(global.console, 'log');
+
+    const fakeEvent = {
+      Records: [{ messageId: '1', body: JSON.stringify(record) }],
+    } as unknown as SQSEvent;
+    // null data should be returned, but enableScheduledDateValidation === false,
+    // so should not schedule and print to console.log only
+    await expect(
+      processor(
+        fakeEvent,
+        null as unknown as Context,
+        null as unknown as Callback,
+      ),
+    ).resolves.not.toThrowError();
+    // expect log to console Scheduler lambda not allowed to schedule...
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      'Scheduler lambda not allowed to schedule...',
+    );
   }, 7000);
 
   it('returns no batch item failures if curated-corpus-api request is successful', async () => {

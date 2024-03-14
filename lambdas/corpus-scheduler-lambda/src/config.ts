@@ -12,6 +12,8 @@ const config = {
     },
     // scheduler lambda env, indicates if lambda is allowed to schedule
     allowedToSchedule: process.env.ALLOWED_TO_SCHEDULE || 'true',
+    enableScheduledDateValidation:
+      process.env.ENABLE_SCHEDULED_DATE_VALIDATION || 'true',
   },
   validation: {
     timeZone: 'America/Los_Angeles',

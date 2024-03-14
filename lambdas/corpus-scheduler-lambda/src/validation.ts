@@ -70,5 +70,8 @@ export async function validateCandidate(
   // // this also validates if values are in enums
   assert<ScheduledCandidate>(candidate);
   // validate candidate scheduled date
-  await validateScheduledDate(candidate.scheduled_corpus_item.scheduled_date);
+  // if ENABLE_SCHEDULED_DATE_VALIDATION env var is true, validate the scheduled date
+  if (config.app.enableScheduledDateValidation === 'true') {
+    await validateScheduledDate(candidate.scheduled_corpus_item.scheduled_date);
+  }
 }

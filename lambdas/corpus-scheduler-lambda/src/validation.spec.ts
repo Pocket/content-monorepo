@@ -2,6 +2,7 @@ import { validateCandidate, validateScheduledDate } from './validation';
 import { createScheduledCandidate } from './testHelpers';
 import { CorpusItemSource, CorpusLanguage } from 'content-common';
 import { DateTime, Settings } from 'luxon';
+import config from './config';
 
 // Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
 describe('validation', function () {
@@ -173,6 +174,34 @@ describe('validation', function () {
     });
   });
   describe('validateCandidate', () => {
+    it('should not validate a bad scheduled date when enableScheduledDateValidation is false', async () => {
+      // mock the config.app.enableScheduledDateValidation
+      jest.replaceProperty(config, 'app', {
+        name: 'Corpus-Scheduler-Lambda',
+        environment: 'test',
+        isDev: true,
+        sentry: {
+          dsn: '',
+          release: '',
+        },
+        allowedToSchedule: 'true',
+        enableScheduledDateValidation: 'false',
+      });
+      const scheduledCandidate = createScheduledCandidate(
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+        'https://fake-image-url.com',
+        CorpusLanguage.EN,
+        ['Rebecca Jennings'],
+        undefined,
+        CorpusItemSource.ML,
+        'bad-scheduled-date',
+      );
+      // should not throw error
+      await expect(
+        validateCandidate(scheduledCandidate),
+      ).resolves.not.toThrowError();
+    });
     it('should throw Error on ScheduleCandidate if source is not ML', async () => {
       const badScheduledCandidate = createScheduledCandidate(
         'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
