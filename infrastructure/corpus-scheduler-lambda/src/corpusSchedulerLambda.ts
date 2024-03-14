@@ -41,6 +41,7 @@ export class CorpusSchedulerSQSLambda extends Construct {
           environment: {
             REGION: this.vpc.region,
             SENTRY_DSN: this.getSentryDsn(),
+            ALLOWED_TO_SCHEDULE: this.getAllowedToSchedule(),
             GIT_SHA: this.getGitSha(),
             JWT_KEY: `${config.name}/${config.environment}/JWT_KEY`,
             ENVIRONMENT:
@@ -85,6 +86,14 @@ export class CorpusSchedulerSQSLambda extends Construct {
   private getGitSha() {
     const serviceHash = new DataAwsSsmParameter(this, 'service-hash', {
       name: `${config.circleCIPrefix}/SERVICE_HASH`,
+    });
+
+    return serviceHash.value;
+  }
+
+  private getAllowedToSchedule() {
+    const serviceHash = new DataAwsSsmParameter(this, 'allowed-to-schedule', {
+      name: `${config.circleCIPrefix}/ALLOWED_TO_SCHEDULE`,
     });
 
     return serviceHash.value;

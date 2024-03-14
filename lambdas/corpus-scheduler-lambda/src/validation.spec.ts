@@ -30,7 +30,7 @@ describe('validation', function () {
       // set scheduled candidate time to 2023-11-10 12 AM (PST) (Friday)
       // this is an earlier date than the current time, we expect this candidate to fail validation
       // computed time difference is NaN
-      let scheduledTime = DateTime.fromObject(
+      const scheduledTime = DateTime.fromObject(
         {
           year: 2023,
           month: 11,
@@ -50,15 +50,15 @@ describe('validation', function () {
       await expect(
         validateScheduledDate(null as unknown as string),
       ).rejects.toThrow(
-          'validateScheduledDate: cannot compute the time difference',
+        'validateScheduledDate: cannot compute the time difference',
       );
 
-        // test for scheduledDate === undefined, expect to fail
-        await expect(
-            validateScheduledDate(undefined as unknown as string),
-        ).rejects.toThrow(
-            'validateScheduledDate: cannot compute the time difference',
-        );
+      // test for scheduledDate === undefined, expect to fail
+      await expect(
+        validateScheduledDate(undefined as unknown as string),
+      ).rejects.toThrow(
+        'validateScheduledDate: cannot compute the time difference',
+      );
     });
     it('should throw Error if candidate is scheduled for Monday - Saturday less than 14 hrs in advance', async () => {
       // set current time to 2023-12-30 11 AM (PST) (Saturday)

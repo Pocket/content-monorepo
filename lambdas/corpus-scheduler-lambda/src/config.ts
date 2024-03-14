@@ -10,6 +10,8 @@ const config = {
       dsn: process.env.SENTRY_DSN || '',
       release: process.env.GIT_SHA || '',
     },
+    // scheduler lambda env, indicates if lambda is allowed to schedule
+    allowedToSchedule: process.env.ALLOWED_TO_SCHEDULE || 'true',
   },
   validation: {
     timeZone: 'America/Los_Angeles',

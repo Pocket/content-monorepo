@@ -14,7 +14,9 @@ export const validateScheduledDate = async (
   scheduledDate: string,
 ): Promise<void> => {
   // get the DateTime from an ISO scheduled date string
-  const isoScheduledDateTime = DateTime.fromISO(scheduledDate, { zone: config.validation.timeZone });
+  const isoScheduledDateTime = DateTime.fromISO(scheduledDate, {
+    zone: config.validation.timeZone,
+  });
 
   // 1. get the current date time for America/Los_Angeles
   const currentTime = DateTime.fromObject(
@@ -30,7 +32,7 @@ export const validateScheduledDate = async (
   // 3. Calculate the time difference between current date & scheduled date in hours
   const timeDifference = Interval.fromDateTimes(
     DateTime.fromISO(currentTime!),
-      isoScheduledDateTime,
+    isoScheduledDateTime,
   ).length('hours');
 
   if (!timeDifference) {
