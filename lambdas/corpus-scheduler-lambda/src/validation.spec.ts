@@ -106,6 +106,7 @@ describe('validation', function () {
       ).resolves.not.toThrowError();
     });
     it('should succeed if candidate is scheduled for Monday - Saturday at least 14 hours in advance', async () => {
+        console.log('here');
       // set current time to 2023-12-30 10 AM (PST) (Saturday)
       let currentMockTime = DateTime.fromObject(
         {

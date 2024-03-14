@@ -23,7 +23,7 @@ export const validateScheduledDate = async (
   console.log('current time: ', currentTime);
 
   // 2. get the day # of the week for the scheduled date using weekday func from DateTime
-  const scheduledDay = DateTime.fromISO(scheduledDate).weekday;
+  const scheduledDay = DateTime.fromISO(scheduledDate, {zone: 'America/Los_Angeles'}).weekday;
 
   console.log('scheduled day: ', scheduledDay);
   console.log('scheduled date: ', scheduledDate);
