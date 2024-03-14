@@ -41,6 +41,8 @@ export class CorpusSchedulerSQSLambda extends Construct {
           environment: {
             REGION: this.vpc.region,
             SENTRY_DSN: this.getSentryDsn(),
+            ALLOWED_TO_SCHEDULE: this.getAllowedToSchedule(),
+            ENABLE_SCHEDULED_DATE_VALIDATION: this.getEnableScheduledDateValidation(),
             GIT_SHA: this.getGitSha(),
             JWT_KEY: `${config.name}/${config.environment}/JWT_KEY`,
             ENVIRONMENT:
@@ -88,5 +90,21 @@ export class CorpusSchedulerSQSLambda extends Construct {
     });
 
     return serviceHash.value;
+  }
+
+  private getAllowedToSchedule() {
+    const allowedToSchedule = new DataAwsSsmParameter(this, 'allowed-to-schedule', {
+      name: `/${config.name}/${config.environment}/ALLOWED_TO_SCHEDULE`,
+    });
+
+    return allowedToSchedule.value;
+  }
+
+  private getEnableScheduledDateValidation() {
+    const enableScheduledDateValidation = new DataAwsSsmParameter(this, 'enable-scheduled-date-validation', {
+      name: `/${config.name}/${config.environment}/ENABLE_SCHEDULED_DATE_VALIDATION`,
+    });
+
+    return enableScheduledDateValidation.value;
   }
 }

@@ -10,7 +10,6 @@ Sentry.AWSLambda.init({
   serverName: config.app.name,
 });
 
-// temp log statements
 console.log('corpus scheduler lambda');
 
 /**
@@ -19,9 +18,17 @@ console.log('corpus scheduler lambda');
  *  Lambda batchSize is 1 to avoid retrying successfully processed records.
  */
 export const processor: SQSHandler = async (event: SQSEvent) => {
-  // We have set batchSize to 1, so the follow for loop is expected to have 1 iteration.
-  for await (const record of event.Records) {
-    await processAndScheduleCandidate(record);
+  // node env treats booleans as string, so check for equality
+  // if allowed to schedule, proceed with flow
+  if (config.app.allowedToSchedule === 'true') {
+    // We have set batchSize to 1, so the follow for loop is expected to have 1 iteration.
+    for await (const record of event.Records) {
+      await processAndScheduleCandidate(record);
+    }
+  }
+  // log if not allowed to schedule
+  else {
+    console.log('Scheduler lambda not allowed to schedule...');
   }
 };
 

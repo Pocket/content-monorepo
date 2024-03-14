@@ -8,7 +8,16 @@ import {
   Topics,
   UrlMetadata,
 } from 'content-common';
+import { DateTime } from 'luxon';
 
+const defaultScheduledDate = DateTime.fromObject(
+  {},
+  {
+    zone: 'America/Los_Angeles',
+  },
+)
+  .plus({ days: 2 })
+  .toISODate();
 export const createScheduledCandidates = (
   candidates: ScheduledCandidate[],
 ): ScheduledCandidates => {
@@ -24,6 +33,7 @@ export const createScheduledCandidate = (
   authors?: string[],
   url?: string,
   source?: CorpusItemSource.ML,
+  scheduledDate?: string,
 ): ScheduledCandidate => {
   return {
     scheduled_corpus_candidate_id: 'a4b5d99c-4c1b-4d35-bccf-6455c8df07b0',
@@ -34,7 +44,7 @@ export const createScheduledCandidate = (
       status: CuratedStatus.RECOMMENDATION,
       source: source || CorpusItemSource.ML,
       topic: Topics.SELF_IMPROVEMENT,
-      scheduled_date: '2024-02-22',
+      scheduled_date: scheduledDate || (defaultScheduledDate as string),
       scheduled_surface_guid: 'NEW_TAB_EN_US',
       title: title,
       excerpt: excerpt,
@@ -80,7 +90,7 @@ export const expectedOutput: CreateApprovedItemInput = {
   isCollection: false,
   isSyndicated: false,
   isTimeSensitive: false,
-  scheduledDate: '2024-02-22',
+  scheduledDate: defaultScheduledDate as string,
   scheduledSurfaceGuid: 'NEW_TAB_EN_US',
 };
 

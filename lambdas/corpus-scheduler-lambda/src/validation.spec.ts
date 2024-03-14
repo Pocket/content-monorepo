@@ -1,25 +1,207 @@
-import { validateCandidate } from './validation';
+import { validateCandidate, validateScheduledDate } from './validation';
 import { createScheduledCandidate } from './testHelpers';
 import { CorpusItemSource, CorpusLanguage } from 'content-common';
+import { DateTime, Settings } from 'luxon';
+import config from './config';
 
 // Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
 describe('validation', function () {
-  const now = new Date('2021-01-01 10:20:30');
-
-  beforeAll(() => {
-    jest.useFakeTimers({
-      now: now,
-      advanceTimers: true,
-    });
+  afterEach(() => {
+    jest.clearAllMocks();
   });
-
-  afterEach(() => jest.clearAllMocks());
 
   afterAll(() => {
     jest.restoreAllMocks();
     jest.useRealTimers();
   });
+  describe('validateScheduledDate', () => {
+    it('should throw Error if scheduled date is corrupt & time difference cannot be computed', async () => {
+      // set current time to 2023-12-30 11 AM (PST) (Saturday)
+      const currentMockTime = DateTime.fromObject(
+        {
+          year: 2023,
+          month: 12,
+          day: 30,
+          hour: 11,
+          minute: 0,
+          second: 0,
+        },
+        { zone: 'America/Los_Angeles' },
+      );
+      // set scheduled candidate time to 2023-11-10 12 AM (PST) (Friday)
+      // this is an earlier date than the current time, we expect this candidate to fail validation
+      // computed time difference is NaN
+      const scheduledTime = DateTime.fromObject(
+        {
+          year: 2023,
+          month: 11,
+          day: 10,
+        },
+        { zone: 'America/Los_Angeles' },
+      );
+      Settings.now = () => currentMockTime.toMillis(); // make sure current time is mocked by settings
+      const scheduledDate = scheduledTime.toISODate(); // get the schedueld date in YYYY-MM-DD format
+      await expect(
+        validateScheduledDate(scheduledDate as string),
+      ).rejects.toThrow(
+        'validateScheduledDate: cannot compute the time difference',
+      );
+
+      // test for scheduledDate === null, expect to fail
+      await expect(
+        validateScheduledDate(null as unknown as string),
+      ).rejects.toThrow(
+        'validateScheduledDate: cannot compute the time difference',
+      );
+
+      // test for scheduledDate === undefined, expect to fail
+      await expect(
+        validateScheduledDate(undefined as unknown as string),
+      ).rejects.toThrow(
+        'validateScheduledDate: cannot compute the time difference',
+      );
+    });
+    it('should throw Error if candidate is scheduled for Monday - Saturday less than 14 hrs in advance', async () => {
+      // set current time to 2023-12-30 11 AM (PST) (Saturday)
+      let currentMockTime = DateTime.fromObject(
+        {
+          year: 2023,
+          month: 12,
+          day: 30,
+          hour: 11,
+          minute: 0,
+          second: 0,
+        },
+        { zone: 'America/Los_Angeles' },
+      );
+      // set scheduled candidate time to 2023-12-31 12 AM (PST) (Sunday)
+      let scheduledTime = DateTime.fromObject(
+        {
+          year: 2023,
+          month: 12,
+          day: 31,
+        },
+        { zone: 'America/Los_Angeles' },
+      );
+      // should try scheduling on Sunday (scheduled for Monday) -> Friday (scheduled for Saturday)
+      // with time diff of 13 hours
+      // expected to fail as min time diff is 14 hours
+      for (let i = 1; i < 7; i++) {
+        currentMockTime = currentMockTime.plus({ days: 1 }); // add 1 day to the current time
+        Settings.now = () => currentMockTime.toMillis(); // make sure current time is mocked by settings
+        scheduledTime = scheduledTime.plus({ days: 1 }); // add 1 day to the scheduled time
+        const scheduledDate = scheduledTime.toISODate(); // get the schedueld date in YYYY-MM-DD format
+        await expect(
+          validateScheduledDate(scheduledDate as string),
+        ).rejects.toThrow(
+          'validateScheduledDate: candidate scheduled for Monday - Saturday needs to arrive minimum 14 hours in advance',
+        );
+      }
+    });
+    it('should throw Error if candidate is scheduled for Sunday less than 32 hrs in advance', async () => {
+      // set current time to 2024-01-27 7 AM (PST) (Saturday)
+      const currentMockTime = DateTime.fromObject(
+        {
+          year: 2024,
+          month: 1,
+          day: 27,
+          hour: 7,
+          minute: 0,
+          second: 0,
+        },
+        { zone: 'America/Los_Angeles' },
+      );
+      Settings.now = () => currentMockTime.toMillis(); // make sure current time is mocked by settings
+      // scheduled date is set to 2024-01-28 (Sunday)
+      // 17 hour diff, expected to fail as min time diff is 32 hours
+      await expect(validateScheduledDate('2024-01-28')).rejects.toThrow(
+        'validateScheduledDate: candidate scheduled for Sunday needs to arrive minimum 32 hours in advance',
+      );
+    });
+    it('should succeed if candidate is scheduled for Sunday at least 32 hours in advance', async () => {
+      // set current time to 2024-01-26 4 PM (PST) (Friday)
+      const currentMockTime = DateTime.fromObject(
+        {
+          year: 2024,
+          month: 1,
+          day: 26,
+          hour: 16,
+          minute: 0,
+          second: 0,
+        },
+        { zone: 'America/Los_Angeles' },
+      );
+      Settings.now = () => currentMockTime.toMillis(); // make sure current time is mocked by settings
+      // scheduled date is set to 2024-01-28 (Sunday)
+      // expected to succeed, time diff is exactly 32 hours
+      await expect(
+        validateScheduledDate('2024-01-28'),
+      ).resolves.not.toThrowError();
+    });
+    it('should succeed if candidate is scheduled for Monday - Saturday at least 14 hours in advance', async () => {
+      // set current time to 2023-12-30 10 AM (PST) (Saturday)
+      let currentMockTime = DateTime.fromObject(
+        {
+          year: 2023,
+          month: 12,
+          day: 30,
+          hour: 10,
+          minute: 0,
+          second: 0,
+        },
+        { zone: 'America/Los_Angeles' },
+      );
+      // set scheduled candidate time to 2023-12-31 12 AM (PST) (Sunday)
+      let scheduledTime = DateTime.fromObject(
+        {
+          year: 2023,
+          month: 12,
+          day: 31,
+        },
+        { zone: 'America/Los_Angeles' },
+      );
+      // should try scheduling on Sunday (scheduled for Monday) -> Friday (scheduled for Saturday)
+      // expected to succeed, time diff is exactly 14 hours
+      for (let i = 1; i < 7; i++) {
+        currentMockTime = currentMockTime.plus({ days: 1 }); // add 1 day to the current time
+        Settings.now = () => currentMockTime.toMillis(); // make sure current time is mocked by settings
+        scheduledTime = scheduledTime.plus({ days: 1 }); // add 1 day to the scheduled time
+        const scheduledDate = scheduledTime.toISODate(); // get the schedueld date in YYYY-MM-DD format
+        await expect(
+          validateScheduledDate(scheduledDate as string),
+        ).resolves.not.toThrowError();
+      }
+    });
+  });
   describe('validateCandidate', () => {
+    it('should not validate a bad scheduled date when enableScheduledDateValidation is false', async () => {
+      // mock the config.app.enableScheduledDateValidation
+      jest.replaceProperty(config, 'app', {
+        name: 'Corpus-Scheduler-Lambda',
+        environment: 'test',
+        isDev: true,
+        sentry: {
+          dsn: '',
+          release: '',
+        },
+        allowedToSchedule: 'true',
+        enableScheduledDateValidation: 'false',
+      });
+      const scheduledCandidate = createScheduledCandidate(
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+        'https://fake-image-url.com',
+        CorpusLanguage.EN,
+        ['Rebecca Jennings'],
+        undefined,
+        CorpusItemSource.ML,
+        'bad-scheduled-date',
+      );
+      // should not throw error
+      await expect(
+        validateCandidate(scheduledCandidate),
+      ).resolves.not.toThrowError();
+    });
     it('should throw Error on ScheduleCandidate if source is not ML', async () => {
       const badScheduledCandidate = createScheduledCandidate(
         'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
@@ -31,9 +213,6 @@ describe('validation', function () {
         CorpusItemSource.MANUAL as CorpusItemSource.ML,
       );
 
-      await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
-        Error,
-      );
       await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
         'Error on typia.assert(): invalid type on $input.scheduled_corpus_item.source, expect to be "ML"',
       );
@@ -50,9 +229,6 @@ describe('validation', function () {
       );
 
       // should throw error
-      await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
-        Error,
-      );
       await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
         'Error on typia.assert(): invalid type on $input.scheduled_corpus_item.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT" | undefined)',
       );
