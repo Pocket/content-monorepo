@@ -148,7 +148,7 @@ describe('corpus scheduler lambda', () => {
     ).rejects.toThrow(Error);
   }, 7000);
 
-  it('should not start scheduling if enableScheduledDateValidation is false', async () => {
+  it('should not start scheduling if allowedToSchedule is false', async () => {
     mockGetUrlMetadata();
     mockCreateApprovedCorpusItemOnce({ data: null });
 
