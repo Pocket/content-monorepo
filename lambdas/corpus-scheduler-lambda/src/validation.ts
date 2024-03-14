@@ -30,6 +30,8 @@ export const validateScheduledDate = async (
     DateTime.fromISO(scheduledDate),
   ).length('hours');
 
+  console.log('timeDifference: ', timeDifference);
+
   // 4. If scheduled date is for Monday - Saturday, min time diff is 14 hrs
   if (
     scheduledDay >= config.validation.MONDAY &&
