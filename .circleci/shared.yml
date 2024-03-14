@@ -552,11 +552,17 @@ jobs:
             mkdir /tmp/artifacts
             cp ~/project/${CIRCLE_SHA1}.zip /tmp/artifacts/
             cd ..
-            maxFileSize=256000 # Get the size of the directory in kilobytes
-            export dirSize=$(du -s dist | cut -f1) 
+            
+            # Compute the uncompressed size, accounting for symlinked files getting duplicated.
+            # :'( pnpm deploy outputs symlinks, even with --config.symlinks=false
+            # This is a known issue: https://github.com/pnpm/pnpm/issues/6166
+            unzip -q ~/project/${CIRCLE_SHA1}.zip -d /tmp/unzipped_content
+            
+            maxFileSize=256000 # Lambda size limit in kilobytes
+            dirSize=$(du -s /tmp/unzipped_content | cut -f1) 
             echo "Size is: $dirSize"
             if ((dirSize > maxFileSize)); then
-              echo "Directory size is equal to or larger than $maxFileSize KB. which is the lambda limit"
+              echo "Directory size is equal to or larger than $maxFileSize KB, which is the lambda limit."
               exit 1
             fi
       - when:
