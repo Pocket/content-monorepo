@@ -1,6 +1,6 @@
 import { ScheduledCandidate } from './types';
 import { assert } from 'typia';
-import {DateTime, Interval} from 'luxon';
+import { DateTime, Interval } from 'luxon';
 import config from './config';
 
 /**
@@ -10,32 +10,47 @@ import config from './config';
  * If a candidate is scheduled for Sunday, time diff >= 32 hrs
  * @param scheduledDate scheduledDate for an item from Metaflow
  */
-export const validateScheduledDate = async (scheduledDate: string): Promise<void> => {
+export const validateScheduledDate = async (
+  scheduledDate: string,
+): Promise<void> => {
   // 1. get the current date time for America/Los_Angeles
-  const currentTime = DateTime.fromObject({},{
-    zone: 'America/Los_Angeles',
-  }).toISO();
+  const currentTime = DateTime.fromObject(
+    {},
+    {
+      zone: 'America/Los_Angeles',
+    },
+  ).toISO();
 
   // 2. get the day # of the week for the scheduled date using weekday func from DateTime
   const scheduledDay = DateTime.fromISO(scheduledDate).weekday;
 
   // 3. Calculate the time difference between current date & scheduled date in hours
-  const timeDifference = Interval.fromDateTimes(DateTime.fromISO(currentTime!), DateTime.fromISO(scheduledDate)).length('hours');
+  const timeDifference = Interval.fromDateTimes(
+    DateTime.fromISO(currentTime!),
+    DateTime.fromISO(scheduledDate),
+  ).length('hours');
 
   // 4. If scheduled date is for Monday - Saturday, min time diff is 14 hrs
-  if(scheduledDay >= config.validation.MONDAY && scheduledDay <= config.validation.SATURDAY) {
+  if (
+    scheduledDay >= config.validation.MONDAY &&
+    scheduledDay <= config.validation.SATURDAY
+  ) {
     if (timeDifference < config.validation.MON_SAT_MIN_DIFF) {
-      throw new Error('validateScheduledDate: candidate scheduled for Monday - Saturday needs to arrive minimum 14 hours in advance');
+      throw new Error(
+        'validateScheduledDate: candidate scheduled for Monday - Saturday needs to arrive minimum 14 hours in advance',
+      );
     }
   }
 
   // 5. If scheduled date is Sunday, min time diff is 32 hrs
-  if(scheduledDay === config.validation.SUNDAY) {
+  if (scheduledDay === config.validation.SUNDAY) {
     if (timeDifference < config.validation.SUNDAY_MIN_DIFF) {
-      throw new Error('validateScheduledDate: candidate scheduled for Sunday needs to arrive minimum 32 hours in advance');
+      throw new Error(
+        'validateScheduledDate: candidate scheduled for Sunday needs to arrive minimum 32 hours in advance',
+      );
     }
   }
-}
+};
 
 /**
  * Validation wrapper. Calls the individual validation methods to validate the candidate.

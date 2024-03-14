@@ -223,7 +223,9 @@ export const processAndScheduleCandidate = async (
         );
       }
     } catch (error) {
-      throw new Error(`processSQSMessages failed for ${candidate.scheduled_corpus_candidate_id}: ${error}`);
+      throw new Error(
+        `processSQSMessages failed for ${candidate.scheduled_corpus_candidate_id}: ${error}`,
+      );
     }
   }
 };
