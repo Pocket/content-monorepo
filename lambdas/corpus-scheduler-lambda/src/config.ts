@@ -13,11 +13,9 @@ const config = {
   },
   validation: {
     timeZone: 'America/Los_Angeles',
-    MONDAY: 1, // monday is day #1 in the week
-    SATURDAY: 6, // saturday is day #6 in the week
-    SUNDAY: 7, // sunday is day #7 in the week
-    MON_SAT_MIN_DIFF: 14,
-    SUNDAY_MIN_DIFF: 32,
+    ISO_SUNDAY: 7, // ISO sunday is day #7 in the week (note: JS getDay returns 0 for Sunday)
+    MON_SAT_MIN_DIFF: 14, // Regular cutoff is 10am. 24:00 - 10:00 = 14 hours
+    SUNDAY_MIN_DIFF: 32, // Sunday cutoff is Friday 4pm. 2 days - 16 hours = 32 hours
   },
   aws: {
     localEndpoint: process.env.AWS_ENDPOINT,

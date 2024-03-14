@@ -14,8 +14,39 @@ describe('validation', function () {
     jest.useRealTimers();
   });
   describe('validateScheduledDate', () => {
+    it('should throw Error if time difference cannot be computed', async () => {
+      // set current time to 2023-12-30 11 AM (PST) (Saturday)
+      const currentMockTime = DateTime.fromObject(
+        {
+          year: 2023,
+          month: 12,
+          day: 30,
+          hour: 11,
+          minute: 0,
+          second: 0,
+        },
+        { zone: 'America/Los_Angeles' },
+      );
+      // set scheduled candidate time to 2023-11-10 12 AM (PST) (Friday)
+      // this is an earlier date than the current time, we expect this candidate to fail validation
+      // computed time difference is NaN
+      const scheduledTime = DateTime.fromObject(
+        {
+          year: 2023,
+          month: 11,
+          day: 10,
+        },
+        { zone: 'America/Los_Angeles' },
+      );
+      Settings.now = () => currentMockTime.toMillis(); // make sure current time is mocked by settings
+      const scheduledDate = scheduledTime.toISODate(); // get the schedueld date in YYYY-MM-DD format
+      await expect(
+        validateScheduledDate(scheduledDate as string),
+      ).rejects.toThrow(
+        'validateScheduledDate: cannot compute the time difference',
+      );
+    });
     it('should throw Error if candidate is scheduled for Monday - Saturday less than 14 hrs in advance', async () => {
-      // Settings.now = jest.fn();
       // set current time to 2023-12-30 11 AM (PST) (Saturday)
       let currentMockTime = DateTime.fromObject(
         {
@@ -47,9 +78,6 @@ describe('validation', function () {
         const scheduledDate = scheduledTime.toISODate(); // get the schedueld date in YYYY-MM-DD format
         await expect(
           validateScheduledDate(scheduledDate as string),
-        ).rejects.toThrow(Error);
-        await expect(
-          validateScheduledDate(scheduledDate as string),
         ).rejects.toThrow(
           'validateScheduledDate: candidate scheduled for Monday - Saturday needs to arrive minimum 14 hours in advance',
         );
@@ -71,7 +99,6 @@ describe('validation', function () {
       Settings.now = () => currentMockTime.toMillis(); // make sure current time is mocked by settings
       // scheduled date is set to 2024-01-28 (Sunday)
       // 17 hour diff, expected to fail as min time diff is 32 hours
-      await expect(validateScheduledDate('2024-01-28')).rejects.toThrow(Error);
       await expect(validateScheduledDate('2024-01-28')).rejects.toThrow(
         'validateScheduledDate: candidate scheduled for Sunday needs to arrive minimum 32 hours in advance',
       );
@@ -144,9 +171,6 @@ describe('validation', function () {
       );
 
       await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
-        Error,
-      );
-      await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
         'Error on typia.assert(): invalid type on $input.scheduled_corpus_item.source, expect to be "ML"',
       );
     });
@@ -162,9 +186,6 @@ describe('validation', function () {
       );
 
       // should throw error
-      await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
-        Error,
-      );
       await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
         'Error on typia.assert(): invalid type on $input.scheduled_corpus_item.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT" | undefined)',
       );
