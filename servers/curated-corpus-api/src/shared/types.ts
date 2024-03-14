@@ -196,6 +196,18 @@ export enum RejectionReason {
   OTHER = 'OTHER',
 }
 
+export enum ManualAdditionReason {
+  EVERGREEN = 'EVERGREEN',
+  FORMAT_DIVERSITY = 'FORMAT_DIVERSITY',
+  TIME_SENSITIVE_EXPLAINER = 'TIME_SENSITIVE_EXPLAINER',
+  TIME_SENSITIVE_NEWS = 'TIME_SENSITIVE_NEWS',
+  PUBLISHER_DIVERSITY = 'PUBLISHER_DIVERSITY',
+  TRENDING = 'TRENDING',
+  TOPIC_DIVERSITY = 'TOPIC_DIVERSITY',
+  UNDER_THE_RADAR = 'UNDER_THE_RADAR',
+  OTHER = 'OTHER',
+}
+
 export enum ScheduledItemSource {
   MANUAL = 'MANUAL', // manually entered through the curation admin tool
   ML = 'ML', // created by ML
@@ -216,5 +228,6 @@ export type ApprovedItemS3ImageUrl = {
 export type OpenGraphFields = {
   description: string;
 };
+
 export const ACCESS_DENIED_ERROR =
   'You do not have access to perform this action.';
