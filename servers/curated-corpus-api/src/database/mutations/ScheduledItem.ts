@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import {
-  CreateScheduledItemInput,
   DeleteScheduledItemInput,
   ImportScheduledItemInput,
   RescheduleScheduledItemInput,
   ScheduledItem,
 } from '../types';
+import { CreateScheduledItemInput } from 'content-common';
 import { NotFoundError } from '@pocket-tools/apollo-utils';
 
 /**
