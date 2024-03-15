@@ -1,7 +1,11 @@
 import { SQSEvent, SQSHandler } from 'aws-lambda';
 import * as Sentry from '@sentry/serverless';
 import config from './config';
-import { processAndScheduleCandidate } from './utils';
+import {
+  generateJwt,
+  getCorpusSchedulerLambdaPrivateKey,
+  processAndScheduleCandidate,
+} from './utils';
 
 Sentry.AWSLambda.init({
   dsn: config.app.sentry.dsn,
@@ -21,9 +25,14 @@ export const processor: SQSHandler = async (event: SQSEvent) => {
   // node env treats booleans as string, so check for equality
   // if allowed to schedule, proceed with flow
   if (config.app.allowedToSchedule === 'true') {
+    //admin api requires jwt token, generate it once
+    // to avoid hitting secrets managers in AWS several times per candidate
+    const bearerToken = 'Bearer '.concat(
+      generateJwt(await getCorpusSchedulerLambdaPrivateKey(config.jwt.key)),
+    );
     // We have set batchSize to 1, so the follow for loop is expected to have 1 iteration.
     for await (const record of event.Records) {
-      await processAndScheduleCandidate(record);
+      await processAndScheduleCandidate(record, bearerToken);
     }
   }
   // log if not allowed to schedule

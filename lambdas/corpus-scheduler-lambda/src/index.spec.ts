@@ -1,4 +1,3 @@
-import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { processor } from './';
 import * as Utils from './utils';
@@ -6,13 +5,12 @@ import { Callback, Context, SQSEvent } from 'aws-lambda';
 import {
   createScheduledCandidate,
   createScheduledCandidates,
+  mockCreateApprovedCorpusItemOnce,
+  mockCreateScheduledCorpusItemOnce,
+  mockGetApprovedCorpusItemByUrl,
+  mockGetUrlMetadata,
 } from './testHelpers';
-import {
-  CorpusItemSource,
-  CorpusLanguage,
-  CuratedStatus,
-  Topics,
-} from 'content-common';
+import { CorpusLanguage } from 'content-common';
 import config from './config';
 
 describe('corpus scheduler lambda', () => {
@@ -23,7 +21,6 @@ describe('corpus scheduler lambda', () => {
   afterAll(() => {
     jest.restoreAllMocks();
   });
-  const server = setupServer();
 
   const scheduledCandidate = createScheduledCandidate(
     'Fake title',
@@ -34,66 +31,8 @@ describe('corpus scheduler lambda', () => {
     'https://fake-url.com',
   );
 
+  const server = setupServer();
   const record = createScheduledCandidates([scheduledCandidate]);
-
-  const getUrlMetadataBody = {
-    data: {
-      getUrlMetadata: {
-        url: 'https://fake-url.com',
-        title: 'Fake title',
-        excerpt: 'fake excerpt',
-        status: CuratedStatus.RECOMMENDATION,
-        language: 'EN',
-        publisher: 'POLITICO',
-        authors: 'Fake Author',
-        imageUrl: 'https://fake-image-url.com',
-        topic: Topics.SELF_IMPROVEMENT,
-        source: CorpusItemSource.ML,
-        isCollection: false,
-        isSyndicated: false,
-      },
-    },
-  };
-
-  const createApprovedCorpusItemBody = {
-    data: {
-      createApprovedCorpusItem: {
-        externalId: 'fake-external-id',
-        url: 'https://fake-url.com',
-        title: 'Fake title',
-      },
-    },
-  };
-
-  /**
-   * Set up the mock server to return responses for the getUrlMetadata query.
-   * @param responseBody GraphQL response body.
-   */
-  const mockGetUrlMetadata = (responseBody: any = getUrlMetadataBody) => {
-    server.use(
-      graphql.query('getUrlMetadata', () => {
-        return HttpResponse.json(responseBody);
-      }),
-    );
-  };
-
-  /**
-   * Set up the mock server to return responses for the createApprovedCorpusItem mutation.
-   * @param body GraphQL response body.
-   */
-  const mockCreateApprovedCorpusItemOnce = (
-    body: any = createApprovedCorpusItemBody,
-  ) => {
-    server.use(
-      graphql.mutation(
-        'CreateApprovedCorpusItem',
-        () => {
-          return HttpResponse.json(body);
-        },
-        { once: true },
-      ),
-    );
-  };
 
   beforeAll(() => server.listen());
   afterEach(() => server.resetHandlers());
@@ -111,8 +50,17 @@ describe('corpus scheduler lambda', () => {
   });
 
   it('returns batch item failure if curated-corpus-api has error, with partial success', async () => {
-    mockGetUrlMetadata();
-    mockCreateApprovedCorpusItemOnce({ errors: [{ message: 'server bork' }] });
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateScheduledCorpusItemOnce(server);
+    mockCreateApprovedCorpusItemOnce(server, {
+      errors: [{ message: 'server bork' }],
+    });
 
     const fakeEvent = {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
@@ -132,8 +80,14 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('returns batch item failure if curated-corpus-api returns null data', async () => {
-    mockGetUrlMetadata();
-    mockCreateApprovedCorpusItemOnce({ data: null });
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateApprovedCorpusItemOnce(server, { data: null });
 
     const fakeEvent = {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
@@ -149,8 +103,14 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('should not start scheduling if allowedToSchedule is false', async () => {
-    mockGetUrlMetadata();
-    mockCreateApprovedCorpusItemOnce({ data: null });
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateApprovedCorpusItemOnce(server, { data: null });
 
     // mock the config.app.enableScheduledDateValidation
     jest.replaceProperty(config, 'app', {
@@ -187,8 +147,14 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('returns no batch item failures if curated-corpus-api request is successful', async () => {
-    mockGetUrlMetadata();
-    mockCreateApprovedCorpusItemOnce();
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateApprovedCorpusItemOnce(server);
 
     const fakeEvent = {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],

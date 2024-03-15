@@ -14,6 +14,7 @@ import {
   CorpusLanguage,
   UrlMetadata,
   ScheduledItemSource,
+  CreateScheduledItemInput,
 } from 'content-common';
 import {
   allowedScheduledSurfaces,
@@ -22,7 +23,12 @@ import {
 } from './types';
 import { assert } from 'typia';
 import { SQSRecord } from 'aws-lambda';
-import { createApprovedCorpusItem, fetchUrlMetadata } from './graphQlApiCalls';
+import {
+  createApprovedCorpusItem,
+  createScheduledCorpusItem,
+  fetchUrlMetadata,
+  getApprovedCorpusItemByUrl,
+} from './graphQlApiCalls';
 
 // Secrets Manager Client
 const smClient = new SecretsManagerClient({ region: config.aws.region });
@@ -79,7 +85,6 @@ export async function getCorpusSchedulerLambdaPrivateKey(secretId: string) {
         SecretId: secretId,
       }),
     );
-
     const privateKey = secret.SecretString as string;
     return JSON.parse(privateKey);
   } catch (e) {
@@ -174,13 +179,95 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
   }
 };
 
+export const createCreateScheduledItemInput = async (
+  candidate: ScheduledCandidate,
+  approvedItemExternalId: string,
+): Promise<CreateScheduledItemInput> => {
+  try {
+    const itemToSchedule: CreateScheduledItemInput = {
+      approvedItemExternalId: approvedItemExternalId,
+      scheduledSurfaceGuid:
+        candidate.scheduled_corpus_item.scheduled_surface_guid,
+      scheduledDate: candidate.scheduled_corpus_item.scheduled_date,
+      source: candidate.scheduled_corpus_item
+        .source as unknown as ScheduledItemSource,
+    };
+    // assert itemToSchedule against CreateScheduledItemInput before sending to mutation
+    assert<CreateScheduledItemInput>(itemToSchedule);
+    return itemToSchedule;
+  } catch (e) {
+    throw new Error(
+      `failed to create CreateScheduledItemInput for ${candidate.scheduled_corpus_candidate_id}. Reason: ${e}`,
+    );
+  }
+};
+
+/**
+ * Creates, approves, schedules OR only schedules a candidate.
+ * @param candidate ScheduledCandidate received from Metaflow
+ * @param bearerToken generated bearerToken for admin api
+ */
+export const createAndScheduleCorpusItemHelper = async (
+  candidate: ScheduledCandidate,
+  bearerToken: string,
+) => {
+  // 1. query getApprovedCorpusItemByUrl to check if item is already created & approved
+  const approvedCorpusItem = await getApprovedCorpusItemByUrl(
+    candidate.scheduled_corpus_item.url,
+    bearerToken,
+  );
+  // if getApprovedCorpusItemByUrl mutation returns null, this is a new candidate
+  // create, approve & schedule it
+  if (!approvedCorpusItem) {
+    // 2. get metadata from Parser (used to fill in some data fields not provided by Metaflow)
+    const parserMetadata = await fetchUrlMetadata(
+      candidate.scheduled_corpus_item.url,
+      bearerToken,
+    );
+
+    // 3. map Metaflow input to CreateApprovedItemInput
+    const createApprovedItemInput =
+      await mapScheduledCandidateInputToCreateApprovedItemInput(
+        candidate,
+        parserMetadata,
+      );
+
+    // 4. call createApprovedCorpusItem mutation
+    const createdItem = await createApprovedCorpusItem(
+      createApprovedItemInput,
+      bearerToken,
+    );
+    console.log(
+      `CreateApprovedCorpusItem MUTATION OUTPUT: externalId: ${createdItem.data.createApprovedCorpusItem.externalId}, url: ${createdItem.data.createApprovedCorpusItem.url}, title: ${createdItem.data.createApprovedCorpusItem.title}`,
+    );
+  }
+  // item has already been created & approved, try scheduling item
+  else {
+    // 5. create CreateScheduledItem input obj
+    const createScheduledItemInput = await createCreateScheduledItemInput(
+      candidate,
+      approvedCorpusItem.externalId,
+    );
+    // 6.  call createScheduledItemInput mutation
+    const scheduledItem = await createScheduledCorpusItem(
+      createScheduledItemInput,
+      bearerToken,
+    );
+    console.log(
+      `CreateScheduledCorpusItem MUTATION OUTPUT: externalId: ${scheduledItem.data.createScheduledCorpusItem.externalId}, url: ${scheduledItem.data.createScheduledCorpusItem.approvedItem.url}, title: ${scheduledItem.data.createScheduledCorpusItem.approvedItem.title}`,
+    );
+  }
+};
+
 /**
  * Process each record from SQS. Transforms Metaflow input into CreateApprovedItemInput & calls the
  * createApprovedCorpusItem mutation
  * @param record an SQSRecord
+ * @param bearerToken generated bearerToken for admin api
  */
 export const processAndScheduleCandidate = async (
   record: SQSRecord,
+  bearerToken: string,
 ): Promise<void> => {
   console.log(record.body);
   const parsedMessage: ScheduledCandidates = JSON.parse(record.body);
@@ -198,25 +285,8 @@ export const processAndScheduleCandidate = async (
           candidate.scheduled_corpus_item.scheduled_surface_guid as string,
         )
       ) {
-        // 3. get metadata from Parser (used to fill in some data fields not provided by Metaflow)
-        const parserMetadata = await fetchUrlMetadata(
-          candidate.scheduled_corpus_item.url,
-        );
-
-        // 4. map Metaflow input to CreateApprovedItemInput
-        const createApprovedItemInput =
-          await mapScheduledCandidateInputToCreateApprovedItemInput(
-            candidate,
-            parserMetadata,
-          );
-
-        // 5. call createApprovedCorpusItem mutation
-        const createdItem = await createApprovedCorpusItem(
-          createApprovedItemInput,
-        );
-        console.log(
-          `CreateApprovedCorpusItem MUTATION OUTPUT: externalId: ${createdItem.data.createApprovedCorpusItem.externalId}, url: ${createdItem.data.createApprovedCorpusItem.url}, title: ${createdItem.data.createApprovedCorpusItem.title}`,
-        );
+        // 3. create & schedule OR only schedule candidate
+        await createAndScheduleCorpusItemHelper(candidate, bearerToken);
       } else {
         console.log(
           `Cannot schedule candidate: ${candidate.scheduled_corpus_candidate_id} for surface ${candidate.scheduled_corpus_item.scheduled_surface_guid}.`,

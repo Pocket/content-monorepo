@@ -1,4 +1,6 @@
 import {
+  createAndScheduleCorpusItemHelper,
+  createCreateScheduledItemInput,
   generateJwt,
   getCorpusSchedulerLambdaPrivateKey,
   mapAuthorToApprovedItemAuthor,
@@ -10,10 +12,19 @@ import {
   GetSecretValueCommand,
   SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
-import { ApprovedItemAuthor, CorpusLanguage } from 'content-common';
+import { setupServer } from 'msw/node';
+import {
+  ApprovedItemAuthor,
+  CorpusItemSource,
+  CorpusLanguage,
+} from 'content-common';
 import {
   createScheduledCandidate,
   expectedOutput,
+  mockCreateApprovedCorpusItemOnce,
+  mockCreateScheduledCorpusItemOnce,
+  mockGetApprovedCorpusItemByUrl,
+  mockGetUrlMetadata,
   parserItem,
 } from './testHelpers';
 
@@ -24,6 +35,7 @@ const jwkToPem = require('jwk-to-pem');
 
 // Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
 describe('utils', function () {
+  const server = setupServer();
   const ssmMock = mockClient(SecretsManagerClient);
   const testPrivateKey = {
     p: '2NE9Yskv7kZaM_OMvKElEWRKi6peRae3JkMp-TvjqMIO69kV3zQfpb0gfIdcC54_BuGUUUjL9IEDApWas-IBbG33bKoGTzCzNbfML0aQvAHpuvZI6pGAq3OdHgC-kGjb5wyK3tDaP-rS8aVYjrB9jQY7Go-F4xWyikNm-99BJg0',
@@ -52,6 +64,7 @@ describe('utils', function () {
   const exp = new Date('2021-01-01 10:25:30');
 
   beforeAll(() => {
+    server.listen();
     jest.useFakeTimers({
       now: now,
       advanceTimers: true,
@@ -60,9 +73,13 @@ describe('utils', function () {
 
   beforeEach(() => ssmMock.reset());
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    server.resetHandlers();
+    jest.clearAllMocks();
+  });
 
   afterAll(() => {
+    server.close();
     jest.restoreAllMocks();
     jest.useRealTimers();
   });
@@ -114,6 +131,124 @@ describe('utils', function () {
         },
       ];
       expect(authors).toEqual(expectedAuthors);
+    });
+  });
+  describe('createCreateScheduledItemInput', () => {
+    it('should create CreateScheduledItemInput correctly', async () => {
+      const scheduledCandidate = createScheduledCandidate(
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+        'https://fake-image-url.com',
+        CorpusLanguage.EN,
+        ['Rebecca Jennings'],
+        'fake-url',
+        CorpusItemSource.ML,
+        '2024-03-16',
+      );
+      const output = await createCreateScheduledItemInput(
+        scheduledCandidate,
+        'fake-approved-external-id',
+      );
+      const expectedApprovedItemOutput = {
+        approvedItemExternalId: 'fake-approved-external-id',
+        scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+        scheduledDate: '2024-03-16',
+        source: 'ML',
+      };
+
+      expect(output).toEqual(expectedApprovedItemOutput);
+    });
+    it('should throw error on CreateScheduledItemInput if a field type is wrong', async () => {
+      const scheduledCandidate = createScheduledCandidate(
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+        'https://fake-image-url.com',
+        CorpusLanguage.EN,
+        ['Rebecca Jennings'],
+        'fake-url',
+        'bad-source' as CorpusItemSource.ML,
+      );
+      await expect(
+        createCreateScheduledItemInput(
+          scheduledCandidate,
+          'fake-approved-external-id',
+        ),
+      ).rejects.toThrow(
+        `failed to create CreateScheduledItemInput for a4b5d99c-4c1b-4d35-bccf-6455c8df07b0. ` +
+          `Reason: Error: Error on typia.assert(): invalid type on $input.source, expect to be ("MANUAL" | "ML")`,
+      );
+    });
+  });
+  describe('createAndScheduleCorpusItemHelper', () => {
+    it('should schedule a previously approved item', async () => {
+      // approvedCorpusItem should return a response, not null
+      mockGetApprovedCorpusItemByUrl(server);
+      mockGetUrlMetadata(server);
+      mockCreateScheduledCorpusItemOnce(server);
+      mockCreateApprovedCorpusItemOnce(server);
+
+      // spy on console.log
+      const consoleLogSpy = jest.spyOn(global.console, 'log');
+
+      const scheduledCandidate = createScheduledCandidate(
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+        'https://fake-image-url.com',
+        CorpusLanguage.EN,
+        ['Rebecca Jennings'],
+        'fake-url',
+        CorpusItemSource.ML,
+        '2024-03-16',
+      );
+      // no errors should be thrown from apis
+      await expect(
+        createAndScheduleCorpusItemHelper(
+          scheduledCandidate,
+          'fake-bearer-token',
+        ),
+      ).resolves.not.toThrowError();
+
+      // we expect the createScheduledCorpusItem to run
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        'CreateScheduledCorpusItem MUTATION OUTPUT: externalId: fake-external-id, url: https://fake-url.com, title: Fake title',
+      );
+    });
+    it('should create, approve & schedule a new candidate', async () => {
+      // approvedCorpusItem should return a response, not null
+      mockGetApprovedCorpusItemByUrl(server, {
+        data: {
+          getApprovedCorpusItemByUrl: null,
+        },
+      });
+      mockGetUrlMetadata(server);
+      mockCreateScheduledCorpusItemOnce(server);
+      mockCreateApprovedCorpusItemOnce(server);
+
+      // spy on console.log
+      const consoleLogSpy = jest.spyOn(global.console, 'log');
+
+      const scheduledCandidate = createScheduledCandidate(
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+        'https://fake-image-url.com',
+        CorpusLanguage.EN,
+        ['Rebecca Jennings'],
+        'fake-url',
+        CorpusItemSource.ML,
+        '2024-03-16',
+      );
+      // no errors should be thrown from apis
+      await expect(
+        createAndScheduleCorpusItemHelper(
+          scheduledCandidate,
+          'fake-bearer-token',
+        ),
+      ).resolves.not.toThrowError();
+
+      // we expect the createScheduledCorpusItem to run
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        'CreateApprovedCorpusItem MUTATION OUTPUT: externalId: fake-external-id, url: https://fake-url.com, title: Fake title',
+      );
     });
   });
   describe('mapScheduledCandidateInputToCreateApprovedItemInput', () => {

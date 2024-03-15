@@ -9,6 +9,8 @@ import {
   UrlMetadata,
 } from 'content-common';
 import { DateTime } from 'luxon';
+import { graphql, HttpResponse } from 'msw';
+import { SetupServer } from 'msw/node';
 
 const defaultScheduledDate = DateTime.fromObject(
   {},
@@ -106,4 +108,126 @@ export const parserItem: UrlMetadata = {
   imageUrl: 'https://fake-image-url.com',
   isCollection: false,
   isSyndicated: false,
+};
+
+export const getUrlMetadataBody = {
+  data: {
+    getUrlMetadata: {
+      url: 'https://fake-url.com',
+      title: 'Fake title',
+      excerpt: 'fake excerpt',
+      status: CuratedStatus.RECOMMENDATION,
+      language: 'EN',
+      publisher: 'POLITICO',
+      authors: 'Fake Author',
+      imageUrl: 'https://fake-image-url.com',
+      topic: Topics.SELF_IMPROVEMENT,
+      source: CorpusItemSource.ML,
+      isCollection: false,
+      isSyndicated: false,
+    },
+  },
+};
+
+export const getApprovedCorpusItemByUrlBody = {
+  data: {
+    getApprovedCorpusItemByUrl: {
+      url: 'https://fake-url.com',
+      externalId: 'fake-external-id',
+    },
+  },
+};
+
+export const createApprovedCorpusItemBody = {
+  data: {
+    createApprovedCorpusItem: {
+      externalId: 'fake-external-id',
+      url: 'https://fake-url.com',
+      title: 'Fake title',
+    },
+  },
+};
+
+export const createScheduledCorpusItemBody = {
+  data: {
+    createScheduledCorpusItem: {
+      externalId: 'fake-external-id',
+      approvedItem: {
+        url: 'https://fake-url.com',
+        title: 'Fake title',
+      },
+    },
+  },
+};
+
+/**
+ * Set up the mock server to return responses for the getUrlMetadata query.
+ * @param server
+ * @param responseBody GraphQL response body.
+ */
+export const mockGetUrlMetadata = (
+  server: SetupServer,
+  responseBody: any = getUrlMetadataBody,
+) => {
+  server.use(
+    graphql.query('getUrlMetadata', () => {
+      return HttpResponse.json(responseBody);
+    }),
+  );
+};
+
+/**
+ * Set up the mock server to return responses for the getApprovedCorpusItemByUrl query.
+ * @param server
+ * @param responseBody GraphQL response body.
+ */
+export const mockGetApprovedCorpusItemByUrl = (
+  server: SetupServer,
+  responseBody: any = getApprovedCorpusItemByUrlBody,
+) => {
+  server.use(
+    graphql.query('getApprovedCorpusItemByUrl', () => {
+      return HttpResponse.json(responseBody);
+    }),
+  );
+};
+
+/**
+ * Set up the mock server to return responses for the createApprovedCorpusItem mutation.
+ * @param server
+ * @param body GraphQL response body.
+ */
+export const mockCreateApprovedCorpusItemOnce = (
+  server: SetupServer,
+  body: any = createApprovedCorpusItemBody,
+) => {
+  server.use(
+    graphql.mutation(
+      'CreateApprovedCorpusItem',
+      () => {
+        return HttpResponse.json(body);
+      },
+      { once: true },
+    ),
+  );
+};
+
+/**
+ * Set up the mock server to return responses for the createScheduledCorpusItem mutation.
+ * @param server
+ * @param body GraphQL response body.
+ */
+export const mockCreateScheduledCorpusItemOnce = (
+  server: SetupServer,
+  body: any = createScheduledCorpusItemBody,
+) => {
+  server.use(
+    graphql.mutation(
+      'CreateScheduledCorpusItem',
+      () => {
+        return HttpResponse.json(body);
+      },
+      { once: true },
+    ),
+  );
 };
