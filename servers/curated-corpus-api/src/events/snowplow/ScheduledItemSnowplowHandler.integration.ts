@@ -17,6 +17,7 @@ import { tracker } from './tracker';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import { getUnixTimestamp } from '../../shared/utils';
 import {
+  ManualScheduleReason,
   ScheduledCorpusItemStatus,
   ScheduledItemSource,
 } from '../../shared/types';
@@ -192,6 +193,99 @@ describe('ScheduledItemSnowplowHandler', () => {
           data: {
             ...scheduledItemEventContextData,
             generated_by: CorpusItemSource.ML,
+          },
+        },
+      ]);
+    });
+  });
+  describe('manual schedule reasons', () => {
+    it('should send a single manual schedule reason with no comment', async () => {
+      const scheduledItemWithMlData: ScheduledCorpusItemPayload = {
+        scheduledCorpusItem: {
+          ...scheduledCorpusItem,
+          generated_by: CorpusItemSource.ML,
+          status: ScheduledCorpusItemStatus.ADDED,
+          reasons: ['TOPIC', 'PUBLISHER'],
+          reasonComment: 'why did i rescheudle this? see above',
+          manualScheduleReasons: [`${ManualScheduleReason.EVERGREEN}`],
+        },
+      };
+
+      emitter.emit(ScheduledCorpusItemEventType.ADD_SCHEDULE, {
+        ...scheduledItemWithMlData,
+        eventType: ScheduledCorpusItemEventType.ADD_SCHEDULE,
+      });
+
+      // make sure we only have good events
+      const allEvents = await waitForSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(1);
+      expect(allEvents.bad).toEqual(0);
+
+      const goodEvents = await getGoodSnowplowEvents();
+
+      const eventContext = parseSnowplowData(
+        goodEvents[0].rawEvent.parameters.cx,
+      );
+
+      expect(eventContext.data).toMatchObject([
+        {
+          schema: config.snowplow.schemas.scheduledCorpusItem,
+          data: {
+            ...scheduledItemEventContextData,
+            status: 'added',
+            generated_by: CorpusItemSource.ML,
+            manually_scheduled_reasons: [ManualScheduleReason.EVERGREEN],
+          },
+        },
+      ]);
+    });
+
+    it('should send a multiple manual schedule reasons with a comment', async () => {
+      const scheduledItemWithMlData: ScheduledCorpusItemPayload = {
+        scheduledCorpusItem: {
+          ...scheduledCorpusItem,
+          generated_by: CorpusItemSource.ML,
+          status: ScheduledCorpusItemStatus.ADDED,
+          reasons: ['TOPIC', 'PUBLISHER'],
+          reasonComment: 'why did i rescheudle this? see above',
+          manualScheduleReasons: [
+            ManualScheduleReason.EVERGREEN,
+            ManualScheduleReason.TOPIC_DIVERSITY,
+          ],
+          manualScheduleReasonsComment: 'i scheduled this manually!',
+        },
+      };
+
+      emitter.emit(ScheduledCorpusItemEventType.ADD_SCHEDULE, {
+        ...scheduledItemWithMlData,
+        eventType: ScheduledCorpusItemEventType.ADD_SCHEDULE,
+      });
+
+      // make sure we only have good events
+      const allEvents = await waitForSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(1);
+      expect(allEvents.bad).toEqual(0);
+
+      const goodEvents = await getGoodSnowplowEvents();
+
+      const eventContext = parseSnowplowData(
+        goodEvents[0].rawEvent.parameters.cx,
+      );
+
+      expect(eventContext.data).toMatchObject([
+        {
+          schema: config.snowplow.schemas.scheduledCorpusItem,
+          data: {
+            ...scheduledItemEventContextData,
+            status: 'added',
+            generated_by: CorpusItemSource.ML,
+            manually_scheduled_reasons: [
+              ManualScheduleReason.EVERGREEN,
+              ManualScheduleReason.TOPIC_DIVERSITY,
+            ],
+            manually_scheduled_reason_comment: 'i scheduled this manually!',
           },
         },
       ]);

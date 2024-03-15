@@ -25,7 +25,7 @@ import { ScheduledCorpusItemEventType } from '../../../events/types';
 import { DateTime } from 'luxon';
 import {
   ACCESS_DENIED_ERROR,
-  ManualAdditionReason,
+  ManualScheduleReason,
   MozillaAccessGroup,
   ScheduledItemSource,
 } from '../../../shared/types';
@@ -110,7 +110,7 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
         manualScheduleReasonComment:
           'i scheduled this because i thought it would be nice',
       };
@@ -171,7 +171,7 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: existingScheduledEntry.scheduledSurfaceGuid,
         scheduledDate,
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
         manualScheduleReasonComment:
           'i scheduled this because i thought it would be nice',
       };
@@ -212,7 +212,7 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
         manualScheduleReasonComment:
           'i scheduled this because i thought it would be nice',
       };
@@ -306,7 +306,7 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
         manualScheduleReasonComment:
           'i scheduled this because i thought it would be nice',
       };
@@ -344,7 +344,7 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualAdditionReason.EVERGREEN},${ManualAdditionReason.PUBLISHER_DIVERSITY}`,
+        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
         manualScheduleReasonComment:
           'i scheduled this because i thought it would be nice',
       };

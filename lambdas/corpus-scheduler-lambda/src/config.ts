@@ -10,6 +10,16 @@ const config = {
       dsn: process.env.SENTRY_DSN || '',
       release: process.env.GIT_SHA || '',
     },
+    // scheduler lambda env, indicates if lambda is allowed to schedule
+    allowedToSchedule: process.env.ALLOWED_TO_SCHEDULE || 'true',
+    enableScheduledDateValidation:
+      process.env.ENABLE_SCHEDULED_DATE_VALIDATION || 'true',
+  },
+  validation: {
+    timeZone: 'America/Los_Angeles',
+    ISO_SUNDAY: 7, // ISO sunday is day #7 in the week (note: JS getDay returns 0 for Sunday)
+    MON_SAT_MIN_DIFF: 14, // Regular cutoff is 10am. 24:00 - 10:00 = 14 hours
+    SUNDAY_MIN_DIFF: 32, // Sunday cutoff is Friday 4pm. 2 days - 16 hours = 32 hours
   },
   aws: {
     localEndpoint: process.env.AWS_ENDPOINT,

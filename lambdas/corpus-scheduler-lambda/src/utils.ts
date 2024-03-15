@@ -243,7 +243,6 @@ export const processAndScheduleCandidate = async (
     try {
       // 1. validate scheduled candidate from Metaflow
       await validateCandidate(candidate);
-
       // 2. if dev & scheduled surface exists in allowed scheduled surfaces, continue processing
       // TODO: schedule to production
       if (

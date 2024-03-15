@@ -67,15 +67,6 @@ export type ReviewedCorpusItem = {
    */
   loaded_from?: CorpusItemSource;
   /**
-   * The reason a curator added the item manually. Filled-in if loaded_from is
-   * set to MANUAL, null for other loaded_from values.
-   */
-  manually_loaded_reasons?: string[];
-  /**
-   * An optional comment added by the curator when adding an item manually.
-   */
-  manually_loaded_reason_comment?: string;
-  /**
    * The decision by the curator on the item’s validity for the curated corpus.
    */
   corpus_review_status: CorpusReviewStatus;
@@ -217,6 +208,14 @@ export type ScheduledCorpusItem = {
    * An optional text field for the curator to provide more information about a change in status.
    */
   status_reason_comment?: string;
+  /**
+   * The list of reasons a curator scheduled the item manually.
+   */
+  manually_scheduled_reasons?: string[];
+  /**
+   *  An optional comment added by the curator when scheduling an item manually.
+   */
+  manually_scheduled_reason_comment?: string;
   /**
    * The method by which this item was generated. Possible values include ML and MANUAL.
    */

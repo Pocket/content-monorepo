@@ -10,15 +10,25 @@ Sentry.AWSLambda.init({
   serverName: config.app.name,
 });
 
+console.log('corpus scheduler lambda');
+
 /**
  * @param event data from an SQS message - should be an array of items to create / schedule in corpus
  * @exception Error Raises an exception on error, which causes the batch to be retried.
  *  Lambda batchSize is 1 to avoid retrying successfully processed records.
  */
 export const processor: SQSHandler = async (event: SQSEvent) => {
-  // We have set batchSize to 1, so the follow for loop is expected to have 1 iteration.
-  for await (const record of event.Records) {
-    await processAndScheduleCandidate(record);
+  // node env treats booleans as string, so check for equality
+  // if allowed to schedule, proceed with flow
+  if (config.app.allowedToSchedule === 'true') {
+    // We have set batchSize to 1, so the follow for loop is expected to have 1 iteration.
+    for await (const record of event.Records) {
+      await processAndScheduleCandidate(record);
+    }
+  }
+  // log if not allowed to schedule
+  else {
+    console.log('Scheduler lambda not allowed to schedule...');
   }
 };
 
