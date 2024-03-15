@@ -179,6 +179,12 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
   }
 };
 
+/**
+ * Creates CreateScheduledItemInput to schedule an approved corpus item
+ * @param candidate ScheduledCandidate received from Metaflow
+ * @param approvedItemExternalId external id for an already approved corpus item
+ * @return CreateScheduledItemInput
+ */
 export const createCreateScheduledItemInput = async (
   candidate: ScheduledCandidate,
   approvedItemExternalId: string,
@@ -260,8 +266,7 @@ export const createAndScheduleCorpusItemHelper = async (
 };
 
 /**
- * Process each record from SQS. Transforms Metaflow input into CreateApprovedItemInput & calls the
- * createApprovedCorpusItem mutation
+ * Process each record from SQS.
  * @param record an SQSRecord
  * @param bearerToken generated bearerToken for admin api
  */
