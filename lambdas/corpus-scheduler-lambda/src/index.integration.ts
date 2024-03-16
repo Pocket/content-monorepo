@@ -29,6 +29,11 @@ describe('corpus scheduler lambda', () => {
   afterAll(() => {
     jest.restoreAllMocks();
   });
+
+  beforeEach(async () => {
+    await resetSnowplowEvents();
+  });
+
   const server = setupServer();
 
   const scheduledCandidate = createScheduledCandidate({
@@ -127,8 +132,27 @@ describe('corpus scheduler lambda', () => {
     jest.restoreAllMocks();
   });
 
-  beforeEach(async () => {
-    await resetSnowplowEvents();
+  it('emits a Snowplow event if candidate is successfully processed', async () => {
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItemOnce(createApprovedCorpusItemBody);
+
+    await processor(fakeEvent, sqsContext, sqsCallback);
+
+    // Exactly one Snowplow event should be emitted.
+    const allEvents = await waitForSnowplowEvents();
+    expect(allEvents.bad).toEqual(0);
+    expect(allEvents.good).toEqual(record.candidates.length);
+
+    // Check that the right Snowplow entity that was included with the event.
+    const snowplowEntity = await extractScheduledCandidateEntity();
+    expect(snowplowEntity.approved_corpus_item_external_id).toEqual(
+      createApprovedCorpusItemBody.data.createApprovedCorpusItem.externalId,
+    );
+    expect(snowplowEntity.scheduled_corpus_candidate_id).toEqual(
+      record.candidates[0].scheduled_corpus_candidate_id,
+    );
+    expect(snowplowEntity.error_name).toBeUndefined();
+    expect(snowplowEntity.error_description).toBeUndefined();
   });
 
   it('sends a Sentry error if curated-corpus-api has error, with partial success', async () => {
@@ -214,28 +238,5 @@ describe('corpus scheduler lambda', () => {
     );
 
     expect(captureExceptionSpy).not.toHaveBeenCalled();
-  });
-
-  it('emits a Snowplow event if candidate is successfully processed', async () => {
-    mockGetUrlMetadata();
-    mockCreateApprovedCorpusItemOnce(createApprovedCorpusItemBody);
-
-    await processor(fakeEvent, sqsContext, sqsCallback);
-
-    // Exactly one Snowplow event should be emitted.
-    const allEvents = await waitForSnowplowEvents();
-    expect(allEvents.bad).toEqual(0);
-    expect(allEvents.good).toEqual(record.candidates.length);
-
-    // Check that the right Snowplow entity that was included with the event.
-    const snowplowEntity = await extractScheduledCandidateEntity();
-    expect(snowplowEntity.approved_corpus_item_external_id).toEqual(
-      createApprovedCorpusItemBody.data.createApprovedCorpusItem.externalId,
-    );
-    expect(snowplowEntity.scheduled_corpus_candidate_id).toEqual(
-      record.candidates[0].scheduled_corpus_candidate_id,
-    );
-    expect(snowplowEntity.error_name).toBeUndefined();
-    expect(snowplowEntity.error_description).toBeUndefined();
   });
 });

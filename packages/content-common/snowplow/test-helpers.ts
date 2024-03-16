@@ -31,6 +31,8 @@ export async function snowplowRequest(
  * Resets the event counts in Snowplow Micro.
  */
 export async function resetSnowplowEvents(): Promise<void> {
+  // Wait a bit for any in-flight Snowplow events from unrelated tests to arrive at Snowplow.
+  await new Promise((resolve) => setTimeout(resolve, 500));
   await snowplowRequest('/micro/reset', true);
 }
 
