@@ -3,7 +3,7 @@ import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { processor } from './';
 import * as Utils from './utils';
-import { Callback, Context, SQSEvent, SQSRecord } from 'aws-lambda';
+import { Callback, Context, SQSEvent } from 'aws-lambda';
 import {
   createScheduledCandidate,
   createScheduledCandidates, mockSetTimeoutToReturnImmediately,
