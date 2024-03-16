@@ -16,7 +16,7 @@ const defaultScheduledDate = DateTime.fromObject(
     zone: 'America/Los_Angeles',
   },
 )
-  .plus({ days: 2 })
+  .plus({ days: 3 }) // Needs to be at least +3 days on Friday after 4pm, and +2 days otherwise.
   .toISODate();
 export const createScheduledCandidates = (
   candidates: ScheduledCandidate[],
@@ -100,4 +100,18 @@ export const parserItem: UrlMetadata = {
   imageUrl: 'https://fake-image-url.com',
   isCollection: false,
   isSyndicated: false,
+};
+
+/**
+ * Mock setTimeout to immediately return.
+ *
+ * Surprisingly, jest.useFakeTimers cannot do this. It requires jest.runAllTimers() to be called
+ * _after_ setTimeout() is started. That's not feasible if other promises are returned first,
+ * for example when using `for await`, or when awaiting another async function.
+ */
+export const mockSetTimeoutToReturnImmediately = () => {
+  jest.spyOn(global, 'setTimeout').mockImplementation((callback) => {
+    callback();
+    return {} as NodeJS.Timeout;
+  });
 };

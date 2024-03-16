@@ -1,11 +1,12 @@
+import * as Sentry from '@sentry/node';
 import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { processor } from './';
 import * as Utils from './utils';
-import { Callback, Context, SQSEvent } from 'aws-lambda';
+import { Callback, Context, SQSEvent, SQSRecord } from 'aws-lambda';
 import {
   createScheduledCandidate,
-  createScheduledCandidates,
+  createScheduledCandidates, mockSetTimeoutToReturnImmediately,
 } from './testHelpers';
 import {
   CorpusItemSource,
@@ -116,15 +117,21 @@ describe('corpus scheduler lambda', () => {
       .mockReturnValue(Promise.resolve('my_secret_value'));
   });
 
+  beforeEach(() => {
+    // The Lambda waits for 10 seconds to flush Snowplow events. During tests we don't want to wait that long.
+    mockSetTimeoutToReturnImmediately();
+  });
+
   afterEach(() => {
-    jest.clearAllMocks();
+    // restoreAllMocks restores all mocks and replaced properties. clearAllMocks only clears mocks.
+    jest.restoreAllMocks();
   });
 
   beforeEach(async () => {
     await resetSnowplowEvents();
   });
 
-  it('throws an error if curated-corpus-api has error, with partial success', async () => {
+  it('sends a Sentry error if curated-corpus-api has error, with partial success', async () => {
     mockGetUrlMetadata();
     mockCreateApprovedCorpusItemOnce({ errors: [{ message: 'server bork' }] });
 
@@ -132,26 +139,26 @@ describe('corpus scheduler lambda', () => {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
     } as unknown as SQSEvent;
 
-    await expect(
-      processor(
-        fakeEvent,
-        null as unknown as Context,
-        null as unknown as Callback,
-      ),
-    ).rejects.toThrow(
-      new Error(
-        'processSQSMessages failed for a4b5d99c-4c1b-4d35-bccf-6455c8df07b0: Error: createApprovedCorpusItem mutation failed: server bork',
-      ),
-    );
+    const captureExceptionSpy = jest
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation();
+
+    await processor(fakeEvent, sqsContext, sqsCallback);
+
+    expect(captureExceptionSpy).toHaveBeenCalled();
   }, 7000);
 
-  it('throws an error if curated-corpus-api returns null data', async () => {
+  it('sends a Sentry error if curated-corpus-api returns null data', async () => {
     mockGetUrlMetadata();
     mockCreateApprovedCorpusItemOnce({ data: null });
 
-    await expect(processor(fakeEvent, sqsContext, sqsCallback)).rejects.toThrow(
-      Error,
-    );
+    const captureExceptionSpy = jest
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation();
+
+    await processor(fakeEvent, sqsContext, sqsCallback);
+
+    expect(captureExceptionSpy).toHaveBeenCalled();
   }, 7000);
 
   it('should not start scheduling if allowedToSchedule is false', async () => {
@@ -192,11 +199,21 @@ describe('corpus scheduler lambda', () => {
     );
   }, 7000);
 
-  it('returns no batch item failures if curated-corpus-api request is successful', async () => {
+  it('does not emit Sentry exceptions if curated-corpus-api request is successful', async () => {
     mockGetUrlMetadata();
     mockCreateApprovedCorpusItemOnce();
 
-    await processor(fakeEvent, sqsContext, sqsCallback);
+    const captureExceptionSpy = jest
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation();
+
+    await processor(
+      fakeEvent,
+      null as unknown as Context,
+      null as unknown as Callback,
+    );
+
+    expect(captureExceptionSpy).not.toHaveBeenCalled();
   });
 
   it('emits a Snowplow event if candidate is successfully processed', async () => {

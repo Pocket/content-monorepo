@@ -13,27 +13,6 @@ describe('utils integrations', function () {
     await resetSnowplowEvents();
   });
 
-  describe('processAndScheduleCandidate', () => {
-    describe('happy path', () => {
-      it(`should emit a Snowplow event when a candidate is scheduled`, async () => {
-        // Create a ScheduledCandidate with
-        const candidate: any = createScheduledCandidate();
-
-        await mapScheduledCandidateInputToCreateApprovedItemInput(
-          candidate,
-          parserItem,
-        );
-
-        const allEvents = await waitForSnowplowEvents();
-        expect(allEvents).toEqual({ total: 1, good: 1, bad: 0 });
-
-        // Check that the right error was emitted.
-        const snowplowEntity = await extractScheduledCandidateEntity();
-        expect(snowplowEntity.error_description).toBeUndefined();
-      });
-    });
-  });
-
   describe('mapScheduledCandidateInputToCreateApprovedItemInput', () => {
     describe('error handling', () => {
       interface MetadataErrorTestCase {
