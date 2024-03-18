@@ -1,8 +1,13 @@
 {
   "name": "content-common",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "common code shared between multiple content services",
   "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./snowplow": "./dist/snowplow/index.js",
+    "./snowplow/test-helpers": "./dist/snowplow/test-helpers.js"
+  },
   "scripts": {
     "build": "rm -rf dist && tsc",
     "test": "jest \"\\.spec\\.ts\"",
@@ -12,12 +17,15 @@
   "author": "pocket",
   "license": "ISC",
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "@snowplow/node-tracker": "3.5.0"
+  },
   "devDependencies": {
-    "eslint-config-custom": "workspace:*",
-    "tsconfig": "workspace:*",
     "@types/jest": "29.5.12",
+    "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
-    "ts-jest": "29.1.2"
+    "msw": "2.1.2",
+    "ts-jest": "29.1.2",
+    "tsconfig": "workspace:*"
   }
 }

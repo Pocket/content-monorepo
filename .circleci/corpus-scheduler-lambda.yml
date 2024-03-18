@@ -4,6 +4,14 @@ workflows:
       ######
       # Every PR Jobs
       ######
+      - test_integrations:
+          <<: *not_dev_main
+          for: corpus_scheduler_lambda
+          context: pocket
+          name: corpus_scheduler_test_integrations
+          scope: corpus-scheduler-aws_lambda
+          run_prisma_jobs: false
+
       - build_lambda:
           <<: *not_dev_main
           context: pocket

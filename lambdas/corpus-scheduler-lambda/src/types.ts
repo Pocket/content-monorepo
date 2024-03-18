@@ -1,9 +1,10 @@
 import {
-  CuratedStatus,
   CorpusItemSource,
   CorpusLanguage,
+  CuratedStatus,
   Topics,
 } from 'content-common';
+import { tags } from 'typia';
 
 export interface ScheduledCandidates {
   candidates: ScheduledCandidate[];
@@ -11,11 +12,11 @@ export interface ScheduledCandidates {
 export interface ScheduledCandidate {
   scheduled_corpus_candidate_id: string;
   scheduled_corpus_item: ScheduledCorpusItem;
-  features: { [key: string]: string | number }; // ML controls which features are sent
-  run_details: { [key: string]: string | number }; // ML controls which run debug info is sent
+  features: ScheduledCorpusCandidateFeatures;
+  run_details: ScheduledCorpusCandidateRunDetails;
 }
 
-interface ScheduledCorpusItem {
+export interface ScheduledCorpusItem {
   url: string;
   status: CuratedStatus;
   // TODO: set source to CorpusItemSource.ML once ML source is added
@@ -32,3 +33,17 @@ interface ScheduledCorpusItem {
 
 // TODO: add allowed surfaces here to schedule to production
 export const allowedScheduledSurfaces: string[] = [];
+
+export type ScheduledCorpusCandidateFeatures = {
+  rank: number & tags.Type<'int64'>; // rank is integer in Snowplow schema
+  score: number;
+  data_source: string;
+  ml_version: string;
+  [key: string]: string | number; // ML controls which additional features are sent
+};
+
+export type ScheduledCorpusCandidateRunDetails = {
+  flow_name: string;
+  run_id: string;
+  [key: string]: any; // ML controls which additional run debug info is sent
+};

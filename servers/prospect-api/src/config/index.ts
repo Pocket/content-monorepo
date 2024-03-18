@@ -1,6 +1,3 @@
-const snowplowHttpProtocol =
-  process.env.NODE_ENV === 'production' ? 'https' : 'http';
-
 export default {
   environment: process.env.NODE_ENV || 'development',
   app: {
@@ -31,12 +28,12 @@ export default {
     appId: 'pocket-prospect-api',
   },
   snowplow: {
-    endpoint: process.env.SNOWPLOW_ENDPOINT || 'localhost:9090',
-    httpProtocol: snowplowHttpProtocol,
-    bufferSize: 1,
-    retries: 3,
-    namespace: 'pocket-backend',
-    appId: 'pocket-backend-prospect-api',
+    // appId should end in '-dev' outside of production such that Dbt can filter events:
+    // https://github.com/Pocket/dbt-snowflake/blob/main/macros/validate_snowplow_app_id.sql
+    appId:
+      process.env.NODE_ENV === 'production'
+        ? 'pocket-backend-prospect-api'
+        : 'pocket-backend-prospect-api-dev',
     schemas: {
       // published 2024-01-26
       prospect: 'iglu:com.pocket/prospect/jsonschema/1-0-2',

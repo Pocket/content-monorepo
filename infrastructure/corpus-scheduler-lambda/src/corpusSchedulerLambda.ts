@@ -47,6 +47,7 @@ export class CorpusSchedulerSQSLambda extends Construct {
             JWT_KEY: `${config.name}/${config.environment}/JWT_KEY`,
             ENVIRONMENT:
               config.environment === 'Prod' ? 'production' : 'development',
+            SNOWPLOW_ENDPOINT: config.envVars.snowplowEndpoint,
           },
           vpcConfig: {
             securityGroupIds: this.vpc.defaultSecurityGroups.ids,

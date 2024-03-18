@@ -1,8 +1,8 @@
 import {
-  createAndScheduleCorpusItemHelper,
-  createCreateScheduledItemInput,
   generateJwt,
   getCorpusSchedulerLambdaPrivateKey,
+  createAndScheduleCorpusItemHelper,
+  createCreateScheduledItemInput,
   mapAuthorToApprovedItemAuthor,
   mapScheduledCandidateInputToCreateApprovedItemInput,
 } from './utils';
@@ -13,20 +13,19 @@ import {
   SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 import { setupServer } from 'msw/node';
-import {
-  ApprovedItemAuthor,
-  CorpusItemSource,
-  CorpusLanguage,
-} from 'content-common';
+import { ApprovedItemAuthor, CorpusItemSource } from 'content-common';
 import {
   createScheduledCandidate,
+  defaultScheduledDate,
   expectedOutput,
   mockCreateApprovedCorpusItemOnce,
   mockCreateScheduledCorpusItemOnce,
   mockGetApprovedCorpusItemByUrl,
   mockGetUrlMetadata,
+  mockSnowplow,
   parserItem,
 } from './testHelpers';
+import { getEmitter, getTracker } from 'content-common/snowplow';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwt = require('jsonwebtoken');
@@ -62,6 +61,9 @@ describe('utils', function () {
   };
   const now = new Date('2021-01-01 10:20:30');
   const exp = new Date('2021-01-01 10:25:30');
+
+  const emitter = getEmitter();
+  const tracker = getTracker(emitter, config.snowplow.appId);
 
   beforeAll(() => {
     server.listen();
@@ -114,6 +116,95 @@ describe('utils', function () {
       expect(privateKey.my_secret_key).toEqual('my_secret_value');
     });
   });
+  describe('createCreateScheduledItemInput', () => {
+    it('should create CreateScheduledItemInput correctly', async () => {
+      const scheduledCandidate = createScheduledCandidate();
+      const output = await createCreateScheduledItemInput(
+        scheduledCandidate,
+        'fake-approved-external-id',
+      );
+      const expectedApprovedItemOutput = {
+        approvedItemExternalId: 'fake-approved-external-id',
+        scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+        scheduledDate: defaultScheduledDate as string,
+        source: 'ML',
+      };
+
+      expect(output).toEqual(expectedApprovedItemOutput);
+    });
+    it('should throw error on CreateScheduledItemInput if a field type is wrong', async () => {
+      const badCandidate: any = createScheduledCandidate();
+      badCandidate.scheduled_corpus_item['source'] =
+        'bad-source' as CorpusItemSource.ML;
+      await expect(
+        createCreateScheduledItemInput(
+          badCandidate,
+          'fake-approved-external-id',
+        ),
+      ).rejects.toThrow(
+        `failed to create CreateScheduledItemInput for a4b5d99c-4c1b-4d35-bccf-6455c8df07b0. ` +
+          `Reason: Error: Error on typia.assert(): invalid type on $input.source, expect to be ("MANUAL" | "ML")`,
+      );
+    });
+  });
+  describe('createAndScheduleCorpusItemHelper', () => {
+    it('should schedule a previously approved item', async () => {
+      mockSnowplow(server);
+      // approvedCorpusItem should return a response, not null
+      mockGetApprovedCorpusItemByUrl(server);
+      mockGetUrlMetadata(server);
+      mockCreateScheduledCorpusItemOnce(server);
+      mockCreateApprovedCorpusItemOnce(server);
+
+      // spy on console.log
+      const consoleLogSpy = jest.spyOn(global.console, 'log');
+
+      const scheduledCandidate = createScheduledCandidate();
+      // no errors should be thrown from apis
+      await expect(
+        createAndScheduleCorpusItemHelper(
+          scheduledCandidate,
+          'fake-bearer-token',
+          tracker,
+        ),
+      ).resolves.not.toThrowError();
+
+      // we expect the createScheduledCorpusItem to run
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        'CreateScheduledCorpusItem MUTATION OUTPUT: externalId: fake-external-id, url: https://fake-url.com, title: Fake title',
+      );
+    });
+    it('should create, approve & schedule a new candidate', async () => {
+      mockSnowplow(server);
+      // approvedCorpusItem should return a response, not null
+      mockGetApprovedCorpusItemByUrl(server, {
+        data: {
+          getApprovedCorpusItemByUrl: null,
+        },
+      });
+      mockGetUrlMetadata(server);
+      mockCreateScheduledCorpusItemOnce(server);
+      mockCreateApprovedCorpusItemOnce(server);
+
+      // spy on console.log
+      const consoleLogSpy = jest.spyOn(global.console, 'log');
+
+      const scheduledCandidate = createScheduledCandidate();
+      // no errors should be thrown from apis
+      await expect(
+        createAndScheduleCorpusItemHelper(
+          scheduledCandidate,
+          'fake-bearer-token',
+          tracker,
+        ),
+      ).resolves.not.toThrowError();
+
+      // we expect the createScheduledCorpusItem to run
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        'CreateApprovedCorpusItem MUTATION OUTPUT: externalId: fake-external-id, url: https://fake-url.com, title: Fake title',
+      );
+    });
+  });
   describe('mapAuthorToApprovedItemAuthor', () => {
     it('should create an ApprovedItemAuthor[] from a string array of author names', async () => {
       const authors = mapAuthorToApprovedItemAuthor([
@@ -133,133 +224,9 @@ describe('utils', function () {
       expect(authors).toEqual(expectedAuthors);
     });
   });
-  describe('createCreateScheduledItemInput', () => {
-    it('should create CreateScheduledItemInput correctly', async () => {
-      const scheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-        'fake-url',
-        CorpusItemSource.ML,
-        '2024-03-16',
-      );
-      const output = await createCreateScheduledItemInput(
-        scheduledCandidate,
-        'fake-approved-external-id',
-      );
-      const expectedApprovedItemOutput = {
-        approvedItemExternalId: 'fake-approved-external-id',
-        scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-        scheduledDate: '2024-03-16',
-        source: 'ML',
-      };
-
-      expect(output).toEqual(expectedApprovedItemOutput);
-    });
-    it('should throw error on CreateScheduledItemInput if a field type is wrong', async () => {
-      const scheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-        'fake-url',
-        'bad-source' as CorpusItemSource.ML,
-      );
-      await expect(
-        createCreateScheduledItemInput(
-          scheduledCandidate,
-          'fake-approved-external-id',
-        ),
-      ).rejects.toThrow(
-        `failed to create CreateScheduledItemInput for a4b5d99c-4c1b-4d35-bccf-6455c8df07b0. ` +
-          `Reason: Error: Error on typia.assert(): invalid type on $input.source, expect to be ("MANUAL" | "ML")`,
-      );
-    });
-  });
-  describe('createAndScheduleCorpusItemHelper', () => {
-    it('should schedule a previously approved item', async () => {
-      // approvedCorpusItem should return a response, not null
-      mockGetApprovedCorpusItemByUrl(server);
-      mockGetUrlMetadata(server);
-      mockCreateScheduledCorpusItemOnce(server);
-      mockCreateApprovedCorpusItemOnce(server);
-
-      // spy on console.log
-      const consoleLogSpy = jest.spyOn(global.console, 'log');
-
-      const scheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-        'fake-url',
-        CorpusItemSource.ML,
-        '2024-03-16',
-      );
-      // no errors should be thrown from apis
-      await expect(
-        createAndScheduleCorpusItemHelper(
-          scheduledCandidate,
-          'fake-bearer-token',
-        ),
-      ).resolves.not.toThrowError();
-
-      // we expect the createScheduledCorpusItem to run
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        'CreateScheduledCorpusItem MUTATION OUTPUT: externalId: fake-external-id, url: https://fake-url.com, title: Fake title',
-      );
-    });
-    it('should create, approve & schedule a new candidate', async () => {
-      // approvedCorpusItem should return a response, not null
-      mockGetApprovedCorpusItemByUrl(server, {
-        data: {
-          getApprovedCorpusItemByUrl: null,
-        },
-      });
-      mockGetUrlMetadata(server);
-      mockCreateScheduledCorpusItemOnce(server);
-      mockCreateApprovedCorpusItemOnce(server);
-
-      // spy on console.log
-      const consoleLogSpy = jest.spyOn(global.console, 'log');
-
-      const scheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-        'fake-url',
-        CorpusItemSource.ML,
-        '2024-03-16',
-      );
-      // no errors should be thrown from apis
-      await expect(
-        createAndScheduleCorpusItemHelper(
-          scheduledCandidate,
-          'fake-bearer-token',
-        ),
-      ).resolves.not.toThrowError();
-
-      // we expect the createScheduledCorpusItem to run
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        'CreateApprovedCorpusItem MUTATION OUTPUT: externalId: fake-external-id, url: https://fake-url.com, title: Fake title',
-      );
-    });
-  });
   describe('mapScheduledCandidateInputToCreateApprovedItemInput', () => {
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput', async () => {
-      const scheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-      );
+      const scheduledCandidate = createScheduledCandidate();
       const output = await mapScheduledCandidateInputToCreateApprovedItemInput(
         scheduledCandidate,
         parserItem,
@@ -268,14 +235,14 @@ describe('utils', function () {
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on Parser fields for undefined optional ScheduledCandidate fields', async () => {
       // all optional fields are undefined and should be taken from the Parser
-      const scheduledCandidate = createScheduledCandidate();
-      expect(scheduledCandidate.scheduled_corpus_item.title).toBeUndefined();
-      expect(scheduledCandidate.scheduled_corpus_item.excerpt).toBeUndefined();
-      expect(scheduledCandidate.scheduled_corpus_item.language).toBeUndefined();
-      expect(scheduledCandidate.scheduled_corpus_item.authors).toBeUndefined();
-      expect(
-        scheduledCandidate.scheduled_corpus_item.image_url,
-      ).toBeUndefined();
+      const scheduledCandidate = createScheduledCandidate({
+        title: undefined,
+        excerpt: undefined,
+        language: undefined,
+        authors: undefined,
+        image_url: undefined,
+      });
+
       const output = await mapScheduledCandidateInputToCreateApprovedItemInput(
         scheduledCandidate,
         parserItem,
@@ -283,29 +250,23 @@ describe('utils', function () {
       expect(output).toEqual(expectedOutput);
     });
     it('should throw Error on CreateApprovedItemInput if field types are wrong', async () => {
-      const scheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-      );
-      parserItem.publisher = 1 as unknown as string; // force publisher to be the wrong type to trigger an Error
+      const scheduledCandidate = createScheduledCandidate();
+
+      const invalidParserItem: any = {
+        ...parserItem,
+        publisher: 1,
+      };
 
       await expect(
         mapScheduledCandidateInputToCreateApprovedItemInput(
           scheduledCandidate,
-          parserItem,
-        ),
-      ).rejects.toThrow(Error);
-      await expect(
-        mapScheduledCandidateInputToCreateApprovedItemInput(
-          scheduledCandidate,
-          parserItem,
+          invalidParserItem,
         ),
       ).rejects.toThrow(
-        `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
-          `Reason: Error: Error on typia.assert(): invalid type on $input.publisher, expect to be string`,
+        new Error(
+          `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
+            `Reason: Error: Error on typia.assert(): invalid type on $input.publisher, expect to be string`,
+        ),
       );
     });
   });
