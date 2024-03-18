@@ -1,4 +1,4 @@
-import { ScheduledCandidate, ScheduledCandidates } from './types';
+import { ScheduledCandidate, ScheduledCandidates, ScheduledCorpusItem } from './types';
 import {
   CorpusItemSource,
   CorpusLanguage,
@@ -16,7 +16,7 @@ const defaultScheduledDate = DateTime.fromObject(
     zone: 'America/Los_Angeles',
   },
 )
-  .plus({ days: 2 })
+  .plus({ days: 3 }) // Needs to be at least +3 days on Friday after 4pm, and +2 days otherwise.
   .toISODate();
 export const createScheduledCandidates = (
   candidates: ScheduledCandidate[],
@@ -26,31 +26,25 @@ export const createScheduledCandidates = (
   };
 };
 export const createScheduledCandidate = (
-  title?: string,
-  excerpt?: string,
-  imageUrl?: string,
-  language?: CorpusLanguage,
-  authors?: string[],
-  url?: string,
-  source?: CorpusItemSource.ML,
-  scheduledDate?: string,
+  scheduledCorpusItemOverrides: Partial<ScheduledCorpusItem> = {},
 ): ScheduledCandidate => {
   return {
     scheduled_corpus_candidate_id: 'a4b5d99c-4c1b-4d35-bccf-6455c8df07b0',
     scheduled_corpus_item: {
-      url:
-        url ||
-        'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
+      url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
       status: CuratedStatus.RECOMMENDATION,
-      source: source || CorpusItemSource.ML,
+      source: CorpusItemSource.ML,
       topic: Topics.SELF_IMPROVEMENT,
-      scheduled_date: scheduledDate || (defaultScheduledDate as string),
+      scheduled_date: defaultScheduledDate as string,
       scheduled_surface_guid: 'NEW_TAB_EN_US',
-      title: title,
-      excerpt: excerpt,
-      language: language,
-      image_url: imageUrl,
-      authors: authors,
+      title:
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+      excerpt:
+        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+      language: CorpusLanguage.EN,
+      image_url: 'https://fake-image-url.com',
+      authors: ['Rebecca Jennings'],
+      ...scheduledCorpusItemOverrides,
     },
     features: {
       domain_prob: 0.7829,
@@ -106,4 +100,18 @@ export const parserItem: UrlMetadata = {
   imageUrl: 'https://fake-image-url.com',
   isCollection: false,
   isSyndicated: false,
+};
+
+/**
+ * Mock setTimeout to immediately return.
+ *
+ * Surprisingly, jest.useFakeTimers cannot do this. It requires jest.runAllTimers() to be called
+ * _after_ setTimeout() is started. That's not feasible if other promises are returned first,
+ * for example when using `for await`, or when awaiting another async function.
+ */
+export const mockSetTimeoutToReturnImmediately = () => {
+  jest.spyOn(global, 'setTimeout').mockImplementation((callback) => {
+    callback();
+    return {} as NodeJS.Timeout;
+  });
 };

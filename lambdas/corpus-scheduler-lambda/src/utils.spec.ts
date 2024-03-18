@@ -10,7 +10,7 @@ import {
   GetSecretValueCommand,
   SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
-import { ApprovedItemAuthor, CorpusLanguage } from 'content-common';
+import { ApprovedItemAuthor } from 'content-common';
 import {
   createScheduledCandidate,
   expectedOutput,
@@ -118,13 +118,7 @@ describe('utils', function () {
   });
   describe('mapScheduledCandidateInputToCreateApprovedItemInput', () => {
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput', async () => {
-      const scheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-      );
+      const scheduledCandidate = createScheduledCandidate();
       const output = await mapScheduledCandidateInputToCreateApprovedItemInput(
         scheduledCandidate,
         parserItem,
@@ -133,14 +127,14 @@ describe('utils', function () {
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on Parser fields for undefined optional ScheduledCandidate fields', async () => {
       // all optional fields are undefined and should be taken from the Parser
-      const scheduledCandidate = createScheduledCandidate();
-      expect(scheduledCandidate.scheduled_corpus_item.title).toBeUndefined();
-      expect(scheduledCandidate.scheduled_corpus_item.excerpt).toBeUndefined();
-      expect(scheduledCandidate.scheduled_corpus_item.language).toBeUndefined();
-      expect(scheduledCandidate.scheduled_corpus_item.authors).toBeUndefined();
-      expect(
-        scheduledCandidate.scheduled_corpus_item.image_url,
-      ).toBeUndefined();
+      const scheduledCandidate = createScheduledCandidate({
+        title: undefined,
+        excerpt: undefined,
+        language: undefined,
+        authors: undefined,
+        image_url: undefined,
+      });
+
       const output = await mapScheduledCandidateInputToCreateApprovedItemInput(
         scheduledCandidate,
         parserItem,
@@ -148,29 +142,23 @@ describe('utils', function () {
       expect(output).toEqual(expectedOutput);
     });
     it('should throw Error on CreateApprovedItemInput if field types are wrong', async () => {
-      const scheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-      );
-      parserItem.publisher = 1 as unknown as string; // force publisher to be the wrong type to trigger an Error
+      const scheduledCandidate = createScheduledCandidate();
+
+      const invalidParserItem: any = {
+        ...parserItem,
+        publisher: 1,
+      };
 
       await expect(
         mapScheduledCandidateInputToCreateApprovedItemInput(
           scheduledCandidate,
-          parserItem,
-        ),
-      ).rejects.toThrow(Error);
-      await expect(
-        mapScheduledCandidateInputToCreateApprovedItemInput(
-          scheduledCandidate,
-          parserItem,
+          invalidParserItem,
         ),
       ).rejects.toThrow(
-        `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
-          `Reason: Error: Error on typia.assert(): invalid type on $input.publisher, expect to be string`,
+        new Error(
+          `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
+            `Reason: Error: Error on typia.assert(): invalid type on $input.publisher, expect to be string`,
+        ),
       );
     });
   });

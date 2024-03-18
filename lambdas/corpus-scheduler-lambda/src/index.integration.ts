@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { processor } from './';
@@ -5,7 +6,7 @@ import * as Utils from './utils';
 import { Callback, Context, SQSEvent } from 'aws-lambda';
 import {
   createScheduledCandidate,
-  createScheduledCandidates,
+  createScheduledCandidates, mockSetTimeoutToReturnImmediately,
 } from './testHelpers';
 import {
   CorpusItemSource,
@@ -13,28 +14,45 @@ import {
   CuratedStatus,
   Topics,
 } from 'content-common';
+import {
+  resetSnowplowEvents,
+  waitForSnowplowEvents,
+} from 'content-common/snowplow/test-helpers';
+import { extractScheduledCandidateEntity } from './events/testHelpers';
 import config from './config';
 
 describe('corpus scheduler lambda', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   afterAll(() => {
     jest.restoreAllMocks();
   });
+
+  beforeEach(async () => {
+    // Need to restoreAllMocks after each test, such that resetSnowplowEvents can call setTimeout to
+    // wait for Snowplow events to arrive from the last test. Alternatively, we could call
+    // waitForSnowplowEvents() in each test where a Snowplow event is emitted.
+    jest.restoreAllMocks();
+    await resetSnowplowEvents();
+    // The Lambda waits for 10 seconds to flush Snowplow events. During tests we don't want to wait that long.
+    mockSetTimeoutToReturnImmediately();
+  });
+
   const server = setupServer();
 
-  const scheduledCandidate = createScheduledCandidate(
-    'Fake title',
-    'fake excerpt',
-    'https://fake-image-url.com',
-    CorpusLanguage.EN,
-    ['Fake Author'],
-    'https://fake-url.com',
-  );
+  const scheduledCandidate = createScheduledCandidate({
+    title: 'Fake title',
+    excerpt: 'fake excerpt',
+    image_url: 'https://fake-image-url.com',
+    language: CorpusLanguage.EN,
+    authors: ['Fake Author'],
+    url: 'https://fake-url.com',
+  });
 
   const record = createScheduledCandidates([scheduledCandidate]);
+  const fakeEvent = {
+    Records: [{ messageId: '1', body: JSON.stringify(record) }],
+  } as unknown as SQSEvent;
+  const sqsContext = null as unknown as Context;
+  const sqsCallback = null as unknown as Callback;
 
   const getUrlMetadataBody = {
     data: {
@@ -95,7 +113,7 @@ describe('corpus scheduler lambda', () => {
     );
   };
 
-  beforeAll(() => server.listen());
+  beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
@@ -107,10 +125,34 @@ describe('corpus scheduler lambda', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    // restoreAllMocks restores all mocks and replaced properties. clearAllMocks only clears mocks.
+    jest.restoreAllMocks();
   });
 
-  it('returns batch item failure if curated-corpus-api has error, with partial success', async () => {
+  it('emits a Snowplow event if candidate is successfully processed', async () => {
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItemOnce(createApprovedCorpusItemBody);
+
+    await processor(fakeEvent, sqsContext, sqsCallback);
+
+    // Exactly one Snowplow event should be emitted.
+    const allEvents = await waitForSnowplowEvents();
+    expect(allEvents.bad).toEqual(0);
+    expect(allEvents.good).toEqual(record.candidates.length);
+
+    // Check that the right Snowplow entity that was included with the event.
+    const snowplowEntity = await extractScheduledCandidateEntity();
+    expect(snowplowEntity.approved_corpus_item_external_id).toEqual(
+      createApprovedCorpusItemBody.data.createApprovedCorpusItem.externalId,
+    );
+    expect(snowplowEntity.scheduled_corpus_candidate_id).toEqual(
+      record.candidates[0].scheduled_corpus_candidate_id,
+    );
+    expect(snowplowEntity.error_name).toBeUndefined();
+    expect(snowplowEntity.error_description).toBeUndefined();
+  });
+
+  it('sends a Sentry error if curated-corpus-api has error, with partial success', async () => {
     mockGetUrlMetadata();
     mockCreateApprovedCorpusItemOnce({ errors: [{ message: 'server bork' }] });
 
@@ -118,34 +160,26 @@ describe('corpus scheduler lambda', () => {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
     } as unknown as SQSEvent;
 
-    await expect(
-      processor(
-        fakeEvent,
-        null as unknown as Context,
-        null as unknown as Callback,
-      ),
-    ).rejects.toThrow(
-      new Error(
-        'processSQSMessages failed for a4b5d99c-4c1b-4d35-bccf-6455c8df07b0: Error: createApprovedCorpusItem mutation failed: server bork',
-      ),
-    );
+    const captureExceptionSpy = jest
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation();
+
+    await processor(fakeEvent, sqsContext, sqsCallback);
+
+    expect(captureExceptionSpy).toHaveBeenCalled();
   }, 7000);
 
-  it('returns batch item failure if curated-corpus-api returns null data', async () => {
+  it('sends a Sentry error if curated-corpus-api returns null data', async () => {
     mockGetUrlMetadata();
     mockCreateApprovedCorpusItemOnce({ data: null });
 
-    const fakeEvent = {
-      Records: [{ messageId: '1', body: JSON.stringify(record) }],
-    } as unknown as SQSEvent;
+    const captureExceptionSpy = jest
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation();
 
-    await expect(
-      processor(
-        fakeEvent,
-        null as unknown as Context,
-        null as unknown as Callback,
-      ),
-    ).rejects.toThrow(Error);
+    await processor(fakeEvent, sqsContext, sqsCallback);
+
+    expect(captureExceptionSpy).toHaveBeenCalled();
   }, 7000);
 
   it('should not start scheduling if allowedToSchedule is false', async () => {
@@ -186,18 +220,20 @@ describe('corpus scheduler lambda', () => {
     );
   }, 7000);
 
-  it('returns no batch item failures if curated-corpus-api request is successful', async () => {
+  it('does not emit Sentry exceptions if curated-corpus-api request is successful', async () => {
     mockGetUrlMetadata();
     mockCreateApprovedCorpusItemOnce();
 
-    const fakeEvent = {
-      Records: [{ messageId: '1', body: JSON.stringify(record) }],
-    } as unknown as SQSEvent;
+    const captureExceptionSpy = jest
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation();
 
     await processor(
       fakeEvent,
       null as unknown as Context,
       null as unknown as Callback,
     );
+
+    expect(captureExceptionSpy).not.toHaveBeenCalled();
   });
 });

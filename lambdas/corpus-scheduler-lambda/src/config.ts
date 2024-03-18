@@ -36,6 +36,18 @@ const config = {
     userId: 'ML',
     groups: ['mozilliansorg_pocket_scheduled_surface_curator_full'],
   },
+  snowplow: {
+    // appId should end in '-dev' outside of production such that Dbt can filter events:
+    // https://github.com/Pocket/dbt-snowflake/blob/main/macros/validate_snowplow_app_id.sql
+    appId: isDev ? 'corpus-scheduler-lambda-dev' : 'corpus-scheduler-lambda',
+    schemas: {
+      // published 2024-02-28
+      scheduled_corpus_candidate:
+        'iglu:com.pocket/scheduled_corpus_candidate/jsonschema/1-0-2',
+      // published 2024-02-28
+      objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-17',
+    },
+  },
 };
 
 export default config;
