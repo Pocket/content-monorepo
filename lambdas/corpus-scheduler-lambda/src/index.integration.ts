@@ -22,16 +22,18 @@ import { extractScheduledCandidateEntity } from './events/testHelpers';
 import config from './config';
 
 describe('corpus scheduler lambda', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   afterAll(() => {
     jest.restoreAllMocks();
   });
 
   beforeEach(async () => {
+    // Need to restoreAllMocks after each test, such that resetSnowplowEvents can call setTimeout to
+    // wait for Snowplow events to arrive from the last test. Alternatively, we could call
+    // waitForSnowplowEvents() in each test where a Snowplow event is emitted.
+    jest.restoreAllMocks();
     await resetSnowplowEvents();
+    // The Lambda waits for 10 seconds to flush Snowplow events. During tests we don't want to wait that long.
+    mockSetTimeoutToReturnImmediately();
   });
 
   const server = setupServer();
@@ -120,11 +122,6 @@ describe('corpus scheduler lambda', () => {
     jest
       .spyOn(Utils, 'getCorpusSchedulerLambdaPrivateKey')
       .mockReturnValue(Promise.resolve('my_secret_value'));
-  });
-
-  beforeEach(() => {
-    // The Lambda waits for 10 seconds to flush Snowplow events. During tests we don't want to wait that long.
-    mockSetTimeoutToReturnImmediately();
   });
 
   afterEach(() => {

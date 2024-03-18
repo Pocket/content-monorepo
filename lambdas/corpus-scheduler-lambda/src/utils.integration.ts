@@ -45,7 +45,6 @@ describe('utils integrations', function () {
       metadataErrorTestCases.forEach(
         ({ candidateKey, parserKey, expectedSnowplowError }) => {
           it(`should emit a Snowplow event when ${candidateKey} is missing with error_name=${expectedSnowplowError}`, async () => {
-            // Create a ScheduledCandidate with
             const incompleteCandidate: any = createScheduledCandidate();
             incompleteCandidate.scheduled_corpus_item[candidateKey] = undefined;
 
