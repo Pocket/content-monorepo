@@ -2,7 +2,6 @@ import {
   ScheduledCandidate,
   ScheduledCandidates,
   ScheduledCorpusItem,
-  ScheduledSurfaces,
 } from './types';
 import {
   CorpusItemSource,
@@ -10,6 +9,7 @@ import {
   CreateApprovedItemInput,
   CuratedStatus,
   ScheduledItemSource,
+  ScheduledSurfaces,
   Topics,
   UrlMetadata,
 } from 'content-common';

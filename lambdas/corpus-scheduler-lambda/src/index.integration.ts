@@ -13,14 +13,13 @@ import {
   mockGetUrlMetadata,
   mockSetTimeoutToReturnImmediately,
 } from './testHelpers';
-import { CorpusLanguage } from 'content-common';
+import { CorpusLanguage, ScheduledSurfaces } from 'content-common';
 import {
   resetSnowplowEvents,
   waitForSnowplowEvents,
 } from 'content-common/snowplow/test-helpers';
 import { extractScheduledCandidateEntity } from './events/testHelpers';
 import config from './config';
-import { ScheduledSurfaces } from './types';
 
 describe('corpus scheduler lambda', () => {
   afterAll(() => {

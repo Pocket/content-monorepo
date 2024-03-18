@@ -85,6 +85,19 @@ export type CreateScheduledItemInput = {
   source: ScheduledItemSource;
 };
 
+export enum ScheduledSurfaces {
+  NEW_TAB_EN_US = 'NEW_TAB_EN_US',
+  NEW_TAB_DE_DE = 'NEW_TAB_DE_DE',
+  NEW_TAB_EN_GB = 'NEW_TAB_EN_GB',
+  NEW_TAB_FR_FR = 'NEW_TAB_FR_FR',
+  NEW_TAB_IT_IT = 'NEW_TAB_IT_IT',
+  NEW_TAB_ES_ES = 'NEW_TAB_ES_ES',
+  NEW_TAB_EN_INT = 'NEW_TAB_EN_INT',
+  POCKET_HITS_EN_US = 'POCKET_HITS_EN_US',
+  POCKET_HITS_DE_DE = 'POCKET_HITS_DE_DE',
+  SANDBOX = 'SANDBOX',
+}
+
 // prospect-api
 export interface UrlMetadata {
   url: string;

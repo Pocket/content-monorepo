@@ -1,9 +1,12 @@
 import { validateCandidate, validateScheduledDate } from './validation';
 import { createScheduledCandidate } from './testHelpers';
-import { CorpusItemSource, CorpusLanguage } from 'content-common';
+import {
+    CorpusItemSource,
+    CorpusLanguage,
+    ScheduledSurfaces
+} from 'content-common';
 import { DateTime, Settings } from 'luxon';
 import config from './config';
-import { ScheduledSurfaces } from './types';
 
 // Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
 describe('validation', function () {
