@@ -231,7 +231,7 @@ export const mockCreateScheduledCorpusItemOnce = (
 };
 
 /**
- * Set up the mock server to return responses for the createScheduledCorpusItem mutation.
+ * Set up the mock server to mock snowplow endpoint.
  * @param server
  */
 export const mockSnowplow = (server: SetupServer) => {

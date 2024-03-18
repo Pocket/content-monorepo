@@ -54,65 +54,6 @@ describe('corpus scheduler lambda', () => {
   const sqsContext = null as unknown as Context;
   const sqsCallback = null as unknown as Callback;
 
-  // const getUrlMetadataBody = {
-  //   data: {
-  //     getUrlMetadata: {
-  //       url: 'https://fake-url.com',
-  //       title: 'Fake title',
-  //       excerpt: 'fake excerpt',
-  //       status: CuratedStatus.RECOMMENDATION,
-  //       language: 'EN',
-  //       publisher: 'POLITICO',
-  //       authors: 'Fake Author',
-  //       imageUrl: 'https://fake-image-url.com',
-  //       topic: Topics.SELF_IMPROVEMENT,
-  //       source: CorpusItemSource.ML,
-  //       isCollection: false,
-  //       isSyndicated: false,
-  //     },
-  //   },
-  // };
-  //
-  // const createApprovedCorpusItemBody = {
-  //   data: {
-  //     createApprovedCorpusItem: {
-  //       externalId: 'fake-external-id',
-  //       url: 'https://fake-url.com',
-  //       title: 'Fake title',
-  //     },
-  //   },
-  // };
-  //
-  // /**
-  //  * Set up the mock server to return responses for the getUrlMetadata query.
-  //  * @param responseBody GraphQL response body.
-  //  */
-  // const mockGetUrlMetadata = (responseBody: any = getUrlMetadataBody) => {
-  //   server.use(
-  //       graphql.query('getUrlMetadata', () => {
-  //         return HttpResponse.json(responseBody);
-  //       }),
-  //   );
-  // };
-  //
-  // /**
-  //  * Set up the mock server to return responses for the createApprovedCorpusItem mutation.
-  //  * @param body GraphQL response body.
-  //  */
-  // const mockCreateApprovedCorpusItemOnce = (
-  //     body: any = createApprovedCorpusItemBody,
-  // ) => {
-  //   server.use(
-  //       graphql.mutation(
-  //           'CreateApprovedCorpusItem',
-  //           () => {
-  //             return HttpResponse.json(body);
-  //           },
-  //           { once: true },
-  //       ),
-  //   );
-  // };
-
   beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
