@@ -20,7 +20,7 @@ import {
 import { assert, TypeGuardError } from 'typia';
 import { SQSRecord } from 'aws-lambda';
 import {
-  createApprovedCorpusItem,
+  createApprovedAndScheduledCorpusItem,
   createScheduledCorpusItem,
   fetchUrlMetadata,
   getApprovedCorpusItemByUrl,
@@ -292,7 +292,7 @@ export const createAndScheduleCorpusItemHelper = async (
       );
 
     // 4. call createApprovedCorpusItem mutation
-    const createdItem = await createApprovedCorpusItem(
+    const createdItem = await createApprovedAndScheduledCorpusItem(
       createApprovedItemInput,
       bearerToken,
     );

@@ -11,10 +11,11 @@ export const sleep = async (ms: number) => {
 };
 /**
  * Calls the createApprovedCorpusItem mutation in curated-corpus-api.
+ * Approves & schedules a candidate
  * @param data
  * @param bearerToken generated bearerToken for admin api
  */
-export async function createApprovedCorpusItem(
+export async function createApprovedAndScheduledCorpusItem(
   data: CreateApprovedItemInput,
   bearerToken: string,
 ) {
