@@ -1,19 +1,19 @@
 import * as Sentry from '@sentry/node';
-import { graphql, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { processor } from './';
 import * as Utils from './utils';
 import { Callback, Context, SQSEvent } from 'aws-lambda';
 import {
+  createApprovedCorpusItemBody,
   createScheduledCandidate,
-  createScheduledCandidates, mockSetTimeoutToReturnImmediately,
+  createScheduledCandidates,
+  mockCreateApprovedCorpusItemOnce,
+  mockCreateScheduledCorpusItemOnce,
+  mockGetApprovedCorpusItemByUrl,
+  mockGetUrlMetadata,
+  mockSetTimeoutToReturnImmediately,
 } from './testHelpers';
-import {
-  CorpusItemSource,
-  CorpusLanguage,
-  CuratedStatus,
-  Topics,
-} from 'content-common';
+import { CorpusLanguage } from 'content-common';
 import {
   resetSnowplowEvents,
   waitForSnowplowEvents,
@@ -54,65 +54,6 @@ describe('corpus scheduler lambda', () => {
   const sqsContext = null as unknown as Context;
   const sqsCallback = null as unknown as Callback;
 
-  const getUrlMetadataBody = {
-    data: {
-      getUrlMetadata: {
-        url: 'https://fake-url.com',
-        title: 'Fake title',
-        excerpt: 'fake excerpt',
-        status: CuratedStatus.RECOMMENDATION,
-        language: 'EN',
-        publisher: 'POLITICO',
-        authors: 'Fake Author',
-        imageUrl: 'https://fake-image-url.com',
-        topic: Topics.SELF_IMPROVEMENT,
-        source: CorpusItemSource.ML,
-        isCollection: false,
-        isSyndicated: false,
-      },
-    },
-  };
-
-  const createApprovedCorpusItemBody = {
-    data: {
-      createApprovedCorpusItem: {
-        externalId: 'fake-external-id',
-        url: 'https://fake-url.com',
-        title: 'Fake title',
-      },
-    },
-  };
-
-  /**
-   * Set up the mock server to return responses for the getUrlMetadata query.
-   * @param responseBody GraphQL response body.
-   */
-  const mockGetUrlMetadata = (responseBody: any = getUrlMetadataBody) => {
-    server.use(
-      graphql.query('getUrlMetadata', () => {
-        return HttpResponse.json(responseBody);
-      }),
-    );
-  };
-
-  /**
-   * Set up the mock server to return responses for the createApprovedCorpusItem mutation.
-   * @param body GraphQL response body.
-   */
-  const mockCreateApprovedCorpusItemOnce = (
-    body: any = createApprovedCorpusItemBody,
-  ) => {
-    server.use(
-      graphql.mutation(
-        'CreateApprovedCorpusItem',
-        () => {
-          return HttpResponse.json(body);
-        },
-        { once: true },
-      ),
-    );
-  };
-
   beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
@@ -130,8 +71,14 @@ describe('corpus scheduler lambda', () => {
   });
 
   it('emits a Snowplow event if candidate is successfully processed', async () => {
-    mockGetUrlMetadata();
-    mockCreateApprovedCorpusItemOnce(createApprovedCorpusItemBody);
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateApprovedCorpusItemOnce(server);
 
     await processor(fakeEvent, sqsContext, sqsCallback);
 
@@ -153,8 +100,16 @@ describe('corpus scheduler lambda', () => {
   });
 
   it('sends a Sentry error if curated-corpus-api has error, with partial success', async () => {
-    mockGetUrlMetadata();
-    mockCreateApprovedCorpusItemOnce({ errors: [{ message: 'server bork' }] });
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateApprovedCorpusItemOnce(server, {
+      errors: [{ message: 'server bork' }],
+    });
 
     const fakeEvent = {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
@@ -170,8 +125,14 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('sends a Sentry error if curated-corpus-api returns null data', async () => {
-    mockGetUrlMetadata();
-    mockCreateApprovedCorpusItemOnce({ data: null });
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateApprovedCorpusItemOnce(server, { data: null });
 
     const captureExceptionSpy = jest
       .spyOn(Sentry, 'captureException')
@@ -183,8 +144,14 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('should not start scheduling if allowedToSchedule is false', async () => {
-    mockGetUrlMetadata();
-    mockCreateApprovedCorpusItemOnce({ data: null });
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateApprovedCorpusItemOnce(server, { data: null });
 
     // mock the config.app.enableScheduledDateValidation
     jest.replaceProperty(config, 'app', {
@@ -220,9 +187,33 @@ describe('corpus scheduler lambda', () => {
     );
   }, 7000);
 
-  it('does not emit Sentry exceptions if curated-corpus-api request is successful', async () => {
-    mockGetUrlMetadata();
-    mockCreateApprovedCorpusItemOnce();
+  it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate)', async () => {
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateApprovedCorpusItemOnce(server);
+
+    const captureExceptionSpy = jest
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation();
+
+    await processor(
+      fakeEvent,
+      null as unknown as Context,
+      null as unknown as Callback,
+    );
+
+    expect(captureExceptionSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not emit Sentry exceptions if curated-corpus-api request is successful (schedule item only)', async () => {
+    // returns an approved corpus item so only needs to be scheduled
+    mockGetApprovedCorpusItemByUrl(server);
+    mockCreateScheduledCorpusItemOnce(server);
 
     const captureExceptionSpy = jest
       .spyOn(Sentry, 'captureException')

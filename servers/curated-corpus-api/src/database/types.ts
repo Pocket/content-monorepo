@@ -8,6 +8,7 @@ import {
   ApprovedItemAuthor,
   ApprovedItemRequiredInput,
   CorpusItemSource,
+  CreateScheduledItemInput,
 } from 'content-common';
 
 export type ImportApprovedItemInput = {
@@ -109,13 +110,6 @@ export type ScheduledItemFilterInput = {
 
 export type DeleteScheduledItemInput = {
   externalId: string;
-};
-
-export type CreateScheduledItemInput = {
-  approvedItemExternalId: string;
-  scheduledSurfaceGuid: string;
-  scheduledDate: string;
-  source: ScheduledItemSource;
 };
 
 // type to map to the input coming from the graph mutation

@@ -78,6 +78,13 @@ export type CreateApprovedItemInput = ApprovedItemRequiredInput & {
   datePublished?: string;
 };
 
+export type CreateScheduledItemInput = {
+  approvedItemExternalId: string;
+  scheduledSurfaceGuid: string;
+  scheduledDate: string;
+  source: ScheduledItemSource;
+};
+
 // prospect-api
 export interface UrlMetadata {
   url: string;
