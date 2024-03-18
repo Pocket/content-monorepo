@@ -171,7 +171,7 @@ describe('utils', function () {
 
       // we expect the createScheduledCorpusItem to run
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        'CreateScheduledCorpusItem MUTATION OUTPUT: {"data":{"createScheduledCorpusItem":{"externalId":"fake-scheduled-external-id","approvedItem":{"externalId":"fake-external-id","url":"https://fake-url.com","title":"Fake title"}}}}',
+        'CreateScheduledCorpusItem MUTATION OUTPUT: {"data":{"createScheduledCorpusItem":{"externalId":"fake-scheduled-external-id-2","approvedItem":{"externalId":"fake-external-id","url":"https://fake-url.com","title":"Fake title"}}}}',
       );
     });
     it('should create, approve & schedule a new candidate', async () => {
