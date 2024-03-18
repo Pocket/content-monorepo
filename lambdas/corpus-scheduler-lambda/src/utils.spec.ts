@@ -171,7 +171,7 @@ describe('utils', function () {
 
       // we expect the createScheduledCorpusItem to run
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        'CreateScheduledCorpusItem MUTATION OUTPUT: externalId: fake-external-id, url: https://fake-url.com, title: Fake title',
+        'CreateScheduledCorpusItem MUTATION OUTPUT: {"data":{"createScheduledCorpusItem":{"externalId":"fake-scheduled-external-id","approvedItem":{"externalId":"fake-external-id","url":"https://fake-url.com","title":"Fake title"}}}}',
       );
     });
     it('should create, approve & schedule a new candidate', async () => {
@@ -201,7 +201,7 @@ describe('utils', function () {
 
       // we expect the createScheduledCorpusItem to run
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        'CreateApprovedCorpusItem MUTATION OUTPUT: externalId: fake-external-id, url: https://fake-url.com, title: Fake title',
+        'CreateApprovedCorpusItem MUTATION OUTPUT: {"data":{"createApprovedCorpusItem":{"externalId":"fake-external-id","url":"https://fake-url.com","title":"Fake title","scheduledSurfaceHistory":[{"externalId":"143b8de8-0dc9-4613-b9f0-0e8837a2df1c"}]}}}',
       );
     });
   });

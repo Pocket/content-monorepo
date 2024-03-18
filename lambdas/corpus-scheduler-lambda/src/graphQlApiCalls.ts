@@ -26,26 +26,9 @@ export async function createApprovedAndScheduledCorpusItem(
       createApprovedCorpusItem(data: $data) {
         externalId
         url
-        topic
         title
-        status
-        source
-        publisher
-        language
-        imageUrl
-        excerpt
-        authors {
-          name
-          sortOrder
-        }
-        isTimeSensitive
-        isSyndicated
-        isCollection
-        createdBy
-        createdAt
         scheduledSurfaceHistory {
-          scheduledSurfaceGuid
-          scheduledDate
+          externalId
         }
       }
     }`;
@@ -60,6 +43,10 @@ export async function createApprovedAndScheduledCorpusItem(
     body: JSON.stringify({ query: mutation, variables }),
   });
   const result = await res.json();
+  console.log(
+    `CreateApprovedCorpusItem MUTATION OUTPUT: ${JSON.stringify(result)}`,
+  );
+
   // check for any errors returned by the mutation
   if (!result.data && result.errors.length > 0) {
     throw new Error(
@@ -179,6 +166,9 @@ export async function createScheduledCorpusItem(
     body: JSON.stringify({ query: mutation, variables }),
   });
   const result = await res.json();
+  console.log(
+    `CreateScheduledCorpusItem MUTATION OUTPUT: ${JSON.stringify(result)}`,
+  );
   // check for any errors returned by the mutation
   if (!result.data && result.errors.length > 0) {
     throw new Error(

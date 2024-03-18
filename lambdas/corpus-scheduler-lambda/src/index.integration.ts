@@ -6,7 +6,7 @@ import { Callback, Context, SQSEvent } from 'aws-lambda';
 import {
   createApprovedCorpusItemBody,
   createScheduledCandidate,
-  createScheduledCandidates,
+  createScheduledCandidates, createScheduledCorpusItemBody,
   mockCreateApprovedCorpusItemOnce,
   mockCreateScheduledCorpusItemOnce,
   mockGetApprovedCorpusItemByUrl,
@@ -91,6 +91,40 @@ describe('corpus scheduler lambda', () => {
     const snowplowEntity = await extractScheduledCandidateEntity();
     expect(snowplowEntity.approved_corpus_item_external_id).toEqual(
       createApprovedCorpusItemBody.data.createApprovedCorpusItem.externalId,
+    );
+    expect(snowplowEntity.scheduled_corpus_item_external_id).toEqual(
+      createApprovedCorpusItemBody.data.createApprovedCorpusItem
+        .scheduledSurfaceHistory[0].externalId,
+    );
+    expect(snowplowEntity.scheduled_corpus_candidate_id).toEqual(
+      record.candidates[0].scheduled_corpus_candidate_id,
+    );
+    expect(snowplowEntity.error_name).toBeUndefined();
+    expect(snowplowEntity.error_description).toBeUndefined();
+  });
+
+  it('emits a Snowplow event if a previously approved candidate is successfully processed', async () => {
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server);
+    mockGetUrlMetadata(server);
+    mockCreateScheduledCorpusItemOnce(server);
+
+    await processor(fakeEvent, sqsContext, sqsCallback);
+
+    // Exactly one Snowplow event should be emitted.
+    const allEvents = await waitForSnowplowEvents();
+    expect(allEvents.bad).toEqual(0);
+    expect(allEvents.good).toEqual(record.candidates.length);
+
+    // Check that the right Snowplow entity that was included with the event.
+    const snowplowEntity = await extractScheduledCandidateEntity();
+    const expectedScheduledItem =
+      createScheduledCorpusItemBody.data.createScheduledCorpusItem;
+    expect(snowplowEntity.approved_corpus_item_external_id).toEqual(
+      expectedScheduledItem.approvedItem.externalId,
+    );
+    expect(snowplowEntity.scheduled_corpus_item_external_id).toEqual(
+      expectedScheduledItem.externalId,
     );
     expect(snowplowEntity.scheduled_corpus_candidate_id).toEqual(
       record.candidates[0].scheduled_corpus_candidate_id,
