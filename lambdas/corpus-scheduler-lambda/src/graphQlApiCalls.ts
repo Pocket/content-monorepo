@@ -114,6 +114,7 @@ export async function fetchUrlMetadata(
  * Calls the getApprovedCorpusItemByUrl query to fetch and already approved corpus item.
  * @param url the url to get the approved item for
  * @param bearerToken generated bearerToken for admin api
+ * @returns { url, externalId } or null if url did not exist in the corpus
  */
 export async function getApprovedCorpusItemByUrl(
   url: string,

@@ -57,7 +57,6 @@ describe('corpus scheduler lambda', () => {
       },
     });
     mockGetUrlMetadata(server);
-    mockCreateScheduledCorpusItemOnce(server);
     mockCreateApprovedCorpusItemOnce(server, {
       errors: [{ message: 'server bork' }],
     });
@@ -146,7 +145,7 @@ describe('corpus scheduler lambda', () => {
     );
   }, 7000);
 
-  it('returns no batch item failures if curated-corpus-api request is successful', async () => {
+  it('returns no batch item failures if curated-corpus-api request is successful (create & schedule item)', async () => {
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {
@@ -155,6 +154,22 @@ describe('corpus scheduler lambda', () => {
     });
     mockGetUrlMetadata(server);
     mockCreateApprovedCorpusItemOnce(server);
+
+    const fakeEvent = {
+      Records: [{ messageId: '1', body: JSON.stringify(record) }],
+    } as unknown as SQSEvent;
+
+    await processor(
+      fakeEvent,
+      null as unknown as Context,
+      null as unknown as Callback,
+    );
+  });
+
+  it('returns no batch item failures if curated-corpus-api request is successful (schedule item only)', async () => {
+    // returns an approved corpus item so only needs to be scheduled
+    mockGetApprovedCorpusItemByUrl(server);
+    mockCreateScheduledCorpusItemOnce(server);
 
     const fakeEvent = {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
