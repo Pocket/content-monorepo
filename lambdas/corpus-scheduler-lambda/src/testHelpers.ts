@@ -2,6 +2,7 @@ import {
   ScheduledCandidate,
   ScheduledCandidates,
   ScheduledCorpusItem,
+  ScheduledSurfaces,
 } from './types';
 import {
   CorpusItemSource,
@@ -42,7 +43,7 @@ export const createScheduledCandidate = (
       source: CorpusItemSource.ML,
       topic: Topics.SELF_IMPROVEMENT,
       scheduled_date: defaultScheduledDate as string,
-      scheduled_surface_guid: 'NEW_TAB_EN_US',
+      scheduled_surface_guid: ScheduledSurfaces.NEW_TAB_EN_US,
       title:
         'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
       excerpt:

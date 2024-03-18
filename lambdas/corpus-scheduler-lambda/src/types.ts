@@ -23,7 +23,7 @@ export interface ScheduledCorpusItem {
   source: CorpusItemSource.ML;
   topic: Topics; // Empty string means unknown topic
   scheduled_date: string; // YYYY-MM-DD
-  scheduled_surface_guid: string;
+  scheduled_surface_guid: ScheduledSurfaces;
   title?: string;
   excerpt?: string;
   language?: CorpusLanguage;
@@ -32,7 +32,7 @@ export interface ScheduledCorpusItem {
 }
 
 // TODO: add allowed surfaces here to schedule to production
-export const allowedScheduledSurfaces: string[] = [];
+export const allowedScheduledSurfaces: string[] = ['NEW_TAB_EN_US'];
 
 export type ScheduledCorpusCandidateFeatures = {
   rank: number & tags.Type<'int64'>; // rank is integer in Snowplow schema
@@ -47,3 +47,16 @@ export type ScheduledCorpusCandidateRunDetails = {
   run_id: string;
   [key: string]: any; // ML controls which additional run debug info is sent
 };
+
+export enum ScheduledSurfaces {
+  NEW_TAB_EN_US = 'NEW_TAB_EN_US',
+  NEW_TAB_DE_DE = 'NEW_TAB_DE_DE',
+  NEW_TAB_EN_GB = 'NEW_TAB_EN_GB',
+  NEW_TAB_FR_FR = 'NEW_TAB_FR_FR',
+  NEW_TAB_IT_IT = 'NEW_TAB_IT_IT',
+  NEW_TAB_ES_ES = 'NEW_TAB_ES_ES',
+  NEW_TAB_EN_INT = 'NEW_TAB_EN_INT',
+  POCKET_HITS_EN_US = 'POCKET_HITS_EN_US',
+  POCKET_HITS_DE_DE = 'POCKET_HITS_DE_DE',
+  SANDBOX = 'SANDBOX',
+}

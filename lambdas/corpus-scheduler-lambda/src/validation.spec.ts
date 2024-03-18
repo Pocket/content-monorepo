@@ -3,6 +3,7 @@ import { createScheduledCandidate } from './testHelpers';
 import { CorpusItemSource, CorpusLanguage } from 'content-common';
 import { DateTime, Settings } from 'luxon';
 import config from './config';
+import { ScheduledSurfaces } from './types';
 
 // Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
 describe('validation', function () {
@@ -212,6 +213,16 @@ describe('validation', function () {
       // should throw error
       await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
         'Error on typia.assert(): invalid type on $input.scheduled_corpus_item.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT" | undefined)',
+      );
+    });
+    it('should throw Error on ScheduleCandidate if types are wrong (scheduled_surface)', async () => {
+      const badScheduledCandidate = createScheduledCandidate();
+      badScheduledCandidate.scheduled_corpus_item.scheduled_surface_guid =
+        'bad-surface' as ScheduledSurfaces;
+
+      // should throw error
+      await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
+        'Error on typia.assert(): invalid type on $input.scheduled_corpus_item.scheduled_surface_guid, expect to be ("NEW_TAB_DE_DE" | "NEW_TAB_EN_GB" | "NEW_TAB_EN_INT" | "NEW_TAB_EN_US" | "NEW_TAB_ES_ES" | "NEW_TAB_FR_FR" | "NEW_TAB_IT_IT" | "POCKET_HITS_DE_DE" | "POCKET_HITS_EN_US" | "SANDBOX")',
       );
     });
     it('should not throw Error on ScheduleCandidate if it validates', async () => {
