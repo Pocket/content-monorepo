@@ -270,6 +270,8 @@ export const createAndScheduleCorpusItemHelper = async (
   bearerToken: string,
   tracker: Tracker,
 ) => {
+  let approvedCorpusItemId, scheduledItemId;
+
   // 1. query getApprovedCorpusItemByUrl to check if item is already created & approved
   const approvedCorpusItem = await getApprovedCorpusItemByUrl(
     candidate.scheduled_corpus_item.url,
@@ -292,22 +294,19 @@ export const createAndScheduleCorpusItemHelper = async (
       );
 
     // 4. call createApprovedCorpusItem mutation
-    const createdItem = await createApprovedAndScheduledCorpusItem(
-      createApprovedItemInput,
-      bearerToken,
-    );
-    // get the approved & scheduled corpus item id
-    const approvedCorpusItemId =
-      createdItem.data.createApprovedCorpusItem.externalId;
+    const approvedCorpusItemWithScheduleHistory =
+      await createApprovedAndScheduledCorpusItem(
+        createApprovedItemInput,
+        bearerToken,
+      );
 
-    queueSnowplowEvent(
-      tracker,
-      generateSnowplowSuccessEntity(candidate, approvedCorpusItemId),
-    );
-
-    console.log(
-      `CreateApprovedCorpusItem MUTATION OUTPUT: externalId: ${createdItem.data.createApprovedCorpusItem.externalId}, url: ${createdItem.data.createApprovedCorpusItem.url}, title: ${createdItem.data.createApprovedCorpusItem.title}`,
-    );
+    // Set the approved and scheduled ids needed for Snowplow.
+    approvedCorpusItemId = approvedCorpusItemWithScheduleHistory.externalId;
+    // We know that scheduledSurfaceHistory has exactly 1 element, because the corpus item did not
+    // exist before the above mutation, and therefore could not have been scheduled before.
+    scheduledItemId =
+      approvedCorpusItemWithScheduleHistory.scheduledSurfaceHistory[0]
+        .externalId;
   }
   // item has already been created & approved, try scheduling item
   else {
@@ -321,10 +320,21 @@ export const createAndScheduleCorpusItemHelper = async (
       createScheduledItemInput,
       bearerToken,
     );
-    console.log(
-      `CreateScheduledCorpusItem MUTATION OUTPUT: externalId: ${scheduledItem.data.createScheduledCorpusItem.externalId}, url: ${scheduledItem.data.createScheduledCorpusItem.approvedItem.url}, title: ${scheduledItem.data.createScheduledCorpusItem.approvedItem.title}`,
-    );
+
+    // Set the approved and scheduled ids needed for Snowplow.
+    approvedCorpusItemId = approvedCorpusItem.externalId;
+    scheduledItemId = scheduledItem.externalId;
   }
+
+  // 7. Send a Snowplow event after the item got successfully scheduled.
+  queueSnowplowEvent(
+    tracker,
+    generateSnowplowSuccessEntity(
+      candidate,
+      approvedCorpusItemId,
+      scheduledItemId,
+    ),
+  );
 };
 
 /**

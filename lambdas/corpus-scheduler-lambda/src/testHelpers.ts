@@ -143,6 +143,11 @@ export const createApprovedCorpusItemBody = {
       externalId: 'fake-external-id',
       url: 'https://fake-url.com',
       title: 'Fake title',
+      scheduledSurfaceHistory: [
+        {
+          externalId: '143b8de8-0dc9-4613-b9f0-0e8837a2df1c',
+        },
+      ],
     },
   },
 };
@@ -150,8 +155,9 @@ export const createApprovedCorpusItemBody = {
 export const createScheduledCorpusItemBody = {
   data: {
     createScheduledCorpusItem: {
-      externalId: 'fake-external-id',
+      externalId: 'fake-scheduled-external-id-2',
       approvedItem: {
+        externalId: 'fake-external-id',
         url: 'https://fake-url.com',
         title: 'Fake title',
       },

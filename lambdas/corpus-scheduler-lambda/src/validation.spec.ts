@@ -1,9 +1,9 @@
 import { validateCandidate, validateScheduledDate } from './validation';
 import { createScheduledCandidate } from './testHelpers';
 import {
-    CorpusItemSource,
-    CorpusLanguage,
-    ScheduledSurfaces
+  CorpusItemSource,
+  CorpusLanguage,
+  ScheduledSurfaces,
 } from 'content-common';
 import { DateTime, Settings } from 'luxon';
 import config from './config';

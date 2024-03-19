@@ -60,8 +60,8 @@ export function parseSnowplowData(data: string): { [key: string]: any } {
  * @return Counts for the number of Snowplow events received (total, good, bad).
  */
 export async function waitForSnowplowEvents(
-  maxWaitTime: number = 4000,
   expectedEventCount: number = 1,
+  maxWaitTime: number = 4000,
 ): Promise<SnowplowMicroEventCounts> {
   let totalWaitTime = 0;
   // Snowplow tests take about 20ms. waitPeriod is set to half of that to minimize waiting.
