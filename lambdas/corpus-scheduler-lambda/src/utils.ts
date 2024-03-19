@@ -294,17 +294,19 @@ export const createAndScheduleCorpusItemHelper = async (
       );
 
     // 4. call createApprovedCorpusItem mutation
-    const mutationResult = await createApprovedAndScheduledCorpusItem(
-      createApprovedItemInput,
-      bearerToken,
-    );
-    const approvedCorpusItem = mutationResult.data.createApprovedCorpusItem;
+    const approvedCorpusItemWithScheduleHistory =
+      await createApprovedAndScheduledCorpusItem(
+        createApprovedItemInput,
+        bearerToken,
+      );
 
     // Set the approved and scheduled ids needed for Snowplow.
-    approvedCorpusItemId = approvedCorpusItem.externalId;
+    approvedCorpusItemId = approvedCorpusItemWithScheduleHistory.externalId;
     // We know that scheduledSurfaceHistory has exactly 1 element, because the corpus item did not
     // exist before the above mutation, and therefore could not have been scheduled before.
-    scheduledItemId = approvedCorpusItem.scheduledSurfaceHistory[0].externalId;
+    scheduledItemId =
+      approvedCorpusItemWithScheduleHistory.scheduledSurfaceHistory[0]
+        .externalId;
   }
   // item has already been created & approved, try scheduling item
   else {
@@ -314,11 +316,10 @@ export const createAndScheduleCorpusItemHelper = async (
       approvedCorpusItem.externalId,
     );
     // 6.  call createScheduledItemInput mutation
-    const mutationResult = await createScheduledCorpusItem(
+    const scheduledItem = await createScheduledCorpusItem(
       createScheduledItemInput,
       bearerToken,
     );
-    const scheduledItem = mutationResult.data.createScheduledCorpusItem;
 
     // Set the approved and scheduled ids needed for Snowplow.
     approvedCorpusItemId = approvedCorpusItem.externalId;

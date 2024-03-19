@@ -6,6 +6,25 @@ import {
   UrlMetadata,
 } from 'content-common';
 
+interface ScheduledCorpusItemOutput {
+  externalId: string;
+}
+
+interface ApprovedCorpusItemOutput {
+  externalId: string;
+  url: string;
+}
+
+interface ScheduledCorpusItemWithApprovedCorpusItemOutput
+  extends ScheduledCorpusItemOutput {
+  approvedItem: ApprovedCorpusItemOutput;
+}
+
+interface ApprovedCorpusItemWithScheduleHistoryOutput
+  extends ApprovedCorpusItemOutput {
+  scheduledSurfaceHistory: ScheduledCorpusItemOutput[];
+}
+
 export const sleep = async (ms: number) => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
@@ -18,7 +37,7 @@ export const sleep = async (ms: number) => {
 export async function createApprovedAndScheduledCorpusItem(
   data: CreateApprovedItemInput,
   bearerToken: string,
-) {
+): Promise<ApprovedCorpusItemWithScheduleHistoryOutput> {
   // Wait, don't overwhelm the API
   await sleep(2000);
   const mutation = `
@@ -26,7 +45,6 @@ export async function createApprovedAndScheduledCorpusItem(
       createApprovedCorpusItem(data: $data) {
         externalId
         url
-        title
         scheduledSurfaceHistory {
           externalId
         }
@@ -53,7 +71,7 @@ export async function createApprovedAndScheduledCorpusItem(
       `createApprovedCorpusItem mutation failed: ${result.errors[0].message}`,
     );
   }
-  return result;
+  return result.data.createApprovedCorpusItem;
 }
 
 /**
@@ -107,7 +125,7 @@ export async function fetchUrlMetadata(
 export async function getApprovedCorpusItemByUrl(
   url: string,
   bearerToken: string,
-) {
+): Promise<ApprovedCorpusItemOutput> {
   const query = `
     query getApprovedCorpusItemByUrl($url: String!) {
       getApprovedCorpusItemByUrl(url: $url) {
@@ -144,7 +162,7 @@ export async function getApprovedCorpusItemByUrl(
 export async function createScheduledCorpusItem(
   data: CreateScheduledItemInput,
   bearerToken: string,
-) {
+): Promise<ScheduledCorpusItemWithApprovedCorpusItemOutput> {
   const mutation = `
     mutation CreateScheduledCorpusItem($data: CreateScheduledCorpusItemInput!) {
     createScheduledCorpusItem(data: $data) {
@@ -175,5 +193,5 @@ export async function createScheduledCorpusItem(
       `createScheduledCorpusItem mutation failed: ${result.errors[0].message}`,
     );
   }
-  return result;
+  return result.data.createScheduledCorpusItem;
 }

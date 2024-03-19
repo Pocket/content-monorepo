@@ -6,7 +6,8 @@ import { Callback, Context, SQSEvent } from 'aws-lambda';
 import {
   createApprovedCorpusItemBody,
   createScheduledCandidate,
-  createScheduledCandidates, createScheduledCorpusItemBody,
+  createScheduledCandidates,
+  createScheduledCorpusItemBody,
   mockCreateApprovedCorpusItemOnce,
   mockCreateScheduledCorpusItemOnce,
   mockGetApprovedCorpusItemByUrl,
