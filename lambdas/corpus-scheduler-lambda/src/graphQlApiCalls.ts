@@ -5,25 +5,11 @@ import {
   CreateScheduledItemInput,
   UrlMetadata,
 } from 'content-common';
-
-interface ScheduledCorpusItemOutput {
-  externalId: string;
-}
-
-interface ApprovedCorpusItemOutput {
-  externalId: string;
-  url: string;
-}
-
-interface ScheduledCorpusItemWithApprovedCorpusItemOutput
-  extends ScheduledCorpusItemOutput {
-  approvedItem: ApprovedCorpusItemOutput;
-}
-
-interface ApprovedCorpusItemWithScheduleHistoryOutput
-  extends ApprovedCorpusItemOutput {
-  scheduledSurfaceHistory: ScheduledCorpusItemOutput[];
-}
+import {
+  ApprovedCorpusItemOutput,
+  ApprovedCorpusItemWithScheduleHistoryOutput,
+  ScheduledCorpusItemWithApprovedCorpusItemOutput,
+} from './types';
 
 export const sleep = async (ms: number) => {
   await new Promise((resolve) => setTimeout(resolve, ms));

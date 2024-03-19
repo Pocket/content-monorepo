@@ -1,9 +1,4 @@
-import {
-  CorpusItemSource,
-  CorpusLanguage,
-  CuratedStatus,
-  Topics,
-} from 'content-common';
+import { CorpusItemSource, CorpusLanguage, CuratedStatus, Topics } from 'content-common';
 import { tags } from 'typia';
 
 export interface ScheduledCandidates {
@@ -47,3 +42,22 @@ export type ScheduledCorpusCandidateRunDetails = {
   run_id: string;
   [key: string]: any; // ML controls which additional run debug info is sent
 };
+
+interface ScheduledCorpusItemOutput {
+  externalId: string;
+}
+
+export interface ApprovedCorpusItemOutput {
+  externalId: string;
+  url: string;
+}
+
+export interface ScheduledCorpusItemWithApprovedCorpusItemOutput
+  extends ScheduledCorpusItemOutput {
+  approvedItem: ApprovedCorpusItemOutput;
+}
+
+export interface ApprovedCorpusItemWithScheduleHistoryOutput
+  extends ApprovedCorpusItemOutput {
+  scheduledSurfaceHistory: ScheduledCorpusItemOutput[];
+}
