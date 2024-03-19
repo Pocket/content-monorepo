@@ -136,7 +136,7 @@ describe('ScheduledItemSnowplowHandler', () => {
     });
 
     // make sure we only have good events
-    const allEvents = await waitForSnowplowEvents();
+    const allEvents = await waitForSnowplowEvents(2);
     expect(allEvents.total).toEqual(2);
     expect(allEvents.good).toEqual(2);
     expect(allEvents.bad).toEqual(0);

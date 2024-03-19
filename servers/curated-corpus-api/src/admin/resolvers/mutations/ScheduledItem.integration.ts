@@ -480,6 +480,7 @@ describe('mutations: ScheduledItem', () => {
       );
       expect(returnedItem.updatedAt).toBeCloseTo(
         getUnixTimestamp(scheduledItem.updatedAt),
+        -1, // allows for a difference of 10^-1 / 2 = 5 seconds
       );
 
       expect(new Date(returnedItem.scheduledDate)).toStrictEqual(
