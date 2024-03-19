@@ -14,7 +14,7 @@ import {
   mockGetUrlMetadata,
   mockSetTimeoutToReturnImmediately,
 } from './testHelpers';
-import { CorpusLanguage } from 'content-common';
+import { CorpusLanguage, ScheduledSurfaces } from 'content-common';
 import {
   resetSnowplowEvents,
   waitForSnowplowEvents,
@@ -222,7 +222,116 @@ describe('corpus scheduler lambda', () => {
     );
   }, 7000);
 
-  it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate)', async () => {
+  it('should not schedule if env is prod & not allowed scheduled surface', async () => {
+    // mock the config.app.isDev
+    jest.replaceProperty(config, 'app', {
+      name: 'Corpus-Scheduler-Lambda',
+      environment: 'test',
+      isDev: false, // should be prod env
+      sentry: {
+        dsn: '',
+        release: '',
+      },
+      allowedToSchedule: 'true',
+      enableScheduledDateValidation: 'true',
+    });
+
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateApprovedCorpusItemOnce(server, { data: null });
+
+    // spy on console.log
+    const consoleLogSpy = jest.spyOn(global.console, 'log');
+
+    // overwrite with NEW_TAB_EN_GB scheduled surface which is not allowed
+    record.candidates[0].scheduled_corpus_item.scheduled_surface_guid =
+      ScheduledSurfaces.NEW_TAB_EN_GB;
+    const fakeEvent = {
+      Records: [{ messageId: '1', body: JSON.stringify(record) }],
+    } as unknown as SQSEvent;
+    // null data should be returned, but enableScheduledDateValidation === false,
+    // so should not schedule and print to console.log only
+    await expect(
+      processor(
+        fakeEvent,
+        null as unknown as Context,
+        null as unknown as Callback,
+      ),
+    ).resolves.not.toThrowError();
+    // expect log to console Scheduler lambda not allowed to schedule...
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      'Cannot schedule candidate: a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 for surface NEW_TAB_EN_GB.',
+    );
+  }, 7000);
+
+  it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (prod)', async () => {
+    // mock the config.app.isDev
+    jest.replaceProperty(config, 'app', {
+      name: 'Corpus-Scheduler-Lambda',
+      environment: 'test',
+      isDev: false, // should be prod env
+      sentry: {
+        dsn: '',
+        release: '',
+      },
+      allowedToSchedule: 'true',
+      enableScheduledDateValidation: 'true',
+    });
+
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateApprovedCorpusItemOnce(server);
+
+    const captureExceptionSpy = jest
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation();
+
+    await processor(
+      fakeEvent,
+      null as unknown as Context,
+      null as unknown as Callback,
+    );
+
+    expect(captureExceptionSpy).not.toHaveBeenCalled();
+  }, 7000);
+
+  it('does not emit Sentry exceptions if curated-corpus-api request is successful & valid scheduled surface but not allowed for scheduling (approve & schedule candidate) (dev)', async () => {
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateApprovedCorpusItemOnce(server);
+
+    const captureExceptionSpy = jest
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation();
+
+    // overwrite with NEW_TAB_EN_GB scheduled surface which is not allowed (but dev, so should be scheduled)
+    record.candidates[0].scheduled_corpus_item.scheduled_surface_guid =
+      ScheduledSurfaces.NEW_TAB_EN_GB;
+    await processor(
+      fakeEvent,
+      null as unknown as Context,
+      null as unknown as Callback,
+    );
+
+    expect(captureExceptionSpy).not.toHaveBeenCalled();
+  }, 7000);
+
+  it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (dev)', async () => {
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {

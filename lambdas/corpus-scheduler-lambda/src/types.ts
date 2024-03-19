@@ -1,4 +1,10 @@
-import { CorpusItemSource, CorpusLanguage, CuratedStatus, Topics } from 'content-common';
+import {
+  CorpusItemSource,
+  CorpusLanguage,
+  CuratedStatus,
+  Topics,
+  ScheduledSurfaces,
+} from 'content-common';
 import { tags } from 'typia';
 
 export interface ScheduledCandidates {
@@ -18,7 +24,7 @@ export interface ScheduledCorpusItem {
   source: CorpusItemSource.ML;
   topic: Topics; // Empty string means unknown topic
   scheduled_date: string; // YYYY-MM-DD
-  scheduled_surface_guid: string;
+  scheduled_surface_guid: ScheduledSurfaces;
   title?: string;
   excerpt?: string;
   language?: CorpusLanguage;
@@ -27,7 +33,7 @@ export interface ScheduledCorpusItem {
 }
 
 // TODO: add allowed surfaces here to schedule to production
-export const allowedScheduledSurfaces: string[] = [];
+export const allowedScheduledSurfaces: string[] = ['NEW_TAB_EN_US'];
 
 export type ScheduledCorpusCandidateFeatures = {
   rank: number & tags.Type<'int64'>; // rank is integer in Snowplow schema
