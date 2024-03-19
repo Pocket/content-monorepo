@@ -84,7 +84,7 @@ describe('corpus scheduler lambda', () => {
     await processor(fakeEvent, sqsContext, sqsCallback);
 
     // Exactly one Snowplow event should be emitted.
-    const allEvents = await waitForSnowplowEvents();
+    const allEvents = await waitForSnowplowEvents(record.candidates.length);
     expect(allEvents.bad).toEqual(0);
     expect(allEvents.good).toEqual(record.candidates.length);
 
@@ -113,7 +113,7 @@ describe('corpus scheduler lambda', () => {
     await processor(fakeEvent, sqsContext, sqsCallback);
 
     // Exactly one Snowplow event should be emitted.
-    const allEvents = await waitForSnowplowEvents();
+    const allEvents = await waitForSnowplowEvents(record.candidates.length);
     expect(allEvents.bad).toEqual(0);
     expect(allEvents.good).toEqual(record.candidates.length);
 
