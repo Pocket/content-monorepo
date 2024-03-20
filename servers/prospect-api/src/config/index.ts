@@ -36,7 +36,7 @@ export default {
         : 'pocket-backend-prospect-api-dev',
     schemas: {
       // published 2024-01-26
-      prospect: 'iglu:com.pocket/prospect/jsonschema/1-0-2',
+      prospect: 'iglu:com.pocket/prospect/jsonschema/1-0-3',
       // published 2024-01-02
       objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-16',
     },
