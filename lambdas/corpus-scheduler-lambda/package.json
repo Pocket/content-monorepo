@@ -16,7 +16,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-secrets-manager": "3.529.1",
     "@sentry/serverless": "7.95.0",
     "content-common": "workspace:*",
     "jsonwebtoken": "^9.0.2",
@@ -26,6 +25,7 @@
     "typia": "^5.4.0"
   },
   "devDependencies": {
+    "@aws-sdk/client-secrets-manager": "3.529.1",
     "@types/aws-lambda": "8.10.134",
     "@types/jest": "29.5.12",
     "aws-sdk-client-mock": "^3.0.1",

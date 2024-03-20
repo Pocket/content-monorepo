@@ -3,6 +3,7 @@ import {
   CorpusLanguage,
   CuratedStatus,
   Topics,
+  ScheduledSurfaces,
 } from 'content-common';
 import { tags } from 'typia';
 
@@ -23,7 +24,7 @@ export interface ScheduledCorpusItem {
   source: CorpusItemSource.ML;
   topic: Topics; // Empty string means unknown topic
   scheduled_date: string; // YYYY-MM-DD
-  scheduled_surface_guid: string;
+  scheduled_surface_guid: ScheduledSurfaces;
   title?: string;
   excerpt?: string;
   language?: CorpusLanguage;
@@ -32,7 +33,7 @@ export interface ScheduledCorpusItem {
 }
 
 // TODO: add allowed surfaces here to schedule to production
-export const allowedScheduledSurfaces: string[] = [];
+export const allowedScheduledSurfaces: string[] = ['NEW_TAB_EN_US'];
 
 export type ScheduledCorpusCandidateFeatures = {
   rank: number & tags.Type<'int64'>; // rank is integer in Snowplow schema
@@ -47,3 +48,22 @@ export type ScheduledCorpusCandidateRunDetails = {
   run_id: string;
   [key: string]: any; // ML controls which additional run debug info is sent
 };
+
+interface ScheduledCorpusItemOutput {
+  externalId: string;
+}
+
+export interface ApprovedCorpusItemOutput {
+  externalId: string;
+  url: string;
+}
+
+export interface ScheduledCorpusItemWithApprovedCorpusItemOutput
+  extends ScheduledCorpusItemOutput {
+  approvedItem: ApprovedCorpusItemOutput;
+}
+
+export interface ApprovedCorpusItemWithScheduleHistoryOutput
+  extends ApprovedCorpusItemOutput {
+  scheduledSurfaceHistory: ScheduledCorpusItemOutput[];
+}

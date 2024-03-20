@@ -68,19 +68,21 @@ export const generateSnowplowErrorEntity = (
 /**
  *
  * @param candidate ML candidate
- * @param approvedCorpusItemId Identifier the item added to the corpus
+ * @param approvedCorpusItemId Identifies the item added to the corpus
+ * @param scheduledCorpusItemId Identifies the entry on the schedule
  */
 export const generateSnowplowSuccessEntity = (
   candidate: ScheduledCandidate,
   approvedCorpusItemId: string,
+  scheduledCorpusItemId: string,
 ): SnowplowScheduledCorpusCandidate => {
   return {
     scheduled_corpus_candidate_id: candidate.scheduled_corpus_candidate_id,
     candidate_url: candidate.scheduled_corpus_item.url,
     approved_corpus_item_external_id: approvedCorpusItemId,
+    scheduled_corpus_item_external_id: scheduledCorpusItemId,
     features: candidate.features,
     run_details: candidate.run_details,
-    // TODO: [MC-812] set scheduled_corpus_item_external_id when already scheduled.
   };
 };
 

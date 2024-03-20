@@ -9,6 +9,7 @@ import {
   CreateApprovedItemInput,
   CuratedStatus,
   ScheduledItemSource,
+  ScheduledSurfaces,
   Topics,
   UrlMetadata,
 } from 'content-common';
@@ -42,7 +43,7 @@ export const createScheduledCandidate = (
       source: CorpusItemSource.ML,
       topic: Topics.SELF_IMPROVEMENT,
       scheduled_date: defaultScheduledDate as string,
-      scheduled_surface_guid: 'NEW_TAB_EN_US',
+      scheduled_surface_guid: ScheduledSurfaces.NEW_TAB_EN_US,
       title:
         'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
       excerpt:
@@ -142,6 +143,11 @@ export const createApprovedCorpusItemBody = {
       externalId: 'fake-external-id',
       url: 'https://fake-url.com',
       title: 'Fake title',
+      scheduledSurfaceHistory: [
+        {
+          externalId: '143b8de8-0dc9-4613-b9f0-0e8837a2df1c',
+        },
+      ],
     },
   },
 };
@@ -149,8 +155,9 @@ export const createApprovedCorpusItemBody = {
 export const createScheduledCorpusItemBody = {
   data: {
     createScheduledCorpusItem: {
-      externalId: 'fake-external-id',
+      externalId: 'fake-scheduled-external-id-2',
       approvedItem: {
+        externalId: 'fake-external-id',
         url: 'https://fake-url.com',
         title: 'Fake title',
       },
