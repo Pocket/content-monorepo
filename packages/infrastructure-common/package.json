@@ -1,0 +1,25 @@
+{
+  "name": "infrastructure-common",
+  "version": "1.0.1",
+  "description": "common infra code shared between multiple content infra services",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "test": "jest \"\\.spec\\.ts\"",
+    "lint": "eslint --fix-dry-run \"*.ts\"",
+    "format": "eslint --fix \"**/*.ts\""
+  },
+  "author": "pocket",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "@pocket-tools/terraform-modules": "5.8.6"
+  },
+  "devDependencies": {
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
+  }
+}
