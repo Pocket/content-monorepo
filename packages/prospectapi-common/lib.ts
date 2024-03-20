@@ -6,7 +6,7 @@ import { UrlMetadata } from 'content-common';
 
 /**
  * helper to convert a JS Date to a unix timestamp. note that this will lose
- * milisecond information (as unix timestamps are seconds based).
+ * millisecond information (as unix timestamps are seconds based).
  *
  * @param date a Date object
  * @returns a unix timestamp number
@@ -14,7 +14,7 @@ import { UrlMetadata } from 'content-common';
 export const toUnixTimestamp = (date?: Date): number => {
   date = date || new Date();
 
-  // JS `getTime()` returns miliseconds, while unix timestamp expects seconds
+  // JS `getTime()` returns milliseconds, while unix timestamp expects seconds
   // this is why we divide by 1000
   return Math.floor(date.getTime() / 1000);
 };
@@ -65,6 +65,27 @@ export const derivePublisher = (item: ClientApiItem): string => {
   }
 
   return publisher;
+};
+
+/**
+ * takes a parser item and returns the date it was published, if present
+ */
+export const deriveDatePublished = (item: ClientApiItem): string => {
+  let datePublished: string = '';
+
+  // Collection publication date is not guaranteed by the graph,
+  // so let's only use it if it's present
+  if (item.collection && item.collection.publishedAt) {
+    datePublished = item.collection.publishedAt;
+    // If this is a syndicated article, it always has a published date
+  } else if (item.syndicatedArticle) {
+    datePublished = item.syndicatedArticle.publishedAt;
+    // If the parser could retrieve publication date for a story, use that
+  } else if (item.datePublished) {
+    datePublished = item.datePublished;
+  }
+
+  return datePublished;
 };
 
 /**
@@ -145,6 +166,7 @@ export const deriveUrlMetadata = async (url: string): Promise<UrlMetadata> => {
       ),
       imageUrl: deriveImageUrl(item),
       publisher: derivePublisher(item),
+      datePublished: deriveDatePublished(item),
       title: deriveTitle(item),
       excerpt: deriveExcerpt(item),
       language: item.language,

@@ -70,6 +70,7 @@ export const getUrlMetadata = async (
           title
           language
           topImageUrl
+          datePublished
           authors {
             name
           }
@@ -84,10 +85,12 @@ export const getUrlMetadata = async (
               name
               url
             }
+            publishedAt
             title
           }
           collection {
             slug
+            publishedAt
           }
         }
       }

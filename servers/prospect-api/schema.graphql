@@ -60,6 +60,7 @@ type UrlMetadata {
   url: String!
   imageUrl: String
   publisher: String
+  datePublished: String
   domain: String
   title: String
   excerpt: String

@@ -25,15 +25,15 @@ const makeProspects = (
 
   for (let i = 0; i < count; i++) {
     prospects.push({
-      id: faker.datatype.uuid(),
-      prospectId: faker.datatype.uuid(),
+      id: faker.string.uuid(),
+      prospectId: faker.string.uuid(),
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       prospectType: ProspectType.COUNTS,
       topic: faker.helpers.arrayElement(topicsArray),
       url: faker.internet.url(),
       createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-      saveCount: faker.datatype.number(),
-      rank: faker.datatype.number(),
+      saveCount: faker.number.int(),
+      rank: faker.number.int(),
       ...options,
     });
   }
@@ -104,62 +104,62 @@ describe('lib', () => {
       const prospects: Prospect[] = [];
 
       prospects.push({
-        id: faker.datatype.uuid(),
-        prospectId: faker.datatype.uuid(),
+        id: faker.string.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.COUNTS,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 10,
       });
 
       prospects.push({
-        id: faker.datatype.uuid(),
-        prospectId: faker.datatype.uuid(),
+        id: faker.string.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.COUNTS,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 20,
       });
 
       prospects.push({
-        id: faker.datatype.uuid(),
-        prospectId: faker.datatype.uuid(),
+        id: faker.string.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.COUNTS,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 20,
       });
 
       prospects.push({
-        id: faker.datatype.uuid(),
-        prospectId: faker.datatype.uuid(),
+        id: faker.string.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.SYNDICATED_NEW,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 10,
       });
 
       prospects.push({
-        id: faker.datatype.uuid(),
-        prospectId: faker.datatype.uuid(),
+        id: faker.string.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.SYNDICATED_NEW,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 20,
       });
 
@@ -187,74 +187,74 @@ describe('lib', () => {
 
       // push two prospects each of 3 different prospect types and different ranks
       prospects.push({
-        id: faker.datatype.uuid(),
-        prospectId: faker.datatype.uuid(),
+        id: faker.string.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.COUNTS,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 10,
       });
 
       prospects.push({
-        id: faker.datatype.uuid(),
-        prospectId: faker.datatype.uuid(),
+        id: faker.string.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.COUNTS,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 20,
       });
 
       prospects.push({
-        id: faker.datatype.uuid(),
-        prospectId: faker.datatype.uuid(),
+        id: faker.string.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.TIMESPENT,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 30,
       });
 
       prospects.push({
-        id: faker.datatype.uuid(),
-        prospectId: faker.datatype.uuid(),
+        id: faker.string.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.TIMESPENT,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 60,
       });
 
       prospects.push({
-        id: faker.datatype.uuid(),
-        prospectId: faker.datatype.uuid(),
+        id: faker.string.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.SYNDICATED_NEW,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 40,
       });
 
       prospects.push({
-        id: faker.datatype.uuid(),
-        prospectId: faker.datatype.uuid(),
+        id: faker.string.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.SYNDICATED_NEW,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 50,
       });
 
@@ -305,14 +305,14 @@ describe('lib', () => {
       const prospects: Prospect[] = [];
 
       const baseProspect = {
-        id: faker.datatype.uuid(),
-        prospectId: faker.datatype.uuid(),
+        id: faker.string.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.COUNTS,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 10,
       };
 
@@ -360,13 +360,13 @@ describe('lib', () => {
 
       const testProspect = {
         id: 'dupe',
-        prospectId: faker.datatype.uuid(),
+        prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         prospectType: ProspectType.COUNTS,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
-        saveCount: faker.datatype.number(),
+        saveCount: faker.number.int(),
         rank: 10,
       };
 

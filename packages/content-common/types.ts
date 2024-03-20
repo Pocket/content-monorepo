@@ -103,6 +103,7 @@ export interface UrlMetadata {
   url: string;
   imageUrl?: string;
   publisher?: string;
+  datePublished?: string;
   domain?: string;
   title?: string;
   excerpt?: string;

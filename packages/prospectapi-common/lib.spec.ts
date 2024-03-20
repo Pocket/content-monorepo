@@ -1,5 +1,6 @@
 import {
   deriveAuthors,
+  deriveDatePublished,
   deriveDomainName,
   deriveExcerpt,
   deriveImageUrl,
@@ -56,6 +57,7 @@ describe('lib', () => {
             name: 'The Daily Bugle',
             url: 'https://thedailybugle.com',
           },
+          publishedAt: '2024-01-01',
           title: 'Silly As Needed',
         },
       };
@@ -75,6 +77,45 @@ describe('lib', () => {
     });
 
     it('should return an empty string if no publisher exists', () => {
+      const item: ClientApiItem = {
+        resolvedUrl: 'https://getpocket.com/idk',
+      };
+
+      expect(derivePublisher(item)).toEqual('');
+    });
+  });
+
+  describe('deriveDatePublished', () => {
+    it('should return the syndicated publication date if exists', () => {
+      const item: ClientApiItem = {
+        resolvedUrl: 'https://getpocket.com/idk',
+        syndicatedArticle: {
+          authorNames: [],
+          publisher: {
+            name: 'The Daily Bugle',
+            url: 'https://thedailybugle.com',
+          },
+          publishedAt: '2024-01-01',
+          title: 'Silly As Needed',
+        },
+      };
+
+      expect(deriveDatePublished(item)).toEqual('2024-01-01');
+    });
+
+    it('should return the collection publication date if exists', () => {
+      const item: ClientApiItem = {
+        resolvedUrl: 'https://getpocket.com/idk',
+        collection: {
+          slug: 'idk',
+          publishedAt: '2024-01-01',
+        },
+      };
+
+      expect(deriveDatePublished(item)).toEqual('2024-01-01');
+    });
+
+    it('should return an empty string if no publication date exists', () => {
       const item: ClientApiItem = {
         resolvedUrl: 'https://getpocket.com/idk',
       };
@@ -151,6 +192,7 @@ describe('lib', () => {
           syndicatedArticle: {
             authorNames: ['Octavia Butler', 'V.E. Schwab'],
             title: 'Silly As Needed',
+            publishedAt: '2024-01-02',
           },
         };
 
@@ -163,6 +205,7 @@ describe('lib', () => {
           syndicatedArticle: {
             authorNames: [],
             title: 'Silly As Needed',
+            publishedAt: '2024-02-03',
           },
         };
 
@@ -180,6 +223,7 @@ describe('lib', () => {
           authorNames: [],
           excerpt: 'Your registraton? Hurry up meow.',
           title: 'Silly As Needed',
+          publishedAt: '2024-03-02',
         },
       };
 
@@ -193,6 +237,7 @@ describe('lib', () => {
         syndicatedArticle: {
           authorNames: [],
           title: 'Silly As Needed',
+          publishedAt: '2024-03-02',
         },
       };
 
@@ -207,6 +252,7 @@ describe('lib', () => {
         syndicatedArticle: {
           authorNames: [],
           title: 'Silly As Needed',
+          publishedAt: '2024-01-01',
         },
       };
 
@@ -222,6 +268,7 @@ describe('lib', () => {
         syndicatedArticle: {
           authorNames: [],
           title: 'Silly As Needed',
+          publishedAt: '2024-01-05',
         },
       };
 
@@ -255,6 +302,7 @@ describe('lib', () => {
           authorNames: [],
           title: 'Silly As Needed',
           mainImage: 'https://www.placecage.com/g/300/300',
+          publishedAt: '2024-01-22',
         },
       };
 

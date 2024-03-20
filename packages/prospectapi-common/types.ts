@@ -219,11 +219,13 @@ export type ClientApiSyndicatedArticle = {
     name?: string;
     url?: string;
   };
+  publishedAt: string;
   title: string;
 };
 
 export type ClientApiCollection = {
   slug: string;
+  publishedAt: string;
 };
 
 export type ClientApiAuthor = {
@@ -234,6 +236,7 @@ export type ClientApiItem = {
   domainMetadata?: ClientApiDomainMeta;
   excerpt?: string;
   language?: string;
+  datePublished?: any;
   resolvedUrl: string;
   syndicatedArticle?: ClientApiSyndicatedArticle;
   title?: string;
