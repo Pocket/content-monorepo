@@ -1,5 +1,5 @@
 {
-  "name": "prospect-api-bridge-aws_lambda",
+  "name": "prospect-bridge-aws_lambda",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",

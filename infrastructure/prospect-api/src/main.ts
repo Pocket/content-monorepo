@@ -30,7 +30,9 @@ import { config } from './config';
 import { DynamoDB } from 'infrastructure-common';
 
 class ProspectAPI extends TerraformStack {
-  constructor(scope: Construct, name: string) {
+  constructor(scope: Construct, name: string) {module.exports = {
+    extends: ['custom/cdktf'],
+  };
     super(scope, name);
 
     new AwsProvider(this, 'aws', { region: 'us-east-1' });

@@ -18,6 +18,8 @@ repo_for_enum: &repo_for_enum
       - prospect_api
       - curated_corpus_api
       - corpus_scheduler_lambda
+      - prospect_translation_lambda
+      - prospect_bridge_lambda
 
 resource_class_enum: &resource_class_enum
   resource-class:
@@ -36,6 +38,12 @@ parameters:
     type: boolean
     default: false
   corpus_scheduler_lambda:
+    type: boolean
+    default: false
+  prospect_translation_lambda:
+    type: boolean
+    default: false
+  prospect_bridge_lambda:
     type: boolean
     default: false
 
@@ -62,6 +70,8 @@ commands:
             prospect_api: << pipeline.parameters.prospect_api >>
             curated_corpus_api: << pipeline.parameters.curated_corpus_api >>
             corpus_scheduler_lambda: << pipeline.parameters.corpus_scheduler_lambda >>
+            prospect_translation_lambda: << pipeline.parameters.prospect_translation_lambda >>
+            prospect_bridge_lambda: << pipeline.parameters.prospect_bridge_lambda >>
   install_pnpm:
     steps:
       - run:
