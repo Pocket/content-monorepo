@@ -3,7 +3,7 @@ import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { LocalProvider } from '@cdktf/provider-local/lib/provider';
 import { NullProvider } from '@cdktf/provider-null/lib/provider';
 import { Construct } from 'constructs';
-import { App, S3Backend, TerraformStack } from 'cdktf';
+import {App, RemoteBackend, TerraformStack} from 'cdktf';
 import { BridgeSqsLambda } from './bridgeSqsLambda';
 import { config } from './config';
 import { DataAwsRegion } from '@cdktf/provider-aws/lib/data-aws-region';
@@ -18,11 +18,10 @@ class BridgeSQSLambdaWraper extends TerraformStack {
     new LocalProvider(this, 'local-provider');
     new ArchiveProvider(this, 'archive-provider');
 
-    new S3Backend(this, {
-      bucket: `mozilla-pocket-team-${config.environment.toLowerCase()}-terraform-state`,
-      dynamodbTable: `mozilla-pocket-team-${config.environment.toLowerCase()}-terraform-state`,
-      key: `${config.name}-Sqs-Translation-Lambda`,
-      region: 'us-east-1',
+    new RemoteBackend(this, {
+      hostname: 'app.terraform.io',
+      organization: 'Pocket',
+      workspaces: [{ name: `${config.name}-${config.environment}` }],
     });
 
     const region = new DataAwsRegion(this, 'region');

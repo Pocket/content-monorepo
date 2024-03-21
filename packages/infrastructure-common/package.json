@@ -8,7 +8,6 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "test": "jest \"\\.spec\\.ts\"",
     "lint": "eslint --fix-dry-run \"*.ts\"",
     "format": "eslint --fix \"**/*.ts\""
   },
