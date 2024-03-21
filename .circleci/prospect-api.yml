@@ -190,8 +190,8 @@ workflows:
           service_name: ProspectAPI
           requires:
             - prospect-api_code_deploy_ecs_dev
-            - prospect-api_code_deploy_lambda_dev
-            - prospect-api-bridge_code_deploy_lambda_dev
+#            - prospect-api_code_deploy_lambda_dev
+#            - prospect-api-bridge_code_deploy_lambda_dev
       ######
       # Main Branch Deployment (Prod Environment)
       ######
@@ -298,7 +298,7 @@ workflows:
           sentry_org: pocket
           requires:
             - prospect-api_code_deploy_ecs_prod
-            - prospect-api_code_deploy_lambda_prod
+#            - prospect-api_code_deploy_lambda_prod
 
       # Setup params we may use in Lambdas
       - setup_deploy_params:
@@ -311,4 +311,4 @@ workflows:
           service_name: ProspectAPI
           requires:
             - prospect-api_code_deploy_ecs_prod
-            - prospect-api_code_deploy_lambda_prod
+#            - prospect-api_code_deploy_lambda_prod
