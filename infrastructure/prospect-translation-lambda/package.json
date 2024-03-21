@@ -1,5 +1,5 @@
 {
-  "name": "prospect-api-cdk",
+  "name": "prospect-translation-lambda-cdk",
   "version": "1.0.0",
   "main": "dist/main.js",
   "types": "dist/main.ts",

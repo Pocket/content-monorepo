@@ -4,7 +4,7 @@
   "description": "common infra code shared between multiple content infra services",
   "main": "./dist/index.js",
   "exports": {
-    ".": "./dist/index.js",
+    ".": "./dist/index.js"
   },
   "scripts": {
     "build": "rm -rf dist && tsc",

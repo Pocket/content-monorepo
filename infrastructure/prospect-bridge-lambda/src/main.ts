@@ -4,13 +4,12 @@ import { LocalProvider } from '@cdktf/provider-local/lib/provider';
 import { NullProvider } from '@cdktf/provider-null/lib/provider';
 import { Construct } from 'constructs';
 import { App, S3Backend, TerraformStack } from 'cdktf';
-
-import { PocketVPC } from '@pocket-tools/terraform-modules';
+import { BridgeSqsLambda } from './bridgeSqsLambda';
 import { config } from './config';
-import { TranslationSqsLambda } from './translationSqsLambda';
-import { MlIamUserPolicy } from './iam';
+import { DataAwsRegion } from '@cdktf/provider-aws/lib/data-aws-region';
+import { DataAwsCallerIdentity } from '@cdktf/provider-aws/lib/data-aws-caller-identity';
 
-class TranslationSQSLambdaWraper extends TerraformStack {
+class BridgeSQSLambdaWraper extends TerraformStack {
   constructor(scope: Construct, name: string) {
     super(scope, name);
 
@@ -26,16 +25,12 @@ class TranslationSQSLambdaWraper extends TerraformStack {
       region: 'us-east-1',
     });
 
-    const pocketVPC = new PocketVPC(this, 'pocket-vpc');
-    const dynamodb = new DynamoDB(this, 'dynamodb');
+    const region = new DataAwsRegion(this, 'region');
+    const caller = new DataAwsCallerIdentity(this, 'caller');
 
-    new TranslationSqsLambda(
-        this,
-        'translation-lambda',
-        dynamodb.prospectsTable,
-    );
+    new BridgeSqsLambda(this, 'bridge-lambda', { region, caller });
   }
 }
 const app = new App();
-new TranslationSQSLambdaWraper(app, 'translation-sqs-lambda-wrapper');
+new BridgeSQSLambdaWraper(app, 'bridge-sqs-lambda-wrapper');
 app.synth();

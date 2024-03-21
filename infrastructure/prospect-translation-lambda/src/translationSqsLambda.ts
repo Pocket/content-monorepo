@@ -7,14 +7,12 @@ import {
 import { PocketSQSWithLambdaTarget } from '@pocket-tools/terraform-modules';
 import { LAMBDA_RUNTIMES } from '@pocket-tools/terraform-modules';
 import { DataAwsSsmParameter } from '@cdktf/provider-aws/lib/data-aws-ssm-parameter';
-import { PocketPagerDuty } from '@pocket-tools/terraform-modules';
 
 export class TranslationSqsLambda extends Construct {
   constructor(
     scope: Construct,
     private name: string,
     prospectsTable: ApplicationDynamoDBTable,
-    pagerDuty?: PocketPagerDuty,
   ) {
     super(scope, name);
 
@@ -70,17 +68,8 @@ export class TranslationSqsLambda extends Construct {
           accountId: vpc.accountId,
         },
         alarms: {
-          // TODO: set better alarm values
-          /*
-          errors: {
-            evaluationPeriods: 3,
-            period: 3600, // 1 hour
-            threshold: 20,
-            actions: config.isDev
-              ? []
-              : [pagerDuty!.snsNonCriticalAlarmTopic.arn],
-          },
-          */
+          // We don't configure alarms for this lambda, and
+          // instead rely on Sentry to alert on failure.
         },
       },
       tags: config.tags,

@@ -47,6 +47,38 @@ importers:
       '@pocket-tools/terraform-modules':
         specifier: 5.8.6
         version: 5.8.6(ink@3.2.0)(react@17.0.2)
+      infrastructure-common:
+        specifier: workspace:*
+        version: link:../../packages/infrastructure-common
+    devDependencies:
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../../packages/eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
+
+  infrastructure/prospect-bridge-lambda:
+    dependencies:
+      '@pocket-tools/terraform-modules':
+        specifier: 5.8.6
+        version: 5.8.6(ink@3.2.0)(react@17.0.2)
+    devDependencies:
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../../packages/eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
+
+  infrastructure/prospect-translation-lambda:
+    dependencies:
+      '@pocket-tools/terraform-modules':
+        specifier: 5.8.6
+        version: 5.8.6(ink@3.2.0)(react@17.0.2)
+      infrastructure-common:
+        specifier: workspace:*
+        version: link:../../packages/infrastructure-common
     devDependencies:
       eslint-config-custom:
         specifier: workspace:*
@@ -102,7 +134,7 @@ importers:
         version: 2.1.2(typescript@5.3.3)
       ts-jest:
         specifier: 29.1.2
-        version: 29.1.2(@babel/core@7.23.9)(jest@29.7.0)(typescript@5.3.3)
+        version: 29.1.2(@babel/core@7.24.0)(jest@29.7.0)(typescript@5.3.3)
       tsconfig:
         specifier: workspace:*
         version: link:../../packages/tsconfig
@@ -136,7 +168,7 @@ importers:
         version: 29.7.0(@types/node@20.11.22)(ts-node@10.9.2)
       ts-jest:
         specifier: 29.1.2
-        version: 29.1.2(@babel/core@7.24.0)(jest@29.7.0)(typescript@5.3.3)
+        version: 29.1.2(@babel/core@7.23.9)(jest@29.7.0)(typescript@5.3.3)
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.11.22)(typescript@5.3.3)
@@ -241,6 +273,19 @@ importers:
       typescript:
         specifier: ^5.2.2
         version: 5.3.3
+
+  packages/infrastructure-common:
+    dependencies:
+      '@pocket-tools/terraform-modules':
+        specifier: 5.8.6
+        version: 5.8.6(ink@3.2.0)(react@17.0.2)
+    devDependencies:
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
 
   packages/prospectapi-common:
     dependencies:
@@ -7053,7 +7098,7 @@ packages:
     dependencies:
       semver: 7.6.0
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240318
+      typescript: 5.5.0-dev.20240321
     dev: false
 
   /drange@1.1.1:
@@ -12973,7 +13018,7 @@ packages:
       '@babel/core': 7.23.9
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
-      jest: 29.7.0(@types/node@20.11.13)(ts-node@10.9.2)
+      jest: 29.7.0(@types/node@20.11.22)(ts-node@10.9.2)
       jest-util: 29.7.0
       json5: 2.2.3
       lodash.memoize: 4.1.2
@@ -13007,7 +13052,7 @@ packages:
       '@babel/core': 7.24.0
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
-      jest: 29.7.0(@types/node@20.11.22)(ts-node@10.9.2)
+      jest: 29.7.0(@types/node@20.11.13)(ts-node@10.9.2)
       jest-util: 29.7.0
       json5: 2.2.3
       lodash.memoize: 4.1.2
@@ -13326,8 +13371,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240318:
-    resolution: {integrity: sha512-NLUk3mN8h9UWmeFns5dhiRIIZffmDePNOMPwwr36tYoJikteOGLNCOOcCP2Yvc+cOzl/mkBOUaEngUBGYRJBGw==}
+  /typescript@5.5.0-dev.20240321:
+    resolution: {integrity: sha512-QEUqMB18VAUQBHtHlq8BfjxGZzFkavH5fhZn+I97N67mDZTa86n1S8kiRKmrbxVwPAdvn3DYtJzcGq5OvdWkmQ==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
