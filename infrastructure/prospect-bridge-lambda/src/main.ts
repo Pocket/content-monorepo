@@ -3,7 +3,7 @@ import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { LocalProvider } from '@cdktf/provider-local/lib/provider';
 import { NullProvider } from '@cdktf/provider-null/lib/provider';
 import { Construct } from 'constructs';
-import {App, RemoteBackend, TerraformStack} from 'cdktf';
+import {App, Aspects, MigrateIds, RemoteBackend, TerraformStack} from 'cdktf';
 import { BridgeSqsLambda } from './bridgeSqsLambda';
 import { config } from './config';
 import { DataAwsRegion } from '@cdktf/provider-aws/lib/data-aws-region';
@@ -28,6 +28,10 @@ class BridgeSQSLambdaWraper extends TerraformStack {
     const caller = new DataAwsCallerIdentity(this, 'caller');
 
     new BridgeSqsLambda(this, 'bridge-lambda', { region, caller });
+
+    // Pre cdktf 0.17 ids were generated differently so we need to apply a migration aspect
+    // https://developer.hashicorp.com/terraform/cdktf/concepts/aspects
+    Aspects.of(this).add(new MigrateIds());
   }
 }
 const app = new App();

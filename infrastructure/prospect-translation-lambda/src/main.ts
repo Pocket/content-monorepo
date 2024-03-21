@@ -3,7 +3,7 @@ import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { LocalProvider } from '@cdktf/provider-local/lib/provider';
 import { NullProvider } from '@cdktf/provider-null/lib/provider';
 import { Construct } from 'constructs';
-import {App, RemoteBackend, TerraformStack} from 'cdktf';
+import {App, Aspects, MigrateIds, RemoteBackend, TerraformStack} from 'cdktf';
 import { TranslationSqsLambda } from './translationSqsLambda';
 import { DynamoDB } from 'infrastructure-common';
 import { config } from './config';
@@ -35,6 +35,10 @@ class TranslationSQSLambdaWraper extends TerraformStack {
       'translation-lambda',
       dynamodb.prospectsTable,
     );
+
+    // Pre cdktf 0.17 ids were generated differently so we need to apply a migration aspect
+    // https://developer.hashicorp.com/terraform/cdktf/concepts/aspects
+    Aspects.of(this).add(new MigrateIds());
   }
 }
 const app = new App();
