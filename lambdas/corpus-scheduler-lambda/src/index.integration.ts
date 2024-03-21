@@ -265,7 +265,7 @@ describe('corpus scheduler lambda', () => {
     await processor(fakeEvent, sqsContext, sqsCallback);
 
     expect(sentryRequests).toHaveLength(1);
-  }, 7000);
+  });
 
   it('sends a Sentry error if curated-corpus-api returns null data', async () => {
     // returns null as we are trying to create & schedule a new item
@@ -282,7 +282,7 @@ describe('corpus scheduler lambda', () => {
     await processor(fakeEvent, sqsContext, sqsCallback);
 
     expect(sentryRequests).toHaveLength(1);
-  }, 17000);
+  });
 
   it('should not start scheduling if allowedToSchedule is false', async () => {
     // returns null as we are trying to create & schedule a new item
@@ -310,7 +310,7 @@ describe('corpus scheduler lambda', () => {
     expect(consoleLogSpy).toHaveBeenCalledWith(
       'Scheduler lambda not allowed to schedule...',
     );
-  }, 7000);
+  });
 
   it('should not schedule if env is prod & not allowed scheduled surface', async () => {
     const { processor } = await importProcessorWithEnv({
@@ -348,7 +348,7 @@ describe('corpus scheduler lambda', () => {
     expect(consoleLogSpy).toHaveBeenCalledWith(
       'Cannot schedule candidate: a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 for surface NEW_TAB_EN_GB.',
     );
-  }, 7000);
+  });
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (prod)', async () => {
     // mock the config.app.isDev
@@ -384,7 +384,7 @@ describe('corpus scheduler lambda', () => {
     );
 
     expect(captureExceptionSpy).not.toHaveBeenCalled();
-  }, 7000);
+  });
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful & valid scheduled surface but not allowed for scheduling (approve & schedule candidate) (dev)', async () => {
     // returns null as we are trying to create & schedule a new item
@@ -410,7 +410,7 @@ describe('corpus scheduler lambda', () => {
     );
 
     expect(captureExceptionSpy).not.toHaveBeenCalled();
-  }, 7000);
+  });
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (dev)', async () => {
     // returns null as we are trying to create & schedule a new item
