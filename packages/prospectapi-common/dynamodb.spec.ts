@@ -1,5 +1,5 @@
-import { Prospect, ProspectType } from './types';
-import { Topics } from 'content-common';
+import { Prospect } from './types';
+import { ProspectType, Topics } from 'content-common';
 import { toUnixTimestamp } from './lib';
 import { generateInsertParams } from './dynamodb';
 

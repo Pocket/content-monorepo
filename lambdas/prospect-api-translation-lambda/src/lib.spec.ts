@@ -1,5 +1,5 @@
-import { Prospect, ProspectType } from 'prospectapi-common';
-import { Topics, UrlMetadata } from 'content-common';
+import { Prospect } from 'prospectapi-common';
+import { ProspectType, Topics, UrlMetadata } from 'content-common';
 
 import {
   hasValidStructure,

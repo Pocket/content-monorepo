@@ -2,7 +2,7 @@
 // currently is a confluence doc:
 // https://getpocket.atlassian.net/wiki/spaces/PE/pages/2584150049/Pocket+Shared+Data
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
-import { Topics } from 'content-common';
+import { ProspectType, Topics } from 'content-common';
 
 // this is the structure of an `Item` as returned by dynamo
 // just a convenience return type
@@ -11,27 +11,6 @@ export type DynamoItem =
       [key: string]: NativeAttributeValue;
     }
   | undefined;
-
-// these values will need to match those listed in the source of truth doc:
-// https://mozilla-hub.atlassian.net/wiki/spaces/PE/pages/390642851/Pocket+Shared+Data#Prospect-Types
-export enum ProspectType {
-  TIMESPENT = 'TIMESPENT',
-  COUNTS = 'COUNTS',
-  SYNDICATED_NEW = 'SYNDICATED_NEW',
-  SYNDICATED_RERUN = 'SYNDICATED_RERUN',
-  DOMAIN_ALLOWLIST = 'DOMAIN_ALLOWLIST',
-  TOP_SAVED = 'TOP_SAVED',
-  RECOMMENDED = 'RECOMMENDED',
-  COUNTS_MODELED = 'COUNTS_MODELED',
-  TIMESPENT_MODELED = 'TIMESPENT_MODELED',
-  TITLE_URL_MODELED = 'TITLE_URL_MODELED',
-  RSS_LOGISTIC = 'RSS_LOGISTIC',
-  RSS_LOGISTIC_RECENT = 'RSS_LOGISTIC_RECENT',
-  DISMISSED = 'DISMISSED',
-  CONSTRAINT_SCHEDULE = 'CONSTRAINT_SCHEDULE',
-  SLATE_SCHEDULER = 'SLATE_SCHEDULER',
-  SLATE_SCHEDULER_V2 = 'SLATE_SCHEDULER_V2',
-}
 
 // this is the type used in most of the code and in dynamo
 export type Prospect = {
@@ -107,8 +86,6 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.TITLE_URL_MODELED,
       ProspectType.RSS_LOGISTIC,
       ProspectType.RSS_LOGISTIC_RECENT,
-      ProspectType.CONSTRAINT_SCHEDULE,
-      ProspectType.SLATE_SCHEDULER,
       ProspectType.SLATE_SCHEDULER_V2,
     ],
   },

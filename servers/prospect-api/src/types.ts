@@ -1,6 +1,6 @@
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
-import { ProspectType, Prospect } from 'prospectapi-common';
-import { CorpusLanguage, Topics } from 'content-common';
+import { Prospect } from 'prospectapi-common';
+import { CorpusLanguage, ProspectType, Topics } from 'content-common';
 import { BaseContext } from '@apollo/server';
 
 // Re-export CorpusLanguage, used to be part of this file, but moved to common

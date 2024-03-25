@@ -1,4 +1,4 @@
-import { ProspectType } from './types';
+import { ProspectType } from 'content-common';
 import { dbClient } from './dynamodb-client';
 import { getProspectById, insertProspect, truncateDb } from './dynamodb';
 import { createProspect } from './test/helpers';
