@@ -99,6 +99,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.DOMAIN_ALLOWLIST,
       ProspectType.DISMISSED,
       ProspectType.TITLE_URL_MODELED,
+      ProspectType.RSS_LOGISTIC,
     ],
   },
   {
