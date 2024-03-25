@@ -357,8 +357,12 @@ describe('mutations: ApprovedItem', () => {
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
         ReviewedCorpusItemEventType.ADD_ITEM,
       );
-      expect(await eventTracker.mock.calls[1][0].eventType).toEqual(
+      const emitScheduledCorpusItemEventArgs = await eventTracker.mock.calls[1][0];
+      expect(emitScheduledCorpusItemEventArgs.eventType).toEqual(
         ScheduledCorpusItemEventType.ADD_SCHEDULE,
+      );
+      expect(emitScheduledCorpusItemEventArgs.scheduledCorpusItem.generated_by).toEqual(
+        ScheduledItemSource.ML,
       );
 
       // 3- Events have the right entities passed to it.
