@@ -192,10 +192,11 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
 
     // the following fields are from primary source = Parser
     const publisher = itemMetadata.publisher as string;
-    //Metaflow only grabs the first author even if there are more than 1 authors present, so grab authors from Parser
-    const authors = mapAuthorToApprovedItemAuthor(
-      itemMetadata.authors!.split(','),
-    );
+    // Metaflow only grabs the first author even if there are more than 1 author present, so grab authors from Parser
+    // if Parser cannot return authors, default to Metaflow then
+    const authors = itemMetadata.authors
+      ? mapAuthorToApprovedItemAuthor(itemMetadata.authors!.split(','))
+      : mapAuthorToApprovedItemAuthor(candidate.scheduled_corpus_item.authors!);
 
     const itemToSchedule: CreateApprovedItemInput = {
       url: candidate.scheduled_corpus_item.url, // source = Metaflow
