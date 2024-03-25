@@ -1,6 +1,6 @@
 // Helper types and enums used in the schema
 import { ScheduledCorpusItemStatus } from '../../shared/types';
-import { CorpusItemSource } from 'content-common';
+import { CorpusItemSource, ScheduledItemSource } from 'content-common';
 
 export type RejectionReason = { reason: string };
 
@@ -219,7 +219,7 @@ export type ScheduledCorpusItem = {
   /**
    * The method by which this item was generated. Possible values include ML and MANUAL.
    */
-  generated_by?: CorpusItemSource;
+  generated_by?: ScheduledItemSource;
   /**
    * The status of the scheduled_corpus_item, as decided by a curator.
    */
