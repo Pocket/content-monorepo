@@ -4,7 +4,7 @@ import {
 } from '@prisma/client';
 import { ScheduledItem, CorpusItem, ApprovedItem } from '../database/types';
 import { ScheduledCorpusItemStatus } from '../shared/types';
-import { CorpusItemSource } from 'content-common';
+import { ScheduledItemSource } from 'content-common';
 
 export enum ReviewedCorpusItemEventType {
   ADD_ITEM = 'ADD_ITEM',
@@ -47,7 +47,7 @@ export type ReviewedCorpusItemPayload = {
 export type ScheduledCorpusItemPayload = {
   scheduledCorpusItem: ScheduledItem & {
     // the method by which this item was generated (MANUAL or ML, for a scheduled item)
-    generated_by?: CorpusItemSource;
+    generated_by?: ScheduledItemSource;
     // for some surfaces, curators will provide at least one reason and
     // optionally a comment when manually scheduling a corpus item.
     // the purpose here is for ML to know *why* items are manually scheduled
