@@ -85,6 +85,25 @@ export type CreateScheduledItemInput = {
   source: ScheduledItemSource;
 };
 
+// these values will need to match those listed in the source of truth doc:
+// https://mozilla-hub.atlassian.net/wiki/spaces/PE/pages/390642851/Pocket+Shared+Data#Prospect-Types
+export enum ProspectType {
+  COUNTS = 'COUNTS',
+  COUNTS_MODELED = 'COUNTS_MODELED',
+  DISMISSED = 'DISMISSED',
+  DOMAIN_ALLOWLIST = 'DOMAIN_ALLOWLIST',
+  RECOMMENDED = 'RECOMMENDED',
+  RSS_LOGISTIC = 'RSS_LOGISTIC',
+  RSS_LOGISTIC_RECENT = 'RSS_LOGISTIC_RECENT',
+  SLATE_SCHEDULER_V2 = 'SLATE_SCHEDULER_V2',
+  SYNDICATED_NEW = 'SYNDICATED_NEW',
+  SYNDICATED_RERUN = 'SYNDICATED_RERUN',
+  TIMESPENT = 'TIMESPENT',
+  TIMESPENT_MODELED = 'TIMESPENT_MODELED',
+  TITLE_URL_MODELED = 'TITLE_URL_MODELED',
+  TOP_SAVED = 'TOP_SAVED',
+}
+
 export enum ScheduledSurfaces {
   NEW_TAB_EN_US = 'NEW_TAB_EN_US',
   NEW_TAB_DE_DE = 'NEW_TAB_DE_DE',

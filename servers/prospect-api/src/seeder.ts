@@ -1,14 +1,15 @@
 import { faker, fakerDE, fakerES, fakerFR, fakerIT } from '@faker-js/faker';
-import config from './config';
+import { ProspectType } from 'content-common';
 import {
   dbClient,
   insertProspect,
   Prospect,
-  ProspectType,
   ScheduledSurface,
   ScheduledSurfaces,
   truncateDb,
 } from 'prospectapi-common';
+import config from './config';
+
 import { CorpusLanguage, Topics } from './types';
 
 // conjure up double the batch size so we get variance
@@ -21,7 +22,7 @@ const langToFakerLocale = {
   ES: fakerES,
   FR: fakerFR,
   IT: fakerIT,
-}
+};
 
 const buildProspect = (
   surfaceGuid: ScheduledSurface,
@@ -43,8 +44,7 @@ const buildProspect = (
     Object.keys(CorpusLanguage).indexOf(guidLang) == -1
       ? faker.helpers.arrayElement(Object.values(CorpusLanguage))
       : guidLang;
-  const fakerLocale = langToFakerLocale[corpusLang]
-
+  const fakerLocale = langToFakerLocale[corpusLang];
 
   const imageCat = faker.helpers.arrayElement([
     'city',

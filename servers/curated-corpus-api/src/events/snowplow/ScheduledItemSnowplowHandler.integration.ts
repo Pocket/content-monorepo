@@ -69,7 +69,7 @@ const scheduledCorpusItem: ScheduledItem = {
 const scheduledEventData: ScheduledCorpusItemPayload = {
   scheduledCorpusItem: {
     ...scheduledCorpusItem,
-    generated_by: CorpusItemSource.MANUAL,
+    generated_by: ScheduledItemSource.MANUAL,
     // in the real world this should match the event type, but it's fine to
     // hard-code here just to ensure the value is making it to snowplow
     status: ScheduledCorpusItemStatus.REMOVED,
@@ -163,7 +163,7 @@ describe('ScheduledItemSnowplowHandler', () => {
       const scheduledItemWithMlData: ScheduledCorpusItemPayload = {
         scheduledCorpusItem: {
           ...scheduledCorpusItem,
-          generated_by: CorpusItemSource.ML,
+          generated_by: ScheduledItemSource.ML,
           status: ScheduledCorpusItemStatus.REMOVED,
           reasons: ['TOPIC', 'PUBLISHER'],
           reasonComment: 'why did i rescheudle this? see above',
@@ -203,7 +203,7 @@ describe('ScheduledItemSnowplowHandler', () => {
       const scheduledItemWithMlData: ScheduledCorpusItemPayload = {
         scheduledCorpusItem: {
           ...scheduledCorpusItem,
-          generated_by: CorpusItemSource.ML,
+          generated_by: ScheduledItemSource.ML,
           status: ScheduledCorpusItemStatus.ADDED,
           reasons: ['TOPIC', 'PUBLISHER'],
           reasonComment: 'why did i rescheudle this? see above',
@@ -245,7 +245,7 @@ describe('ScheduledItemSnowplowHandler', () => {
       const scheduledItemWithMlData: ScheduledCorpusItemPayload = {
         scheduledCorpusItem: {
           ...scheduledCorpusItem,
-          generated_by: CorpusItemSource.ML,
+          generated_by: ScheduledItemSource.ML,
           status: ScheduledCorpusItemStatus.ADDED,
           reasons: ['TOPIC', 'PUBLISHER'],
           reasonComment: 'why did i rescheudle this? see above',

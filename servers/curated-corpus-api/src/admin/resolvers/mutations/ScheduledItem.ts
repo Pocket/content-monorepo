@@ -1,7 +1,7 @@
 import {
-  CorpusItemSource,
   parseReasonsCsv,
   sanitizeText,
+  ScheduledItemSource,
 } from 'content-common';
 
 import config from '../../../config';
@@ -77,9 +77,7 @@ export async function deleteScheduledItem(
     scheduledCorpusItem: {
       ...scheduledItem,
       status: ScheduledCorpusItemStatus.REMOVED,
-      // hard-coded to manual for now. once MC-645 is complete, this should be pulled from
-      // the `scheduledItem.source` property.
-      generated_by: CorpusItemSource.MANUAL,
+      generated_by: scheduledItem.source as ScheduledItemSource,
       // get reasons and reason comment (these may both be null. they're only
       // supplied when a scheduled item is deleted for a limited set of surfaces)
       reasons: parseReasonsCsv(data.reasons, config.app.removeReasonMaxLength),

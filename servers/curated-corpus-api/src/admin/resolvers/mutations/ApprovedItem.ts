@@ -21,6 +21,7 @@ import {
 import {
   ReviewedCorpusItemEventType,
   ScheduledCorpusItemEventType,
+  ScheduledCorpusItemPayload,
 } from '../../../events/types';
 import { uploadImageToS3, uploadImageToS3FromUrl } from '../../aws/upload';
 import {
@@ -31,6 +32,7 @@ import {
   ACCESS_DENIED_ERROR,
   ApprovedItemS3ImageUrl,
   RejectionReason,
+  ScheduledCorpusItemStatus,
   Topics,
 } from '../../../shared/types';
 import { scheduledSurfaceAllowedValues } from '../../../shared/utils';
@@ -124,11 +126,19 @@ export async function createApprovedItem(
       context.authenticatedUser.username,
     );
 
+    // build an extended copy of the returned scheduledItem which will include
+    // additional event tracking info
+    const scheduledItemForEvents: ScheduledCorpusItemPayload = {
+      scheduledCorpusItem: {
+        ...scheduledItem,
+        status: ScheduledCorpusItemStatus.ADDED,
+        generated_by: scheduledSource,
+      },
+    };
+
     context.emitScheduledCorpusItemEvent(
       ScheduledCorpusItemEventType.ADD_SCHEDULE,
-      {
-        scheduledCorpusItem: scheduledItem,
-      },
+      scheduledItemForEvents,
     );
   }
 

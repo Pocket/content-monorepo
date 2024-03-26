@@ -1,13 +1,13 @@
+import { ProspectType, Topics } from 'content-common';
+
 import {
   Prospect,
-  ProspectType,
   dbClient,
   getProspectById,
   insertProspect,
   truncateDb,
   toUnixTimestamp,
 } from 'prospectapi-common';
-import { Topics } from 'content-common';
 
 import config from '../config';
 import {
