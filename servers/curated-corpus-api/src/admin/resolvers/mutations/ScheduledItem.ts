@@ -25,7 +25,6 @@ import {
   AuthenticationError,
   UserInputError,
 } from '@pocket-tools/apollo-utils';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { NotFoundError } from '@pocket-tools/apollo-utils';
 import { IAdminContext } from '../../context';
 
@@ -168,8 +167,8 @@ export async function createScheduledItem(
   } catch (error) {
     // If it's the duplicate scheduling constraint, catch the error
     // and send a user-friendly one to the client instead.
+    // Prisma P2002 error: "Unique constraint failed on the {constraint}"
     if (
-      error instanceof PrismaClientKnownRequestError &&
       error.code === 'P2002'
     ) {
       throw new UserInputError(
@@ -223,15 +222,12 @@ export async function rescheduleScheduledItem(
         scheduledCorpusItem: rescheduledItem,
       },
     );
-
     return rescheduledItem;
   } catch (error) {
     // If it's the duplicate scheduling constraint, catch the error
     // and send a user-friendly one to the client instead.
-    if (
-      error instanceof PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
+    // Prisma P2002 error: "Unique constraint failed on the {constraint}"
+    if (error.code === 'P2002') {
       throw new UserInputError(
         `This story is already scheduled to appear on ${data.scheduledDate.toLocaleString(
           'en-US',
@@ -242,7 +238,6 @@ export async function rescheduleScheduledItem(
         )}.`,
       );
     }
-
     // If it's something else, throw the error unchanged.
     throw new Error(error);
   }

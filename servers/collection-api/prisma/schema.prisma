@@ -1,0 +1,218 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+  output        = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model IABCategory {
+  id                Int           @id @default(autoincrement())
+  externalId        String        @unique @default(uuid()) @db.VarChar(255)
+  name              String        @db.VarChar(255)
+  slug              String        @db.VarChar(255)
+  createdAt         DateTime      @default(now()) @db.Timestamp(0)
+  updatedAt         DateTime      @updatedAt
+  IABCategoryId     Int?
+
+  // parent and children define the one-to-many relationship with this table
+  // these declarations are required to map to the top/sub categories defined in the Collection model below
+  childCollections  Collection[]  @relation("CollectionIABChildCategory")
+  parentCollections Collection[]  @relation("CollectionIABParentCategory")
+
+  parent            IABCategory?  @relation("IABCategoryChildren", fields: [IABCategoryId], references: [id])
+  children          IABCategory[] @relation("IABCategoryChildren")
+
+  @@index([IABCategoryId])
+}
+
+model CollectionStoryAuthor {
+  externalId        String          @id @default(uuid()) @db.VarChar(255)
+  name              String          @db.VarChar(255)
+  collectionStoryId Int
+  sortOrder         Int             @default(0)
+  collectionStory   CollectionStory @relation(fields: [collectionStoryId], references: [id], onDelete: Cascade)
+
+  @@index([collectionStoryId])
+}
+
+model CollectionStory {
+  id           Int                     @id @default(autoincrement())
+  externalId   String                  @unique @default(uuid()) @db.VarChar(255)
+  collectionId Int
+  url          String                  @db.VarChar(500)
+  title        String                  @db.VarChar(255)
+  excerpt      String                  @db.Text
+  imageUrl     String                  @db.VarChar(500)
+  publisher    String                  @db.VarChar(255)
+  sortOrder    Int                     @default(0)
+  createdAt    DateTime                @default(now()) @db.Timestamp(0)
+  updatedAt    DateTime                @updatedAt
+  fromPartner  Boolean                 @default(false)
+  collection   Collection              @relation(fields: [collectionId], references: [id])
+  authors      CollectionStoryAuthor[]
+
+  @@unique([collectionId, url])
+  @@index([collectionId])
+  @@index([url])
+}
+
+model Image {
+  id            Int               @id @default(autoincrement())
+  entityId      Int?
+  entityType    ImageEntityType?
+  sizeCategory  ImageSizeCategory @default(LARGE)
+  width         Int
+  height        Int
+  mimeType      String            @db.VarChar(255)
+  fileSizeBytes Int
+  fileName      String            @db.VarChar(255)
+  path          String            @unique @db.VarChar(255)
+  createdAt     DateTime          @default(now()) @db.DateTime(0)
+  updatedAt     DateTime          @updatedAt
+
+  @@index([entityId, entityType])
+}
+
+model CollectionAuthor {
+  id          Int          @id @default(autoincrement())
+  externalId  String       @unique @default(uuid()) @db.VarChar(255)
+  name        String       @unique @db.VarChar(255)
+  slug        String?      @db.VarChar(300)
+  bio         String?      @db.Text
+  imageUrl    String?      @db.VarChar(500)
+  createdAt   DateTime     @default(now()) @db.DateTime(0)
+  updatedAt   DateTime     @updatedAt
+  active      Boolean?     @default(true)
+  collections Collection[] @relation("CollectionToCollectionAuthor")
+
+  @@index([name])
+}
+
+model Label {
+  id          Int               @id @default(autoincrement())
+  externalId  String            @unique @default(uuid()) @db.VarChar(255)
+  name        String            @unique @db.VarChar(255)
+  createdAt   DateTime          @default(now()) @db.DateTime(0)
+  createdBy   String            @db.VarChar(255)
+  updatedAt   DateTime          @updatedAt
+  updatedBy   String?           @db.VarChar(255)
+  collections CollectionLabel[]
+
+  @@index([name])
+}
+
+model CollectionLabel {
+  collectionId Int
+  createdAt    DateTime   @default(now()) @db.DateTime(0)
+  createdBy    String     @db.VarChar(255)
+  labelId      Int
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  label        Label      @relation(fields: [labelId], references: [id])
+
+  @@id([labelId, collectionId])
+  @@index([collectionId], map: "CollectionLabel_collectionId_fkey")
+}
+
+model Collection {
+  id                  Int                    @id @default(autoincrement())
+  externalId          String                 @unique @default(uuid()) @db.VarChar(255)
+  slug                String                 @unique @db.VarChar(300)
+  title               String                 @db.VarChar(255)
+  excerpt             String?                @db.Text
+  intro               String?                @db.Text
+  imageUrl            String?                @db.VarChar(500)
+  publishedAt         DateTime?              @db.DateTime(0)
+  status              CollectionStatus?      @default(DRAFT)
+  createdAt           DateTime               @default(now()) @db.DateTime(0)
+  updatedAt           DateTime               @updatedAt
+  curationCategoryId  Int?
+  IABChildCategoryId  Int?
+  IABParentCategoryId Int?
+  language            CollectionLanguage     @default(EN)
+  IABChildCategory    IABCategory?           @relation("CollectionIABChildCategory", fields: [IABChildCategoryId], references: [id])
+  IABParentCategory   IABCategory?           @relation("CollectionIABParentCategory", fields: [IABParentCategoryId], references: [id])
+  curationCategory    CurationCategory?      @relation(fields: [curationCategoryId], references: [id])
+  labels              CollectionLabel[]
+  partnership         CollectionPartnership?
+  stories             CollectionStory[]
+  authors             CollectionAuthor[]     @relation("CollectionToCollectionAuthor")
+
+  // this compound index is for the public getCollections query
+  // status and language are always present in the WHERE
+  // publishedAt is always the ORDER BY
+  @@index([status, language, publishedAt])
+  @@index([slug])
+  @@index([title])
+  @@index([IABChildCategoryId], map: "Collection_IABChildCategoryId_fkey")
+  @@index([IABParentCategoryId], map: "Collection_IABParentCategoryId_fkey")
+  @@index([curationCategoryId], map: "Collection_curationCategoryId_fkey")
+}
+
+model CurationCategory {
+  id          Int          @id @default(autoincrement())
+  externalId  String       @unique @default(uuid()) @db.VarChar(255)
+  slug        String       @unique @db.VarChar(300)
+  name        String       @db.VarChar(255)
+  collections Collection[]
+}
+
+model CollectionPartner {
+  id           Int                     @id @default(autoincrement())
+  externalId   String                  @unique @default(uuid()) @db.VarChar(255)
+  name         String                  @db.VarChar(500)
+  url          String                  @db.VarChar(500)
+  imageUrl     String                  @db.VarChar(500)
+  blurb        String                  @db.Text
+  partnerships CollectionPartnership[]
+}
+
+model CollectionPartnership {
+  id           Int                       @id @default(autoincrement())
+  externalId   String                    @unique @default(uuid()) @db.VarChar(255)
+  type         CollectionPartnershipType @default(PARTNERED)
+  partnerId    Int
+  collectionId Int                       @unique
+  name         String?                   @db.VarChar(500)
+  url          String?                   @db.VarChar(500)
+  imageUrl     String?                   @db.VarChar(500)
+  blurb        String?                   @db.Text
+  collection   Collection                @relation(fields: [collectionId], references: [id])
+  partner      CollectionPartner         @relation(fields: [partnerId], references: [id])
+
+  @@index([partnerId], map: "CollectionPartnership_partnerId_fkey")
+}
+
+enum CollectionLanguage {
+  EN
+  DE
+}
+
+enum ImageEntityType {
+  COLLECTION
+  COLLECTION_STORY
+  COLLECTION_AUTHOR
+  COLLECTION_PARTNER
+  COLLECTION_PARTNERSHIP
+}
+
+enum ImageSizeCategory {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+enum CollectionStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CollectionPartnershipType {
+  PARTNERED
+  SPONSORED
+}

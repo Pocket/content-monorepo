@@ -1,0 +1,393 @@
+scalar Upload
+
+input CollectionInput {
+  title: String!
+  excerpt: String!
+}
+
+"""
+available filters for searching collections
+"""
+input SearchCollectionsFilters {
+  author: String
+  labelExternalIds: [String]
+  title: String
+  status: CollectionStatus
+}
+
+type CollectionAuthorsResult {
+  pagination: Pagination
+  authors: [CollectionAuthor!]!
+}
+
+input CreateCollectionAuthorInput {
+  name: String!
+  slug: String
+  bio: Markdown
+  imageUrl: Url
+  active: Boolean
+}
+
+input UpdateCollectionAuthorInput {
+  externalId: String!
+  name: String!
+  slug: String!
+  bio: Markdown
+  imageUrl: Url
+  active: Boolean
+}
+
+input UpdateCollectionAuthorImageUrlInput {
+  externalId: String!
+  imageUrl: Url!
+}
+
+input CreateCollectionInput {
+  slug: String!
+  title: String!
+  excerpt: Markdown
+  intro: Markdown
+  imageUrl: Url
+  language: CollectionLanguage!
+  status: CollectionStatus
+  authorExternalId: String!
+  curationCategoryExternalId: String
+  IABParentCategoryExternalId: String
+  IABChildCategoryExternalId: String
+  labelExternalIds: [String]
+}
+
+input UpdateLabelInput {
+  externalId: String
+  name: String!
+}
+input UpdateCollectionInput {
+  externalId: String
+  slug: String!
+  title: String!
+  excerpt: Markdown!
+  intro: Markdown
+  imageUrl: Url
+  language: CollectionLanguage!
+  status: CollectionStatus!
+  authorExternalId: String!
+  curationCategoryExternalId: String
+  IABParentCategoryExternalId: String
+  IABChildCategoryExternalId: String
+  labelExternalIds: [String]
+}
+
+input UpdateCollectionImageUrlInput {
+  externalId: String!
+  imageUrl: Url!
+}
+
+input CollectionStoryAuthorInput {
+  name: String!
+  sortOrder: Int!
+}
+
+input CreateCollectionStoryInput {
+  collectionExternalId: String!
+  url: Url!
+  title: String!
+  excerpt: Markdown!
+  imageUrl: Url!
+  authors: [CollectionStoryAuthorInput!]!
+  publisher: String!
+  sortOrder: Int
+  fromPartner: Boolean
+}
+
+input UpdateCollectionStoryInput {
+  externalId: String!
+  url: Url!
+  title: String!
+  excerpt: Markdown!
+  imageUrl: Url!
+  authors: [CollectionStoryAuthorInput!]!
+  publisher: String!
+  sortOrder: Int
+  fromPartner: Boolean
+}
+
+input UpdateCollectionStorySortOrderInput {
+  externalId: String!
+  sortOrder: Int!
+}
+
+input UpdateCollectionStoryImageUrlInput {
+  externalId: String!
+  imageUrl: Url!
+}
+
+type CollectionImageUrl {
+  url: String!
+}
+
+input CollectionImageUploadInput {
+  image: Upload!
+  width: Int!
+  height: Int!
+  fileSizeBytes: Int!
+}
+
+"""
+Details of a partner company sponsored collections are associated with.
+"""
+type CollectionPartner {
+  externalId: String!
+  name: String!
+  url: Url!
+  imageUrl: Url!
+  blurb: Markdown!
+}
+
+type CollectionPartnersResult {
+  pagination: Pagination
+  partners: [CollectionPartner!]!
+}
+
+input CreateCollectionPartnerInput {
+  name: String!
+  url: Url!
+  imageUrl: Url!
+  blurb: Markdown!
+}
+
+input UpdateCollectionPartnerInput {
+  externalId: String!
+  name: String!
+  url: Url!
+  imageUrl: Url
+  blurb: Markdown!
+}
+
+input UpdateCollectionPartnerImageUrlInput {
+  externalId: String!
+  imageUrl: Url!
+}
+
+"""
+If a collection was made in partnership with an external company, this
+entity will hold all required info about that partnership.
+
+Note that this admin-only type exposes both the optional customized fields
+and the CollectionPartner entity with the default values.
+
+The consolidated CollectionPartnership type is available in the public schema.
+"""
+type CollectionPartnerAssociation {
+  externalId: String!
+  type: CollectionPartnershipType!
+  partner: CollectionPartner!
+  name: String
+  url: Url
+  imageUrl: Url
+  blurb: Markdown
+}
+
+input CreateCollectionPartnerAssociationInput {
+  type: CollectionPartnershipType!
+  partnerExternalId: String!
+  collectionExternalId: String!
+  name: String
+  url: Url
+  imageUrl: Url
+  blurb: Markdown
+}
+
+input UpdateCollectionPartnerAssociationInput {
+  externalId: String!
+  type: CollectionPartnershipType!
+  partnerExternalId: String!
+  name: String
+  url: Url
+  imageUrl: Url
+  blurb: Markdown
+}
+
+input UpdateCollectionPartnerAssociationImageUrlInput {
+  externalId: String!
+  imageUrl: Url!
+}
+
+input DeleteCollectionPartnerAssociationInput {
+  externalId: String!
+}
+
+type Query {
+  searchCollections(
+    filters: SearchCollectionsFilters!
+    page: Int
+    perPage: Int
+  ): CollectionsResult!
+  """
+  Retrieves a Collection by externalId.
+  """
+  getCollection(externalId: String!): Collection
+  """
+  Retrieves a CollectionAuthor by externalId.
+  """
+  getCollectionAuthor(externalId: String!): CollectionAuthor
+  """
+  Retrieves a paged list of CollectionAuthors.
+  """
+  getCollectionAuthors(page: Int, perPage: Int): CollectionAuthorsResult!
+  """
+  Retrieves a CollectionAuthor by externalId.
+  """
+  getCollectionPartner(externalId: String!): CollectionPartner
+  """
+  Retrieves a paged list of CollectionAuthors.
+  """
+  getCollectionPartners(page: Int, perPage: Int): CollectionPartnersResult!
+  """
+  Retrieves a CollectionStory by externalId. Used for tests only.
+  """
+  getCollectionStory(externalId: String!): CollectionStory
+  """
+  Retrieves a list of CurationCategories, sorted alphabetically
+  """
+  getCurationCategories: [CurationCategory!]!
+  """
+  Retrieves the nested list of IAB top/sub categories.
+  """
+  getIABCategories: [IABParentCategory!]!
+  """
+  Retrieves the languages currently supported.
+  """
+  getLanguages: [CollectionLanguage!]!
+  """
+  Retrieves a CollectionPartnerAssociation by externalId. Used for tests only.
+  """
+  getCollectionPartnerAssociation(
+    externalId: String!
+  ): CollectionPartnerAssociation
+  """
+  Retrieves a CollectionPartnerAssociation by the externalId of the collection
+  it is related to.
+  """
+  getCollectionPartnerAssociationForCollection(
+    externalId: String!
+  ): CollectionPartnerAssociation
+
+  """
+  Retrieves all available Labels
+  """
+  labels: [Label!]!
+}
+
+type Mutation {
+  """
+  Creates a CollectionAuthor.
+  """
+  createCollectionAuthor(data: CreateCollectionAuthorInput!): CollectionAuthor!
+  """
+  Updates a CollectionAuthor.
+  """
+  updateCollectionAuthor(data: UpdateCollectionAuthorInput!): CollectionAuthor!
+  """
+  Updates only the `imageUrl` property of a CollectionAuthor.
+  Dedicated to uploading images within the UI.
+  """
+  updateCollectionAuthorImageUrl(
+    data: UpdateCollectionAuthorImageUrlInput!
+  ): CollectionAuthor!
+  """
+  Creates a Collection.
+  """
+  createCollection(data: CreateCollectionInput!): Collection!
+  """
+  Updates a Collection.
+  """
+  updateCollection(data: UpdateCollectionInput!): Collection!
+  """
+  Updates only the `imageUrl` property of a Collection.
+  Dedicated to uploading images within the UI.
+  """
+  updateCollectionImageUrl(data: UpdateCollectionImageUrlInput!): Collection!
+  """
+  Creates a CollectionStory.
+  """
+  createCollectionStory(data: CreateCollectionStoryInput!): CollectionStory!
+  """
+  Updates a CollectionStory.
+  """
+  updateCollectionStory(data: UpdateCollectionStoryInput!): CollectionStory!
+  """
+  Updates only the `sortOrder` property of a CollectionStory.
+  Dedicated to ordering stories within the UI.
+  """
+  updateCollectionStorySortOrder(
+    data: UpdateCollectionStorySortOrderInput!
+  ): CollectionStory!
+  """
+  Updates only the `imageUrl` property of a CollectionStory.
+  Dedicated to uploading images within the UI.
+  """
+  updateCollectionStoryImageUrl(
+    data: UpdateCollectionStoryImageUrlInput!
+  ): CollectionStory!
+  """
+  Deletes a CollectionStory. Also deletes all the related CollectionStoryAuthor records.
+  """
+  deleteCollectionStory(externalId: String!): CollectionStory!
+  """
+  Uploads an image to S3. Does *not* save the image to any entity
+  (CollectionAuthor/Collection/CollectionStory).
+  """
+  collectionImageUpload(data: CollectionImageUploadInput!): CollectionImageUrl!
+  """
+  Creates a CollectionPartner.
+  """
+  createCollectionPartner(
+    data: CreateCollectionPartnerInput!
+  ): CollectionPartner!
+  """
+  Updates a CollectionPartner.
+  """
+  updateCollectionPartner(
+    data: UpdateCollectionPartnerInput!
+  ): CollectionPartner!
+  """
+  Updates only the `imageUrl` property of a CollectionPartner.
+  Dedicated to uploading images within the UI.
+  """
+  updateCollectionPartnerImageUrl(
+    data: UpdateCollectionPartnerImageUrlInput!
+  ): CollectionPartner!
+  """
+  Creates a CollectionPartnerAssociation.
+  """
+  createCollectionPartnerAssociation(
+    data: CreateCollectionPartnerAssociationInput!
+  ): CollectionPartnerAssociation!
+  """
+  Updates a CollectionPartnerAssociation.
+  """
+  updateCollectionPartnerAssociation(
+    data: UpdateCollectionPartnerAssociationInput!
+  ): CollectionPartnerAssociation!
+  """
+  Updates only the `imageUrl` property of a CollectionPartner.
+  Dedicated to uploading images within the UI.
+  """
+  updateCollectionPartnerAssociationImageUrl(
+    data: UpdateCollectionPartnerAssociationImageUrlInput!
+  ): CollectionPartnerAssociation!
+  """
+  Deletes a CollectionPartnerAssociation.
+  """
+  deleteCollectionPartnerAssociation(
+    externalId: String!
+  ): CollectionPartnerAssociation!
+  """
+  Creates a Label.
+  """
+  createLabel(name: String!): Label!
+  """
+  Updates a Label that is not assigned to any Collection yet.
+  """
+  updateLabel(data: UpdateLabelInput!): Label!
+}

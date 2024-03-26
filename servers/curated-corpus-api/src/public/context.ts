@@ -1,5 +1,5 @@
 import { BaseContext } from '@apollo/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { client } from '../database/client';
 
 export interface IPublicContext extends BaseContext {

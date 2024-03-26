@@ -1,4 +1,4 @@
-import { ApprovedItem, ScheduledItem, PrismaClient } from '@prisma/client';
+import { ApprovedItem, ScheduledItem, PrismaClient } from '.prisma/client';
 import { clearDb } from './clearDb';
 import { createApprovedItemHelper } from './createApprovedItemHelper';
 import {

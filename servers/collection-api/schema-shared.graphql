@@ -1,0 +1,166 @@
+"""
+These are all just renamed strings right now
+"""
+scalar Url
+scalar Markdown
+scalar DateString
+
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
+}
+
+"""
+We need to manually implement cacheControl in the schema for now
+https://stackoverflow.com/questions/52922080/how-to-implement-caching-on-apollo-server-hapi-graphql
+https://github.com/apollographql/federation/issues/356
+"""
+directive @cacheControl(
+  maxAge: Int
+  scope: CacheControlScope
+) on FIELD_DEFINITION | OBJECT | INTERFACE
+
+extend type Item @key(fields: "givenUrl") {
+  "key field to identify the Item entity in the Parser service"
+  givenUrl: Url! @external
+
+  "If the item is a collection allow them to get the collection information"
+  collection: Collection
+}
+
+"""
+valid language codes for collections
+"""
+enum CollectionLanguage {
+  "German"
+  DE
+  "English"
+  EN
+}
+
+"""
+Interactive Advertising Bureau Category - these are used on clients to serve relevant ads
+"""
+type IABCategory {
+  externalId: String!
+  name: String!
+  slug: String!
+}
+
+type IABParentCategory {
+  externalId: String!
+  name: String!
+  slug: String!
+  children: [IABCategory!]!
+}
+
+"""
+Type and enums related to Collections made in partnership with a company.
+"""
+enum CollectionPartnershipType {
+  PARTNERED
+  SPONSORED
+}
+
+"""
+If a collection was made in partnership with an external company, this
+entity will hold all required info about that partnership.
+"""
+type CollectionPartnership {
+  externalId: String!
+  type: CollectionPartnershipType!
+  name: String!
+  url: Url!
+  imageUrl: Url!
+  blurb: Markdown!
+}
+
+"""
+A label used to mark and categorize an Entity (e.g. Collection).
+"""
+type Label {
+  externalId: ID!
+  name: String!
+}
+
+type Collection @key(fields: "slug") {
+  externalId: ID!
+  slug: String!
+  title: String!
+  excerpt: Markdown
+  status: CollectionStatus!
+  curationCategory: CurationCategory
+  intro: Markdown
+  imageUrl: Url
+  labels: [Label]
+  """
+  note that language is *not* being used as locale - only to specify the
+  language of the collection.
+  """
+  language: CollectionLanguage!
+  partnership: CollectionPartnership
+  publishedAt: DateString
+  authors: [CollectionAuthor!]!
+  stories: [CollectionStory!]!
+  """
+  We will never return child categories in this type, so there's no need to
+  specify `IABParentCategory` here. The basic `IABCategory` is sufficient.
+  """
+  IABParentCategory: IABCategory
+  IABChildCategory: IABCategory
+}
+
+enum CollectionStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+type CollectionAuthor {
+  externalId: ID!
+  name: String!
+  slug: String
+  bio: Markdown
+  imageUrl: Url
+  active: Boolean!
+}
+
+type CurationCategory {
+  externalId: ID!
+  name: String!
+  slug: String!
+}
+
+type CollectionStory @key(fields: "item { givenUrl }") {
+  externalId: ID!
+  url: Url!
+  title: String!
+  excerpt: Markdown!
+  imageUrl: Url
+  authors: [CollectionStoryAuthor!]!
+  publisher: String
+  sortOrder: Int
+  item: Item
+  """
+  if True, the story is provided by a partner and should be displayed as such
+  """
+  fromPartner: Boolean!
+}
+
+type CollectionStoryAuthor {
+  name: String!
+  sortOrder: Int!
+}
+
+type CollectionsResult {
+  pagination: Pagination!
+  collections: [Collection!]!
+}
+
+type Pagination {
+  currentPage: Int!
+  totalPages: Int!
+  totalResults: Int!
+  perPage: Int!
+}

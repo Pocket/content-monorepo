@@ -1,9 +1,9 @@
 // need this to be able to use Prisma-native types for orderBy and filter clauses
-import * as prisma from '@prisma/client';
+import * as prisma from '.prisma/client';
 import {
   ApprovedItem as PrismaApprovedItem,
   PrismaClient,
-} from '@prisma/client';
+} from '.prisma/client';
 import {
   Connection,
   findManyCursorConnection,
