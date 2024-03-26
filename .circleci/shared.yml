@@ -79,11 +79,21 @@ commands:
           command: |
             pnpm install
   generate_prisma_client:
+    parameters:
+      scope:
+        description: The pnpm scope to build for
+        type: string
+        default: ""
     steps:
       - run:
           name: Generate prisma client
           command: pnpm run --filter=<< parameters.scope >> db:generate-prisma-client
   apply_prisma_migration:
+    parameters:
+      scope:
+        description: The pnpm scope to build for
+        type: string
+        default: ""
     steps:
       - run:
           name: Apply prisma migration
