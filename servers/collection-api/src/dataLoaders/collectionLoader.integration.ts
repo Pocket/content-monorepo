@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { PrismaClient, CollectionStatus, Label } from '@prisma/client';
+import { PrismaClient, CollectionStatus, Label } from '.prisma/client';
 import { getCollectionsBySlugs } from '../database/queries/Collection';
 import {
   clear as clearDb,

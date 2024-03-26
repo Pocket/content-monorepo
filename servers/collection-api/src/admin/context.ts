@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { S3 } from '@aws-sdk/client-s3';
 import Express from 'express';
 import { client } from '../database/client';

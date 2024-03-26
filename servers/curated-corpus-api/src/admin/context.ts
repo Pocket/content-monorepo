@@ -2,7 +2,7 @@ import { S3 } from '@aws-sdk/client-s3';
 import { IncomingHttpHeaders } from 'http';
 import Express from 'express';
 import { BaseContext } from '@apollo/server';
-import { PrismaClient, RejectedCuratedCorpusItem } from '@prisma/client';
+import { PrismaClient, RejectedCuratedCorpusItem } from '.prisma/client';
 import { client } from '../database/client';
 import { ApprovedItem } from '../database/types';
 import { CuratedCorpusEventEmitter } from '../events/curatedCorpusEventEmitter';

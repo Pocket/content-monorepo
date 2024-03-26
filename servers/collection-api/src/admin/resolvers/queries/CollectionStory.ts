@@ -1,5 +1,5 @@
 import { getCollectionStory as dbGetCollectionStory } from '../../../database/queries';
-import { CollectionStory } from '@prisma/client';
+import { CollectionStory } from '.prisma/client';
 import { ACCESS_DENIED_ERROR } from '../../../shared/constants';
 import { ForbiddenError, NotFoundError } from '@pocket-tools/apollo-utils';
 

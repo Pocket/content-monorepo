@@ -1,4 +1,4 @@
-import { CurationCategory, PrismaClient } from '@prisma/client';
+import { CurationCategory, PrismaClient } from '.prisma/client';
 
 /**
  * @param db

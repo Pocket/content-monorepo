@@ -1,4 +1,4 @@
-import { CollectionPartner, PrismaClient } from '@prisma/client';
+import { CollectionPartner, PrismaClient } from '.prisma/client';
 
 /**
  * @param db

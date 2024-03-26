@@ -2,7 +2,7 @@ import {
   CollectionStatus,
   CollectionPartnershipType,
   PrismaClient,
-} from '@prisma/client';
+} from '.prisma/client';
 import {
   CollectionLanguage,
   CreateCollectionLabelInput,

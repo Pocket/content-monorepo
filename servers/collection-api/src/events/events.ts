@@ -35,7 +35,7 @@ import {
   CurationCategory as dbCurationCategory,
   IABCategory as dbIABCategory,
   CollectionLabel,
-} from '@prisma/client';
+} from '.prisma/client';
 
 import { getLabelById } from '../shared/resolvers/types';
 

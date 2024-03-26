@@ -1,4 +1,4 @@
-import { CuratedStatus, RejectedCuratedCorpusItem } from '@prisma/client';
+import { CuratedStatus, RejectedCuratedCorpusItem } from '.prisma/client';
 import {
   getGoodSnowplowEvents,
   parseSnowplowData,

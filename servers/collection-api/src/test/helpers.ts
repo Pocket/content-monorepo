@@ -12,7 +12,7 @@ import {
   Label,
   Prisma,
   PrismaClient,
-} from '@prisma/client';
+} from '.prisma/client';
 import {
   CollectionLanguage,
   CollectionPartnerAssociation,

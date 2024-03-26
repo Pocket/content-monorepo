@@ -22,7 +22,7 @@ import {
   CollectionLanguage,
 } from './types';
 import { CollectionComplete } from '../database/types';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 
 describe('event helpers: ', () => {
   const dbClient: PrismaClient = client();

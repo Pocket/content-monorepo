@@ -6,7 +6,7 @@ import {
   Image,
   ImageEntityType,
   Label,
-} from '@prisma/client';
+} from '.prisma/client';
 import { AuthenticationError } from '@pocket-tools/apollo-utils';
 import {
   CollectionPartnerAssociation,

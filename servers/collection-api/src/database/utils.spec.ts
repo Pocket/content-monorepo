@@ -1,4 +1,4 @@
-import { CollectionStatus } from '@prisma/client';
+import { CollectionStatus } from '.prisma/client';
 import {
   buildGetPublishedCollectionsWhere,
   buildSearchCollectionsWhereClause,

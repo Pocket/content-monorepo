@@ -2,10 +2,10 @@ import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { client } from '../../../database/client';
 
-import { CollectionStatus } from '@prisma/client';
+import { CollectionStatus } from '.prisma/client';
 import { clear as clearDb } from '../../../test/helpers';
 import {
   ACCESS_DENIED_ERROR,

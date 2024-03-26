@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { collectionStoryInjectItemMiddleware } from '../middleware/prisma';
 
 let prisma;

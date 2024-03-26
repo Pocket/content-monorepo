@@ -9,7 +9,7 @@ import {
   CurationCategory,
   IABCategory,
   CollectionLabel,
-} from '@prisma/client';
+} from '.prisma/client';
 
 export type CreateCollectionAuthorInput = {
   name: string;

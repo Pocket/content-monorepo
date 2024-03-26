@@ -1,4 +1,4 @@
-import { CollectionStatus, PrismaClient } from '@prisma/client';
+import { CollectionStatus, PrismaClient } from '.prisma/client';
 import {
   SearchCollectionsFilters,
   CollectionComplete,

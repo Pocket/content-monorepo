@@ -1,7 +1,7 @@
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { client } from '../../../database/client';
 
 import {
@@ -175,7 +175,7 @@ describe('mutations: ScheduledItem', () => {
         manualScheduleReasonComment:
           'i scheduled this because i thought it would be nice',
       };
-
+      
       const result = await request(app)
         .post(graphQLUrl)
         .set(headers)
@@ -185,7 +185,6 @@ describe('mutations: ScheduledItem', () => {
         });
 
       expect(result.body.data).toBeNull();
-
       // Expecting to see a custom error message from the resolver
       expect(result.body.errors?.[0].message).toContain(
         `This story is already scheduled to appear on NEW_TAB_EN_US on ${displayDate}.`,

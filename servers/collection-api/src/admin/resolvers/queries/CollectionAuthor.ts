@@ -2,7 +2,7 @@ import { countAuthors, getAuthor, getAuthors } from '../../../database/queries';
 import config from '../../../config';
 import { CollectionAuthorsResult } from '../../../typeDefs';
 import { getPagination } from '../../../utils';
-import { CollectionAuthor } from '@prisma/client';
+import { CollectionAuthor } from '.prisma/client';
 import { ACCESS_DENIED_ERROR } from '../../../shared/constants';
 import { ForbiddenError, NotFoundError } from '@pocket-tools/apollo-utils';
 

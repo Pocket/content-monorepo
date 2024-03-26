@@ -1,4 +1,4 @@
-import { Collection } from '@prisma/client';
+import { Collection } from '.prisma/client';
 import * as Sentry from '@sentry/node';
 import { getCollectionUrlSlug } from '../../utils';
 

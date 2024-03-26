@@ -1,4 +1,4 @@
-import { Collection, CollectionStory, Prisma } from '@prisma/client';
+import { Collection, CollectionStory, Prisma } from '.prisma/client';
 
 // THIS IS WEIRD!
 // we are importing every export *in this file* into itself so we can spy

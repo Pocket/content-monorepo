@@ -2,12 +2,12 @@ import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { client } from '../../../database/client';
 
 import slugify from 'slugify';
 import { faker } from '@faker-js/faker';
-import { CollectionAuthor } from '@prisma/client';
+import { CollectionAuthor } from '.prisma/client';
 import config from '../../../config';
 import { clear as clearDb, createAuthorHelper } from '../../../test/helpers';
 import { CreateCollectionAuthorInput } from '../../../database/types';

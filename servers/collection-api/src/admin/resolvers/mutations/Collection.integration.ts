@@ -4,7 +4,7 @@ import request from 'supertest';
 import * as sinon from 'sinon';
 
 import { ApolloServer } from '@apollo/server';
-import { Collection, CollectionStatus, PrismaClient } from '@prisma/client';
+import { Collection, CollectionStatus, PrismaClient } from '.prisma/client';
 
 import { client } from '../../../database/client';
 import {

@@ -1,4 +1,4 @@
-import { CollectionStatus, Prisma } from '@prisma/client';
+import { CollectionStatus, Prisma } from '.prisma/client';
 import { UserInputError } from '@pocket-tools/apollo-utils';
 import {
   CollectionsFilters,

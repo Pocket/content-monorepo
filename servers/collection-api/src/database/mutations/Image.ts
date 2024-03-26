@@ -1,4 +1,4 @@
-import { Image, ImageEntityType, PrismaClient } from '@prisma/client';
+import { Image, ImageEntityType, PrismaClient } from '.prisma/client';
 import { CreateImageInput } from '../types';
 
 /**

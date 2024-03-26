@@ -1,5 +1,5 @@
 import { UserInputError } from '@pocket-tools/apollo-utils';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '.prisma/client';
 
 import {
   CollectionPartnerAssociation,

@@ -1,5 +1,5 @@
 import { Connection } from '@devoxa/prisma-relay-cursor-connection';
-import { RejectedCuratedCorpusItem } from '@prisma/client';
+import { RejectedCuratedCorpusItem } from '.prisma/client';
 import config from '../../../config';
 import {
   getRejectedItemByUrl as dbGetRejectedItemByUrl,

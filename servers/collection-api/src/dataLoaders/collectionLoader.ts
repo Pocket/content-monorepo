@@ -1,6 +1,6 @@
 import DataLoader from 'dataloader';
 
-import { PrismaClient, Collection } from '@prisma/client';
+import { PrismaClient, Collection } from '.prisma/client';
 
 import { CollectionComplete } from '../database/types';
 import { getCollectionsBySlugs } from '../database/queries';

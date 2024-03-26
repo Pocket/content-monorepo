@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { collectionLoader } from '../dataLoaders/collectionLoader';
 import { client } from '../database/client';
 

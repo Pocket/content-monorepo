@@ -1,4 +1,4 @@
-import { Prisma, CollectionStatus } from '@prisma/client';
+import { Prisma, CollectionStatus } from '.prisma/client';
 
 import * as PrismaMiddleware from './prisma';
 

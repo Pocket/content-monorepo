@@ -1,4 +1,4 @@
-import { Label, PrismaClient } from '@prisma/client';
+import { Label, PrismaClient } from '.prisma/client';
 import { AdminAPIUser } from '../../admin/context';
 import { UserInputError } from '@pocket-tools/apollo-utils';
 import { UpdateLabelInput } from '../types';

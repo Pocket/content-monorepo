@@ -2,11 +2,11 @@ import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { client } from '../../../database/client';
 
 import { faker } from '@faker-js/faker';
-import { CollectionPartner } from '@prisma/client';
+import { CollectionPartner } from '.prisma/client';
 import { clear as clearDb, createPartnerHelper } from '../../../test/helpers';
 import { CreateCollectionPartnerInput } from '../../../database/types';
 import {

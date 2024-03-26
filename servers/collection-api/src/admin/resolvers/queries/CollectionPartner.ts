@@ -9,7 +9,7 @@ import {
 import config from '../../../config';
 import { CollectionPartnersResult } from '../../../typeDefs';
 import { getPagination } from '../../../utils';
-import { CollectionPartner } from '@prisma/client';
+import { CollectionPartner } from '.prisma/client';
 import { ACCESS_DENIED_ERROR } from '../../../shared/constants';
 import { ForbiddenError, NotFoundError } from '@pocket-tools/apollo-utils';
 

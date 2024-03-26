@@ -3,8 +3,8 @@ import {
   CollectionPartner,
   CollectionPartnership,
   Label,
-} from '@prisma/client';
-import { PrismaClient } from '@prisma/client';
+} from '.prisma/client';
+import { PrismaClient } from '.prisma/client';
 /**
  * Field-level resolvers for the public CollectionPartnership type.
  *

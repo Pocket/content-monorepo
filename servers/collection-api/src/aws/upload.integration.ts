@@ -29,9 +29,9 @@ describe('Upload', () => {
     expect(upload.fileName).toEqual(/[^/]*$/.exec(upload.path)[0]);
 
     // Check that the returned url matches the expected pattern
-    // http://localstack:4566/collection-api-local-images/cde476c9-b047-4f3b-be06-ce1c2fce9988.jpeg
+    // http://localhost/collection-api-local-images/cde476c9-b047-4f3b-be06-ce1c2fce9988.jpeg
     const urlPattern = new RegExp(
-      `^http://localstack(:4566)?/${config.aws.s3.bucket}/.+.(jpeg|png)$`,
+      `^http://localhost?/${config.aws.s3.bucket}/.+.(jpeg|png)$`,
     );
     expect(upload.path).toMatch(urlPattern);
   });

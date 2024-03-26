@@ -1,4 +1,4 @@
-import { CollectionPartnershipType } from '@prisma/client';
+import { CollectionPartnershipType } from '.prisma/client';
 import { CollectionComplete } from '../database/types';
 
 export const now = new Date('2023-01-01 00:00:00 GMT-5');

@@ -1,6 +1,5 @@
 import {
   Prospect,
-  Topics,
   ProspectType,
   dbClient,
   getProspectById,
@@ -8,6 +7,7 @@ import {
   truncateDb,
   toUnixTimestamp,
 } from 'prospectapi-common';
+import { Topics } from 'content-common';
 
 import config from '../config';
 import {
