@@ -82,14 +82,14 @@ commands:
     steps:
       - run:
           name: Generate prisma client
-          command: pnpm run db:generate-prisma-client
+          command: pnpm run --filter=<< parameters.scope >> db:generate-prisma-client
   apply_prisma_migration:
     steps:
       - run:
           name: Apply prisma migration
           command: |
             export $(egrep -v '^#' .docker/local.env | xargs -0)
-            pnpm run migrate:prisma-reset
+            pnpm run --filter=<< parameters.scope >> migrate:prisma-reset
   install_infrastructure_pnpm:
     steps:
       - run:
