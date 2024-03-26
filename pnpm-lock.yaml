@@ -16,6 +16,19 @@ importers:
         specifier: latest
         version: 1.12.4
 
+  infrastructure/collection-api:
+    dependencies:
+      '@pocket-tools/terraform-modules':
+        specifier: 5.8.6
+        version: 5.8.6(ink@3.2.0)(react@17.0.2)
+    devDependencies:
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../../packages/eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
+
   infrastructure/corpus-scheduler-lambda:
     dependencies:
       '@pocket-tools/terraform-modules':
@@ -7931,7 +7944,7 @@ packages:
     dependencies:
       semver: 7.6.0
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240325
+      typescript: 5.5.0-dev.20240326
     dev: false
 
   /drange@1.1.1:
@@ -14278,8 +14291,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240325:
-    resolution: {integrity: sha512-3kSBj+PWimbJvH3s/sQiIU7zBIOWAEpHdD3lykIykePugc1qXNIK8d5/WJJNpzH4q2n6gY8pz8lLoe/HanVGnA==}
+  /typescript@5.5.0-dev.20240326:
+    resolution: {integrity: sha512-SxtRpcyojeAqYONbjjN85fZh06WkdLhJiBwsfn6Ud2BUMYFIdjKMOeDyBXPKCmBArP3Ax+PZ0hq1Y2vli76zHg==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false

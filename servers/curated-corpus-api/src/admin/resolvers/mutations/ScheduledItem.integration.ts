@@ -175,7 +175,7 @@ describe('mutations: ScheduledItem', () => {
         manualScheduleReasonComment:
           'i scheduled this because i thought it would be nice',
       };
-      
+
       const result = await request(app)
         .post(graphQLUrl)
         .set(headers)
