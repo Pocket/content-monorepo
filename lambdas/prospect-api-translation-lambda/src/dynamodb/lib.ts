@@ -7,7 +7,9 @@ import {
   BatchWriteCommandInput,
 } from '@aws-sdk/lib-dynamodb';
 
-import { Prospect, ProspectType, toUnixTimestamp } from 'prospectapi-common';
+import { ProspectType } from 'content-common';
+
+import { Prospect, toUnixTimestamp } from 'prospectapi-common';
 
 import config from '../config';
 

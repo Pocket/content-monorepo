@@ -1,5 +1,8 @@
 import { faker } from '@faker-js/faker';
 
+import { ProspectType } from 'content-common';
+import { Prospect } from 'prospectapi-common';
+
 import config from './config';
 import {
   getScheduledSurfaceByGuid,
@@ -10,7 +13,7 @@ import {
   standardizeLanguage,
   deDuplicateProspectUrls,
 } from './lib';
-import { Prospect, ProspectType } from 'prospectapi-common';
+
 import { Topics } from './types';
 
 // turn the enum into an array, we can grab a random one easy-peasy

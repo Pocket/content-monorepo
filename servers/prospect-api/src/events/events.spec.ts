@@ -1,19 +1,12 @@
 import * as Sentry from '@sentry/node';
-import {
-  Prospect,
-  ProspectType,
-  ScheduledSurfaces,
-} from 'prospectapi-common';
+import { ProspectType } from 'content-common';
+import { Prospect, ScheduledSurfaces } from 'prospectapi-common';
 import {
   generateEventBridgePayload,
   sendEvent,
   sendEventBridgeEvent,
 } from './events';
-import {
-  CorpusLanguage,
-  MozillaAccessGroup,
-  Topics,
-  UserAuth } from '../types';
+import { CorpusLanguage, MozillaAccessGroup, Topics, UserAuth } from '../types';
 import { EventBridgeEventType, ProspectReviewStatus } from './types';
 import { EventBridgeClient } from '@aws-sdk/client-eventbridge';
 import config from '../config';
@@ -70,17 +63,17 @@ describe('event helpers: ', () => {
   };
 
   const clientStub: jest.SpyInstance = jest
-      .spyOn(EventBridgeClient.prototype, 'send')
-      .mockImplementation(() => Promise.resolve({ FailedEntryCount: 0 }));
+    .spyOn(EventBridgeClient.prototype, 'send')
+    .mockImplementation(() => Promise.resolve({ FailedEntryCount: 0 }));
   const sentryStub: jest.SpyInstance = jest
-      .spyOn(Sentry, 'captureException')
-      .mockImplementation(() => '');
+    .spyOn(Sentry, 'captureException')
+    .mockImplementation(() => '');
   const crumbStub: jest.SpyInstance = jest
-      .spyOn(Sentry, 'addBreadcrumb')
-      .mockImplementation(() => Promise.resolve());
+    .spyOn(Sentry, 'addBreadcrumb')
+    .mockImplementation(() => Promise.resolve());
   const serverLoggerErrorStub: jest.SpyInstance = jest
-      .spyOn(serverLogger, 'error')
-      .mockImplementation(() => Promise.resolve());
+    .spyOn(serverLogger, 'error')
+    .mockImplementation(() => Promise.resolve());
   const now = new Date('2022-01-01 00:00:00');
 
   beforeAll(() => {
@@ -103,7 +96,7 @@ describe('event helpers: ', () => {
       expect(payload.prospect).toMatchObject(prospect);
 
       expect(payload.prospect.prospectReviewStatus).toEqual(
-        ProspectReviewStatus.Dismissed
+        ProspectReviewStatus.Dismissed,
       );
       expect(payload.prospect.reviewedBy).toEqual(authUser.username);
       expect(typeof payload.prospect.reviewedAt).toBe('number');
@@ -134,16 +127,14 @@ describe('event helpers: ', () => {
       });
 
       // Compare to initial payload
-      expect(sendCommand.Entries[0]['Detail']).toEqual(
-        JSON.stringify(payload)
-      );
+      expect(sendCommand.Entries[0]['Detail']).toEqual(JSON.stringify(payload));
     });
 
     it('should log error if any events fail to send', async () => {
       clientStub.mockRestore();
       jest
-          .spyOn(EventBridgeClient.prototype, 'send')
-          .mockImplementationOnce(() => Promise.resolve({ FailedEntryCount: 1 }));
+        .spyOn(EventBridgeClient.prototype, 'send')
+        .mockImplementationOnce(() => Promise.resolve({ FailedEntryCount: 1 }));
 
       await sendEvent(payload);
 
@@ -152,14 +143,14 @@ describe('event helpers: ', () => {
 
       expect(sentryStub).toHaveBeenCalledTimes(1);
       expect(sentryStub.mock.calls[0][0].message).toContain(
-        `Failed to send event 'prospect-dismiss' to event bus`
+        `Failed to send event 'prospect-dismiss' to event bus`,
       );
       expect(serverLoggerErrorStub).toHaveBeenCalledTimes(1);
       expect(serverLoggerErrorStub.mock.calls[0][0]).toEqual(
-          'sendEvent: Failed to send event to event bus.'
+        'sendEvent: Failed to send event to event bus.',
       );
       expect(serverLoggerErrorStub.mock.calls[0][1].eventType).toEqual(
-          'prospect-dismiss'
+        'prospect-dismiss',
       );
     });
   });
@@ -167,11 +158,9 @@ describe('event helpers: ', () => {
   describe('sendEventBridgeEvent', () => {
     it('should log error if send call throws error', async () => {
       clientStub.mockRestore();
-      jest
-          .spyOn(EventBridgeClient.prototype, 'send')
-          .mockImplementation(() => {
-            throw new Error('boo!');
-          });
+      jest.spyOn(EventBridgeClient.prototype, 'send').mockImplementation(() => {
+        throw new Error('boo!');
+      });
 
       await sendEventBridgeEvent(prospect, authUser);
 
@@ -181,14 +170,14 @@ describe('event helpers: ', () => {
       expect(sentryStub.mock.calls[0][0].message).toContain('boo!');
       expect(crumbStub).toHaveBeenCalledTimes(1);
       expect(crumbStub.mock.calls[0][0].message).toContain(
-        `Failed to send event 'prospect-dismiss' to event bus`
+        `Failed to send event 'prospect-dismiss' to event bus`,
       );
       expect(serverLoggerErrorStub).toHaveBeenCalledTimes(1);
       expect(serverLoggerErrorStub.mock.calls[0][0]).toEqual(
-          'sendEventBridgeEvent: Failed to send event to event bus.'
+        'sendEventBridgeEvent: Failed to send event to event bus.',
       );
       expect(serverLoggerErrorStub.mock.calls[0][1].eventType).toEqual(
-          'prospect-dismiss'
+        'prospect-dismiss',
       );
     });
   });

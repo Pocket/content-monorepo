@@ -1,6 +1,7 @@
+import { ProspectType, Topics } from 'content-common';
+
 import {
   Prospect,
-  ProspectType,
   dbClient,
   getProspectById,
   insertProspect,
@@ -14,7 +15,6 @@ import {
   batchDeleteProspects,
   deleteOldProspects,
 } from './lib';
-import { Topics } from 'content-common';
 
 describe('dynamodb', () => {
   let prospect: Prospect;

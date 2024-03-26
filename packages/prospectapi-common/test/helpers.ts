@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
-import { Prospect, ProspectType } from '../types';
-import { CorpusLanguage, Topics } from 'content-common';
+import { Prospect } from '../types';
+import { CorpusLanguage, ProspectType, Topics } from 'content-common';
 
 // turn the enum into an array so we can grab a random one easily
 const topicsArray = Object.keys(Topics).map((key) => Topics[key]);

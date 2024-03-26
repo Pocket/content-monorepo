@@ -6,7 +6,6 @@ export {
   DynamoItem,
   GetProspectsFilters,
   Prospect,
-  ProspectType,
   ScheduledSurfaces,
   ScheduledSurface,
 } from './types';

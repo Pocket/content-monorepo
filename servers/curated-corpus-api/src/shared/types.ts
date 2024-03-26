@@ -1,23 +1,4 @@
-// Pocket Shared Data - see Confluence for details
-// https://mozilla-hub.atlassian.net/wiki/spaces/PE/pages/390642851/Pocket+Shared+Data#Prospect-Types
-export enum ProspectType {
-  TIMESPENT = 'TIMESPENT',
-  COUNTS = 'COUNTS',
-  SYNDICATED_NEW = 'SYNDICATED_NEW',
-  SYNDICATED_RERUN = 'SYNDICATED_RERUN',
-  DOMAIN_ALLOWLIST = 'DOMAIN_ALLOWLIST',
-  TOP_SAVED = 'TOP_SAVED',
-  RECOMMENDED = 'RECOMMENDED',
-  COUNTS_MODELED = 'COUNTS_MODELED',
-  TIMESPENT_MODELED = 'TIMESPENT_MODELED',
-  TITLE_URL_MODELED = 'TITLE_URL_MODELED',
-  DISMISSED = 'DISMISSED',
-  RSS_LOGISTIC = 'RSS_LOGISTIC',
-  RSS_LOGISTIC_RECENT = 'RSS_LOGISTIC_RECENT',
-  CONSTRAINT_SCHEDULE = 'CONSTRAINT_SCHEDULE',
-  SLATE_SCHEDULER = 'SLATE_SCHEDULER',
-  SLATE_SCHEDULER_V2 = 'SLATE_SCHEDULER_V2',
-}
+import { ProspectType } from 'content-common';
 
 export enum MozillaAccessGroup {
   READONLY = 'team_pocket', // Read only access to all curation tools
@@ -62,8 +43,6 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.TITLE_URL_MODELED,
       ProspectType.RSS_LOGISTIC,
       ProspectType.RSS_LOGISTIC_RECENT,
-      ProspectType.CONSTRAINT_SCHEDULE,
-      ProspectType.SLATE_SCHEDULER,
       ProspectType.SLATE_SCHEDULER_V2,
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENUS,
