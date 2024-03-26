@@ -35,10 +35,11 @@ class CollectionAPI extends TerraformStack {
     new LocalProvider(this, 'local_provider');
     new NullProvider(this, 'null_provider');
     new PagerdutyProvider(this, 'pagerduty_provider', { token: undefined });
+    
     new RemoteBackend(this, {
       hostname: 'app.terraform.io',
       organization: 'Pocket',
-      workspaces: [{ prefix: `${config.name}-` }],
+      workspaces: [{ name: `${config.name}-${config.environment}` }],
     });
 
     const caller = new DataAwsCallerIdentity(this, 'caller');
