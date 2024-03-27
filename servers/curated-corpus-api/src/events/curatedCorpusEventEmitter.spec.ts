@@ -8,7 +8,7 @@ import {
 import config from '../config';
 import { getUnixTimestamp } from '../shared/utils';
 import { ApprovedItem } from '../database/types';
-import { RejectedCuratedCorpusItem } from '@prisma/client';
+import { RejectedCuratedCorpusItem } from '.prisma/client';
 import { ScheduledItemSource, Topics } from '../shared/types';
 import { CorpusItemSource, CuratedStatus } from 'content-common';
 

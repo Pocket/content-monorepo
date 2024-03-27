@@ -17,6 +17,7 @@ repo_for_enum: &repo_for_enum
     enum:
       - prospect_api
       - curated_corpus_api
+      - collection_api
       - corpus_scheduler_lambda
 
 resource_class_enum: &resource_class_enum
@@ -33,6 +34,9 @@ parameters:
     type: boolean
     default: false
   curated_corpus_api:
+    type: boolean
+    default: false
+  collection_api:
     type: boolean
     default: false
   corpus_scheduler_lambda:
@@ -61,6 +65,7 @@ commands:
           environment:
             prospect_api: << pipeline.parameters.prospect_api >>
             curated_corpus_api: << pipeline.parameters.curated_corpus_api >>
+            collection_api: << pipeline.parameters.collection_api >>
             corpus_scheduler_lambda: << pipeline.parameters.corpus_scheduler_lambda >>
   install_pnpm:
     steps:
@@ -78,13 +83,6 @@ commands:
       - run:
           name: Generate prisma client
           command: pnpm run db:generate-prisma-client
-  apply_prisma_migration:
-    steps:
-      - run:
-          name: Apply prisma migration
-          command: |
-            export $(egrep -v '^#' .docker/local.env | xargs -0)
-            pnpm run migrate:prisma-reset
   install_infrastructure_pnpm:
     steps:
       - run:
@@ -402,8 +400,14 @@ jobs:
           condition:
             equal: [ true, << parameters.run_prisma_jobs >> ]
           steps:
-            - generate_prisma_client
-            - apply_prisma_migration
+            - run:
+                name: generate prisma client
+                command: pnpm run --filter=<< parameters.scope >> db:generate-prisma-client
+            - run:
+                name: apply prisma migration
+                command: |
+                  export $(egrep -v '^#' .docker/local.env | xargs -0)
+                  pnpm run --filter=<< parameters.scope >> migrate:prisma-reset
       - run:
           name: run setup.sh
           command: |

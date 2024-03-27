@@ -15,7 +15,7 @@ import {
   ReviewedCorpusItem,
 } from './schema';
 import { getUnixTimestamp } from '../../shared/utils';
-import { RejectedCuratedCorpusItem } from '@prisma/client';
+import { RejectedCuratedCorpusItem } from '.prisma/client';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import {
   ApprovedItemAuthor,

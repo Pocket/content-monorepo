@@ -1,10 +1,10 @@
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { client } from '../../../database/client';
 
-import { RejectedCuratedCorpusItem as dbRejectedCuratedCorpusItem } from '@prisma/client';
+import { RejectedCuratedCorpusItem as dbRejectedCuratedCorpusItem } from '.prisma/client';
 import {
   clearDb,
   createRejectedCuratedCorpusItemHelper,

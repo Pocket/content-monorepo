@@ -1,7 +1,7 @@
 import {
   RejectedCuratedCorpusItem,
   ScheduledItem as ScheduledItemModel,
-} from '@prisma/client';
+} from '.prisma/client';
 import { ScheduledItem, CorpusItem, ApprovedItem } from '../database/types';
 import { ScheduledCorpusItemStatus } from '../shared/types';
 import { ScheduledItemSource } from 'content-common';

@@ -1,4 +1,4 @@
-import { CuratedStatus } from '@prisma/client';
+import { CuratedStatus } from '.prisma/client';
 import {
   getGoodSnowplowEvents,
   parseSnowplowData,

@@ -1,4 +1,4 @@
-import { CuratedStatus } from '@prisma/client';
+import { CuratedStatus } from '.prisma/client';
 import { EventBusHandler } from './EventBusHandler';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import {

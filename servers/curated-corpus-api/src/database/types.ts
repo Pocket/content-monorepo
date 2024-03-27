@@ -2,7 +2,7 @@ import {
   ApprovedItem as ApprovedItemModel,
   CuratedStatus,
   ScheduledItem as ScheduledItemModel,
-} from '@prisma/client';
+} from '.prisma/client';
 import { ScheduledItemSource } from '../shared/types';
 import {
   ApprovedItemAuthor,
