@@ -19,6 +19,7 @@ import {
   getApprovedItemByExternalId,
 } from '../../../database/queries';
 import {
+  RejectedCorpusItemPayload,
   ReviewedCorpusItemEventType,
   ScheduledCorpusItemEventType,
   ScheduledCorpusItemPayload,
@@ -311,16 +312,24 @@ export async function rejectApprovedItem(
     updatedAt: rejectedItem.createdAt,
     updatedBy: rejectedItem.createdBy,
   };
+
   // Now emit the event with the updated Approved Item data.
   context.emitReviewedCorpusItemEvent(
     ReviewedCorpusItemEventType.REMOVE_ITEM,
     approvedItem,
   );
 
+  const rejectedItemPayload: RejectedCorpusItemPayload = {
+    ...rejectedItem,
+    // this helps analytics correlate data between the approved items that were rejected
+    // and the rejected item. *not* present when rejecting a prospect.
+    approvedCorpusItemExternalId: approvedItem.externalId,
+  };
+
   // Let Snowplow know that an entry was added to the Rejected Items table.
   context.emitReviewedCorpusItemEvent(
     ReviewedCorpusItemEventType.REJECT_ITEM,
-    rejectedItem,
+    rejectedItemPayload,
   );
 
   return approvedItem;

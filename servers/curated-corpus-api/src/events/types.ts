@@ -38,6 +38,11 @@ export type BaseEventData = {
 // Stub type ready to be extended with non-database properties (for event tracking).
 export type ApprovedCorpusItemPayload = ApprovedItem;
 
+// Extended with non DB properties for event tracking.
+export type RejectedCorpusItemPayload = RejectedCuratedCorpusItem & {
+  approvedCorpusItemExternalId?: string;
+};
+
 // Data for the events that are fired on changes to curated items
 export type ReviewedCorpusItemPayload = {
   reviewedCorpusItem: ApprovedCorpusItemPayload | RejectedCuratedCorpusItem;
