@@ -908,11 +908,11 @@ input CreateScheduledCorpusItemInput {
   """
   A comma-separated list of reasons for manually scheduling an item. Helps ML improve models for sets of scheduled items.
   """
-  manualScheduleReasons: String
+  reasons: String
   """
   Free-text entered by the curator to give further detail to the manual schedule reason(s) provided.
   """
-  manualScheduleReasonComment: String
+  reasonComment: String
 }
 
 """
