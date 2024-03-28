@@ -3,6 +3,8 @@ export default {
   app: {
     apolloClientName: 'ProspectAPI',
     clientApiEndpoint: 'https://client-api.getpocket.com',
+    // the amount of time in ms between attempts to re-try getting metadata from the parser
+    metadataRetryDelay: 10000,
     version: `${process.env.GIT_SHA ?? 'local'}`,
   },
   aws: {

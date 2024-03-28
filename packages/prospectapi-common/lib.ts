@@ -1,5 +1,7 @@
 import { parse } from 'tldts';
 import * as Sentry from '@sentry/node';
+
+import config from './config';
 import { getUrlMetadata } from './client-api-proxy';
 import { ClientApiItem } from './types';
 import { UrlMetadata } from 'content-common';
@@ -152,9 +154,31 @@ export const deriveImageUrl = (item: ClientApiItem): string | undefined => {
   return item.syndicatedArticle?.mainImage || item.topImageUrl;
 };
 
-export const deriveUrlMetadata = async (url: string): Promise<UrlMetadata> => {
+/**
+ * attempts to retrieve metadata from the parser and, if successful, formats
+ * the resulting data to conform to the graph spec.
+ *
+ * @param url
+ * @param retryDelay how long in ms between tries to fetch metadata from the parser. primarily here for running tests.
+ * @returns UrlMetadata object
+ */
+export const deriveUrlMetadata = async (
+  url: string,
+  retryDelay = config.app.metadataRetryDelay,
+): Promise<UrlMetadata> => {
   // get the meta data from the parser
-  const item = await getUrlMetadata(url);
+  let item;
+
+  try {
+    item = await getUrlMetadata(url, retryDelay);
+  } catch (e) {
+    Sentry.captureException(e.message, {
+      extra: {
+        description: 'Failed to retrieve metadata from the parser',
+        url: url,
+      },
+    });
+  }
 
   // return fully populated meta data if metadata is returned from the parser
   if (item) {

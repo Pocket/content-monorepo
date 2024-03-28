@@ -27,7 +27,7 @@ let clientRetryDelay;
  */
 export const getUrlMetadata = async (
   url: string,
-  retryDelay: number = 10000,
+  retryDelay: number = config.app.metadataRetryDelay,
 ): Promise<ClientApiItem | null> => {
   // Move Apollo Client instantiation to inside the function to prevent memory leaks.
   if (!client || clientRetryDelay != retryDelay) {
