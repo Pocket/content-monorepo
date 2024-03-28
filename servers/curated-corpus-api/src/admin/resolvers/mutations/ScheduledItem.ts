@@ -1,4 +1,5 @@
 import {
+  CuratedCorpusApiErrorCodes,
   parseReasonsCsv,
   sanitizeText,
   ScheduledItemSource,
@@ -28,6 +29,7 @@ import {
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { NotFoundError } from '@pocket-tools/apollo-utils';
 import { IAdminContext } from '../../context';
+import { GraphQLError } from 'graphql';
 
 /**
  * Deletes an item from the Scheduled Surface schedule.
@@ -94,6 +96,24 @@ export async function deleteScheduledItem(
   );
 
   return scheduledItem;
+}
+
+function throwAlreadyScheduledError(
+  scheduledSurfaceGuid: string,
+  scheduledDate: Date,
+) {
+  throw new GraphQLError(
+    `This story is already scheduled to appear on ${scheduledSurfaceGuid} on ${scheduledDate.toLocaleString(
+      'en-US',
+      {
+        dateStyle: 'medium',
+        timeZone: 'UTC',
+      },
+    )}.`,
+    {
+      extensions: { code: CuratedCorpusApiErrorCodes.ALREADY_SCHEDULED },
+    },
+  );
 }
 
 /**
@@ -172,13 +192,9 @@ export async function createScheduledItem(
       error instanceof PrismaClientKnownRequestError &&
       error.code === 'P2002'
     ) {
-      throw new UserInputError(
-        `This story is already scheduled to appear on ${
-          scheduledItemData.scheduledSurfaceGuid
-        } on ${scheduledItemData.scheduledDate.toLocaleString('en-US', {
-          dateStyle: 'medium',
-          timeZone: 'UTC',
-        })}.`,
+      throwAlreadyScheduledError(
+        scheduledItemData.scheduledSurfaceGuid,
+        scheduledItemData.scheduledDate,
       );
     }
 
@@ -232,15 +248,7 @@ export async function rescheduleScheduledItem(
       error instanceof PrismaClientKnownRequestError &&
       error.code === 'P2002'
     ) {
-      throw new UserInputError(
-        `This story is already scheduled to appear on ${data.scheduledDate.toLocaleString(
-          'en-US',
-          {
-            dateStyle: 'medium',
-            timeZone: 'UTC',
-          },
-        )}.`,
-      );
+      throwAlreadyScheduledError(item.scheduledSurfaceGuid, data.scheduledDate);
     }
 
     // If it's something else, throw the error unchanged.

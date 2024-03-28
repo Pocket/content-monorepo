@@ -8,8 +8,9 @@ import {
   ApprovedItemAuthor,
   CorpusLanguage,
   CreateApprovedItemInput,
-  ScheduledItemSource,
   CreateScheduledItemInput,
+  CuratedCorpusApiErrorCodes,
+  ScheduledItemSource,
   UrlMetadata,
 } from 'content-common';
 import {
@@ -328,7 +329,10 @@ export const createAndScheduleCorpusItemHelper = async (
       approvedCorpusItemId = approvedCorpusItem.externalId;
       scheduledItemId = scheduledItem.externalId;
     } catch (e) {
-      if (e instanceof Error && e.message?.indexOf('already scheduled') >= 0) {
+      if (
+        e instanceof Error &&
+        e.message?.indexOf(CuratedCorpusApiErrorCodes.ALREADY_SCHEDULED) >= 0
+      ) {
         // Send a Snowplow event indicating that the candidate was already scheduled.
         queueSnowplowEvent(
           tracker,

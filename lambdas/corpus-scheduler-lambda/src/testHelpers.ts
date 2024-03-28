@@ -172,7 +172,7 @@ export const createScheduledCorpusItemUserErrorBody = {
         'This story is already scheduled to appear on NEW_TAB_EN_US on Mar 27, 2024.',
       path: ['createScheduledCorpusItem'],
       extensions: {
-        code: 'BAD_USER_INPUT',
+        code: 'ALREADY_SCHEDULED',
         serviceName: 'curated-corpus',
         exception: {
           message:
