@@ -110,9 +110,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
-        manualScheduleReasonComment:
-          'i scheduled this because i thought it would be nice',
+        reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
+        reasonComment: 'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -171,9 +170,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: existingScheduledEntry.scheduledSurfaceGuid,
         scheduledDate,
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
-        manualScheduleReasonComment:
-          'i scheduled this because i thought it would be nice',
+        reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
+        reasonComment: 'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -211,9 +209,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
-        manualScheduleReasonComment:
-          'i scheduled this because i thought it would be nice',
+        reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
+        reasonComment: 'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -305,9 +302,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
-        manualScheduleReasonComment:
-          'i scheduled this because i thought it would be nice',
+        reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
+        reasonComment: 'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -343,9 +339,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
-        manualScheduleReasonComment:
-          'i scheduled this because i thought it would be nice',
+        reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
+        reasonComment: 'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)

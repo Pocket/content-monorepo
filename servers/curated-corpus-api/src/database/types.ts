@@ -114,8 +114,8 @@ export type DeleteScheduledItemInput = {
 
 // type to map to the input coming from the graph mutation
 export type CreateScheduledItemGraphInput = CreateScheduledItemInput & {
-  manualScheduleReasons?: string;
-  manualScheduleReasonComment?: string;
+  reasons?: string;
+  reasonComment?: string;
 };
 
 export type RescheduleScheduledItemInput = {
