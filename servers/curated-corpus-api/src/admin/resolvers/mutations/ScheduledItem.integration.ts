@@ -188,7 +188,7 @@ describe('mutations: ScheduledItem', () => {
         `This story is already scheduled to appear on NEW_TAB_EN_US on ${displayDate}.`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT',
+        'ALREADY_SCHEDULED',
       );
 
       // Check that the ADD_SCHEDULE event was not fired
@@ -807,7 +807,7 @@ describe('mutations: ScheduledItem', () => {
       expect(result.body.data).toBeNull();
 
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT',
+        'ALREADY_SCHEDULED',
       );
 
       // Check that the ADD_SCHEDULE event was not fired
