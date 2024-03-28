@@ -8,6 +8,7 @@ import {
   createScheduledCandidate,
   createScheduledCandidates,
   createScheduledCorpusItemBody,
+  createScheduledCorpusItemUserErrorBody,
   mockCreateApprovedCorpusItemOnce,
   mockCreateScheduledCorpusItemOnce,
   mockGetApprovedCorpusItemByUrl,
@@ -21,6 +22,7 @@ import {
 } from 'content-common/snowplow/test-helpers';
 import { extractScheduledCandidateEntity } from './events/testHelpers';
 import config from './config';
+import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 
 describe('corpus scheduler lambda', () => {
   afterAll(() => {
@@ -132,6 +134,33 @@ describe('corpus scheduler lambda', () => {
     );
     expect(snowplowEntity.error_name).toBeUndefined();
     expect(snowplowEntity.error_description).toBeUndefined();
+  });
+
+  it('emits a Snowplow event if the same item was already scheduled', async () => {
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server);
+    mockGetUrlMetadata(server);
+    mockCreateScheduledCorpusItemOnce(
+      server,
+      createScheduledCorpusItemUserErrorBody,
+    );
+
+    await processor(fakeEvent, sqsContext, sqsCallback);
+
+    // Exactly one Snowplow event should be emitted.
+    const allEvents = await waitForSnowplowEvents(record.candidates.length);
+    expect(allEvents.bad).toEqual(0);
+    expect(allEvents.good).toEqual(1);
+
+    // Check that the right Snowplow entity that was included with the event.
+    const snowplowEntity = await extractScheduledCandidateEntity();
+    expect(snowplowEntity.scheduled_corpus_candidate_id).toEqual(
+      record.candidates[0].scheduled_corpus_candidate_id,
+    );
+    expect(snowplowEntity.error_name).toEqual(
+      SnowplowScheduledCorpusCandidateErrorName.ALREADY_SCHEDULED,
+    );
+    expect(snowplowEntity.error_description).toBeTruthy();
   });
 
   it('sends a Sentry error if curated-corpus-api has error, with partial success', async () => {

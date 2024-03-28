@@ -1,4 +1,5 @@
 import {
+  CuratedCorpusApiErrorCodes,
   parseReasonsCsv,
   sanitizeText,
   ScheduledItemSource,
@@ -27,6 +28,7 @@ import {
 } from '@pocket-tools/apollo-utils';
 import { NotFoundError } from '@pocket-tools/apollo-utils';
 import { IAdminContext } from '../../context';
+import { GraphQLError } from 'graphql';
 
 /**
  * Deletes an item from the Scheduled Surface schedule.
@@ -95,6 +97,24 @@ export async function deleteScheduledItem(
   return scheduledItem;
 }
 
+function throwAlreadyScheduledError(
+  scheduledSurfaceGuid: string,
+  scheduledDate: Date,
+) {
+  throw new GraphQLError(
+    `This story is already scheduled to appear on ${scheduledSurfaceGuid} on ${scheduledDate.toLocaleString(
+      'en-US',
+      {
+        dateStyle: 'medium',
+        timeZone: 'UTC',
+      },
+    )}.`,
+    {
+      extensions: { code: CuratedCorpusApiErrorCodes.ALREADY_SCHEDULED },
+    },
+  );
+}
+
 /**
  * Adds a curated item to a scheduled surface for a given date.
  *
@@ -154,15 +174,10 @@ export async function createScheduledItem(
   } catch (error) {
     // If it's the duplicate scheduling constraint, catch the error
     // and send a user-friendly one to the client instead.
-    // Prisma P2002 error: "Unique constraint failed on the {constraint}"
     if (error.code === 'P2002') {
-      throw new UserInputError(
-        `This story is already scheduled to appear on ${
-          scheduledItemData.scheduledSurfaceGuid
-        } on ${scheduledItemData.scheduledDate.toLocaleString('en-US', {
-          dateStyle: 'medium',
-          timeZone: 'UTC',
-        })}.`,
+      throwAlreadyScheduledError(
+        scheduledItemData.scheduledSurfaceGuid,
+        scheduledItemData.scheduledDate,
       );
     }
 
@@ -211,17 +226,8 @@ export async function rescheduleScheduledItem(
   } catch (error) {
     // If it's the duplicate scheduling constraint, catch the error
     // and send a user-friendly one to the client instead.
-    // Prisma P2002 error: "Unique constraint failed on the {constraint}"
     if (error.code === 'P2002') {
-      throw new UserInputError(
-        `This story is already scheduled to appear on ${data.scheduledDate.toLocaleString(
-          'en-US',
-          {
-            dateStyle: 'medium',
-            timeZone: 'UTC',
-          },
-        )}.`,
-      );
+      throwAlreadyScheduledError(item.scheduledSurfaceGuid, data.scheduledDate);
     }
     // If it's something else, throw the error unchanged.
     throw new Error(error);

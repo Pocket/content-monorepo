@@ -132,3 +132,7 @@ export interface UrlMetadata {
   // authors is a comma separated string
   authors?: string;
 }
+
+export enum CuratedCorpusApiErrorCodes {
+  ALREADY_SCHEDULED = 'ALREADY_SCHEDULED',
+}

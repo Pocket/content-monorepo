@@ -175,8 +175,9 @@ export async function createScheduledCorpusItem(
   );
   // check for any errors returned by the mutation
   if (!result.data && result.errors.length > 0) {
+    const error = result.errors[0];
     throw new Error(
-      `createScheduledCorpusItem mutation failed: ${result.errors[0].message}`,
+      `createScheduledCorpusItem mutation failed with ${error.extensions.code}: ${error.message}`,
     );
   }
   return result.data.createScheduledCorpusItem;
