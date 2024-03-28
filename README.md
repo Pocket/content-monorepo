@@ -166,6 +166,8 @@ Make sure the `.env` under each service using `prisma` contains the appropriate 
 
 For `curated-corpus-api`: `DATABASE_URL=mysql://root:@localhost:3306/curation_corpus?connect_timeout=300`
 
+For `collection-api`: `DATABASE_URL=mysql://root:@localhost:3306/collections?connect_timeout=300`
+
 Run:
 
 ```

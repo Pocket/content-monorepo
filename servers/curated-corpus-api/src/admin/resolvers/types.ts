@@ -1,4 +1,4 @@
-import { ScheduledItem } from '@prisma/client';
+import { ScheduledItem } from '.prisma/client';
 import { ApprovedItem } from '../../database/types';
 import { ScheduledItemSource } from '../../shared/types';
 import { CorpusItemSource, CuratedStatus } from 'content-common';

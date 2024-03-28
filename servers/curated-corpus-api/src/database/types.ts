@@ -2,7 +2,7 @@ import {
   ApprovedItem as ApprovedItemModel,
   CuratedStatus,
   ScheduledItem as ScheduledItemModel,
-} from '@prisma/client';
+} from '.prisma/client';
 import { ScheduledItemSource } from '../shared/types';
 import {
   ApprovedItemAuthor,
@@ -114,8 +114,8 @@ export type DeleteScheduledItemInput = {
 
 // type to map to the input coming from the graph mutation
 export type CreateScheduledItemGraphInput = CreateScheduledItemInput & {
-  manualScheduleReasons?: string;
-  manualScheduleReasonComment?: string;
+  reasons?: string;
+  reasonComment?: string;
 };
 
 export type RescheduleScheduledItemInput = {

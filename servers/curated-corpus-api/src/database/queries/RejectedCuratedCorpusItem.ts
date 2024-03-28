@@ -1,6 +1,6 @@
-import { RejectedCuratedCorpusItem, PrismaClient } from '@prisma/client';
+import { RejectedCuratedCorpusItem, PrismaClient } from '.prisma/client';
 // need this to be able to use Prisma-native types for orderBy and filter clauses
-import { Prisma } from '@prisma/client';
+import { Prisma } from '.prisma/client';
 import {
   findManyCursorConnection,
   Connection,

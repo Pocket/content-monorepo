@@ -209,14 +209,6 @@ export type ScheduledCorpusItem = {
    */
   status_reason_comment?: string;
   /**
-   * The list of reasons a curator scheduled the item manually.
-   */
-  manually_scheduled_reasons?: string[];
-  /**
-   *  An optional comment added by the curator when scheduling an item manually.
-   */
-  manually_scheduled_reason_comment?: string;
-  /**
    * The method by which this item was generated. Possible values include ML and MANUAL.
    */
   generated_by?: ScheduledItemSource;

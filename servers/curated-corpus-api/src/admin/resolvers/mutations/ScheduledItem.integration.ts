@@ -1,7 +1,7 @@
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { client } from '../../../database/client';
 
 import {
@@ -110,9 +110,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
-        manualScheduleReasonComment:
-          'i scheduled this because i thought it would be nice',
+        reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
+        reasonComment: 'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -171,9 +170,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: existingScheduledEntry.scheduledSurfaceGuid,
         scheduledDate,
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
-        manualScheduleReasonComment:
-          'i scheduled this because i thought it would be nice',
+        reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
+        reasonComment: 'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -185,7 +183,6 @@ describe('mutations: ScheduledItem', () => {
         });
 
       expect(result.body.data).toBeNull();
-
       // Expecting to see a custom error message from the resolver
       expect(result.body.errors?.[0].message).toContain(
         `This story is already scheduled to appear on NEW_TAB_EN_US on ${displayDate}.`,
@@ -212,9 +209,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
-        manualScheduleReasonComment:
-          'i scheduled this because i thought it would be nice',
+        reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
+        reasonComment: 'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -306,9 +302,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
-        manualScheduleReasonComment:
-          'i scheduled this because i thought it would be nice',
+        reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
+        reasonComment: 'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)
@@ -344,9 +339,8 @@ describe('mutations: ScheduledItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
         source: ScheduledItemSource.MANUAL,
-        manualScheduleReasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
-        manualScheduleReasonComment:
-          'i scheduled this because i thought it would be nice',
+        reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
+        reasonComment: 'i scheduled this because i thought it would be nice',
       };
 
       const result = await request(app)

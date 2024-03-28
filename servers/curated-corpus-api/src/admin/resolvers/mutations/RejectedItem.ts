@@ -2,7 +2,7 @@ import {
   AuthenticationError,
   UserInputError,
 } from '@pocket-tools/apollo-utils';
-import { RejectedCuratedCorpusItem } from '@prisma/client';
+import { RejectedCuratedCorpusItem } from '.prisma/client';
 import { createRejectedItem as dbCreateRejectedItem } from '../../../database/mutations';
 import { ReviewedCorpusItemEventType } from '../../../events/types';
 import { RejectionReason, ACCESS_DENIED_ERROR } from '../../../shared/types';

@@ -1,4 +1,4 @@
-import { CuratedStatus, RejectedCuratedCorpusItem } from '@prisma/client';
+import { CuratedStatus, RejectedCuratedCorpusItem } from '.prisma/client';
 import {
   getGoodSnowplowEvents,
   parseSnowplowData,
@@ -75,10 +75,10 @@ const rejectedEventData: ReviewedCorpusItemPayload = {
 function assertValidSnowplowReviewedItemEvents(data) {
   const eventContext = parseSnowplowData(data);
 
-  if (eventContext.data[0].data.approved_corpus_item_external_id) {
-    assertValidSnowplowApprovedItemEvents(eventContext);
-  } else {
+  if (eventContext.data[0].data.corpus_review_status === 'rejected') {
     assertValidSnowplowRejectedItemEvents(eventContext);
+  } else {
+    assertValidSnowplowApprovedItemEvents(eventContext);
   }
 }
 
@@ -117,22 +117,30 @@ function assertValidSnowplowApprovedItemEvents(eventContext) {
 }
 
 function assertValidSnowplowRejectedItemEvents(eventContext) {
+  const matchData: any = {
+    object_version: ObjectVersion.NEW,
+    rejected_corpus_item_external_id: rejectedItem.externalId,
+    corpus_review_status: CorpusReviewStatus.REJECTED,
+    url: rejectedItem.url,
+    title: rejectedItem.title,
+    language: rejectedItem.language,
+    topic: rejectedItem.topic,
+    rejection_reasons: ['COMMERCIAL', 'PAYWALL', 'OTHER'],
+    created_at: getUnixTimestamp(rejectedItem.createdAt),
+    created_by: rejectedItem.createdBy,
+  };
+
+  // if a rejected item has a prospect id, it will not have an approved item external id
+  if (eventContext.data[0].data.prospect_id) {
+    matchData.prospect_id = rejectedItem.prospectId;
+  } else {
+    matchData.approved_corpus_item_external_id = approvedItem.externalId;
+  }
+
   expect(eventContext.data).toMatchObject([
     {
       schema: config.snowplow.schemas.reviewedCorpusItem,
-      data: {
-        object_version: ObjectVersion.NEW,
-        rejected_corpus_item_external_id: rejectedItem.externalId,
-        prospect_id: rejectedItem.prospectId,
-        corpus_review_status: CorpusReviewStatus.REJECTED,
-        url: rejectedItem.url,
-        title: rejectedItem.title,
-        language: rejectedItem.language,
-        topic: rejectedItem.topic,
-        rejection_reasons: ['COMMERCIAL', 'PAYWALL', 'OTHER'],
-        created_at: getUnixTimestamp(rejectedItem.createdAt),
-        created_by: rejectedItem.createdBy,
-      },
+      data: matchData,
     },
   ]);
 }
@@ -169,11 +177,21 @@ describe('ReviewedItemSnowplowHandler', () => {
       ...rejectedEventData,
       eventType: ReviewedCorpusItemEventType.REJECT_ITEM,
     });
+    // Emit the rejected item event with an approved item external id
+    // and no prospect id (mirrors case of rejecting an approved item)
+    emitter.emit(ReviewedCorpusItemEventType.REJECT_ITEM, {
+      reviewedCorpusItem: {
+        ...rejectedItem,
+        prospectId: null,
+        approvedCorpusItemExternalId: approvedItem.externalId,
+      },
+      eventType: ReviewedCorpusItemEventType.REJECT_ITEM,
+    });
 
     // make sure we only have good events
-    const allEvents = await waitForSnowplowEvents(4);
-    expect(allEvents.total).toEqual(4);
-    expect(allEvents.good).toEqual(4);
+    const allEvents = await waitForSnowplowEvents(5);
+    expect(allEvents.total).toEqual(5);
+    expect(allEvents.good).toEqual(5);
     expect(allEvents.bad).toEqual(0);
 
     const goodEvents = await getGoodSnowplowEvents();
@@ -188,6 +206,7 @@ describe('ReviewedItemSnowplowHandler', () => {
         'reviewed_corpus_item_added',
         'reviewed_corpus_item_updated',
         'reviewed_corpus_item_removed',
+        'reviewed_corpus_item_rejected',
         'reviewed_corpus_item_rejected',
       ],
       'reviewed_corpus_item',

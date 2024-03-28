@@ -26,7 +26,6 @@ import {
   AuthenticationError,
   UserInputError,
 } from '@pocket-tools/apollo-utils';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { NotFoundError } from '@pocket-tools/apollo-utils';
 import { IAdminContext } from '../../context';
 import { GraphQLError } from 'graphql';
@@ -128,11 +127,7 @@ export async function createScheduledItem(
   { data },
   context: IAdminContext,
 ): Promise<ScheduledItem> {
-  const {
-    manaulScheduleReasons,
-    manualScheduleReasonComment,
-    ...scheduledItemData
-  } = data;
+  const { reasons, reasonComment, ...scheduledItemData } = data;
 
   // Check if the user can execute this mutation.
   if (!context.authenticatedUser.canWriteToSurface(data.scheduledSurfaceGuid)) {
@@ -160,22 +155,13 @@ export async function createScheduledItem(
         ...scheduledItem,
         status: ScheduledCorpusItemStatus.ADDED,
         generated_by: scheduledItemData.source,
-        // get reasons and reason comment. (these may both be null. they're only
-        // supplied when an item was scheduled manually for limited surfaces.)
-        manualScheduleReasons: parseReasonsCsv(
-          manaulScheduleReasons,
-          config.app.removeReasonMaxLength,
-        ),
-        // eslint cannot decide what it wants below - it complains about
-        // indentation no matter what i do, so i'm skipping it 🙃
-        /* eslint-disable */
-        manualScheduleReasonsComment: manualScheduleReasonComment
-          ? sanitizeText(
-              manualScheduleReasonComment,
-              config.app.removeReasonMaxLength,
-            )
+        // get reasons and reason comment for adding a scheduled item.
+        // (these may both be null. they're only supplied when an item was
+        // scheduled manually for limited surfaces.)
+        reasons: parseReasonsCsv(reasons, config.app.removeReasonMaxLength),
+        reasonComment: data.reasonComment
+          ? sanitizeText(reasonComment, config.app.removeReasonMaxLength)
           : null,
-        /* eslint-enable */
       },
     };
 
@@ -188,10 +174,7 @@ export async function createScheduledItem(
   } catch (error) {
     // If it's the duplicate scheduling constraint, catch the error
     // and send a user-friendly one to the client instead.
-    if (
-      error instanceof PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
+    if (error.code === 'P2002') {
       throwAlreadyScheduledError(
         scheduledItemData.scheduledSurfaceGuid,
         scheduledItemData.scheduledDate,
@@ -239,18 +222,13 @@ export async function rescheduleScheduledItem(
         scheduledCorpusItem: rescheduledItem,
       },
     );
-
     return rescheduledItem;
   } catch (error) {
     // If it's the duplicate scheduling constraint, catch the error
     // and send a user-friendly one to the client instead.
-    if (
-      error instanceof PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
+    if (error.code === 'P2002') {
       throwAlreadyScheduledError(item.scheduledSurfaceGuid, data.scheduledDate);
     }
-
     // If it's something else, throw the error unchanged.
     throw new Error(error);
   }
