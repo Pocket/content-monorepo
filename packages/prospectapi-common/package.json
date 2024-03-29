@@ -18,7 +18,7 @@
     "@aws-sdk/client-dynamodb": "3.529.1",
     "@aws-sdk/lib-dynamodb": "3.529.1",
     "content-common": "workspace:*",
-    "@sentry/node": "6.19.7",
+    "@sentry/node": "7.62.0",
     "cross-fetch": "3.1.5",
     "fetch-retry": "5.0.6",
     "graphql-tag": "2.12.6",

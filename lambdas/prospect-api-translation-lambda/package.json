@@ -15,7 +15,7 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "3.529.1",
     "@aws-sdk/lib-dynamodb": "3.529.1",
-    "@sentry/serverless": "6.19.7",
+    "@sentry/serverless": "7.95.0",
     "content-common": "workspace:*",
     "prospectapi-common": "workspace:*",
     "uuid": "9.0.1"
