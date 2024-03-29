@@ -126,12 +126,91 @@ This is a future improvement, not needed now.
 """
 union Surface = ScheduledSurface
 
+"""
+An edge in a connection.
+"""
+type CorpusItemEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+  """
+  The Corpus Item at the end of the edge.
+  """
+  node: CorpusItem!
+}
+
+"""
+The connection type for Corpus Item.
+"""
+type CorpusItemConnection {
+  """
+  A list of edges.
+  """
+  edges: [CorpusItemEdge!]!
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+  """
+  Identifies the total count of Corpus Items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+Available fields for filtering Corpus Items.
+"""
+input CorpusItemFilter {
+  """
+  Optional filter on the URL field. Returns partial matches.
+  """
+  url: Url
+  """
+  Optional filter on the title field. Returns partial matches.
+  """
+  title: String
+  """
+  Optional filter on the excerpt field. Returns partial matches.
+  """
+  excerpt: String
+  """
+  Optional filter on the publisher field. Returns partial matches.
+  """
+  publisher: String
+  """
+  Optional filter on the authors field. Returns partial matches.
+  """
+  author: String
+  """
+  Optional filter on the topic field.
+  """
+  topic: String
+  """
+  Optional filter on the status of Approved Items.
+  """
+  status: CuratedStatus
+  """
+  Optional filter on the language Corpus Items have been classified as.
+  This is a two-letter string, e.g. 'EN' for English or 'DE' for 'German'.
+  """
+  language: CorpusLanguage
+}
+
 type Query {
-    scheduledSurface(id: ID!): ScheduledSurface!
-    """
-    This is a future improvement, not needed now.
-    """
-    surface(id: ID!): Surface!
+  scheduledSurface(id: ID!): ScheduledSurface!
+  """
+  This is a future improvement, not needed now.
+  """
+  surface(id: ID!): Surface!
+
+  """
+  Retrieves a paginated, filterable list of Corpus Items.
+  """
+  corpusItems(
+    filters: CorpusItemFilter
+    pagination: PaginationInput
+  ): CorpusItemConnection!
 }
 
 type SavedItem @key(fields: "url") {

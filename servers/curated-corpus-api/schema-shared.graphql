@@ -11,6 +11,20 @@ extend schema
     )
 
 """
+The outcome of the curators reviewing a prospective story.
+"""
+enum CuratedStatus {
+  """
+  Recommend this story for Pocket users. This is first-tier content.
+  """
+  RECOMMENDATION
+  """
+  This story is suitable for our curated corpus. It's a second-tier recommendation.
+  """
+  CORPUS
+}
+
+"""
 A URL - usually, for an interesting story on the internet that's worth saving to Pocket.
 """
 scalar Url

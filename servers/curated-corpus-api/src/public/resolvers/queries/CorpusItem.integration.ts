@@ -5,6 +5,7 @@ import { PrismaClient } from '.prisma/client';
 import { client } from '../../../database/client';
 
 import {
+  CORPUS_ITEMS,
   CORPUS_ITEM_REFERENCE_RESOLVER,
   CORPUS_ITEM_TARGET_REFERENCE_RESOLVER,
 } from './sample-queries.gql';
@@ -12,7 +13,7 @@ import { clearDb, createApprovedItemHelper } from '../../../test/helpers';
 import { startServer } from '../../../express';
 import { IPublicContext } from '../../context';
 
-describe('CorpusItem reference resolver', () => {
+describe('CorpusItem', () => {
   let app: Express.Application;
   let server: ApolloServer<IPublicContext>;
   let graphQLUrl: string;
@@ -34,227 +35,338 @@ describe('CorpusItem reference resolver', () => {
     await db.$disconnect();
   });
 
-  it('returns the corpus item if it exists by reference resolver id', async () => {
-    // Create an approved item.
-    const approvedItem = await createApprovedItemHelper(db, {
-      title: 'Story one',
+  describe('reference resolver', () => {
+    it('returns the corpus item if it exists by reference resolver id', async () => {
+      // Create an approved item.
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'Story one',
+      });
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
+          variables: {
+            representations: [
+              {
+                __typename: 'CorpusItem',
+                id: approvedItem.externalId,
+              },
+            ],
+          },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?._entities).toHaveLength(1);
+      expect(result.body.data?._entities[0].title).toEqual(approvedItem.title);
+      expect(result.body.data?._entities[0].authors).toHaveLength(
+        <number>approvedItem.authors?.length,
+      );
     });
 
-    const result = await request(app)
-      .post(graphQLUrl)
-      .send({
-        query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
-        variables: {
-          representations: [
-            {
-              __typename: 'CorpusItem',
-              id: approvedItem.externalId,
-            },
-          ],
-        },
-      });
+    it('should return null if the reference resolver id provided is not known', async () => {
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
+          variables: {
+            representations: [
+              {
+                __typename: 'CorpusItem',
+                id: 'ABRACADABRA',
+              },
+            ],
+          },
+        });
 
-    expect(result.body.errors).toBeUndefined();
-
-    expect(result.body.data).not.toBeNull();
-    expect(result.body.data?._entities).toHaveLength(1);
-    expect(result.body.data?._entities[0].title).toEqual(approvedItem.title);
-    expect(result.body.data?._entities[0].authors).toHaveLength(
-      <number>approvedItem.authors?.length
-    );
-  });
-
-  it('should return null if the reference resolver id provided is not known', async () => {
-    const result = await request(app)
-      .post(graphQLUrl)
-      .send({
-        query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
-        variables: {
-          representations: [
-            {
-              __typename: 'CorpusItem',
-              id: 'ABRACADABRA',
-            },
-          ],
-        },
-      });
-
-    // The entity should be null
-    expect(result.body.errors).toBeUndefined();
-    expect(result.body.data).not.toBeNull();
-    expect(result.body.data?._entities).toHaveLength(1);
-    expect(result.body.data?._entities[0]).toBeNull();
-  });
-
-  it('returns the corpus item if it exists by reference resolver url', async () => {
-    // Create an approved item.
-    const approvedItem = await createApprovedItemHelper(db, {
-      title: 'Story one',
+      // The entity should be null
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?._entities).toHaveLength(1);
+      expect(result.body.data?._entities[0]).toBeNull();
     });
 
-    const result = await request(app)
-      .post(graphQLUrl)
-      .send({
-        query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
-        variables: {
-          representations: [
-            {
-              __typename: 'CorpusItem',
-              url: approvedItem.url,
-            },
-          ],
-        },
+    it('returns the corpus item if it exists by reference resolver url', async () => {
+      // Create an approved item.
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'Story one',
       });
 
-    expect(result.body.errors).toBeUndefined();
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
+          variables: {
+            representations: [
+              {
+                __typename: 'CorpusItem',
+                url: approvedItem.url,
+              },
+            ],
+          },
+        });
 
-    expect(result.body.data).not.toBeNull();
-    expect(result.body.data?._entities).toHaveLength(1);
-    expect(result.body.data?._entities[0].title).toEqual(approvedItem.title);
-    expect(result.body.data?._entities[0].authors).toHaveLength(
-      <number>approvedItem.authors?.length
-    );
-  });
+      expect(result.body.errors).toBeUndefined();
 
-  it('should return null if the reference resolver url provided is not known', async () => {
-    const result = await request(app)
-      .post(graphQLUrl)
-      .send({
-        query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
-        variables: {
-          representations: [
-            {
-              __typename: 'CorpusItem',
-              url: 'ABRACADABRA',
-            },
-          ],
-        },
-      });
-
-    // The entity should be null
-    expect(result.body.errors).toBeUndefined();
-    expect(result.body.data).not.toBeNull();
-    expect(result.body.data?._entities).toHaveLength(1);
-    expect(result.body.data?._entities[0]).toBeNull();
-  });
-
-  it('returns the corpus item if it exists', async () => {
-    // Create an approved item.
-    const approvedItem = await createApprovedItemHelper(db, {
-      title: 'Story one',
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?._entities).toHaveLength(1);
+      expect(result.body.data?._entities[0].title).toEqual(approvedItem.title);
+      expect(result.body.data?._entities[0].authors).toHaveLength(
+        <number>approvedItem.authors?.length,
+      );
     });
 
-    const result = await request(app)
-      .post(graphQLUrl)
-      .send({
-        query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
-        variables: {
-          representations: [
-            {
-              __typename: 'SavedItem',
-              url: approvedItem.url,
-            },
-          ],
-        },
-      });
+    it('should return null if the reference resolver url provided is not known', async () => {
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
+          variables: {
+            representations: [
+              {
+                __typename: 'CorpusItem',
+                url: 'ABRACADABRA',
+              },
+            ],
+          },
+        });
 
-    expect(result.body.errors).toBeUndefined();
-
-    expect(result.body.data).not.toBeNull();
-    expect(result.body.data?._entities).toHaveLength(1);
-    expect(result.body.data?._entities[0].corpusItem.title).toEqual(
-      approvedItem.title
-    );
-    expect(result.body.data?._entities[0].corpusItem.authors).toHaveLength(
-      <number>approvedItem.authors?.length
-    );
-  });
-
-  it('should return null if the url provided is not known', async () => {
-    const result = await request(app)
-      .post(graphQLUrl)
-      .send({
-        query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
-        variables: {
-          representations: [
-            {
-              __typename: 'SavedItem',
-              url: 'ABRACADABRA',
-            },
-          ],
-        },
-      });
-
-    expect(result.body.errors).toBeUndefined();
-    expect(result.body.data?._entities).toHaveLength(1);
-    expect(result.body.data?._entities[0].corpusItem).toBeNull();
-  });
-
-  it('returns the corpus target if its syndicated', async () => {
-    // Create an approved item.
-    const approvedItem = await createApprovedItemHelper(db, {
-      title: 'Story one',
-      url: 'https://getpocket.com/explore/item/why-exhaustion-is-not-unique-to-our-overstimulated-age',
+      // The entity should be null
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?._entities).toHaveLength(1);
+      expect(result.body.data?._entities[0]).toBeNull();
     });
 
-    const result = await request(app)
-      .post(graphQLUrl)
-      .send({
-        query: print(CORPUS_ITEM_TARGET_REFERENCE_RESOLVER),
-        variables: {
-          representations: [
-            {
-              __typename: 'CorpusItem',
-              id: approvedItem.externalId,
-            },
-          ],
-        },
+    it('returns the corpus item if it exists', async () => {
+      // Create an approved item.
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'Story one',
       });
 
-    expect(result.body.errors).toBeUndefined();
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
+          variables: {
+            representations: [
+              {
+                __typename: 'SavedItem',
+                url: approvedItem.url,
+              },
+            ],
+          },
+        });
 
-    expect(result.body.data).not.toBeNull();
-    expect(result.body.data?._entities).toHaveLength(1);
-    expect(result.body.data?._entities[0].title).toEqual(approvedItem.title);
-    expect(result.body.data?._entities[0].target.slug).toEqual(
-      'why-exhaustion-is-not-unique-to-our-overstimulated-age'
-    );
-    expect(result.body.data?._entities[0].target.__typename).toEqual(
-      'SyndicatedArticle'
-    );
-  });
+      expect(result.body.errors).toBeUndefined();
 
-  it('returns the corpus target if its collection', async () => {
-    // Create an approved item.
-    const approvedItem = await createApprovedItemHelper(db, {
-      title: 'Story one',
-      url: 'https://getpocket.com/collections/avocado-toast-was-king-these-recipes-are-vying-for-the-throne',
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?._entities).toHaveLength(1);
+      expect(result.body.data?._entities[0].corpusItem.title).toEqual(
+        approvedItem.title,
+      );
+      expect(result.body.data?._entities[0].corpusItem.authors).toHaveLength(
+        <number>approvedItem.authors?.length,
+      );
     });
 
-    const result = await request(app)
-      .post(graphQLUrl)
-      .send({
-        query: print(CORPUS_ITEM_TARGET_REFERENCE_RESOLVER),
-        variables: {
-          representations: [
-            {
-              __typename: 'CorpusItem',
-              id: approvedItem.externalId,
-            },
-          ],
-        },
+    it('should return null if the url provided is not known', async () => {
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
+          variables: {
+            representations: [
+              {
+                __typename: 'SavedItem',
+                url: 'ABRACADABRA',
+              },
+            ],
+          },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data?._entities).toHaveLength(1);
+      expect(result.body.data?._entities[0].corpusItem).toBeNull();
+    });
+
+    it('returns the corpus target if its syndicated', async () => {
+      // Create an approved item.
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'Story one',
+        url: 'https://getpocket.com/explore/item/why-exhaustion-is-not-unique-to-our-overstimulated-age',
       });
 
-    expect(result.body.errors).toBeUndefined();
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEM_TARGET_REFERENCE_RESOLVER),
+          variables: {
+            representations: [
+              {
+                __typename: 'CorpusItem',
+                id: approvedItem.externalId,
+              },
+            ],
+          },
+        });
 
-    expect(result.body.data).not.toBeNull();
-    expect(result.body.data?._entities).toHaveLength(1);
-    expect(result.body.data?._entities[0].title).toEqual(approvedItem.title);
-    expect(result.body.data?._entities[0].target.slug).toEqual(
-      'avocado-toast-was-king-these-recipes-are-vying-for-the-throne'
-    );
-    expect(result.body.data?._entities[0].target.__typename).toEqual(
-      'Collection'
-    );
+      expect(result.body.errors).toBeUndefined();
+
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?._entities).toHaveLength(1);
+      expect(result.body.data?._entities[0].title).toEqual(approvedItem.title);
+      expect(result.body.data?._entities[0].target.slug).toEqual(
+        'why-exhaustion-is-not-unique-to-our-overstimulated-age',
+      );
+      expect(result.body.data?._entities[0].target.__typename).toEqual(
+        'SyndicatedArticle',
+      );
+    });
+
+    it('returns the corpus target if its collection', async () => {
+      // Create an approved item.
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'Story one',
+        url: 'https://getpocket.com/collections/avocado-toast-was-king-these-recipes-are-vying-for-the-throne',
+      });
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEM_TARGET_REFERENCE_RESOLVER),
+          variables: {
+            representations: [
+              {
+                __typename: 'CorpusItem',
+                id: approvedItem.externalId,
+              },
+            ],
+          },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?._entities).toHaveLength(1);
+      expect(result.body.data?._entities[0].title).toEqual(approvedItem.title);
+      expect(result.body.data?._entities[0].target.slug).toEqual(
+        'avocado-toast-was-king-these-recipes-are-vying-for-the-throne',
+      );
+      expect(result.body.data?._entities[0].target.__typename).toEqual(
+        'Collection',
+      );
+    });
+  });
+
+  describe('search resolver', () => {
+    it('returns the corpus item from title search', async () => {
+      // Create an approved item.
+      const corpusItem = await createApprovedItemHelper(db, {
+        title: 'Story one',
+        url: 'https://getpocket.com/a/cool/story',
+      });
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEMS),
+          variables: { filters: { title: 'one' } },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?.corpusItems.edges).toHaveLength(1);
+      expect(result.body.data?.corpusItems.edges[0].node.title).toEqual(
+        corpusItem.title,
+      );
+    });
+
+    it('returns the corpus item from author search', async () => {
+      // Create an approved item.
+      const corpusItem = await createApprovedItemHelper(
+        db,
+        {
+          title: 'Story one',
+          url: 'https://getpocket.com/a/cool/story',
+        },
+        ['Billy Jane'],
+      );
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEMS),
+          variables: { filters: { author: 'Billy' } },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?.corpusItems.edges).toHaveLength(1);
+      expect(result.body.data?.corpusItems.edges[0].node.title).toEqual(
+        corpusItem.title,
+      );
+      expect(
+        result.body.data?.corpusItems.edges[0].node.authors[0].name,
+      ).toEqual('Billy Jane');
+    });
+
+    it('returns the corpus item from topic search', async () => {
+      // Create an approved item.
+      const corpusItem = await createApprovedItemHelper(db, {
+        title: 'Story one',
+        url: 'https://getpocket.com/a/cool/story',
+        topic: 'POLITICS',
+      });
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEMS),
+          variables: { filters: { topic: 'politics' } },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?.corpusItems.edges).toHaveLength(1);
+      expect(result.body.data?.corpusItems.edges[0].node.title).toEqual(
+        corpusItem.title,
+      );
+      expect(result.body.data?.corpusItems.edges[0].node.topic).toEqual(
+        'POLITICS',
+      );
+    });
+
+    it('returns the corpus item from excerpt', async () => {
+      // Create an approved item.
+      const corpusItem = await createApprovedItemHelper(db, {
+        title: 'Story one',
+        url: 'https://getpocket.com/a/cool/story',
+        excerpt: 'this is a cool story folks',
+      });
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEMS),
+          variables: { filters: { excerpt: 'folks' } },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?.corpusItems.edges).toHaveLength(1);
+      expect(result.body.data?.corpusItems.edges[0].node.title).toEqual(
+        corpusItem.title,
+      );
+      expect(result.body.data?.corpusItems.edges[0].node.excerpt).toContain(
+        'folks',
+      );
+    });
   });
 });

@@ -40,16 +40,24 @@ export type CreateApprovedItemHelperInput =
  */
 export async function createApprovedItemHelper(
   prisma: PrismaClient,
-  data: CreateApprovedItemHelperInput
+  data: CreateApprovedItemHelperInput,
+  authors?: string[],
 ): Promise<ApprovedItem> {
   const random = Math.round(Math.random() * 1000);
 
-  // randomize number of authors
-  const authorCount = faker.number.int({ min: 1, max: 3 });
-  const authors: ApprovedItemAuthor[] = [];
+  let authorData: ApprovedItemAuthor[] = [];
 
-  for (let i = 0; i < authorCount; i++) {
-    authors.push({ name: faker.person.fullName(), sortOrder: i });
+  if (authors) {
+    authorData = authors.map((name: string, index: number) => {
+      return { name, sortOrder: index } as ApprovedItemAuthor;
+    });
+  } else {
+    // randomize number of authors
+    const authorCount = faker.number.int({ min: 1, max: 3 });
+
+    for (let i = 0; i < authorCount; i++) {
+      authorData.push({ name: faker.person.fullName(), sortOrder: i });
+    }
   }
 
   // defaults for optional properties
@@ -61,7 +69,7 @@ export async function createApprovedItemHelper(
     url: `${faker.internet.url()}/${faker.lorem.slug()}/${faker.string.uuid()}`,
     excerpt: faker.lorem.sentence(15),
     authors: {
-      create: authors,
+      create: authorData,
     },
     status: faker.helpers.arrayElement([
       CuratedStatus.RECOMMENDATION,

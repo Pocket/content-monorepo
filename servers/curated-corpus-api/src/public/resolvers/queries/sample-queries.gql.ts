@@ -85,3 +85,41 @@ export const CORPUS_ITEM_TARGET_REFERENCE_RESOLVER = gql`
     }
   }
 `;
+
+export const CORPUS_ITEMS = gql`
+  query corpusItems($filters: CorpusItemFilter, $pagination: PaginationInput) {
+    corpusItems(filters: $filters, pagination: $pagination) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          id
+          title
+          authors {
+            name
+          }
+          publisher
+          datePublished
+          excerpt
+          topic
+          target {
+            __typename
+            ... on Collection {
+              slug
+            }
+
+            ... on SyndicatedArticle {
+              slug
+            }
+          }
+        }
+      }
+    }
+  }
+`;

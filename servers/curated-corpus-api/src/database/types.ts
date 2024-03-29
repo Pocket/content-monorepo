@@ -55,6 +55,17 @@ export type ApprovedItemFilter = {
   url?: string;
 };
 
+export type CorpusItemFilter = {
+  language?: string;
+  status?: CuratedStatus;
+  title?: string;
+  topic?: string;
+  url?: string;
+  excerpt?: string;
+  publisher?: string;
+  author?: string;
+};
+
 export type RejectedCuratedCorpusItemFilter = {
   url?: string;
   title?: string;

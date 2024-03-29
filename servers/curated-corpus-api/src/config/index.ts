@@ -25,6 +25,7 @@ export default {
     defaultMaxAge: 86400,
     pagination: {
       approvedItemsPerPage: 30,
+      curatedItemsPerPage: 30,
       rejectedItemsPerPage: 30,
       maxAllowedResults: 100,
       scheduledSurfaceHistory: 10,
