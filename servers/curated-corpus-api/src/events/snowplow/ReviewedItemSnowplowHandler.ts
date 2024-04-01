@@ -2,6 +2,7 @@ import { CuratedCorpusSnowplowHandler } from './CuratedCorpusSnowplowHandler';
 import {
   ApprovedCorpusItemPayload,
   BaseEventData,
+  RejectedCorpusItemPayload,
   ReviewedCorpusItemPayload,
 } from '../types';
 import { buildSelfDescribingEvent, Tracker } from '@snowplow/node-tracker';
@@ -15,7 +16,6 @@ import {
   ReviewedCorpusItem,
 } from './schema';
 import { getUnixTimestamp } from '../../shared/utils';
-import { RejectedCuratedCorpusItem } from '.prisma/client';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import {
   ApprovedItemAuthor,
@@ -125,7 +125,7 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
       );
     } else {
       context = ReviewedItemSnowplowHandler.generateRejectedItemContext(
-        item as RejectedCuratedCorpusItem,
+        item as RejectedCorpusItemPayload,
         context,
       );
     }
@@ -159,7 +159,7 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
   }
 
   private static generateRejectedItemContext(
-    item: RejectedCuratedCorpusItem,
+    item: RejectedCorpusItemPayload,
     context: ReviewedCorpusItemContext,
   ): ReviewedCorpusItemContext {
     context.data = {
@@ -172,12 +172,18 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
     // from the prospects stream (e.g., the Parser hasn't supplied it when parsing
     // the URL), so we only send it to Snowplow if the data is there.
     if (item.title) {
-      context.data = { ...context.data, title: item.title };
+      context.data.title = item.title;
     }
 
     // And we do the exact same thing for the `language` field.
     if (item.language) {
-      context.data = { ...context.data, language: item.language };
+      context.data.language = item.language;
+    }
+
+    // the approved corpus item external id will be available if it's an approved item being rejected
+    if (item.approvedCorpusItemExternalId) {
+      context.data.approved_corpus_item_external_id =
+        item.approvedCorpusItemExternalId;
     }
 
     return context;

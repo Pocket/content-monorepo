@@ -1,4 +1,5 @@
 import {
+  CuratedCorpusApiErrorCodes,
   parseReasonsCsv,
   sanitizeText,
   ScheduledItemSource,
@@ -27,6 +28,7 @@ import {
 } from '@pocket-tools/apollo-utils';
 import { NotFoundError } from '@pocket-tools/apollo-utils';
 import { IAdminContext } from '../../context';
+import { GraphQLError } from 'graphql';
 
 /**
  * Deletes an item from the Scheduled Surface schedule.
@@ -95,6 +97,24 @@ export async function deleteScheduledItem(
   return scheduledItem;
 }
 
+function throwAlreadyScheduledError(
+  scheduledSurfaceGuid: string,
+  scheduledDate: Date,
+) {
+  throw new GraphQLError(
+    `This story is already scheduled to appear on ${scheduledSurfaceGuid} on ${scheduledDate.toLocaleString(
+      'en-US',
+      {
+        dateStyle: 'medium',
+        timeZone: 'UTC',
+      },
+    )}.`,
+    {
+      extensions: { code: CuratedCorpusApiErrorCodes.ALREADY_SCHEDULED },
+    },
+  );
+}
+
 /**
  * Adds a curated item to a scheduled surface for a given date.
  *
@@ -107,11 +127,7 @@ export async function createScheduledItem(
   { data },
   context: IAdminContext,
 ): Promise<ScheduledItem> {
-  const {
-    manaulScheduleReasons,
-    manualScheduleReasonComment,
-    ...scheduledItemData
-  } = data;
+  const { reasons, reasonComment, ...scheduledItemData } = data;
 
   // Check if the user can execute this mutation.
   if (!context.authenticatedUser.canWriteToSurface(data.scheduledSurfaceGuid)) {
@@ -139,22 +155,13 @@ export async function createScheduledItem(
         ...scheduledItem,
         status: ScheduledCorpusItemStatus.ADDED,
         generated_by: scheduledItemData.source,
-        // get reasons and reason comment. (these may both be null. they're only
-        // supplied when an item was scheduled manually for limited surfaces.)
-        manualScheduleReasons: parseReasonsCsv(
-          manaulScheduleReasons,
-          config.app.removeReasonMaxLength,
-        ),
-        // eslint cannot decide what it wants below - it complains about
-        // indentation no matter what i do, so i'm skipping it 🙃
-        /* eslint-disable */
-        manualScheduleReasonsComment: manualScheduleReasonComment
-          ? sanitizeText(
-              manualScheduleReasonComment,
-              config.app.removeReasonMaxLength,
-            )
+        // get reasons and reason comment for adding a scheduled item.
+        // (these may both be null. they're only supplied when an item was
+        // scheduled manually for limited surfaces.)
+        reasons: parseReasonsCsv(reasons, config.app.removeReasonMaxLength),
+        reasonComment: data.reasonComment
+          ? sanitizeText(reasonComment, config.app.removeReasonMaxLength)
           : null,
-        /* eslint-enable */
       },
     };
 
@@ -167,17 +174,10 @@ export async function createScheduledItem(
   } catch (error) {
     // If it's the duplicate scheduling constraint, catch the error
     // and send a user-friendly one to the client instead.
-    // Prisma P2002 error: "Unique constraint failed on the {constraint}"
-    if (
-      error.code === 'P2002'
-    ) {
-      throw new UserInputError(
-        `This story is already scheduled to appear on ${
-          scheduledItemData.scheduledSurfaceGuid
-        } on ${scheduledItemData.scheduledDate.toLocaleString('en-US', {
-          dateStyle: 'medium',
-          timeZone: 'UTC',
-        })}.`,
+    if (error.code === 'P2002') {
+      throwAlreadyScheduledError(
+        scheduledItemData.scheduledSurfaceGuid,
+        scheduledItemData.scheduledDate,
       );
     }
 
@@ -226,17 +226,8 @@ export async function rescheduleScheduledItem(
   } catch (error) {
     // If it's the duplicate scheduling constraint, catch the error
     // and send a user-friendly one to the client instead.
-    // Prisma P2002 error: "Unique constraint failed on the {constraint}"
     if (error.code === 'P2002') {
-      throw new UserInputError(
-        `This story is already scheduled to appear on ${data.scheduledDate.toLocaleString(
-          'en-US',
-          {
-            dateStyle: 'medium',
-            timeZone: 'UTC',
-          },
-        )}.`,
-      );
+      throwAlreadyScheduledError(item.scheduledSurfaceGuid, data.scheduledDate);
     }
     // If it's something else, throw the error unchanged.
     throw new Error(error);
