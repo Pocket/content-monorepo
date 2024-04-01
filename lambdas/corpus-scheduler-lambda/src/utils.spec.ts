@@ -31,7 +31,6 @@ import {
   parserItem,
 } from './testHelpers';
 import { getEmitter, getTracker } from 'content-common/snowplow';
-import {HttpResponse} from "msw";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwt = require('jsonwebtoken');

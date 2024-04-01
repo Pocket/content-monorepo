@@ -1,5 +1,4 @@
 import {
-  pocketImageCache,
   ScheduledCandidate,
   ScheduledCandidates,
   ScheduledCorpusItem,
