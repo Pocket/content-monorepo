@@ -1,4 +1,5 @@
 import {
+  pocketImageCache,
   ScheduledCandidate,
   ScheduledCandidates,
   ScheduledCorpusItem,
@@ -248,6 +249,18 @@ export const mockSnowplow = (server: SetupServer) => {
       () => {},
     ),
   );
+};
+
+/**
+ * Mocks fetch pocket image cache
+ * @param statusCode
+ */
+export const mockPocketImageCache = (statusCode: number) => {
+  global.fetch = jest.fn(() =>
+      new HttpResponse(null, {
+        status: statusCode
+      }),
+  ) as jest.Mock;
 };
 
 /**

@@ -1,5 +1,5 @@
-import { validateCandidate, validateScheduledDate } from './validation';
-import { createScheduledCandidate } from './testHelpers';
+import {validateCandidate, validateImageUrl, validateScheduledDate} from './validation';
+import {createScheduledCandidate, mockPocketImageCache} from './testHelpers';
 import {
   CorpusItemSource,
   CorpusLanguage,
@@ -177,6 +177,26 @@ describe('validation', function () {
       }
     });
   });
+    describe('validateImageUrl', () => {
+        it('should be null if image is invalid', async () => {
+            // mock error response
+            mockPocketImageCache(404)
+            // should not throw error
+            await expect(
+                validateImageUrl('https://fake-image-url.com'),
+            ).resolves.not.toThrowError();
+
+            // should be undefined & not image_url
+            expect(await validateImageUrl('https://fake-image-url.com')).toBeNull();
+        });
+        it('should validate imageUrl', async () => {
+            // mock return 200 code
+            mockPocketImageCache(200)
+            const imageUrl = await validateImageUrl('https://fake-image-url.com');
+            // should return  imageUrl
+            expect(imageUrl).toEqual('https://fake-image-url.com');
+        });
+    });
   describe('validateCandidate', () => {
     it('should not validate a bad scheduled date when enableScheduledDateValidation is false', async () => {
       // mock the config.app.enableScheduledDateValidation

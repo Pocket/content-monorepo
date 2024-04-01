@@ -3,7 +3,7 @@ import {
   SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 import config from './config';
-import { validateCandidate } from './validation';
+import {validateCandidate, validateImageUrl} from './validation';
 import {
   ApprovedItemAuthor,
   CorpusLanguage,
@@ -184,10 +184,11 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
         ? candidate.scheduled_corpus_item.language
         : (itemMetadata.language!.toUpperCase() as CorpusLanguage)
     ) as string;
+    // validate image_url (Metaflow or Parser input, whichever is provided)
     const imageUrl = (
       candidate.scheduled_corpus_item.image_url
-        ? candidate.scheduled_corpus_item.image_url
-        : itemMetadata.imageUrl
+        ? await validateImageUrl(candidate.scheduled_corpus_item.image_url)
+        : await validateImageUrl(itemMetadata.imageUrl as string)
     ) as string;
 
     // the following fields are from primary source = Parser

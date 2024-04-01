@@ -26,10 +26,12 @@ import {
   mockCreateScheduledCorpusItemOnce,
   mockGetApprovedCorpusItemByUrl,
   mockGetUrlMetadata,
+  mockPocketImageCache,
   mockSnowplow,
   parserItem,
 } from './testHelpers';
 import { getEmitter, getTracker } from 'content-common/snowplow';
+import {HttpResponse} from "msw";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwt = require('jsonwebtoken');
@@ -189,6 +191,7 @@ describe('utils', function () {
       mockGetUrlMetadata(server);
       mockCreateScheduledCorpusItemOnce(server);
       mockCreateApprovedCorpusItemOnce(server);
+      mockPocketImageCache(200);
 
       // spy on console.log
       const consoleLogSpy = jest.spyOn(global.console, 'log');
@@ -230,7 +233,9 @@ describe('utils', function () {
   });
   describe('mapScheduledCandidateInputToCreateApprovedItemInput', () => {
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput', async () => {
+      mockPocketImageCache(200);
       const scheduledCandidate = createScheduledCandidate();
+
       const output = await mapScheduledCandidateInputToCreateApprovedItemInput(
         scheduledCandidate,
         parserItem,
@@ -238,6 +243,7 @@ describe('utils', function () {
       expect(output).toEqual(expectedOutput);
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on Parser fields for undefined optional ScheduledCandidate fields', async () => {
+      mockPocketImageCache(200);
       // all optional fields are undefined and should be taken from the Parser
       const scheduledCandidate = createScheduledCandidate({
         title: undefined,
@@ -254,6 +260,7 @@ describe('utils', function () {
       expect(output).toEqual(expectedOutput);
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on Metaflow authors if Parser returns null for authors', async () => {
+      mockPocketImageCache(200);
       const scheduledCandidate = createScheduledCandidate();
       const incompleteParserItem: UrlMetadata = {
         url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
@@ -275,7 +282,21 @@ describe('utils', function () {
       );
       expect(output).toEqual(expectedOutput);
     });
-    it('should throw Error on CreateApprovedItemInput if field types are wrong', async () => {
+    it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on valid Parser imageUrl if Metaflow imageUrl is not valid', async () => {
+      // mock once, first request to validate metaflow imageUrl will fail, second request mock to return 200
+      mockPocketImageCache(200);
+      const scheduledCandidate = createScheduledCandidate();
+      // force metaflow imageUrl to be null to fallback on Parser
+      scheduledCandidate.scheduled_corpus_item.image_url = null as unknown as string;
+
+      const output = await mapScheduledCandidateInputToCreateApprovedItemInput(
+          scheduledCandidate,
+          parserItem,
+      );
+      expect(output).toEqual(expectedOutput);
+    });
+    it('should throw Error on CreateApprovedItemInput if field types are wrong (publisher)', async () => {
+      mockPocketImageCache(200);
       const scheduledCandidate = createScheduledCandidate();
 
       const invalidParserItem: any = {
@@ -293,6 +314,23 @@ describe('utils', function () {
           `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
             `Reason: Error: Error on typia.assert(): invalid type on $input.publisher, expect to be string`,
         ),
+      );
+    });
+    it('should throw Error on CreateApprovedItemInput if field types are wrong (imageUrl)', async () => {
+      // candidate & parser imageUrl not valid
+      mockPocketImageCache(400);
+      const scheduledCandidate = createScheduledCandidate();
+
+      await expect(
+          mapScheduledCandidateInputToCreateApprovedItemInput(
+              scheduledCandidate,
+              parserItem,
+          ),
+      ).rejects.toThrow(
+          new Error(
+              `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
+              `Reason: Error: Error on typia.assert(): invalid type on $input.imageUrl, expect to be string`,
+          ),
       );
     });
   });
