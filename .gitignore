@@ -37,3 +37,6 @@ yarn-error.log*
 dist
 logs
 cdktf.out
+
+# we only want pnpm-lock.yaml!
+package-lock.json

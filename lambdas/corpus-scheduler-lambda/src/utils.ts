@@ -8,8 +8,9 @@ import {
   ApprovedItemAuthor,
   CorpusLanguage,
   CreateApprovedItemInput,
-  ScheduledItemSource,
   CreateScheduledItemInput,
+  CuratedCorpusApiErrorCodes,
+  ScheduledItemSource,
   UrlMetadata,
 } from 'content-common';
 import {
@@ -317,15 +318,37 @@ export const createAndScheduleCorpusItemHelper = async (
       candidate,
       approvedCorpusItem.externalId,
     );
-    // 6.  call createScheduledItemInput mutation
-    const scheduledItem = await createScheduledCorpusItem(
-      createScheduledItemInput,
-      bearerToken,
-    );
 
-    // Set the approved and scheduled ids needed for Snowplow.
-    approvedCorpusItemId = approvedCorpusItem.externalId;
-    scheduledItemId = scheduledItem.externalId;
+    try {
+      // 6.  call createScheduledItemInput mutation
+      const scheduledItem = await createScheduledCorpusItem(
+        createScheduledItemInput,
+        bearerToken,
+      );
+
+      // Set the approved and scheduled ids needed for Snowplow.
+      approvedCorpusItemId = approvedCorpusItem.externalId;
+      scheduledItemId = scheduledItem.externalId;
+    } catch (e) {
+      if (
+        e instanceof Error &&
+        e.message?.indexOf(CuratedCorpusApiErrorCodes.ALREADY_SCHEDULED) >= 0
+      ) {
+        // Send a Snowplow event indicating that the candidate was already scheduled.
+        queueSnowplowEvent(
+          tracker,
+          generateSnowplowErrorEntity(
+            candidate,
+            SnowplowScheduledCorpusCandidateErrorName.ALREADY_SCHEDULED,
+            e.message,
+          ),
+        );
+        return;
+      } else {
+        // Unexpected exception
+        throw e;
+      }
+    }
   }
 
   // 7. Send a Snowplow event after the item got successfully scheduled.

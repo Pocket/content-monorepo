@@ -38,6 +38,11 @@ export type BaseEventData = {
 // Stub type ready to be extended with non-database properties (for event tracking).
 export type ApprovedCorpusItemPayload = ApprovedItem;
 
+// Extended with non DB properties for event tracking.
+export type RejectedCorpusItemPayload = RejectedCuratedCorpusItem & {
+  approvedCorpusItemExternalId?: string;
+};
+
 // Data for the events that are fired on changes to curated items
 export type ReviewedCorpusItemPayload = {
   reviewedCorpusItem: ApprovedCorpusItemPayload | RejectedCuratedCorpusItem;
@@ -48,14 +53,10 @@ export type ScheduledCorpusItemPayload = {
   scheduledCorpusItem: ScheduledItem & {
     // the method by which this item was generated (MANUAL or ML, for a scheduled item)
     generated_by?: ScheduledItemSource;
-    // for some surfaces, curators will provide at least one reason and
-    // optionally a comment when manually scheduling a corpus item.
-    // the purpose here is for ML to know *why* items are manually scheduled
-    // in an effort to improve their modeling.
-    manualScheduleReasons?: string[];
-    manualScheduleReasonsComment?: string;
-    // will only be present when unscheduling an item from a limited set of
-    // surfaces. these inform ML of why an item was unscheduled.
+    // multi-purpose field intended to capture the reason(s) for taking the
+    // action. currently, this is only when either scheduling or unscheduling.
+    // specifically, only when scheduling and unscheduling directly from the
+    // schedule view in the admin tool.
     reasons?: string[];
     reasonComment?: string;
     // the status of the scheduled_corpus_item, as decided by a curator.

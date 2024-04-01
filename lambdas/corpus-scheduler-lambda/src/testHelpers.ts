@@ -166,6 +166,32 @@ export const createScheduledCorpusItemBody = {
   },
 };
 
+export const createScheduledCorpusItemUserErrorBody = {
+  errors: [
+    {
+      message:
+        'This story is already scheduled to appear on NEW_TAB_EN_US on Mar 27, 2024.',
+      path: ['createScheduledCorpusItem'],
+      extensions: {
+        code: 'ALREADY_SCHEDULED',
+        serviceName: 'curated-corpus',
+        exception: {
+          message:
+            'This story is already scheduled to appear on NEW_TAB_EN_US on Mar 27, 2024.',
+          locations: [
+            {
+              line: 1,
+              column: 94,
+            },
+          ],
+          path: ['createScheduledCorpusItem'],
+        },
+      },
+    },
+  ],
+  data: null,
+};
+
 /**
  * Set up the mock server to return responses for the getUrlMetadata query.
  * @param server
