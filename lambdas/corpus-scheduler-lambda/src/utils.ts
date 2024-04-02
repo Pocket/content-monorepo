@@ -193,13 +193,22 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
       ((await validateImageUrl(itemMetadata.imageUrl as string)) as string);
     // the following fields are from primary source = Parser
     const publisher = itemMetadata.publisher as string;
+
+    // Only take the first 10 characters of the date value:
+    // if it comes from the Parser, it will look like a full timestamp.
+    // For collections and syndicated items, it will be a date
+    // in the "YYYY-MM-DD" format.
+    const datePublished = itemMetadata.datePublished
+      ? itemMetadata.datePublished.substring(0, 10)
+      : null;
+
     // Metaflow only grabs the first author even if there are more than 1 author present, so grab authors from Parser
     // if Parser cannot return authors, default to Metaflow then
     const authors = itemMetadata.authors
       ? mapAuthorToApprovedItemAuthor(itemMetadata.authors!.split(','))
       : mapAuthorToApprovedItemAuthor(candidate.scheduled_corpus_item.authors!);
 
-    const itemToSchedule: CreateApprovedItemInput = {
+    let itemToSchedule: CreateApprovedItemInput = {
       url: candidate.scheduled_corpus_item.url, // source = Metaflow
       title: title,
       excerpt: excerpt,
@@ -218,6 +227,12 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
       scheduledSurfaceGuid:
         candidate.scheduled_corpus_item.scheduled_surface_guid, // source = Metaflow
     };
+
+    // Only add the publication date to the mutation input if the date is available
+    if (datePublished) {
+      itemToSchedule = { ...itemToSchedule, datePublished };
+    }
+
     // assert itemToSchedule against CreateApprovedItemInput before sending to mutation
     assert<CreateApprovedItemInput>(itemToSchedule);
     return itemToSchedule;
@@ -406,7 +421,7 @@ export const processAndScheduleCandidate = async (
       Sentry.captureException(error);
     }
   }
-  // Ensure all Snowplow events are emitted before the Lambda exists.
+  // Ensure all Snowplow events are emitted before the Lambda exits.
   emitter.flush();
   // Flush processes the HTTP request in the background, so we need to wait here.
   await new Promise((resolve) => setTimeout(resolve, 10000));

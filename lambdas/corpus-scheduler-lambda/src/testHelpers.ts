@@ -118,6 +118,7 @@ export const getUrlMetadataBody = {
       status: CuratedStatus.RECOMMENDATION,
       language: 'EN',
       publisher: 'POLITICO',
+      datePublished: '2024-01-01',
       authors: 'Fake Author',
       imageUrl: 'https://fake-image-url.com',
       topic: Topics.SELF_IMPROVEMENT,

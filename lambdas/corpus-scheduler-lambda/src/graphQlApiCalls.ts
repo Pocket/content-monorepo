@@ -77,6 +77,7 @@ export async function fetchUrlMetadata(
             url
             title
             publisher
+            datePublished
             language
             isSyndicated
             isCollection
