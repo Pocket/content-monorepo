@@ -66,6 +66,9 @@ export const validateScheduledDate = async (
 export async function validateImageUrl(
     imageUrl: string
 ): Promise<string | null> {
+  if(!imageUrl) {
+    return null;
+  }
   // construct the url to fetch (pocket_image_cache + image_url)
   const url = `${pocketImageCache}${encodeURIComponent(imageUrl)}`;
   // fetch the url

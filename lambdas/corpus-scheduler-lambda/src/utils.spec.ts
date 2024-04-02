@@ -31,6 +31,7 @@ import {
   parserItem,
 } from './testHelpers';
 import { getEmitter, getTracker } from 'content-common/snowplow';
+import * as validation from './validation';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwt = require('jsonwebtoken');
@@ -231,15 +232,40 @@ describe('utils', function () {
     });
   });
   describe('mapScheduledCandidateInputToCreateApprovedItemInput', () => {
-    it('should map correctly a ScheduledCandidate to CreateApprovedItemInput', async () => {
-      mockPocketImageCache(200);
+    it('should throw Error on CreateApprovedItemInput if field types are wrong (imageUrl)', async () => {
+      // candidate & parser imageUrl both null
       const scheduledCandidate = createScheduledCandidate();
+      scheduledCandidate.scheduled_corpus_item.image_url = null as unknown as string;
+      parserItem.imageUrl = null as unknown as string;
 
+      await expect(
+          mapScheduledCandidateInputToCreateApprovedItemInput(
+              scheduledCandidate,
+              parserItem,
+          ),
+      ).rejects.toThrow(
+          new Error(
+              `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
+              `Reason: Error: Error on typia.assert(): invalid type on $input.imageUrl, expect to be string`,
+          ),
+      );
+    });
+    it('should map correctly a ScheduledCandidate to CreateApprovedItemInput', async () => {
+      // set parser image url to something different from candidate imageUrl
+      parserItem.imageUrl = 'https://different-image.com';
+      const scheduledCandidate = createScheduledCandidate();
+      const validateImageSpy = jest.spyOn(validation, 'validateImageUrl').mockReturnValue(Promise.resolve(scheduledCandidate.scheduled_corpus_item.image_url as string));
       const output = await mapScheduledCandidateInputToCreateApprovedItemInput(
         scheduledCandidate,
         parserItem,
       );
+      expect(validateImageSpy).toHaveBeenCalled(); //=> true
+      expect(output.imageUrl).not.toBeNull();
+      // should equal https://fake-image-url.com and not https://different-image.com
+      expect(output.imageUrl).toEqual('https://fake-image-url.com');
       expect(output).toEqual(expectedOutput);
+      // set parser image url to default
+      parserItem.imageUrl = scheduledCandidate.scheduled_corpus_item.image_url;
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on Parser fields for undefined optional ScheduledCandidate fields', async () => {
       mockPocketImageCache(200);
@@ -282,16 +308,26 @@ describe('utils', function () {
       expect(output).toEqual(expectedOutput);
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on valid Parser imageUrl if Metaflow imageUrl is not valid', async () => {
-      mockPocketImageCache(200);
       const scheduledCandidate = createScheduledCandidate();
       // force metaflow imageUrl to be null to fallback on Parser
       scheduledCandidate.scheduled_corpus_item.image_url = null as unknown as string;
 
+      // set parser.imageUrl
+      parserItem.imageUrl = 'https://new-fake-image.com';
+      expectedOutput.imageUrl = parserItem.imageUrl;
+      const validateImageSpy = jest.spyOn(validation, 'validateImageUrl').mockReturnValue(Promise.resolve(parserItem.imageUrl as string));
       const output = await mapScheduledCandidateInputToCreateApprovedItemInput(
           scheduledCandidate,
           parserItem,
       );
+      expect(validateImageSpy).toHaveBeenCalled(); //=> true
+      expect(output.imageUrl).not.toBeNull();
+      expect(output.imageUrl).toEqual('https://new-fake-image.com');
       expect(output).toEqual(expectedOutput);
+
+      // set parser image url to default
+      parserItem.imageUrl = 'https://fake-image-url.com';
+      expectedOutput.imageUrl = parserItem.imageUrl;
     });
     it('should throw Error on CreateApprovedItemInput if field types are wrong (publisher)', async () => {
       mockPocketImageCache(200);
@@ -312,23 +348,6 @@ describe('utils', function () {
           `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
             `Reason: Error: Error on typia.assert(): invalid type on $input.publisher, expect to be string`,
         ),
-      );
-    });
-    it('should throw Error on CreateApprovedItemInput if field types are wrong (imageUrl)', async () => {
-      // candidate & parser imageUrl not valid
-      mockPocketImageCache(400);
-      const scheduledCandidate = createScheduledCandidate();
-
-      await expect(
-          mapScheduledCandidateInputToCreateApprovedItemInput(
-              scheduledCandidate,
-              parserItem,
-          ),
-      ).rejects.toThrow(
-          new Error(
-              `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
-              `Reason: Error: Error on typia.assert(): invalid type on $input.imageUrl, expect to be string`,
-          ),
       );
     });
   });

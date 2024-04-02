@@ -186,12 +186,7 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
         : (itemMetadata.language!.toUpperCase() as CorpusLanguage)
     ) as string;
     // validate image_url (Metaflow or Parser input, whichever is provided)
-    const imageUrl = (
-      candidate.scheduled_corpus_item.image_url
-        ? await validateImageUrl(candidate.scheduled_corpus_item.image_url)
-        : await validateImageUrl(itemMetadata.imageUrl as string)
-    ) as string;
-
+    const imageUrl = await validateImageUrl(candidate.scheduled_corpus_item.image_url as string) || await validateImageUrl(itemMetadata.imageUrl as string) as string;
     // the following fields are from primary source = Parser
     const publisher = itemMetadata.publisher as string;
     // Metaflow only grabs the first author even if there are more than 1 author present, so grab authors from Parser
