@@ -28,7 +28,7 @@ import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 describe('corpus scheduler lambda', () => {
   const server = setupServer();
   beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
-  afterEach(() =>{
+  afterEach(() => {
     // restoreAllMocks restores all mocks and replaced properties. clearAllMocks only clears mocks.
     jest.restoreAllMocks();
     server.resetHandlers();
@@ -36,7 +36,7 @@ describe('corpus scheduler lambda', () => {
   afterAll(() => server.close());
   afterAll(() => {
     jest.restoreAllMocks();
-    server.close()
+    server.close();
   });
 
   beforeEach(async () => {
@@ -49,8 +49,8 @@ describe('corpus scheduler lambda', () => {
     mockSetTimeoutToReturnImmediately();
     jest.spyOn(Utils, 'generateJwt').mockReturnValue('test-jwt');
     jest
-        .spyOn(Utils, 'getCorpusSchedulerLambdaPrivateKey')
-        .mockReturnValue(Promise.resolve('my_secret_value'));
+      .spyOn(Utils, 'getCorpusSchedulerLambdaPrivateKey')
+      .mockReturnValue(Promise.resolve('my_secret_value'));
   });
 
   const scheduledCandidate = createScheduledCandidate({
@@ -229,6 +229,7 @@ describe('corpus scheduler lambda', () => {
       },
       allowedToSchedule: 'false',
       enableScheduledDateValidation: 'true',
+      version: 'fake-sha',
     });
 
     // spy on console.log
@@ -264,6 +265,7 @@ describe('corpus scheduler lambda', () => {
       },
       allowedToSchedule: 'true',
       enableScheduledDateValidation: 'true',
+      version: 'fake-sha',
     });
 
     // returns null as we are trying to create & schedule a new item
@@ -312,6 +314,7 @@ describe('corpus scheduler lambda', () => {
       },
       allowedToSchedule: 'true',
       enableScheduledDateValidation: 'true',
+      version: 'fake-sha',
     });
 
     // returns null as we are trying to create & schedule a new item
