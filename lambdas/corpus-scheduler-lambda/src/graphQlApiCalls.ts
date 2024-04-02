@@ -41,6 +41,8 @@ export async function createApprovedAndScheduledCorpusItem(
   const res = await fetch(config.AdminApi, {
     method: 'post',
     headers: {
+      'apollographql-client-name': config.app.name,
+      'apollographql-client-version': config.app.version,
       'Content-Type': 'application/json',
       Authorization: bearerToken,
     },
@@ -89,6 +91,8 @@ export async function fetchUrlMetadata(
   const res = await fetch(config.AdminApi, {
     method: 'post',
     headers: {
+      'apollographql-client-name': config.app.name,
+      'apollographql-client-version': config.app.version,
       'Content-Type': 'application/json',
       Authorization: bearerToken,
     },
@@ -125,6 +129,8 @@ export async function getApprovedCorpusItemByUrl(
   const res = await fetch(config.AdminApi, {
     method: 'post',
     headers: {
+      'apollographql-client-name': config.app.name,
+      'apollographql-client-version': config.app.version,
       'Content-Type': 'application/json',
       Authorization: bearerToken,
     },
@@ -164,6 +170,8 @@ export async function createScheduledCorpusItem(
   const res = await fetch(config.AdminApi, {
     method: 'post',
     headers: {
+      'apollographql-client-name': config.app.name,
+      'apollographql-client-version': config.app.version,
       'Content-Type': 'application/json',
       Authorization: bearerToken,
     },

@@ -14,6 +14,7 @@ const config = {
     allowedToSchedule: process.env.ALLOWED_TO_SCHEDULE || 'true',
     enableScheduledDateValidation:
       process.env.ENABLE_SCHEDULED_DATE_VALIDATION || 'true',
+    version: process.env.GIT_SHA || '',
   },
   validation: {
     timeZone: 'America/Los_Angeles',
