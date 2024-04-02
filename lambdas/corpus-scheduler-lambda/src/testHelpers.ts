@@ -277,6 +277,18 @@ export const mockSnowplow = (server: SetupServer) => {
 };
 
 /**
+ * Mocks fetch pocket image cache
+ * @param statusCode
+ */
+export const mockPocketImageCache = (statusCode: number) => {
+  global.fetch = jest.fn(() =>
+      new HttpResponse(null, {
+        status: statusCode
+      }),
+  ) as jest.Mock;
+};
+
+/**
  * Mock setTimeout to immediately return.
  *
  * Surprisingly, jest.useFakeTimers cannot do this. It requires jest.runAllTimers() to be called

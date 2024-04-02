@@ -13,6 +13,7 @@ import {
   mockCreateScheduledCorpusItemOnce,
   mockGetApprovedCorpusItemByUrl,
   mockGetUrlMetadata,
+  mockPocketImageCache,
   mockSetTimeoutToReturnImmediately,
 } from './testHelpers';
 import { CorpusLanguage, ScheduledSurfaces } from 'content-common';
@@ -25,8 +26,17 @@ import config from './config';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 
 describe('corpus scheduler lambda', () => {
+  const server = setupServer();
+  beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
+  afterEach(() =>{
+    // restoreAllMocks restores all mocks and replaced properties. clearAllMocks only clears mocks.
+    jest.restoreAllMocks();
+    server.resetHandlers();
+  });
+  afterAll(() => server.close());
   afterAll(() => {
     jest.restoreAllMocks();
+    server.close()
   });
 
   beforeEach(async () => {
@@ -37,9 +47,11 @@ describe('corpus scheduler lambda', () => {
     await resetSnowplowEvents();
     // The Lambda waits for 10 seconds to flush Snowplow events. During tests we don't want to wait that long.
     mockSetTimeoutToReturnImmediately();
+    jest.spyOn(Utils, 'generateJwt').mockReturnValue('test-jwt');
+    jest
+        .spyOn(Utils, 'getCorpusSchedulerLambdaPrivateKey')
+        .mockReturnValue(Promise.resolve('my_secret_value'));
   });
-
-  const server = setupServer();
 
   const scheduledCandidate = createScheduledCandidate({
     title: 'Fake title',
@@ -57,23 +69,8 @@ describe('corpus scheduler lambda', () => {
   const sqsContext = null as unknown as Context;
   const sqsCallback = null as unknown as Callback;
 
-  beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
-  afterEach(() => server.resetHandlers());
-  afterAll(() => server.close());
-
-  beforeEach(() => {
-    jest.spyOn(Utils, 'generateJwt').mockReturnValue('test-jwt');
-    jest
-      .spyOn(Utils, 'getCorpusSchedulerLambdaPrivateKey')
-      .mockReturnValue(Promise.resolve('my_secret_value'));
-  });
-
-  afterEach(() => {
-    // restoreAllMocks restores all mocks and replaced properties. clearAllMocks only clears mocks.
-    jest.restoreAllMocks();
-  });
-
   it('emits a Snowplow event if candidate is successfully processed', async () => {
+    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {
@@ -107,6 +104,7 @@ describe('corpus scheduler lambda', () => {
   });
 
   it('emits a Snowplow event if a previously approved candidate is successfully processed', async () => {
+    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server);
     mockGetUrlMetadata(server);
@@ -164,6 +162,7 @@ describe('corpus scheduler lambda', () => {
   });
 
   it('sends a Sentry error if curated-corpus-api has error, with partial success', async () => {
+    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {
@@ -189,6 +188,7 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('sends a Sentry error if curated-corpus-api returns null data', async () => {
+    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {
@@ -208,6 +208,7 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('should not start scheduling if allowedToSchedule is false', async () => {
+    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {
@@ -299,6 +300,7 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (prod)', async () => {
+    mockPocketImageCache(200);
     // mock the config.app.isDev
     jest.replaceProperty(config, 'app', {
       name: 'Corpus-Scheduler-Lambda',
@@ -335,6 +337,7 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful & valid scheduled surface but not allowed for scheduling (approve & schedule candidate) (dev)', async () => {
+    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {
@@ -361,6 +364,7 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (dev)', async () => {
+    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {

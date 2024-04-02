@@ -32,8 +32,11 @@ export interface ScheduledCorpusItem {
   authors?: string[];
 }
 
-// TODO: add allowed surfaces here to schedule to production
 export const allowedScheduledSurfaces: string[] = ['NEW_TAB_EN_US'];
+
+export const pocketImageCache = 'https://pocket-image-cache.com/x/filters:format(jpeg):quality(100):no_upscale():strip_exif()/';
+
+
 
 export type ScheduledCorpusCandidateFeatures = {
   rank: number & tags.Type<'int64'>; // rank is integer in Snowplow schema
