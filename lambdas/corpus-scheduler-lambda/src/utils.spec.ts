@@ -282,7 +282,6 @@ describe('utils', function () {
       expect(output).toEqual(expectedOutput);
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on valid Parser imageUrl if Metaflow imageUrl is not valid', async () => {
-      // mock once, first request to validate metaflow imageUrl will fail, second request mock to return 200
       mockPocketImageCache(200);
       const scheduledCandidate = createScheduledCandidate();
       // force metaflow imageUrl to be null to fallback on Parser
