@@ -281,9 +281,10 @@ export const mockSnowplow = (server: SetupServer) => {
  * @param statusCode
  */
 export const mockPocketImageCache = (statusCode: number) => {
-  global.fetch = jest.fn(() =>
+  global.fetch = jest.fn(
+    () =>
       new HttpResponse(null, {
-        status: statusCode
+        status: statusCode,
       }),
   ) as jest.Mock;
 };

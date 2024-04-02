@@ -1,5 +1,5 @@
-import {pocketImageCache, ScheduledCandidate} from './types';
-import {assert} from 'typia';
+import { pocketImageCache, ScheduledCandidate } from './types';
+import { assert } from 'typia';
 import { DateTime, Interval } from 'luxon';
 import config from './config';
 
@@ -64,9 +64,9 @@ export const validateScheduledDate = async (
  * @returs string or null
  */
 export async function validateImageUrl(
-    imageUrl: string
+  imageUrl: string,
 ): Promise<string | null> {
-  if(!imageUrl) {
+  if (!imageUrl) {
     return null;
   }
   // construct the url to fetch (pocket_image_cache + image_url)
@@ -78,7 +78,7 @@ export async function validateImageUrl(
     },
   });
   // if response is not ok, return null
-  if (!response.ok){
+  if (!response.ok) {
     return null;
   }
   return imageUrl;

@@ -235,26 +235,33 @@ describe('utils', function () {
     it('should throw Error on CreateApprovedItemInput if field types are wrong (imageUrl)', async () => {
       // candidate & parser imageUrl both null
       const scheduledCandidate = createScheduledCandidate();
-      scheduledCandidate.scheduled_corpus_item.image_url = null as unknown as string;
+      scheduledCandidate.scheduled_corpus_item.image_url =
+        null as unknown as string;
       parserItem.imageUrl = null as unknown as string;
 
       await expect(
-          mapScheduledCandidateInputToCreateApprovedItemInput(
-              scheduledCandidate,
-              parserItem,
-          ),
+        mapScheduledCandidateInputToCreateApprovedItemInput(
+          scheduledCandidate,
+          parserItem,
+        ),
       ).rejects.toThrow(
-          new Error(
-              `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
-              `Reason: Error: Error on typia.assert(): invalid type on $input.imageUrl, expect to be string`,
-          ),
+        new Error(
+          `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
+            `Reason: Error: Error on typia.assert(): invalid type on $input.imageUrl, expect to be string`,
+        ),
       );
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput', async () => {
       // set parser image url to something different from candidate imageUrl
       parserItem.imageUrl = 'https://different-image.com';
       const scheduledCandidate = createScheduledCandidate();
-      const validateImageSpy = jest.spyOn(validation, 'validateImageUrl').mockReturnValue(Promise.resolve(scheduledCandidate.scheduled_corpus_item.image_url as string));
+      const validateImageSpy = jest
+        .spyOn(validation, 'validateImageUrl')
+        .mockReturnValue(
+          Promise.resolve(
+            scheduledCandidate.scheduled_corpus_item.image_url as string,
+          ),
+        );
       const output = await mapScheduledCandidateInputToCreateApprovedItemInput(
         scheduledCandidate,
         parserItem,
@@ -310,15 +317,18 @@ describe('utils', function () {
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on valid Parser imageUrl if Metaflow imageUrl is not valid', async () => {
       const scheduledCandidate = createScheduledCandidate();
       // force metaflow imageUrl to be null to fallback on Parser
-      scheduledCandidate.scheduled_corpus_item.image_url = null as unknown as string;
+      scheduledCandidate.scheduled_corpus_item.image_url =
+        null as unknown as string;
 
       // set parser.imageUrl
       parserItem.imageUrl = 'https://new-fake-image.com';
       expectedOutput.imageUrl = parserItem.imageUrl;
-      const validateImageSpy = jest.spyOn(validation, 'validateImageUrl').mockReturnValue(Promise.resolve(parserItem.imageUrl as string));
+      const validateImageSpy = jest
+        .spyOn(validation, 'validateImageUrl')
+        .mockReturnValue(Promise.resolve(parserItem.imageUrl as string));
       const output = await mapScheduledCandidateInputToCreateApprovedItemInput(
-          scheduledCandidate,
-          parserItem,
+        scheduledCandidate,
+        parserItem,
       );
       expect(validateImageSpy).toHaveBeenCalled(); //=> true
       expect(output.imageUrl).not.toBeNull();
