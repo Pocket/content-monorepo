@@ -35,6 +35,7 @@ import { getEmitter, getTracker } from 'content-common/snowplow';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 import * as Sentry from '@sentry/node';
 import { Tracker } from '@snowplow/node-tracker';
+import { DateTime } from 'luxon';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwt = require('jsonwebtoken');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -116,6 +117,33 @@ export const mapAuthorToApprovedItemAuthor = (
 };
 
 /**
+ * Validates a publication date for a curated item.
+ * If this value comes from the Parser, it will look like a MySQL timestamp,
+ * e.g. "2024-02-27 00:00:00".
+ * For collections and syndicated items, it will be a date
+ * in the "YYYY-MM-DD" format.
+ *
+ * @param date the date returned by the Parser via getUrlMetadata query
+ * @return a date in the "YYYY-MM-DD" format if , or null
+ *
+ */
+export const validateDatePublished = (
+  date: string | null | undefined,
+): string | null => {
+  // Early exit if date is not provided
+  if (!date) {
+    return null;
+  }
+
+  // Discard the time component of the Parser date, if present, and convert it
+  // to a Luxon DateTime object
+  const possiblyDate = DateTime.fromFormat(date.substring(0, 10), 'yyyy-MM-dd');
+
+  // If this IS a valid date, return it
+  return possiblyDate.isValid ? possiblyDate.toSQLDate() : null;
+};
+
+/**
  * @param e Error raised by Typia assert<CreateApprovedItemInput>
  * @return Snowplow error corresponding to e if one exists, otherwise undefined.
  */
@@ -193,6 +221,9 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
       ((await validateImageUrl(itemMetadata.imageUrl as string)) as string);
     // the following fields are from primary source = Parser
     const publisher = itemMetadata.publisher as string;
+
+    const datePublished = validateDatePublished(itemMetadata.datePublished);
+
     // Metaflow only grabs the first author even if there are more than 1 author present, so grab authors from Parser
     // if Parser cannot return authors, default to Metaflow then
     const authors = itemMetadata.authors
@@ -218,6 +249,12 @@ export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
       scheduledSurfaceGuid:
         candidate.scheduled_corpus_item.scheduled_surface_guid, // source = Metaflow
     };
+
+    // Only add the publication date to the mutation input if the date is available
+    if (datePublished) {
+      itemToSchedule.datePublished = datePublished;
+    }
+
     // assert itemToSchedule against CreateApprovedItemInput before sending to mutation
     assert<CreateApprovedItemInput>(itemToSchedule);
     return itemToSchedule;
@@ -406,7 +443,7 @@ export const processAndScheduleCandidate = async (
       Sentry.captureException(error);
     }
   }
-  // Ensure all Snowplow events are emitted before the Lambda exists.
+  // Ensure all Snowplow events are emitted before the Lambda exits.
   emitter.flush();
   // Flush processes the HTTP request in the background, so we need to wait here.
   await new Promise((resolve) => setTimeout(resolve, 10000));

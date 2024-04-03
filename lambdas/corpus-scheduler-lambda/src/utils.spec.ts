@@ -5,6 +5,7 @@ import {
   createCreateScheduledItemInput,
   mapAuthorToApprovedItemAuthor,
   mapScheduledCandidateInputToCreateApprovedItemInput,
+  validateDatePublished,
 } from './utils';
 import config from './config';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -359,6 +360,40 @@ describe('utils', function () {
             `Reason: Error: Error on typia.assert(): invalid type on $input.publisher, expect to be string`,
         ),
       );
+    });
+  });
+
+  describe('validateDatePublished', () => {
+    it('should return null if a date is not provided', () => {
+      const testDate = undefined;
+
+      const returnDate = validateDatePublished(testDate);
+
+      expect(returnDate).toBeNull();
+    });
+
+    it('should return null if an invalid date is provided', () => {
+      const testDate = 'BLIMP';
+
+      const returnDate = validateDatePublished(testDate);
+
+      expect(returnDate).toBeNull();
+    });
+
+    it('should return a formatted date if a Parser-style date is provided', () => {
+      const testDate = '2024-01-03 23:48:34';
+
+      const returnDate = validateDatePublished(testDate);
+
+      expect(returnDate).toEqual('2024-01-03');
+    });
+
+    it('should return a formatted date if a Collections-style date is provided', () => {
+      const testDate = '2024-04-11';
+
+      const returnDate = validateDatePublished(testDate);
+
+      expect(returnDate).toEqual('2024-04-11');
     });
   });
 });
