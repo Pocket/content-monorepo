@@ -216,12 +216,20 @@ export async function rescheduleScheduledItem(
       context.authenticatedUser.username,
     );
 
-    context.emitScheduledCorpusItemEvent(
-      ScheduledCorpusItemEventType.RESCHEDULE,
-      {
-        scheduledCorpusItem: rescheduledItem,
-      },
-    );
+    // We should only to emit a reschedule event if the scheduledDate changes.
+    // The curation admin tools use the reschedule mutation as a hack for moveToBottom, and it
+    // resulted in bad signal for ML/analytics when we emitted a reschedule event for this action.
+    if (
+      item.scheduledDate.valueOf() != rescheduledItem.scheduledDate.valueOf()
+    ) {
+      context.emitScheduledCorpusItemEvent(
+        ScheduledCorpusItemEventType.RESCHEDULE,
+        {
+          scheduledCorpusItem: rescheduledItem,
+        },
+      );
+    }
+
     return rescheduledItem;
   } catch (error) {
     // If it's the duplicate scheduling constraint, catch the error

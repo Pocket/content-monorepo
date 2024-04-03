@@ -765,6 +765,43 @@ describe('mutations: ScheduledItem', () => {
       ).toEqual(scheduledItem.externalId);
     });
 
+    it('should reschedule an item for the same date without emitting an event', async () => {
+      // Set up event tracking
+      const eventTracker = jest.fn();
+      eventEmitter.on(ScheduledCorpusItemEventType.RESCHEDULE, eventTracker);
+
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'This is a test',
+      });
+
+      const scheduledItem = await createScheduledItemHelper(db, {
+        scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+        approvedItem,
+        scheduledDate: new Date(2050, 3, 4).toISOString(),
+        source: ScheduledItemSource.ML,
+      });
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(RESCHEDULE_SCHEDULED_ITEM),
+          variables: {
+            data: {
+              externalId: scheduledItem.externalId,
+              scheduledDate: '2050-04-04',
+              source: ScheduledItemSource.MANUAL,
+            },
+          },
+        });
+
+      const returnedItem = result.body.data?.rescheduleScheduledCorpusItem;
+      expect(returnedItem.scheduledDate).toEqual('2050-04-04');
+
+      // Check that the RESCHEDULE event was not fired, because scheduledDate is unchanged:
+      expect(eventTracker).not.toHaveBeenCalled();
+    });
+
     it('should fail if story is already scheduled for given Scheduled Surface/date combination', async () => {
       // Set up event tracking
       const eventTracker = jest.fn();
