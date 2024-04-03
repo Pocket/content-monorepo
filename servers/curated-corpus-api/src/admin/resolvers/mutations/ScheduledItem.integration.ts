@@ -789,7 +789,7 @@ describe('mutations: ScheduledItem', () => {
           variables: {
             data: {
               externalId: scheduledItem.externalId,
-              scheduledDate: '2050-04-04',
+              scheduledDate: '2050-04-04', // Confusingly,  Date(2050, 3, 4) is 2050-04-04.
               source: ScheduledItemSource.MANUAL,
             },
           },
