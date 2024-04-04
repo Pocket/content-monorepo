@@ -1,4 +1,6 @@
-import { MozillaAccessGroup, Topics } from './types';
+import { CorpusItemSource, CuratedStatus, Topics } from 'content-common';
+
+import { MozillaAccessGroup } from './types';
 import {
   getCorpusItemFromApprovedItem,
   getScheduledSurfaceByAccessGroup,
@@ -7,7 +9,6 @@ import {
   getPocketPath,
 } from './utils';
 import { ApprovedItem } from '../database/types';
-import { CorpusItemSource, CuratedStatus } from 'content-common';
 
 describe('shared/utils', () => {
   describe('toUtcDateString', () => {
@@ -28,7 +29,7 @@ describe('shared/utils', () => {
   describe('getScheduledSurfaceByAccessGroup', () => {
     it('should return a scheduled surface for a valid access group', () => {
       const result = getScheduledSurfaceByAccessGroup(
-        MozillaAccessGroup.NEW_TAB_CURATOR_ENUS
+        MozillaAccessGroup.NEW_TAB_CURATOR_ENUS,
       );
 
       expect(result).not.toBeUndefined();
@@ -45,8 +46,8 @@ describe('shared/utils', () => {
     it('should return undefined for a non-scheduled surface access group', () => {
       expect(
         getScheduledSurfaceByAccessGroup(
-          MozillaAccessGroup.COLLECTION_CURATOR_FULL
-        )
+          MozillaAccessGroup.COLLECTION_CURATOR_FULL,
+        ),
       ).toBeUndefined();
     });
   });
@@ -112,7 +113,7 @@ describe('shared/utils', () => {
   describe('getPocketPath', () => {
     it('matches syndicated articles without locale', () => {
       expect(
-        getPocketPath('https://getpocket.com/explore/item/foo-bar')
+        getPocketPath('https://getpocket.com/explore/item/foo-bar'),
       ).toEqual({
         locale: null,
         path: '/explore/item/foo-bar',
@@ -122,7 +123,7 @@ describe('shared/utils', () => {
     });
     it('matches syndicated articles with two character locale', () => {
       expect(
-        getPocketPath('https://getpocket.com/de/explore/item/foo-bar')
+        getPocketPath('https://getpocket.com/de/explore/item/foo-bar'),
       ).toEqual({
         locale: 'de',
         path: '/explore/item/foo-bar',
@@ -132,7 +133,7 @@ describe('shared/utils', () => {
     });
     it('matches syndicated articles with five character locale', () => {
       expect(
-        getPocketPath('https://getpocket.com/en-GB/explore/item/foo-bar')
+        getPocketPath('https://getpocket.com/en-GB/explore/item/foo-bar'),
       ).toEqual({
         locale: 'en-GB',
         path: '/explore/item/foo-bar',
@@ -142,7 +143,7 @@ describe('shared/utils', () => {
     });
     it('matches collections without locale', () => {
       expect(
-        getPocketPath('https://getpocket.com/collections/foo-bar')
+        getPocketPath('https://getpocket.com/collections/foo-bar'),
       ).toEqual({
         locale: null,
         path: '/collections/foo-bar',
@@ -152,7 +153,7 @@ describe('shared/utils', () => {
     });
     it('matches collections articles with two character locale', () => {
       expect(
-        getPocketPath('https://getpocket.com/de/collections/foo-bar')
+        getPocketPath('https://getpocket.com/de/collections/foo-bar'),
       ).toEqual({
         locale: 'de',
         path: '/collections/foo-bar',
@@ -162,7 +163,7 @@ describe('shared/utils', () => {
     });
     it('matches collections articles with five character locale', () => {
       expect(
-        getPocketPath('https://getpocket.com/en-GB/collections/foo-bar')
+        getPocketPath('https://getpocket.com/en-GB/collections/foo-bar'),
       ).toEqual({
         locale: 'en-GB',
         path: '/collections/foo-bar',

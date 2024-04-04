@@ -146,25 +146,6 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
   },
 ];
 
-export enum Topics {
-  BUSINESS = 'BUSINESS',
-  CAREER = 'CAREER',
-  CORONAVIRUS = 'CORONAVIRUS',
-  EDUCATION = 'EDUCATION',
-  ENTERTAINMENT = 'ENTERTAINMENT',
-  FOOD = 'FOOD',
-  GAMING = 'GAMING',
-  HEALTH_FITNESS = 'HEALTH_FITNESS',
-  PARENTING = 'PARENTING',
-  PERSONAL_FINANCE = 'PERSONAL_FINANCE',
-  POLITICS = 'POLITICS',
-  SCIENCE = 'SCIENCE',
-  SELF_IMPROVEMENT = 'SELF_IMPROVEMENT',
-  SPORTS = 'SPORTS',
-  TECHNOLOGY = 'TECHNOLOGY',
-  TRAVEL = 'TRAVEL',
-}
-
 export enum RejectionReason {
   PAYWALL = 'PAYWALL',
   POLITICAL_OPINION = 'POLITICAL_OPINION',
@@ -188,11 +169,6 @@ export enum ManualScheduleReason {
   OTHER = 'OTHER',
 }
 
-export enum ActionScreen {
-  PROSPECTING = 'PROSPECTING',
-  SCHEDULE = 'SCHEDULE',
-  CORPUS = 'CORPUS',
-}
 // End Pocket shared data
 
 // snowplow-dictated enum for the status of a scheduled corpus item

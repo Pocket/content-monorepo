@@ -4,6 +4,8 @@ import {
 } from '@pocket-tools/apollo-utils';
 import { fromUnixTime } from 'date-fns';
 
+import { Topics } from 'content-common';
+
 import {
   createApprovedItem as dbCreateApprovedItem,
   createRejectedItem,
@@ -35,7 +37,6 @@ import {
   ApprovedItemS3ImageUrl,
   RejectionReason,
   ScheduledCorpusItemStatus,
-  Topics,
 } from '../../../shared/types';
 import { scheduledSurfaceAllowedValues } from '../../../shared/utils';
 import {

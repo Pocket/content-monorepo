@@ -9,7 +9,7 @@ import config from '../config';
 import { getUnixTimestamp } from '../shared/utils';
 import { ApprovedItem } from '../database/types';
 import { RejectedCuratedCorpusItem } from '.prisma/client';
-import { Topics } from '../shared/types';
+import { Topics } from 'content-common';
 import {
   CorpusItemSource,
   CuratedStatus,

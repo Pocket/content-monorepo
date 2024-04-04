@@ -5,6 +5,17 @@ import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
 
+import {
+  ActionScreen,
+  ApprovedItemAuthor,
+  CreateApprovedCorpusItemApiInput,
+  CorpusItemSource,
+  CuratedStatus,
+  ScheduledItemSource,
+  CorpusLanguage,
+  Topics,
+} from 'content-common';
+
 import { client } from '../../../database/client';
 
 import {
@@ -25,15 +36,6 @@ import {
   ApprovedItem,
   UpdateApprovedItemAuthorsInput,
 } from '../../../database/types';
-import {
-  ActionScreen,
-  ApprovedItemAuthor,
-  CreateApprovedCorpusItemApiInput,
-  CorpusItemSource,
-  CuratedStatus,
-  ScheduledItemSource,
-  CorpusLanguage,
-} from 'content-common';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../events/init';
 import {
   ReviewedCorpusItemEventType,
@@ -42,7 +44,7 @@ import {
 import Upload from 'graphql-upload/Upload.js';
 import { createReadStream, unlinkSync, writeFileSync } from 'fs';
 import { GET_REJECTED_ITEMS } from '../queries/sample-queries.gql';
-import { MozillaAccessGroup, Topics } from '../../../shared/types';
+import { MozillaAccessGroup } from '../../../shared/types';
 import {
   ImportApprovedCorpusItemApiInput,
   RejectApprovedCorpusItemApiInput,

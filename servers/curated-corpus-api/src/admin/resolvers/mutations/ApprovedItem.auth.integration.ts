@@ -15,12 +15,9 @@ import {
   CreateApprovedCorpusItemApiInput,
   CorpusItemSource,
   CuratedStatus,
-} from 'content-common';
-import {
-  ACCESS_DENIED_ERROR,
-  MozillaAccessGroup,
   Topics,
-} from '../../../shared/types';
+} from 'content-common';
+import { ACCESS_DENIED_ERROR, MozillaAccessGroup } from '../../../shared/types';
 import { clearDb, createApprovedItemHelper } from '../../../test/helpers';
 import {
   CREATE_APPROVED_ITEM,
