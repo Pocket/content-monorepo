@@ -2,8 +2,10 @@ import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
-import { client } from '../../../database/client';
 
+import { ActionScreen, ScheduledItemSource } from 'content-common';
+
+import { client } from '../../../database/client';
 import {
   clearDb,
   createApprovedItemHelper,
@@ -14,8 +16,8 @@ import {
   DELETE_SCHEDULED_ITEM,
   RESCHEDULE_SCHEDULED_ITEM,
 } from './sample-mutations.gql';
+import { CreateScheduledItemApiInput } from '../types';
 import {
-  CreateScheduledItemGraphInput,
   DeleteScheduledItemInput,
   RescheduleScheduledItemInput,
 } from '../../../database/types';
@@ -27,7 +29,6 @@ import {
   ACCESS_DENIED_ERROR,
   ManualScheduleReason,
   MozillaAccessGroup,
-  ScheduledItemSource,
 } from '../../../shared/types';
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
@@ -70,7 +71,7 @@ describe('mutations: ScheduledItem', () => {
         title: 'A test story',
       });
 
-      const input: CreateScheduledItemGraphInput = {
+      const input: CreateScheduledItemApiInput = {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'RECSAPI',
         scheduledDate: '2100-01-01',
@@ -105,7 +106,7 @@ describe('mutations: ScheduledItem', () => {
       const eventTracker = jest.fn();
       eventEmitter.on(ScheduledCorpusItemEventType.ADD_SCHEDULE, eventTracker);
 
-      const input: CreateScheduledItemGraphInput = {
+      const input: CreateScheduledItemApiInput = {
         approvedItemExternalId: 'not-a-valid-id-at-all',
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
@@ -165,7 +166,7 @@ describe('mutations: ScheduledItem', () => {
 
       // Set up the input for the mutation that contains the exact same values
       // as the scheduled entry created above.
-      const input: CreateScheduledItemGraphInput = {
+      const input: CreateScheduledItemApiInput = {
         approvedItemExternalId: item.externalId,
         scheduledSurfaceGuid: existingScheduledEntry.scheduledSurfaceGuid,
         scheduledDate,
@@ -195,6 +196,52 @@ describe('mutations: ScheduledItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(0);
     });
 
+    it('should create an entry and send along the action screen to analytics', async () => {
+      // Set up event tracking
+      const eventTracker = jest.fn();
+      eventEmitter.on(ScheduledCorpusItemEventType.ADD_SCHEDULE, eventTracker);
+
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'A test story',
+      });
+
+      const input: CreateScheduledItemApiInput = {
+        approvedItemExternalId: approvedItem.externalId,
+        scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+        scheduledDate: '2100-01-01',
+        source: ScheduledItemSource.MANUAL,
+        reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
+        reasonComment: 'i scheduled this because i thought it would be nice',
+        actionScreen: ActionScreen.SCHEDULE,
+      };
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(CREATE_SCHEDULED_ITEM),
+          variables: { data: input },
+        });
+
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.errors).toBeUndefined();
+
+      // Check that the ADD_SCHEDULE event was fired successfully:
+      // 1 - Event was fired once!
+      expect(eventTracker).toHaveBeenCalledTimes(1);
+
+      const addScheduleEventCall = await eventTracker.mock.calls[0][0];
+
+      // 2 - Event has the right type.
+      expect(addScheduleEventCall.eventType).toEqual(
+        ScheduledCorpusItemEventType.ADD_SCHEDULE,
+      );
+      // 3- Event has the right entity passed to it.
+      expect(addScheduleEventCall.scheduledCorpusItem.action_screen).toEqual(
+        input.actionScreen,
+      );
+    });
+
     it('should create an entry and return data (including Approved Item)', async () => {
       // Set up event tracking
       const eventTracker = jest.fn();
@@ -204,7 +251,7 @@ describe('mutations: ScheduledItem', () => {
         title: 'A test story',
       });
 
-      const input: CreateScheduledItemGraphInput = {
+      const input: CreateScheduledItemApiInput = {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
@@ -297,7 +344,7 @@ describe('mutations: ScheduledItem', () => {
         title: 'A test story',
       });
 
-      const input: CreateScheduledItemGraphInput = {
+      const input: CreateScheduledItemApiInput = {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
@@ -334,7 +381,7 @@ describe('mutations: ScheduledItem', () => {
         title: 'A test story',
       });
 
-      const input: CreateScheduledItemGraphInput = {
+      const input: CreateScheduledItemApiInput = {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
@@ -371,7 +418,7 @@ describe('mutations: ScheduledItem', () => {
         title: 'A test story',
       });
 
-      const input: CreateScheduledItemGraphInput = {
+      const input: CreateScheduledItemApiInput = {
         approvedItemExternalId: approvedItem.externalId,
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
         scheduledDate: '2100-01-01',
@@ -530,6 +577,58 @@ describe('mutations: ScheduledItem', () => {
       expect(
         await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId,
       ).toEqual(scheduledItem.externalId);
+    });
+
+    it('should delete an item scheduled for a Scheduled Surface and send along an action screen value', async () => {
+      // Set up event tracking
+      const eventTracker = jest.fn();
+      eventEmitter.on(
+        ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
+        eventTracker,
+      );
+
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'This is a test',
+      });
+
+      const scheduledItem = await createScheduledItemHelper(db, {
+        scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+        approvedItem,
+      });
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(DELETE_SCHEDULED_ITEM),
+          variables: {
+            data: {
+              externalId: scheduledItem.externalId,
+              reasons: 'PUBLISHER,TOPIC',
+              reasonComment: 'test comment',
+              actionScreen: ActionScreen.SCHEDULE,
+            },
+          },
+        });
+
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.errors).toBeUndefined();
+
+      // Check that the REMOVE_SCHEDULE event was fired successfully:
+      // 1 - Event was fired once!
+      expect(eventTracker).toHaveBeenCalledTimes(1);
+
+      const removeScheduleEventCall = await eventTracker.mock.calls[0][0];
+
+      // 2 - Event has the right type.
+      expect(removeScheduleEventCall.eventType).toEqual(
+        ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
+      );
+
+      // 3- Event has the right entity passed to it.
+      expect(removeScheduleEventCall.scheduledCorpusItem.action_screen).toEqual(
+        ActionScreen.SCHEDULE,
+      );
     });
 
     it('should fail if user has read-only access', async () => {
@@ -800,6 +899,56 @@ describe('mutations: ScheduledItem', () => {
 
       // Check that the RESCHEDULE event was not fired, because scheduledDate is unchanged:
       expect(eventTracker).not.toHaveBeenCalled();
+    });
+
+    it('should reschedule an item scheduled for a Scheduled Surface and send along an action screen value', async () => {
+      // Set up event tracking
+      const eventTracker = jest.fn();
+      eventEmitter.on(ScheduledCorpusItemEventType.RESCHEDULE, eventTracker);
+
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'This is a test',
+      });
+
+      const scheduledItem = await createScheduledItemHelper(db, {
+        scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+        approvedItem,
+        scheduledDate: new Date(2050, 4, 4).toISOString(),
+        source: ScheduledItemSource.ML,
+      });
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(RESCHEDULE_SCHEDULED_ITEM),
+          variables: {
+            data: {
+              externalId: scheduledItem.externalId,
+              scheduledDate: '2050-05-05',
+              source: ScheduledItemSource.MANUAL,
+              actionScreen: ActionScreen.SCHEDULE,
+            },
+          },
+        });
+
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.errors).toBeUndefined();
+
+      // Check that the RESCHEDULE event was fired successfully:
+      // 1 - Event was fired once!
+      expect(eventTracker).toHaveBeenCalledTimes(1);
+
+      const rescheduleEventCall = await eventTracker.mock.calls[0][0];
+
+      // 2 - Event has the right type.
+      expect(rescheduleEventCall.eventType).toEqual(
+        ScheduledCorpusItemEventType.RESCHEDULE,
+      );
+      // 3- Event has the right entity passed to it.
+      expect(rescheduleEventCall.scheduledCorpusItem.action_screen).toEqual(
+        ActionScreen.SCHEDULE,
+      );
     });
 
     it('should fail if story is already scheduled for given Scheduled Surface/date combination', async () => {

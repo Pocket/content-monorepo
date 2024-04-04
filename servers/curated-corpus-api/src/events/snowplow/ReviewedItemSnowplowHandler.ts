@@ -114,6 +114,7 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
         topic: item.topic || undefined,
         created_at: getUnixTimestamp(item.createdAt),
         created_by: item.createdBy,
+        action_screen: item.action_screen ?? undefined,
       },
     };
 

@@ -3,13 +3,31 @@ import {
   CuratedStatus,
   ScheduledItem as ScheduledItemModel,
 } from '.prisma/client';
-import { ScheduledItemSource } from '../shared/types';
 import {
   ApprovedItemAuthor,
   ApprovedItemRequiredInput,
   CorpusItemSource,
-  CreateScheduledItemInput,
+  CorpusLanguage,
+  ScheduledItemSource,
 } from 'content-common';
+
+export type CreateApprovedItemInput = {
+  prospectId?: string;
+  url: string;
+  title: string;
+  excerpt: string;
+  authors: ApprovedItemAuthor[];
+  status: CuratedStatus;
+  language: CorpusLanguage;
+  publisher: string;
+  datePublished?: string;
+  imageUrl: string;
+  topic: string;
+  source: CorpusItemSource;
+  isCollection: boolean;
+  isTimeSensitive: boolean;
+  isSyndicated: boolean;
+};
 
 export type ImportApprovedItemInput = {
   url: string;
@@ -110,12 +128,6 @@ export type ScheduledItemFilterInput = {
 
 export type DeleteScheduledItemInput = {
   externalId: string;
-};
-
-// type to map to the input coming from the graph mutation
-export type CreateScheduledItemGraphInput = CreateScheduledItemInput & {
-  reasons?: string;
-  reasonComment?: string;
 };
 
 export type RescheduleScheduledItemInput = {

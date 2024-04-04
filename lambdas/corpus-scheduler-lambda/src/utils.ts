@@ -7,7 +7,7 @@ import { validateCandidate, validateImageUrl } from './validation';
 import {
   ApprovedItemAuthor,
   CorpusLanguage,
-  CreateApprovedItemInput,
+  CreateApprovedCorpusItemApiInput,
   CreateScheduledItemInput,
   CuratedCorpusApiErrorCodes,
   ScheduledItemSource,
@@ -162,7 +162,7 @@ function mapApprovedItemInputTypiaErrorToSnowplowError(
 
 /**
  *
- * @param e Error raised by Typia assert<CreateApprovedItemInput>
+ * @param e Error raised by Typia assert<CreateApprovedCorpusItemApiInput>
  * @param candidate
  */
 function handleApprovedItemInputTypiaError(
@@ -185,89 +185,92 @@ function handleApprovedItemInputTypiaError(
  * Creates a scheduled item to send to createApprovedCorpusItem mutation
  * @param candidate ScheduledCandidate received from Metaflow
  * @param itemMetadata UrlMetadata item from Parser
- * @return CreateApprovedItemInput
+ * @return CreateApprovedCorpusItemApiInput
  */
-export const mapScheduledCandidateInputToCreateApprovedItemInput = async (
-  candidate: ScheduledCandidate,
-  itemMetadata: UrlMetadata,
-): Promise<CreateApprovedItemInput> => {
-  try {
-    // the following fields are from Metaflow source & already validated
-    const source = candidate.scheduled_corpus_item.source;
-    const topic = candidate.scheduled_corpus_item.topic;
+export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
+  async (
+    candidate: ScheduledCandidate,
+    itemMetadata: UrlMetadata,
+  ): Promise<CreateApprovedCorpusItemApiInput> => {
+    try {
+      // the following fields are from Metaflow source & already validated
+      const source = candidate.scheduled_corpus_item.source;
+      const topic = candidate.scheduled_corpus_item.topic;
 
-    // the following fields are from primary source = Metaflow, fallback on Parser input
-    const title = (
-      candidate.scheduled_corpus_item.title
-        ? candidate.scheduled_corpus_item.title
-        : itemMetadata.title
-    ) as string;
-    const excerpt = (
-      candidate.scheduled_corpus_item.excerpt
-        ? candidate.scheduled_corpus_item.excerpt
-        : itemMetadata.excerpt
-    ) as string;
-    // using toUpperCase on language returned from parser, as parser returns 'en' instead of 'EN'
-    const language = (
-      candidate.scheduled_corpus_item.language
-        ? candidate.scheduled_corpus_item.language
-        : (itemMetadata.language!.toUpperCase() as CorpusLanguage)
-    ) as string;
-    // validate image_url (Metaflow or Parser input, whichever is provided)
-    const imageUrl =
-      (await validateImageUrl(
-        candidate.scheduled_corpus_item.image_url as string,
-      )) ||
-      ((await validateImageUrl(itemMetadata.imageUrl as string)) as string);
-    // the following fields are from primary source = Parser
-    const publisher = itemMetadata.publisher as string;
+      // the following fields are from primary source = Metaflow, fallback on Parser input
+      const title = (
+        candidate.scheduled_corpus_item.title
+          ? candidate.scheduled_corpus_item.title
+          : itemMetadata.title
+      ) as string;
+      const excerpt = (
+        candidate.scheduled_corpus_item.excerpt
+          ? candidate.scheduled_corpus_item.excerpt
+          : itemMetadata.excerpt
+      ) as string;
+      // using toUpperCase on language returned from parser, as parser returns 'en' instead of 'EN'
+      const language = (
+        candidate.scheduled_corpus_item.language
+          ? candidate.scheduled_corpus_item.language
+          : (itemMetadata.language!.toUpperCase() as CorpusLanguage)
+      ) as string;
+      // validate image_url (Metaflow or Parser input, whichever is provided)
+      const imageUrl =
+        (await validateImageUrl(
+          candidate.scheduled_corpus_item.image_url as string,
+        )) ||
+        ((await validateImageUrl(itemMetadata.imageUrl as string)) as string);
+      // the following fields are from primary source = Parser
+      const publisher = itemMetadata.publisher as string;
 
-    const datePublished = validateDatePublished(itemMetadata.datePublished);
+      const datePublished = validateDatePublished(itemMetadata.datePublished);
 
-    // Metaflow only grabs the first author even if there are more than 1 author present, so grab authors from Parser
-    // if Parser cannot return authors, default to Metaflow then
-    const authors = itemMetadata.authors
-      ? mapAuthorToApprovedItemAuthor(itemMetadata.authors!.split(','))
-      : mapAuthorToApprovedItemAuthor(candidate.scheduled_corpus_item.authors!);
+      // Metaflow only grabs the first author even if there are more than 1 author present, so grab authors from Parser
+      // if Parser cannot return authors, default to Metaflow then
+      const authors = itemMetadata.authors
+        ? mapAuthorToApprovedItemAuthor(itemMetadata.authors!.split(','))
+        : mapAuthorToApprovedItemAuthor(
+            candidate.scheduled_corpus_item.authors!,
+          );
 
-    const itemToSchedule: CreateApprovedItemInput = {
-      url: candidate.scheduled_corpus_item.url, // source = Metaflow
-      title: title,
-      excerpt: excerpt,
-      status: candidate.scheduled_corpus_item.status, // source = Metaflow
-      language: language,
-      publisher: publisher,
-      authors: authors,
-      imageUrl: imageUrl,
-      topic: topic,
-      source: source, // source = Metaflow
-      scheduledSource: source as unknown as ScheduledItemSource.ML,
-      isCollection: itemMetadata.isCollection as boolean, // source = Parser
-      isSyndicated: itemMetadata.isSyndicated as boolean, // source = Parser
-      isTimeSensitive: false,
-      scheduledDate: candidate.scheduled_corpus_item.scheduled_date, // source = Metaflow
-      scheduledSurfaceGuid:
-        candidate.scheduled_corpus_item.scheduled_surface_guid, // source = Metaflow
-    };
+      const itemToSchedule: CreateApprovedCorpusItemApiInput = {
+        url: candidate.scheduled_corpus_item.url, // source = Metaflow
+        title: title,
+        excerpt: excerpt,
+        status: candidate.scheduled_corpus_item.status, // source = Metaflow
+        language: language,
+        publisher: publisher,
+        authors: authors,
+        imageUrl: imageUrl,
+        topic: topic,
+        source: source, // source = Metaflow
+        scheduledSource: source as unknown as ScheduledItemSource.ML,
+        isCollection: itemMetadata.isCollection as boolean, // source = Parser
+        isSyndicated: itemMetadata.isSyndicated as boolean, // source = Parser
+        isTimeSensitive: false,
+        scheduledDate: candidate.scheduled_corpus_item.scheduled_date, // source = Metaflow
+        scheduledSurfaceGuid:
+          candidate.scheduled_corpus_item.scheduled_surface_guid, // source = Metaflow
+      };
 
-    // Only add the publication date to the mutation input if the date is available
-    if (datePublished) {
-      itemToSchedule.datePublished = datePublished;
+      // Only add the publication date to the mutation input if the date is available
+      if (datePublished) {
+        itemToSchedule.datePublished = datePublished;
+      }
+
+      // assert itemToSchedule against CreateApprovedCorpusItemApiInput before sending to mutation
+      assert<CreateApprovedCorpusItemApiInput>(itemToSchedule);
+      return itemToSchedule;
+    } catch (e) {
+      if (e instanceof TypeGuardError) {
+        handleApprovedItemInputTypiaError(e, candidate);
+      }
+
+      throw new Error(
+        `failed to map ${candidate.scheduled_corpus_candidate_id} to CreateApprovedCorpusItemApiInput. Reason: ${e}`,
+      );
     }
-
-    // assert itemToSchedule against CreateApprovedItemInput before sending to mutation
-    assert<CreateApprovedItemInput>(itemToSchedule);
-    return itemToSchedule;
-  } catch (e) {
-    if (e instanceof TypeGuardError) {
-      handleApprovedItemInputTypiaError(e, candidate);
-    }
-
-    throw new Error(
-      `failed to map ${candidate.scheduled_corpus_candidate_id} to CreateApprovedItemInput. Reason: ${e}`,
-    );
-  }
-};
+  };
 
 /**
  * Creates CreateScheduledItemInput to schedule an approved corpus item
@@ -325,9 +328,9 @@ export const createAndScheduleCorpusItemHelper = async (
       bearerToken,
     );
 
-    // 3. map Metaflow input to CreateApprovedItemInput
-    const createApprovedItemInput =
-      await mapScheduledCandidateInputToCreateApprovedItemInput(
+    // 3. map Metaflow input to CreateApprovedCorpusItemApiInput
+    const createApprovedCorpusItemApiInput =
+      await mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
         candidate,
         parserMetadata,
       );
@@ -335,7 +338,7 @@ export const createAndScheduleCorpusItemHelper = async (
     // 4. call createApprovedCorpusItem mutation
     const approvedCorpusItemWithScheduleHistory =
       await createApprovedAndScheduledCorpusItem(
-        createApprovedItemInput,
+        createApprovedCorpusItemApiInput,
         bearerToken,
       );
 

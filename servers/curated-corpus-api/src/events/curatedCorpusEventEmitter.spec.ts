@@ -9,8 +9,12 @@ import config from '../config';
 import { getUnixTimestamp } from '../shared/utils';
 import { ApprovedItem } from '../database/types';
 import { RejectedCuratedCorpusItem } from '.prisma/client';
-import { ScheduledItemSource, Topics } from '../shared/types';
-import { CorpusItemSource, CuratedStatus } from 'content-common';
+import { Topics } from 'content-common';
+import {
+  CorpusItemSource,
+  CuratedStatus,
+  ScheduledItemSource,
+} from 'content-common';
 
 describe('CuratedCorpusEventEmitter', () => {
   const emitter = new CuratedCorpusEventEmitter();

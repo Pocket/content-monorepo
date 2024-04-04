@@ -1,6 +1,10 @@
 // Helper types and enums used in the schema
 import { ScheduledCorpusItemStatus } from '../../shared/types';
-import { CorpusItemSource, ScheduledItemSource } from 'content-common';
+import {
+  ActionScreen,
+  CorpusItemSource,
+  ScheduledItemSource,
+} from 'content-common';
 
 export type RejectionReason = { reason: string };
 
@@ -134,6 +138,10 @@ export type ReviewedCorpusItem = {
    * The curator who most recently updated the reviewed corpus item.
    */
   updated_by?: string;
+  /**
+   * Indicates where in the Curation Tools UI the action took place. Null if the action was performed by a backend ML process.
+   */
+  action_screen?: ActionScreen;
 };
 
 /**
@@ -216,4 +224,8 @@ export type ScheduledCorpusItem = {
    * The status of the scheduled_corpus_item, as decided by a curator.
    */
   status?: ScheduledCorpusItemStatus;
+  /**
+   * Indicates where in the Curation Tools UI the action took place. Null if the action was performed by a backend ML process.
+   */
+  action_screen?: ActionScreen;
 };

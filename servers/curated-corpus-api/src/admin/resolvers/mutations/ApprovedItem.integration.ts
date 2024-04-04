@@ -1,9 +1,23 @@
+import FormData from 'form-data';
 import { print } from 'graphql';
 import request from 'supertest';
+
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
+
+import {
+  ActionScreen,
+  ApprovedItemAuthor,
+  CreateApprovedCorpusItemApiInput,
+  CorpusItemSource,
+  CuratedStatus,
+  ScheduledItemSource,
+  CorpusLanguage,
+  Topics,
+} from 'content-common';
+
 import { client } from '../../../database/client';
-import FormData from 'form-data';
+
 import {
   clearDb,
   createApprovedItemHelper,
@@ -20,16 +34,8 @@ import {
 } from './sample-mutations.gql';
 import {
   ApprovedItem,
-  RejectApprovedItemInput,
   UpdateApprovedItemAuthorsInput,
-  UpdateApprovedItemInput,
 } from '../../../database/types';
-import {
-  ApprovedItemAuthor,
-  CreateApprovedItemInput,
-  CorpusItemSource,
-  CuratedStatus
-} from 'content-common';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../events/init';
 import {
   ReviewedCorpusItemEventType,
@@ -38,12 +44,12 @@ import {
 import Upload from 'graphql-upload/Upload.js';
 import { createReadStream, unlinkSync, writeFileSync } from 'fs';
 import { GET_REJECTED_ITEMS } from '../queries/sample-queries.gql';
+import { MozillaAccessGroup } from '../../../shared/types';
 import {
-  MozillaAccessGroup,
-  ScheduledItemSource,
-  Topics,
-} from '../../../shared/types';
-import { ImportApprovedCorpusItemInput } from '../types';
+  ImportApprovedCorpusItemApiInput,
+  RejectApprovedCorpusItemApiInput,
+  UpdateApprovedCorpusItemApiInput,
+} from '../types';
 import nock from 'nock';
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
@@ -79,7 +85,7 @@ describe('mutations: ApprovedItem', () => {
 
   describe('createApprovedCorpusItem mutation', () => {
     // a standard set of inputs for this mutation
-    let input: CreateApprovedItemInput;
+    let input: CreateApprovedCorpusItemApiInput;
 
     beforeEach(() => {
       // reset input before each test (as tests may manipulate this value)
@@ -357,13 +363,14 @@ describe('mutations: ApprovedItem', () => {
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
         ReviewedCorpusItemEventType.ADD_ITEM,
       );
-      const emitScheduledCorpusItemEventArgs = await eventTracker.mock.calls[1][0];
+      const emitScheduledCorpusItemEventArgs = await eventTracker.mock
+        .calls[1][0];
       expect(emitScheduledCorpusItemEventArgs.eventType).toEqual(
         ScheduledCorpusItemEventType.ADD_SCHEDULE,
       );
-      expect(emitScheduledCorpusItemEventArgs.scheduledCorpusItem.generated_by).toEqual(
-        ScheduledItemSource.ML,
-      );
+      expect(
+        emitScheduledCorpusItemEventArgs.scheduledCorpusItem.generated_by,
+      ).toEqual(ScheduledItemSource.ML);
 
       // 3- Events have the right entities passed to it.
       expect(
@@ -468,6 +475,45 @@ describe('mutations: ApprovedItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(0);
     });
 
+    it('should accept optional analytics metadata', async () => {
+      // Set up event tracking
+      const eventTracker = jest.fn();
+      eventEmitter.on(ReviewedCorpusItemEventType.ADD_ITEM, eventTracker);
+
+      // extra inputs for analytics data
+      input.actionScreen = ActionScreen.SCHEDULE;
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(CREATE_APPROVED_ITEM),
+          variables: { data: input },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+
+      // Expect to see all the input data we supplied in the Approved Item
+      // returned by the mutation
+
+      // We only return the approved item here, so need to purge the analytics
+      // input values from the input before comparison.
+      delete input.actionScreen;
+
+      expect(result.body.data?.createApprovedCorpusItem).toMatchObject(input);
+
+      expect(eventTracker).toHaveBeenCalledTimes(1);
+
+      // 2 - Events have the right values.
+      const emitApprovedCorpusItemEventArgs = await eventTracker.mock
+        .calls[0][0];
+
+      expect(
+        emitApprovedCorpusItemEventArgs.reviewedCorpusItem.action_screen,
+      ).toEqual(ActionScreen.SCHEDULE);
+    });
+
     it('should not create an approved item with invalid topic supplied', async () => {
       // Set up event tracking
       const eventTracker = jest.fn();
@@ -548,7 +594,7 @@ describe('mutations: ApprovedItem', () => {
   describe('updateApprovedCorpusItem mutation', () => {
     let item: ApprovedItem;
     let authors: ApprovedItemAuthor[];
-    let input: UpdateApprovedItemInput;
+    let input: UpdateApprovedCorpusItemApiInput;
 
     beforeEach(async () => {
       item = await createApprovedItemHelper(db, {
@@ -576,7 +622,7 @@ describe('mutations: ApprovedItem', () => {
         authors,
         status: CuratedStatus.CORPUS,
         imageUrl: 'https://test.com/image.png',
-        language: 'DE',
+        language: CorpusLanguage.DE,
         publisher: 'Cloud Factory',
         datePublished: '2024-02-24',
         topic: Topics.BUSINESS,
@@ -684,6 +730,45 @@ describe('mutations: ApprovedItem', () => {
       ).toEqual(data?.updateApprovedCorpusItem.externalId);
     });
 
+    it('should accept optional analytics metadata', async () => {
+      // Set up event tracking
+      const eventTracker = jest.fn();
+      eventEmitter.on(ReviewedCorpusItemEventType.UPDATE_ITEM, eventTracker);
+
+      // extra inputs for analytics data
+      input.actionScreen = ActionScreen.SCHEDULE;
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(UPDATE_APPROVED_ITEM),
+          variables: { data: input },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+
+      // Expect to see all the input data we supplied in the Approved Item
+      // returned by the mutation
+
+      // We only return the approved item here, so need to purge the analytics
+      // input values from the input before comparison.
+      delete input.actionScreen;
+
+      expect(result.body.data?.updateApprovedCorpusItem).toMatchObject(input);
+
+      expect(eventTracker).toHaveBeenCalledTimes(1);
+
+      // 2 - Events have the right values.
+      const emitUpdatedCorpusItemEventArgs = await eventTracker.mock
+        .calls[0][0];
+
+      expect(
+        emitUpdatedCorpusItemEventArgs.reviewedCorpusItem.action_screen,
+      ).toEqual(ActionScreen.SCHEDULE);
+    });
+
     it('should fail if sent an invalid topic', async () => {
       // this should be `HEALTH_FITNESS`
       input.topic = 'HEALTH FITNESS';
@@ -709,14 +794,16 @@ describe('mutations: ApprovedItem', () => {
     });
 
     it('should fail if language code is outside of allowed values', async () => {
-      input.language = 'ZZ';
+      // remove type safety to force a bad value
+      const badInput: any = { ...input };
+      badInput.language = 'ZZ';
 
       const result = await request(app)
         .post(graphQLUrl)
         .set(headers)
         .send({
           query: print(UPDATE_APPROVED_ITEM),
-          variables: { data: input },
+          variables: { data: badInput },
         });
 
       expect(result.body.errors).not.toBeUndefined();
@@ -731,14 +818,15 @@ describe('mutations: ApprovedItem', () => {
     });
 
     it('should fail if language code is correct but not in upper case', async () => {
-      input.language = 'de';
+      const badInput: any = { ...input };
+      badInput.language = 'de';
 
       const result = await request(app)
         .post(graphQLUrl)
         .set(headers)
         .send({
           query: print(UPDATE_APPROVED_ITEM),
-          variables: { data: input },
+          variables: { data: badInput },
         });
 
       expect(result.body.errors).not.toBeUndefined();
@@ -753,7 +841,7 @@ describe('mutations: ApprovedItem', () => {
     });
 
     it('should succeed if language code (English) is correct and upper case', async () => {
-      input.language = 'EN';
+      input.language = CorpusLanguage.EN;
 
       const result = await request(app)
         .post(graphQLUrl)
@@ -769,7 +857,7 @@ describe('mutations: ApprovedItem', () => {
     });
 
     it('should succeed if language code (Deutsch) is correct and upper case', async () => {
-      input.language = 'DE';
+      input.language = CorpusLanguage.DE;
 
       const result = await request(app)
         .post(graphQLUrl)
@@ -785,7 +873,7 @@ describe('mutations: ApprovedItem', () => {
     });
 
     it('should succeed if language code (Italian) is correct and upper case', async () => {
-      input.language = 'IT';
+      input.language = CorpusLanguage.IT;
 
       const result = await request(app)
         .post(graphQLUrl)
@@ -801,7 +889,7 @@ describe('mutations: ApprovedItem', () => {
     });
 
     it('should succeed if language code (Spanish) is correct and upper case', async () => {
-      input.language = 'ES';
+      input.language = CorpusLanguage.ES;
 
       const result = await request(app)
         .post(graphQLUrl)
@@ -817,7 +905,7 @@ describe('mutations: ApprovedItem', () => {
     });
 
     it('should succeed if language code (French) is correct and upper case', async () => {
-      input.language = 'FR';
+      input.language = CorpusLanguage.FR;
 
       const result = await request(app)
         .post(graphQLUrl)
@@ -916,9 +1004,10 @@ describe('mutations: ApprovedItem', () => {
         language: 'EN',
       });
 
-      const input: RejectApprovedItemInput = {
+      const input: RejectApprovedCorpusItemApiInput = {
         externalId: item.externalId,
         reason: 'MISINFORMATION,OTHER',
+        actionScreen: ActionScreen.SCHEDULE,
       };
 
       const resultReject = await request(app)
@@ -971,21 +1060,29 @@ describe('mutations: ApprovedItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(2);
 
       // The REMOVE_ITEM event sends up-to-date info on the Approved Item.
-      expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
+      const removeItemEvent = await eventTracker.mock.calls[0][0];
+
+      expect(removeItemEvent.eventType).toEqual(
         ReviewedCorpusItemEventType.REMOVE_ITEM,
       );
-      expect(
-        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
-      ).toEqual(resultReject.body.data?.rejectApprovedCorpusItem.externalId);
+      expect(removeItemEvent.reviewedCorpusItem.externalId).toEqual(
+        resultReject.body.data?.rejectApprovedCorpusItem.externalId,
+      );
+      expect(removeItemEvent.reviewedCorpusItem.action_screen).toEqual(
+        input.actionScreen,
+      );
+      expect(removeItemEvent.reviewedCorpusItem.url).toEqual(
+        resultGetReject.body.data?.getRejectedCorpusItems.edges[0].node.url,
+      );
 
       // The REJECT_ITEM event sends through the newly created Rejected Item.
-      expect(await eventTracker.mock.calls[1][0].eventType).toEqual(
+      const rejectItemEvent = await eventTracker.mock.calls[1][0];
+
+      expect(rejectItemEvent.eventType).toEqual(
         ReviewedCorpusItemEventType.REJECT_ITEM,
       );
-      expect(
-        await eventTracker.mock.calls[0][0].reviewedCorpusItem.url,
-      ).toEqual(
-        resultGetReject.body.data?.getRejectedCorpusItems.edges[0].node.url,
+      expect(rejectItemEvent.reviewedCorpusItem.action_screen).toEqual(
+        input.actionScreen,
       );
     });
 
@@ -995,7 +1092,7 @@ describe('mutations: ApprovedItem', () => {
       eventEmitter.on(ReviewedCorpusItemEventType.REMOVE_ITEM, eventTracker);
       eventEmitter.on(ReviewedCorpusItemEventType.REJECT_ITEM, eventTracker);
 
-      const input: RejectApprovedItemInput = {
+      const input: RejectApprovedCorpusItemApiInput = {
         externalId: 'this-id-does-not-exist',
         reason: 'MISINFORMATION,OTHER',
       };
@@ -1040,7 +1137,7 @@ describe('mutations: ApprovedItem', () => {
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       });
 
-      const input: RejectApprovedItemInput = {
+      const input: RejectApprovedCorpusItemApiInput = {
         externalId: item.externalId,
         reason: 'MISINFORMATION,OTHER',
       };
@@ -1073,7 +1170,7 @@ describe('mutations: ApprovedItem', () => {
         language: 'EN',
       });
 
-      const input: RejectApprovedItemInput = {
+      const input: RejectApprovedCorpusItemApiInput = {
         externalId: item.externalId,
         reason: ' MISINFORMATION, OTHER ',
       };
@@ -1097,7 +1194,7 @@ describe('mutations: ApprovedItem', () => {
         language: 'EN',
       });
 
-      const input: RejectApprovedItemInput = {
+      const input: RejectApprovedCorpusItemApiInput = {
         externalId: item.externalId,
         reason: 'BADFONT',
       };
@@ -1125,7 +1222,7 @@ describe('mutations: ApprovedItem', () => {
         language: 'EN',
       });
 
-      const input: RejectApprovedItemInput = {
+      const input: RejectApprovedCorpusItemApiInput = {
         externalId: item.externalId,
         reason: 'BADFONT,BORINGCOLORS',
       };
@@ -1153,7 +1250,7 @@ describe('mutations: ApprovedItem', () => {
         language: 'EN',
       });
 
-      const input: RejectApprovedItemInput = {
+      const input: RejectApprovedCorpusItemApiInput = {
         externalId: item.externalId,
         reason: 'MISINFORMATION,IDONTLIKEIT',
       };
@@ -1247,7 +1344,7 @@ describe('mutations: ApprovedItem', () => {
   });
 
   describe('importApprovedCorpusItem mutation', () => {
-    const input: ImportApprovedCorpusItemInput = {
+    const input: ImportApprovedCorpusItemApiInput = {
       url: 'https://test.com/docker',
       title: 'Find Out How I Cured My Docker In 2 Days',
       excerpt: 'A short summary of what this story is about',

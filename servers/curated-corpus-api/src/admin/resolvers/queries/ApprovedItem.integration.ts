@@ -2,9 +2,10 @@ import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { ApprovedItem, PrismaClient } from '.prisma/client';
-import { client } from '../../../database/client';
 
-import { CuratedStatus } from 'content-common'
+import { CuratedStatus } from 'content-common';
+
+import { client } from '../../../database/client';
 import {
   clearDb,
   createApprovedItemHelper,
@@ -240,8 +241,9 @@ describe('queries: ApprovedCorpusItem', () => {
           },
         });
 
-      expect(nextPageData?.getApprovedCorpusItems.edges)
-        .not.toMatchObject({ cursor });
+      expect(nextPageData?.getApprovedCorpusItems.edges).not.toMatchObject({
+        cursor,
+      });
     });
 
     it('should return before cursor without overfetching', async () => {
@@ -271,8 +273,9 @@ describe('queries: ApprovedCorpusItem', () => {
           },
         });
 
-      expect(prevPageData?.getApprovedCorpusItems.edges)
-          .not.toMatchObject({ cursor });
+      expect(prevPageData?.getApprovedCorpusItems.edges).not.toMatchObject({
+        cursor,
+      });
     });
 
     it('should filter by language', async () => {
@@ -548,9 +551,7 @@ describe('queries: ApprovedCorpusItem', () => {
           },
         });
 
-      expect(result.body.data).toHaveProperty(
-        'approvedCorpusItemByExternalId'
-      );
+      expect(result.body.data).toHaveProperty('approvedCorpusItemByExternalId');
 
       // There should be no data returned
       expect(result.body.data?.approvedCorpusItemByExternalId).toBeNull();
@@ -633,7 +634,7 @@ describe('queries: ApprovedCorpusItem', () => {
       // There should be no data returned for the subquery (an empty array),
       // since the third story doesn't have any scheduled entries in this test suite.
       expect(
-        result.body.data?.getApprovedCorpusItemByUrl.scheduledSurfaceHistory
+        result.body.data?.getApprovedCorpusItemByUrl.scheduledSurfaceHistory,
       ).toHaveLength(0);
     });
 
@@ -655,7 +656,7 @@ describe('queries: ApprovedCorpusItem', () => {
       // There should be no data returned for the subquery (an empty array),
       // since this story doesn't have any entries on the UK New Tab
       expect(
-        result.body.data?.getApprovedCorpusItemByUrl.scheduledSurfaceHistory
+        result.body.data?.getApprovedCorpusItemByUrl.scheduledSurfaceHistory,
       ).toHaveLength(0);
     });
 
@@ -676,7 +677,7 @@ describe('queries: ApprovedCorpusItem', () => {
       expect(result.body.errors).toBeUndefined();
 
       expect(
-        result.body.data?.getApprovedCorpusItemByUrl.scheduledSurfaceHistory
+        result.body.data?.getApprovedCorpusItemByUrl.scheduledSurfaceHistory,
       ).toHaveLength(3);
     });
 
@@ -723,7 +724,7 @@ describe('queries: ApprovedCorpusItem', () => {
 
       // There's a total of 20 entries for the first story
       expect(
-        result.body.data?.getApprovedCorpusItemByUrl.scheduledSurfaceHistory
+        result.body.data?.getApprovedCorpusItemByUrl.scheduledSurfaceHistory,
       ).toHaveLength(20);
     });
 
@@ -848,16 +849,16 @@ describe('queries: ApprovedCorpusItem', () => {
       expect(result.body.data).toBeDefined();
       expect(result.body.data?._entities).toHaveLength(4);
       expect(result.body.data?._entities[0].url).toEqual(
-        'https://www.test2.com/story-seven'
+        'https://www.test2.com/story-seven',
       );
       expect(result.body.data?._entities[1].url).toEqual(
-        'https://www.test2.com/story-three'
+        'https://www.test2.com/story-three',
       );
       expect(result.body.data?._entities[2].url).toEqual(
-        'https://www.sample-domain.com/what-zombies-can-teach-you-graphql'
+        'https://www.sample-domain.com/what-zombies-can-teach-you-graphql',
       );
       expect(result.body.data?._entities[3].url).toEqual(
-        'https://www.test2.com/story-two'
+        'https://www.test2.com/story-two',
       );
     });
   });

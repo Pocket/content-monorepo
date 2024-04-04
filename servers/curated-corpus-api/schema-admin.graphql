@@ -173,6 +173,24 @@ enum ScheduledItemSource {
 }
 
 """
+Indicates where in the Curation Tools UI the action took place
+"""
+enum ActionScreen {
+  """
+  This action took place from the prospecting screen in the admin tool
+  """
+  PROSPECTING
+  """
+  This action took place from the schedule screen in the admin tool
+  """
+  SCHEDULE
+  """
+  This action took place from the corpus screen in the admin tool
+  """
+  CORPUS
+}
+
+"""
 A Scheduled Surface, including its associated Prospect Types.
 """
 type ScheduledSurface {
@@ -669,6 +687,10 @@ input CreateApprovedCorpusItemInput {
   Optionally, specify the source of the Scheduled Item. Could be one of: MANUAL or ML
   """
   scheduledSource: ScheduledItemSource
+  """
+  The UI screen where the approved corpus item is being created from.
+  """
+  actionScreen: ActionScreen
 }
 
 """
@@ -820,6 +842,11 @@ input UpdateApprovedCorpusItemInput {
   Example: a story covering an election, or "The best of 202x" collection.
   """
   isTimeSensitive: Boolean!
+  """
+  The UI screen where the approved corpus item is being updated from.
+  Can be on the corpus screen or the schedule screen.
+  """
+  actionScreen: ActionScreen
 }
 
 """
@@ -848,6 +875,11 @@ input RejectApprovedCorpusItemInput {
   A comma-separated list of rejection reasons.
   """
   reason: String!
+  """
+  The UI screen where the approved corpus item is being rejected from.
+  Can be the schedule screen or the corpus screen.
+  """
+  actionScreen: ActionScreen
 }
 
 """
@@ -883,6 +915,11 @@ input CreateRejectedCorpusItemInput {
   A comma-separated list of rejection reasons.
   """
   reason: String!
+  """
+  The UI screen where the rejected corpus item is being created from.
+  Currently only available on prospect screen.
+  """
+  actionScreen: ActionScreen
 }
 
 """
@@ -913,6 +950,11 @@ input CreateScheduledCorpusItemInput {
   Free-text entered by the curator to give further detail to the manual schedule reason(s) provided.
   """
   reasonComment: String
+  """
+  The UI screen where the scheduled corpus item is being created from.
+  Can be from the prospecting, corpus, or schedule screens.
+  """
+  actionScreen: ActionScreen
 }
 
 """
@@ -931,6 +973,11 @@ input RescheduleScheduledCorpusItemInput {
   Source of the Scheduled Item. Could be one of: MANUAL or ML
   """
   source: ScheduledItemSource!
+  """
+  The UI screen where the scheduled corpus item is being resceduled from.
+  Can only be from the schedule screen.
+  """
+  actionScreen: ActionScreen
 }
 
 """
@@ -949,6 +996,11 @@ input DeleteScheduledCorpusItemInput {
   Free-text entered by the curator to give further detail to the reason(s) provided.
   """
   reasonComment: String
+  """
+  The UI screen where the scheduled corpus item is being deleted from.
+  Can only be from the schedule screen.
+  """
+  actionScreen: ActionScreen
 }
 
 type Query {

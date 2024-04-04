@@ -42,16 +42,18 @@ export async function deleteScheduledItem(
   { data },
   context: IAdminContext,
 ): Promise<ScheduledItem> {
+  const { reasons, reasonComment, actionScreen, ...deleteScheduleData } = data;
+
   // Need to fetch the item first to check access privileges.
   // Note that we do not worry here about an extra hit to the DB
   // as load on this service will be low.
   const item = await context.db.scheduledItem.findUnique({
-    where: { externalId: data.externalId },
+    where: { externalId: deleteScheduleData.externalId },
   });
 
   if (!item) {
     throw new NotFoundError(
-      `Item with ID of '${data.externalId}' could not be found.`,
+      `Item with ID of '${deleteScheduleData.externalId}' could not be found.`,
     );
   }
 
@@ -61,7 +63,10 @@ export async function deleteScheduledItem(
   }
 
   // Access allowed, proceed as normal from this point on.
-  const scheduledItem = await dbDeleteScheduledItem(context.db, data);
+  const scheduledItem = await dbDeleteScheduledItem(
+    context.db,
+    deleteScheduleData,
+  );
 
   // The date is already in UTC - excellent! The relevant SnowplowHandler class
   // will transform it into a Unix timestamp before sending it as part of the Snowplow
@@ -78,14 +83,16 @@ export async function deleteScheduledItem(
   const scheduledItemForEvents: ScheduledCorpusItemPayload = {
     scheduledCorpusItem: {
       ...scheduledItem,
-      status: ScheduledCorpusItemStatus.REMOVED,
+      action_screen: actionScreen,
+      // TODO: should source be a part of the mutation input?
       generated_by: scheduledItem.source as ScheduledItemSource,
       // get reasons and reason comment (these may both be null. they're only
       // supplied when a scheduled item is deleted for a limited set of surfaces)
-      reasons: parseReasonsCsv(data.reasons, config.app.removeReasonMaxLength),
-      reasonComment: data.reasonComment
-        ? sanitizeText(data.reasonComment, config.app.removeReasonMaxLength)
+      reasons: parseReasonsCsv(reasons, config.app.removeReasonMaxLength),
+      reasonComment: reasonComment
+        ? sanitizeText(reasonComment, config.app.removeReasonMaxLength)
         : null,
+      status: ScheduledCorpusItemStatus.REMOVED,
     },
   };
 
@@ -127,7 +134,7 @@ export async function createScheduledItem(
   { data },
   context: IAdminContext,
 ): Promise<ScheduledItem> {
-  const { reasons, reasonComment, ...scheduledItemData } = data;
+  const { reasons, reasonComment, actionScreen, ...scheduledItemData } = data;
 
   // Check if the user can execute this mutation.
   if (!context.authenticatedUser.canWriteToSurface(data.scheduledSurfaceGuid)) {
@@ -153,7 +160,7 @@ export async function createScheduledItem(
     const scheduledItemForEvents: ScheduledCorpusItemPayload = {
       scheduledCorpusItem: {
         ...scheduledItem,
-        status: ScheduledCorpusItemStatus.ADDED,
+        action_screen: actionScreen,
         generated_by: scheduledItemData.source,
         // get reasons and reason comment for adding a scheduled item.
         // (these may both be null. they're only supplied when an item was
@@ -162,6 +169,7 @@ export async function createScheduledItem(
         reasonComment: data.reasonComment
           ? sanitizeText(reasonComment, config.app.removeReasonMaxLength)
           : null,
+        status: ScheduledCorpusItemStatus.ADDED,
       },
     };
 
@@ -191,16 +199,18 @@ export async function rescheduleScheduledItem(
   { data },
   context: IAdminContext,
 ): Promise<ScheduledItem> {
+  const { actionScreen, ...rescheduleData } = data;
+
   // Need to fetch the item first to check access privileges.
   // Note that we do not worry here about an extra hit to the DB
   // as load on this service will be low.
   const item = await context.db.scheduledItem.findUnique({
-    where: { externalId: data.externalId },
+    where: { externalId: rescheduleData.externalId },
   });
 
   if (!item) {
     throw new NotFoundError(
-      `Item with ID of '${data.externalId}' could not be found.`,
+      `Item with ID of '${rescheduleData.externalId}' could not be found.`,
     );
   }
 
@@ -212,7 +222,7 @@ export async function rescheduleScheduledItem(
   try {
     const rescheduledItem = await dbRescheduleScheduledItem(
       context.db,
-      data,
+      rescheduleData,
       context.authenticatedUser.username,
     );
 
@@ -225,7 +235,10 @@ export async function rescheduleScheduledItem(
       context.emitScheduledCorpusItemEvent(
         ScheduledCorpusItemEventType.RESCHEDULE,
         {
-          scheduledCorpusItem: rescheduledItem,
+          scheduledCorpusItem: {
+            ...rescheduledItem,
+            action_screen: actionScreen,
+          },
         },
       );
     }

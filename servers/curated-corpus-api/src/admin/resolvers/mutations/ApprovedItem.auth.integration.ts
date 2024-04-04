@@ -12,15 +12,12 @@ import {
 } from '../../../database/types';
 import {
   ApprovedItemAuthor,
-  CreateApprovedItemInput,
+  CreateApprovedCorpusItemApiInput,
   CorpusItemSource,
-  CuratedStatus
-} from 'content-common';
-import {
-  ACCESS_DENIED_ERROR,
-  MozillaAccessGroup,
+  CuratedStatus,
   Topics,
-} from '../../../shared/types';
+} from 'content-common';
+import { ACCESS_DENIED_ERROR, MozillaAccessGroup } from '../../../shared/types';
 import { clearDb, createApprovedItemHelper } from '../../../test/helpers';
 import {
   CREATE_APPROVED_ITEM,
@@ -53,7 +50,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
   });
 
   // a standard set of inputs for this mutation
-  const input: CreateApprovedItemInput = {
+  const input: CreateApprovedCorpusItemApiInput = {
     prospectId: '123-abc',
     title: 'Find Out How I Cured My Docker In 2 Days',
     url: 'https://test.com/docker',

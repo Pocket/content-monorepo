@@ -4,7 +4,7 @@ import {
 } from '.prisma/client';
 import { ScheduledItem, CorpusItem, ApprovedItem } from '../database/types';
 import { ScheduledCorpusItemStatus } from '../shared/types';
-import { ScheduledItemSource } from 'content-common';
+import { ActionScreen, ScheduledItemSource } from 'content-common';
 
 export enum ReviewedCorpusItemEventType {
   ADD_ITEM = 'ADD_ITEM',
@@ -36,16 +36,20 @@ export type BaseEventData = {
 
 // Data for approved items
 // Stub type ready to be extended with non-database properties (for event tracking).
-export type ApprovedCorpusItemPayload = ApprovedItem;
+export type ApprovedCorpusItemPayload = ApprovedItem & {
+  action_screen?: ActionScreen;
+};
 
 // Extended with non DB properties for event tracking.
 export type RejectedCorpusItemPayload = RejectedCuratedCorpusItem & {
   approvedCorpusItemExternalId?: string;
+  // the admin UI screen that originated the event
+  action_screen?: ActionScreen;
 };
 
 // Data for the events that are fired on changes to curated items
 export type ReviewedCorpusItemPayload = {
-  reviewedCorpusItem: ApprovedCorpusItemPayload | RejectedCuratedCorpusItem;
+  reviewedCorpusItem: ApprovedCorpusItemPayload | RejectedCorpusItemPayload;
 };
 
 // Data for the events that are fired on updates to Scheduled Surface schedule
@@ -61,6 +65,8 @@ export type ScheduledCorpusItemPayload = {
     reasonComment?: string;
     // the status of the scheduled_corpus_item, as decided by a curator.
     status?: ScheduledCorpusItemStatus;
+    // the admin UI screen that originated the event
+    action_screen?: ActionScreen;
   };
 };
 

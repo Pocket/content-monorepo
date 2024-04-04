@@ -4,13 +4,15 @@ import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
 import { client } from '../../../database/client';
 
+import { ScheduledItemSource } from 'content-common';
+
 import {
   clearDb,
   createApprovedItemHelper,
   createScheduledItemHelper,
 } from '../../../test/helpers';
 import { GET_SCHEDULED_ITEMS } from './sample-queries.gql';
-import { MozillaAccessGroup, ScheduledItemSource } from '../../../shared/types';
+import { MozillaAccessGroup } from '../../../shared/types';
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
 

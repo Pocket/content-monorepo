@@ -10,12 +10,13 @@ import {
   createRejectedCuratedCorpusItemHelper,
 } from '../../../test/helpers';
 import { CREATE_REJECTED_ITEM } from './sample-mutations.gql';
-import { CreateRejectedItemInput } from '../../../database/types';
+import { CreateRejectedCorpusItemApiInput } from '../types';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../events/init';
 import { ReviewedCorpusItemEventType } from '../../../events/types';
 import { ACCESS_DENIED_ERROR, MozillaAccessGroup } from '../../../shared/types';
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
+import { ActionScreen, CorpusLanguage } from 'content-common';
 
 describe('mutations: RejectedItem', () => {
   let app: Express.Application;
@@ -49,7 +50,7 @@ describe('mutations: RejectedItem', () => {
 
   describe('createRejectedCorpusItem mutation', () => {
     // a standard set of inputs for this mutation
-    let input: CreateRejectedItemInput;
+    let input: CreateRejectedCorpusItemApiInput;
 
     beforeEach(() => {
       // re-set input for each test (as tests may alter input)
@@ -58,7 +59,7 @@ describe('mutations: RejectedItem', () => {
         url: 'https://test.com/docker',
         title: 'Find Out How I Cured My Docker In 2 Days',
         topic: 'Technology',
-        language: 'DE',
+        language: CorpusLanguage.DE,
         publisher: 'Convective Cloud',
         reason: 'MISINFORMATION,OTHER',
       };
@@ -85,20 +86,74 @@ describe('mutations: RejectedItem', () => {
       expect(result.body.data?.createRejectedCorpusItem).toMatchObject(input);
       // Expect to see the SSO username in the `createdBy` field
       expect(result.body.data?.createRejectedCorpusItem.createdBy).toEqual(
-        headers.username
+        headers.username,
       );
 
       // Check that the REJECT_ITEM event was fired successfully:
       // 1 - Event was fired once.
       expect(eventTracker).toHaveBeenCalledTimes(1);
+
+      const rejectItemEventCall = await eventTracker.mock.calls[0][0];
+
       // 2 - Event has the right type.
-      expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ReviewedCorpusItemEventType.REJECT_ITEM
+      expect(rejectItemEventCall.eventType).toEqual(
+        ReviewedCorpusItemEventType.REJECT_ITEM,
       );
+
       // 3- Event has the right entity passed to it.
-      expect(
-        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId
-      ).toEqual(result.body.data?.createRejectedCorpusItem.externalId);
+      expect(rejectItemEventCall.reviewedCorpusItem.externalId).toEqual(
+        result.body.data?.createRejectedCorpusItem.externalId,
+      );
+    });
+
+    it('creates a rejected item with action screen supplied', async () => {
+      input.actionScreen = ActionScreen.SCHEDULE;
+
+      // Set up event tracking
+      const eventTracker = jest.fn();
+      eventEmitter.on(ReviewedCorpusItemEventType.REJECT_ITEM, eventTracker);
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(CREATE_REJECTED_ITEM),
+          variables: { data: input },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+
+      // remove actionScreen from the input as that will not be returned by the db
+      delete input.actionScreen;
+
+      // Expect to see all the input data we supplied in the Approved Item
+      // returned by the mutation
+      expect(result.body.data?.createRejectedCorpusItem).toMatchObject(input);
+      // Expect to see the SSO username in the `createdBy` field
+      expect(result.body.data?.createRejectedCorpusItem.createdBy).toEqual(
+        headers.username,
+      );
+
+      // Check that the REJECT_ITEM event was fired successfully:
+      // 1 - Event was fired once.
+      expect(eventTracker).toHaveBeenCalledTimes(1);
+
+      const rejectItemEventCall = await eventTracker.mock.calls[0][0];
+
+      // 2 - Event has the right type.
+      expect(rejectItemEventCall.eventType).toEqual(
+        ReviewedCorpusItemEventType.REJECT_ITEM,
+      );
+
+      // 3- Event has the right entity passed to it.
+      expect(rejectItemEventCall.reviewedCorpusItem.externalId).toEqual(
+        result.body.data?.createRejectedCorpusItem.externalId,
+      );
+
+      expect(rejectItemEventCall.reviewedCorpusItem.action_screen).toEqual(
+        ActionScreen.SCHEDULE,
+      );
     });
 
     it('creates a rejected item without a prospectId', async () => {
@@ -123,11 +178,11 @@ describe('mutations: RejectedItem', () => {
       // Expect to see all the input data we supplied in the Approved Item
       // returned by the mutation
       expect(result.body.data?.createRejectedCorpusItem).toMatchObject(
-        inputWithoutProspectId
+        inputWithoutProspectId,
       );
       // Expect to see the SSO username in the `createdBy` field
       expect(result.body.data?.createRejectedCorpusItem.createdBy).toEqual(
-        headers.username
+        headers.username,
       );
 
       // Check that the REJECT_ITEM event was fired successfully:
@@ -135,11 +190,11 @@ describe('mutations: RejectedItem', () => {
       expect(eventTracker).toHaveBeenCalledTimes(1);
       // 2 - Event has the right type.
       expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ReviewedCorpusItemEventType.REJECT_ITEM
+        ReviewedCorpusItemEventType.REJECT_ITEM,
       );
       // 3- Event has the right entity passed to it.
       expect(
-        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId
+        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
       ).toEqual(result.body.data?.createRejectedCorpusItem.externalId);
     });
 
@@ -190,10 +245,10 @@ describe('mutations: RejectedItem', () => {
 
       // And there is the correct error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `A rejected item with the URL "${input.url}" already exists.`
+        `A rejected item with the URL "${input.url}" already exists.`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // Check that the REJECT_ITEM event was not fired
@@ -225,10 +280,10 @@ describe('mutations: RejectedItem', () => {
 
       // And there is the correct error from the resolvers
       expect(result.body.errors?.[0].message).toContain(
-        `An approved item with the URL "${input.url}" already exists.`
+        `An approved item with the URL "${input.url}" already exists.`,
       );
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
 
       // Check that the REJECT_ITEM event was not fired
@@ -326,7 +381,7 @@ describe('mutations: RejectedItem', () => {
       expect(result.body.data).toBeNull();
 
       expect(result.body.errors?.[0].message).toContain(
-        ` is not a valid rejection reason.`
+        ` is not a valid rejection reason.`,
       );
     });
 
@@ -345,7 +400,7 @@ describe('mutations: RejectedItem', () => {
       expect(result.body.data).toBeNull();
 
       expect(result.body.errors?.[0].message).toContain(
-        ` is not a valid rejection reason.`
+        ` is not a valid rejection reason.`,
       );
     });
 
@@ -364,55 +419,57 @@ describe('mutations: RejectedItem', () => {
       expect(result.body.data).toBeNull();
 
       expect(result.body.errors?.[0].message).toContain(
-        ` is not a valid rejection reason.`
+        ` is not a valid rejection reason.`,
       );
     });
 
     it('should fail if language code is outside of allowed values', async () => {
-      input.language = 'ZZ';
+      const badInput: any = { ...input };
+      badInput.language = 'ZZ';
 
       const result = await request(app)
         .post(graphQLUrl)
         .set(headers)
         .send({
           query: print(CREATE_REJECTED_ITEM),
-          variables: { data: input },
+          variables: { data: badInput },
         });
 
       expect(result.body.errors).not.toBeUndefined();
       expect(result.body.data).toBeUndefined();
 
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
       expect(result.body.errors?.[0].message).toContain(
-        'does not exist in "CorpusLanguage" enum.'
+        'does not exist in "CorpusLanguage" enum.',
       );
     });
 
     it('should fail if language code is correct but not in upper case', async () => {
-      input.language = 'de';
+      const badInput: any = { ...input };
+      badInput.language = 'de';
 
       const result = await request(app)
         .post(graphQLUrl)
         .set(headers)
         .send({
           query: print(CREATE_REJECTED_ITEM),
-          variables: { data: input },
+          variables: { data: badInput },
         });
 
       expect(result.body.errors).not.toBeUndefined();
       expect(result.body.data).toBeUndefined();
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'BAD_USER_INPUT'
+        'BAD_USER_INPUT',
       );
       expect(result.body.errors?.[0].message).toContain(
-        'does not exist in "CorpusLanguage" enum.'
+        'does not exist in "CorpusLanguage" enum.',
       );
     });
 
     it('should succeed if language code (English) is correct and upper case', async () => {
-      input.language = 'EN';
+      input.language = CorpusLanguage.EN;
 
       const result = await request(app)
         .post(graphQLUrl)
@@ -428,7 +485,7 @@ describe('mutations: RejectedItem', () => {
     });
 
     it('should succeed if language code (Deutsch) is correct and upper case', async () => {
-      input.language = 'DE';
+      input.language = CorpusLanguage.DE;
 
       const result = await request(app)
         .post(graphQLUrl)
@@ -444,7 +501,7 @@ describe('mutations: RejectedItem', () => {
     });
 
     it('should succeed if language code (Italian) is correct and upper case', async () => {
-      input.language = 'IT';
+      input.language = CorpusLanguage.IT;
 
       const result = await request(app)
         .post(graphQLUrl)
@@ -460,7 +517,7 @@ describe('mutations: RejectedItem', () => {
     });
 
     it('should succeed if language code (Spanish) is correct and upper case', async () => {
-      input.language = 'ES';
+      input.language = CorpusLanguage.ES;
 
       const result = await request(app)
         .post(graphQLUrl)
@@ -476,7 +533,7 @@ describe('mutations: RejectedItem', () => {
     });
 
     it('should succeed if language code (French) is correct and upper case', async () => {
-      input.language = 'FR';
+      input.language = CorpusLanguage.FR;
 
       const result = await request(app)
         .post(graphQLUrl)
