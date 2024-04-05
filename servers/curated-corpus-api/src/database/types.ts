@@ -29,35 +29,6 @@ export type CreateApprovedItemInput = {
   isSyndicated: boolean;
 };
 
-export type ImportApprovedItemInput = {
-  url: string;
-  title: string;
-  excerpt: string;
-  status: CuratedStatus;
-  language: string;
-  publisher: string;
-  imageUrl: string;
-  topic: string;
-  source: CorpusItemSource;
-  isCollection: boolean;
-  isSyndicated: boolean;
-  createdAt: Date;
-  createdBy: string;
-  updatedAt: Date;
-  updatedBy: string;
-};
-
-export type ImportScheduledItemInput = {
-  approvedItemId: number;
-  scheduledSurfaceGuid: string;
-  scheduledDate: string;
-  source: ScheduledItemSource;
-  createdAt: Date;
-  createdBy: string;
-  updatedAt: Date;
-  updatedBy: string;
-};
-
 export type PaginationInput = {
   after?: string;
   before?: string;

@@ -4,7 +4,6 @@ import { CreateScheduledItemInput } from 'content-common';
 
 import {
   DeleteScheduledItemInput,
-  ImportScheduledItemInput,
   RescheduleScheduledItemInput,
   ScheduledItem,
 } from '../types';
@@ -47,29 +46,6 @@ export async function createScheduledItem(
       createdBy: username,
       source,
     },
-    include: {
-      approvedItem: {
-        include: {
-          authors: {
-            orderBy: [{ sortOrder: 'asc' }],
-          },
-        },
-      },
-    },
-  });
-}
-
-/**
- * Create (import) a scheduled item for a given approved item
- * @param db
- * @param data
- */
-export async function importScheduledItem(
-  db: PrismaClient,
-  data: ImportScheduledItemInput,
-): Promise<ScheduledItem> {
-  return db.scheduledItem.create({
-    data,
     include: {
       approvedItem: {
         include: {

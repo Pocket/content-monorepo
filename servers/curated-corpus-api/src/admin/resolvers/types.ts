@@ -1,42 +1,10 @@
-import { ScheduledItem } from '.prisma/client';
-import { ApprovedItem } from '../../database/types';
 import {
   ActionScreen,
   ApprovedItemAuthor,
-  CorpusItemSource,
   CorpusLanguage,
   CreateScheduledItemInput,
   CuratedStatus,
-  ScheduledItemSource,
 } from 'content-common';
-
-// this is the type returned from the importApprovedItem mutation
-export type ImportApprovedCorpusItemPayload = {
-  approvedItem: ApprovedItem;
-  scheduledItem: ScheduledItem;
-};
-
-// this maps to the ImportApprovedCorpusItemInput graph input
-export type ImportApprovedCorpusItemApiInput = {
-  url: string;
-  title: string;
-  excerpt: string;
-  status: CuratedStatus;
-  language: string;
-  publisher: string;
-  imageUrl: string;
-  topic?: string;
-  source: CorpusItemSource;
-  isCollection: boolean;
-  isSyndicated: boolean;
-  createdAt: number;
-  createdBy: string;
-  updatedAt: number;
-  updatedBy: string;
-  scheduledDate: string;
-  scheduledSurfaceGuid: string;
-  scheduledSource: ScheduledItemSource;
-};
 
 // this maps to the UpdateApprovedCorpusItemInput graph input
 export type UpdateApprovedCorpusItemApiInput = {

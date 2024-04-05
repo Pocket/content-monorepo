@@ -26,11 +26,9 @@ import {
 } from '../../../test/helpers';
 import {
   CREATE_APPROVED_ITEM,
-  IMPORT_APPROVED_ITEM,
   REJECT_APPROVED_ITEM,
   UPDATE_APPROVED_ITEM,
   UPDATE_APPROVED_ITEM_AUTHORS,
-  // UPLOAD_APPROVED_ITEM_IMAGE,
 } from './sample-mutations.gql';
 import {
   ApprovedItem,
@@ -46,11 +44,9 @@ import { createReadStream, unlinkSync, writeFileSync } from 'fs';
 import { GET_REJECTED_ITEMS } from '../queries/sample-queries.gql';
 import { MozillaAccessGroup } from '../../../shared/types';
 import {
-  ImportApprovedCorpusItemApiInput,
   RejectApprovedCorpusItemApiInput,
   UpdateApprovedCorpusItemApiInput,
 } from '../types';
-import nock from 'nock';
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
 import { integrationTestsS3UrlPattern } from '../../aws/upload.integration';
@@ -1340,221 +1336,6 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.data?.uploadApprovedCorpusItemImage.url).toMatch(
         integrationTestsS3UrlPattern,
       );
-    });
-  });
-
-  describe('importApprovedCorpusItem mutation', () => {
-    const input: ImportApprovedCorpusItemApiInput = {
-      url: 'https://test.com/docker',
-      title: 'Find Out How I Cured My Docker In 2 Days',
-      excerpt: 'A short summary of what this story is about',
-      status: CuratedStatus.RECOMMENDATION,
-      imageUrl: 'https://pocket-image-cache.com/image.png',
-      language: 'EN',
-      publisher: 'Convective Cloud',
-      topic: Topics.TECHNOLOGY,
-      source: CorpusItemSource.BACKFILL,
-      isCollection: false,
-      isSyndicated: false,
-      createdAt: 1647312676,
-      createdBy: 'ad|Mozilla-LDAP|swing',
-      updatedAt: 1647312676,
-      updatedBy: 'ad|Mozilla-LDAP|swing',
-      scheduledDate: '2022-02-02',
-      scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-      scheduledSource: ScheduledItemSource.MANUAL,
-    };
-
-    async function expectAddItemEventFired(addItemEventTracker, approvedItem) {
-      // 1 - Check that the ADD_ITEM event was fired once
-      expect(addItemEventTracker).toHaveBeenCalledTimes(1);
-      // 2 - Event has the right type.
-      expect(await addItemEventTracker.mock.calls[0][0].eventType).toEqual(
-        ReviewedCorpusItemEventType.ADD_ITEM,
-      );
-      // 3- Event has the right entity passed to it.
-      expect(
-        await addItemEventTracker.mock.calls[0][0].reviewedCorpusItem
-          .externalId,
-      ).toEqual(approvedItem.externalId);
-    }
-
-    async function expectScheduleItemEventFired(
-      addScheduleEventTracker,
-      scheduledItem,
-    ) {
-      // 1 - Check that the ADD_SCHEDULE event was fired once
-      expect(addScheduleEventTracker).toHaveBeenCalledTimes(1);
-      // 2 - Event has the right type.
-      expect(await addScheduleEventTracker.mock.calls[0][0].eventType).toEqual(
-        ScheduledCorpusItemEventType.ADD_SCHEDULE,
-      );
-      // 3- Event has the right entity passed to it.
-      expect(
-        await addScheduleEventTracker.mock.calls[0][0].scheduledCorpusItem
-          .externalId,
-      ).toEqual(scheduledItem.externalId);
-    }
-
-    const testFilePath = __dirname + '/test-image.png';
-    let addItemEventTracker;
-    let addScheduleEventTracker;
-    // shadowed variable from migration, be careful
-    let headers;
-
-    beforeEach(async () => {
-      // setup image
-      writeFileSync(testFilePath, 'I am an image');
-
-      // set up event tracking
-      addItemEventTracker = jest.fn();
-      eventEmitter.on(
-        ReviewedCorpusItemEventType.ADD_ITEM,
-        addItemEventTracker,
-      );
-      addScheduleEventTracker = jest.fn();
-      eventEmitter.on(
-        ScheduledCorpusItemEventType.ADD_SCHEDULE,
-        addScheduleEventTracker,
-      );
-
-      headers = {
-        groups: `${MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL}`,
-      };
-    });
-
-    afterEach(() => unlinkSync(testFilePath));
-
-    it('should create approved item and scheduled item if neither exists', async () => {
-      nock(input.imageUrl).get('').replyWithFile(200, testFilePath, {
-        'Content-Type': 'image/png',
-      });
-
-      const result = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(IMPORT_APPROVED_ITEM),
-          variables: { data: input },
-        });
-
-      const approvedItem =
-        result.body.data?.importApprovedCorpusItem.approvedItem;
-      const scheduledItem =
-        result.body.data?.importApprovedCorpusItem.scheduledItem;
-
-      // Check approvedItem
-      expect(approvedItem.url).toEqual(input.url);
-      expect(approvedItem.imageUrl).toMatch(integrationTestsS3UrlPattern);
-      expect(approvedItem.externalId).not.toBeNull();
-      expect(scheduledItem.externalId).not.toBeNull();
-      expect(scheduledItem.scheduledSurfaceGuid).toEqual(
-        input.scheduledSurfaceGuid,
-      );
-
-      await expectAddItemEventFired(addItemEventTracker, approvedItem);
-
-      // Check scheduledItem
-      expect(scheduledItem.approvedItem.externalId).toEqual(
-        approvedItem.externalId,
-      );
-      await expectScheduleItemEventFired(
-        addScheduleEventTracker,
-        scheduledItem,
-      );
-    });
-
-    it('should throw an invalid image url error if an invalid image url is provided', async () => {
-      nock(input.imageUrl).get('').replyWithFile(200, testFilePath, {
-        'Content-Type': 'not-an/image',
-      });
-
-      const result = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(IMPORT_APPROVED_ITEM),
-          variables: { data: input },
-        });
-
-      expect(result.body.data).toBeNull();
-      expect(result.body.errors[0].message).toEqual('Invalid image URL');
-      expect(result.body.errors[0].extensions.code).toEqual('BAD_USER_INPUT');
-    });
-
-    it('should create scheduled item if approved item exists', async () => {
-      await createApprovedItemHelper(db, {
-        title: 'something wicked this way comes',
-        url: input.url,
-      });
-
-      const result = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(IMPORT_APPROVED_ITEM),
-          variables: { data: input },
-        });
-
-      const approvedItem =
-        result.body.data?.importApprovedCorpusItem.approvedItem;
-      result.body.data?.importApprovedCorpusItem.approvedItem;
-      const scheduledItem =
-        result.body.data?.importApprovedCorpusItem.scheduledItem;
-      result.body.data?.importApprovedCorpusItem.scheduledItem;
-
-      // Check approvedItem
-      expect(approvedItem.url).toEqual(input.url);
-      // Check that the ADD_ITEM event was not fired
-      expect(addItemEventTracker).toHaveBeenCalledTimes(0);
-
-      // Check scheduledItem
-      expect(scheduledItem.approvedItem.externalId).toEqual(
-        approvedItem.externalId,
-      );
-      await expectScheduleItemEventFired(
-        addScheduleEventTracker,
-        scheduledItem,
-      );
-    });
-
-    it('should return exiting approved item and scheduled item', async () => {
-      const existingApprovedItem = await createApprovedItemHelper(db, {
-        title: 'something wicked this way comes',
-        url: input.url,
-      });
-      await createScheduledItemHelper(db, {
-        approvedItem: existingApprovedItem,
-        scheduledDate: new Date(input.scheduledDate).toISOString(),
-        scheduledSurfaceGuid: input.scheduledSurfaceGuid,
-      });
-
-      const result = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(IMPORT_APPROVED_ITEM),
-          variables: { data: input },
-        });
-
-      const approvedItem =
-        result.body.data?.importApprovedCorpusItem.approvedItem;
-      result.body.data?.importApprovedCorpusItem.approvedItem;
-      const scheduledItem =
-        result.body.data?.importApprovedCorpusItem.scheduledItem;
-      result.body.data?.importApprovedCorpusItem.scheduledItem;
-
-      // Check approvedItem
-      expect(approvedItem.url).toEqual(input.url);
-      // Check that the ADD_ITEM event was not fired
-      expect(addItemEventTracker).toHaveBeenCalledTimes(0);
-
-      // Check scheduledItem
-      expect(scheduledItem.approvedItem.externalId).toEqual(
-        approvedItem.externalId,
-      );
-      // Check that the ADD_SCHEDULE event was not fired
-      expect(addScheduleEventTracker).toHaveBeenCalledTimes(0);
     });
   });
 });

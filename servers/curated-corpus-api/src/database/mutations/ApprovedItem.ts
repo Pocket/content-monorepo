@@ -2,7 +2,6 @@ import { PrismaClient } from '.prisma/client';
 import {
   ApprovedItem,
   CreateApprovedItemInput,
-  ImportApprovedItemInput,
   UpdateApprovedItemAuthorsInput,
   UpdateApprovedItemInput,
 } from '../types';
@@ -35,28 +34,6 @@ export async function createApprovedItem(
         create: data.authors,
       },
     },
-    include: {
-      authors: {
-        orderBy: [{ sortOrder: 'asc' }],
-      },
-    },
-  });
-}
-
-/**
- * This mutation imports/creates an approved curated item.
- * Due to the nature of the import, we do not throw an
- * error when an approved item already exists
- *
- * @param db
- * @param data
- */
-export async function importApprovedItem(
-  db: PrismaClient,
-  data: ImportApprovedItemInput,
-): Promise<ApprovedItem> {
-  return db.approvedItem.create({
-    data,
     include: {
       authors: {
         orderBy: [{ sortOrder: 'asc' }],
