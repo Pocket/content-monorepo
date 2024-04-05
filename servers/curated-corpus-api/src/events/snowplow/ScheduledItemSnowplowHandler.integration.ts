@@ -48,6 +48,7 @@ const scheduledCorpusItem: ScheduledItem = {
     externalId: '123-abc',
     prospectId: '456-dfg',
     url: 'https://test.com/a-story',
+    domainName: 'test.com',
     status: CuratedStatus.RECOMMENDATION,
     title: 'Everything you need to know about React',
     excerpt: 'Something here',

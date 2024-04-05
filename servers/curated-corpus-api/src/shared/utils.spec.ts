@@ -7,6 +7,7 @@ import {
   getScheduledSurfaceByGuid,
   toUtcDateString,
   getPocketPath,
+  getNormalizedDomainName,
 } from './utils';
 import { ApprovedItem } from '../database/types';
 
@@ -74,6 +75,7 @@ describe('shared/utils', () => {
         externalId: '123-abc',
         prospectId: 'abc-123',
         url: 'https://test.com',
+        domainName: 'test.com',
         status: CuratedStatus.CORPUS,
         id: 123,
         title: 'Test title',
@@ -181,6 +183,71 @@ describe('shared/utils', () => {
         path: '/',
       });
       expect(getPocketPath('https://other.com')).toBeNull();
+    });
+  });
+
+  describe('getNormalizedDomainName', () => {
+    it('should extract domain from a http url', () => {
+      const url = 'http://example.com';
+      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+    });
+    it('should extract domain from a https url', () => {
+      const url = 'https://example.com';
+      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+    });
+    it('should handle a homograph attack', () => {
+      const url = 'http://exаmple.com'; // Note: The 'а' is a Cyrillic character.
+      expect(getNormalizedDomainName(url)).not.toEqual('example.com');
+    });
+    it('should correctly remove the www. subdomain', () => {
+      const url = 'http://www.example.com';
+      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+    });
+    it('should handle mixed case in the domain name', () => {
+      const url = 'Https://WwW.ExAmPlE.cOm';
+      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+    });
+    it('should handle URLs with many subdomains', () => {
+      expect(
+        getNormalizedDomainName('http://sub.sub2.sub3.example.com'),
+      ).toStrictEqual('sub.sub2.sub3.example.com');
+    });
+    it('should not be tricked by a domain in the path', () => {
+      const url = 'http://legit.com/redirect?http://example.com';
+      expect(getNormalizedDomainName(url)).toStrictEqual('legit.com');
+    });
+    it('should handle URLs with paths', () => {
+      const url = 'http://example.com/path/to/resource';
+      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+    });
+    it('should handle query parameters', () => {
+      const url = 'http://example.com?query=123';
+      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+    });
+    it('should handle ports in the URL', () => {
+      const url = 'http://example.com:8080';
+      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+    });
+    it('should handle international domain names', () => {
+      const url = 'http://münchen.com'; // Might need punycode conversion in a real scenario
+      expect(getNormalizedDomainName(url)).toStrictEqual('münchen.com');
+    });
+    describe('getNormalizedDomainName errors', () => {
+      it('should throw an error for empty strings', () => {
+        expect(() => getNormalizedDomainName('')).toThrow(Error);
+      });
+      it('should throw an error for URLs without a domain name', () => {
+        const url = 'http:///path/without/domain';
+        expect(() => getNormalizedDomainName(url)).toThrow(Error);
+      });
+      it('should return an error for an ftp scheme', () => {
+        const url = 'ftp://example.com';
+        expect(() => getNormalizedDomainName(url)).toThrow(Error);
+      });
+      it('should return an error for an ftp scheme, with a http scheme in the path', () => {
+        const url = 'ftp://example.com/http://other.com';
+        expect(() => getNormalizedDomainName(url)).toThrow(Error);
+      });
     });
   });
 });

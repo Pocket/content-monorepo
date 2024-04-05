@@ -19,6 +19,12 @@ model ApprovedItemAuthor {
   @@index([approvedItemId])
 }
 
+model Domain {
+  domainName    String         @id @db.VarChar(255)
+  isTrusted     Boolean        @default(false)
+  approvedItems ApprovedItem[]
+}
+
 model ApprovedItem {
   id              Int                  @id @default(autoincrement())
   externalId      String               @unique @default(uuid()) @db.VarChar(255)
@@ -42,6 +48,8 @@ model ApprovedItem {
   source          CuratedItemSource?
   authors         ApprovedItemAuthor[]
   scheduledItems  ScheduledItem[]
+  domain          Domain               @relation(fields: [domainName], references: [domainName])
+  domainName      String               @db.VarChar(255)
 }
 
 model RejectedCuratedCorpusItem {
@@ -59,16 +67,16 @@ model RejectedCuratedCorpusItem {
 }
 
 model ScheduledItem {
-  id                   Int                  @id @default(autoincrement())
-  externalId           String               @unique @default(uuid()) @db.VarChar(255)
+  id                   Int                 @id @default(autoincrement())
+  externalId           String              @unique @default(uuid()) @db.VarChar(255)
   approvedItemId       Int
-  createdAt            DateTime             @default(now())
-  createdBy            String               @db.VarChar(255)
-  updatedAt            DateTime             @updatedAt
-  updatedBy            String?              @db.VarChar(255)
-  scheduledDate        DateTime             @db.Date
-  scheduledSurfaceGuid String               @db.VarChar(50)
-  approvedItem         ApprovedItem         @relation(fields: [approvedItemId], references: [id])
+  createdAt            DateTime            @default(now())
+  createdBy            String              @db.VarChar(255)
+  updatedAt            DateTime            @updatedAt
+  updatedBy            String?             @db.VarChar(255)
+  scheduledDate        DateTime            @db.Date
+  scheduledSurfaceGuid String              @db.VarChar(50)
+  approvedItem         ApprovedItem        @relation(fields: [approvedItemId], references: [id])
   source               ScheduledItemSource
 
   @@unique([approvedItemId, scheduledSurfaceGuid, scheduledDate], name: "ItemScheduledSurfaceDate")

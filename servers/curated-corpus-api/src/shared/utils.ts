@@ -1,9 +1,5 @@
 import { ScheduledSurface, ScheduledSurfaces } from './types';
-import {
-  ApprovedItem,
-  CorpusItem,
-  CorpusTargetType,
-} from '../database/types';
+import { ApprovedItem, CorpusItem, CorpusTargetType } from '../database/types';
 import { ApprovedItemAuthor } from 'content-common';
 import { parse } from 'url';
 
@@ -187,4 +183,15 @@ export const getPocketPath = (
     type,
     key,
   };
+};
+
+/**
+ * @param url url with http(s) scheme
+ * @returns domain name of url including subdomains, except www.
+ * @throws an error if the URL does not contain a domain name.
+ */
+export const getNormalizedDomainName = (url: string): string => {
+  const regex = /^https?:\/\/(www\.)?(?<domainName>[^?/:]+)/i;
+  const matches = url.match(regex);
+  return matches.groups.domainName.toLowerCase();
 };
