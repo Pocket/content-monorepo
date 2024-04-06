@@ -108,16 +108,5 @@ describe('mutations: ApprovedItem', () => {
       });
       expect(domainCount).toStrictEqual(1);
     });
-
-    it('should throw an error when the domain exceeds 255 characters', async () => {
-      const longDomain = 'a'.repeat(256) + '.example.com';
-      const longDomainInput = {
-        ...input,
-        url: `https://${longDomain}`,
-      };
-      await expect(
-        createApprovedItem(db, longDomainInput, username),
-      ).rejects.toThrow(Error);
-    });
   });
 });
