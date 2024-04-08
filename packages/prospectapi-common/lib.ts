@@ -170,6 +170,8 @@ export const deriveUrlMetadata = async (
   let item;
 
   try {
+    // note - getUrlMetadata will retry on error, so this try/catch will only
+    // catch if the final results from getUrlMetadata *after retries* is an error
     item = await getUrlMetadata(url, retryDelay);
   } catch (e) {
     Sentry.captureException(e.message, {

@@ -34,7 +34,7 @@ export const getUrlMetadata = async (
     client = new ApolloClient({
       link: createHttpLink({
         fetch: fetchRetry(fetch, {
-          retries: 2,
+          retries: config.app.metadataRetries, // set to 2
           // Retry if the status code indicates that the service is temporarily unavailable.
           // By default, fetch-retry only retries on network errors.
           // 504 is the only one that's been observed in production.

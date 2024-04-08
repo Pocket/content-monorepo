@@ -5,6 +5,8 @@ export default {
     clientApiEndpoint: 'https://client-api.getpocket.com',
     // the amount of time in ms between attempts to re-try getting metadata from the parser
     metadataRetryDelay: 10000,
+    // the number of times we will retry hitting client API for parser metadata
+    metadataRetries: 2,
     version: `${process.env.GIT_SHA ?? 'local'}`,
   },
   aws: {

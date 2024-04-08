@@ -4,6 +4,7 @@ import { setupServer } from 'msw/node';
 
 import { UrlMetadata } from 'content-common';
 
+import config from './config';
 import {
   deriveAuthors,
   deriveDatePublished,
@@ -404,10 +405,12 @@ describe('lib', () => {
 
     it('calls sentry on an error retrieving url metadata', async () => {
       const url = 'https://example.com';
+      let clientApiCallCount = 0;
 
       // force the response to be a 504
       server.use(
         graphql.query('ProspectApiUrlMetadata', () => {
+          clientApiCallCount++;
           return HttpResponse.json({}, { status: 504 });
         }),
       );
@@ -425,6 +428,10 @@ describe('lib', () => {
           },
         },
       );
+
+      // make sure retries are happening on the call to client API
+      // should be equal to retries + the initial call
+      expect(clientApiCallCount).toEqual(config.app.metadataRetries + 1);
 
       // the function should return a minimal object when the parser call fails
       expect(result).toEqual({
