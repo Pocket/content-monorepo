@@ -2,7 +2,6 @@ import {
   AuthenticationError,
   UserInputError,
 } from '@pocket-tools/apollo-utils';
-import { fromUnixTime } from 'date-fns';
 
 import { Topics } from 'content-common';
 
@@ -11,15 +10,10 @@ import {
   createRejectedItem,
   createScheduledItem,
   deleteApprovedItem as dbDeleteApprovedItem,
-  importApprovedItem as dbImportApprovedItem,
-  importScheduledItem,
   updateApprovedItem as dbUpdateApprovedItem,
   updateApprovedItemAuthors as dbUpdateApprovedItemAuthors,
 } from '../../../database/mutations';
-import {
-  getApprovedItemByUrl,
-  getApprovedItemByExternalId,
-} from '../../../database/queries';
+import { getApprovedItemByExternalId } from '../../../database/queries';
 import {
   ApprovedCorpusItemPayload,
   RejectedCorpusItemPayload,
@@ -27,11 +21,7 @@ import {
   ScheduledCorpusItemEventType,
   ScheduledCorpusItemPayload,
 } from '../../../events/types';
-import { uploadImageToS3, uploadImageToS3FromUrl } from '../../aws/upload';
-import {
-  ImportApprovedCorpusItemApiInput,
-  ImportApprovedCorpusItemPayload,
-} from '../types';
+import { uploadImageToS3 } from '../../aws/upload';
 import {
   ACCESS_DENIED_ERROR,
   ApprovedItemS3ImageUrl,
@@ -39,16 +29,8 @@ import {
   ScheduledCorpusItemStatus,
 } from '../../../shared/types';
 import { scheduledSurfaceAllowedValues } from '../../../shared/utils';
-import {
-  ApprovedItem,
-  CreateRejectedItemInput,
-  ImportApprovedItemInput,
-  ImportScheduledItemInput,
-  ScheduledItem,
-} from '../../../database/types';
+import { ApprovedItem, CreateRejectedItemInput } from '../../../database/types';
 import { IAdminContext } from '../../context';
-import { getScheduledItemByUniqueAttributes } from '../../../database/queries/ScheduledItem';
-import { InvalidImageUrl } from '../../aws/errors';
 
 /**
  * Creates an approved curated item with data supplied. Optionally, schedules the freshly
@@ -388,132 +370,4 @@ export async function uploadApprovedItemImage(
 
   const image = await data.promise;
   return await uploadImageToS3(context.s3, image);
-}
-
-/**
- * Imports an approved item
- * Creates an approved item if it doesn't exist, and
- * creates a scheduled item for the approved item
- * if it doesn't exist
- * @param parent
- * @param data
- * @param context
- */
-export async function importApprovedItem(
-  parent,
-  { data }: { data: ImportApprovedCorpusItemApiInput },
-  context: IAdminContext,
-): Promise<ImportApprovedCorpusItemPayload> {
-  // Check if user is authorized to import an item
-  if (!context.authenticatedUser.canWriteToCorpus()) {
-    throw new AuthenticationError(ACCESS_DENIED_ERROR);
-  }
-
-  // Get approved item
-  // Try creating the approved item first. The assumption here is that for an
-  // import, we don't expect the approved item to exist. Handle an existing
-  // approved item in the catch statement
-  let approvedItem: ApprovedItem;
-  try {
-    const image = await uploadImageToS3FromUrl(context.s3, data.imageUrl);
-    data = { ...data, imageUrl: image.url };
-
-    approvedItem = await dbImportApprovedItem(
-      context.db,
-      toDbApprovedItemInput(data),
-    );
-    context.emitReviewedCorpusItemEvent(
-      ReviewedCorpusItemEventType.ADD_ITEM,
-      approvedItem,
-    );
-  } catch (e) {
-    approvedItem = (await getApprovedItemByUrl(
-      context.db,
-      data.url,
-    )) as ApprovedItem;
-
-    // If there's an invalid image, stop here and throw an exception
-    if (!approvedItem && e instanceof InvalidImageUrl) {
-      throw new UserInputError(e.message);
-    }
-  }
-
-  // Get scheduled item
-  // Try creating the scheduled item first. The assumption here is that for an
-  // import, we don't expect the scheduled item to exist. Handle an existing
-  // scheduled item in the catch statement
-  let scheduledItem: ScheduledItem;
-  try {
-    scheduledItem = await importScheduledItem(
-      context.db,
-      toDbScheduledItemInput({
-        ...data,
-        approvedItemId: approvedItem.id,
-      }),
-    );
-    context.emitScheduledCorpusItemEvent(
-      ScheduledCorpusItemEventType.ADD_SCHEDULE,
-      {
-        scheduledCorpusItem: scheduledItem,
-      },
-    );
-  } catch (e) {
-    scheduledItem = (await getScheduledItemByUniqueAttributes(context.db, {
-      approvedItemId: approvedItem.id,
-      scheduledSurfaceGuid: data.scheduledSurfaceGuid,
-      scheduledDate: data.scheduledDate,
-    })) as ScheduledItem;
-  }
-
-  return {
-    approvedItem,
-    scheduledItem,
-  };
-}
-
-/**
- * Transform GraphQL ImportApprovedCorpusItemInput to ImportApprovedItemInput
- * for the database
- * @param data
- */
-function toDbApprovedItemInput(
-  data: ImportApprovedCorpusItemApiInput,
-): ImportApprovedItemInput {
-  return {
-    title: data.title,
-    excerpt: data.excerpt,
-    status: data.status,
-    language: data.language,
-    publisher: data.publisher,
-    imageUrl: data.imageUrl,
-    topic: data.topic ?? '',
-    url: data.url,
-    isCollection: data.isCollection,
-    isSyndicated: data.isSyndicated,
-    source: data.source,
-    createdAt: fromUnixTime(data.createdAt),
-    createdBy: data.createdBy,
-    updatedAt: fromUnixTime(data.updatedAt),
-    updatedBy: data.updatedBy,
-  };
-}
-
-/**
- * Transforms GraphQL ImportApprovedCorpusItemInput with approvedItemId
- * to ImportScheduledItemInput for the database
- * @param data
- */
-function toDbScheduledItemInput(
-  data: ImportApprovedCorpusItemApiInput & { approvedItemId: number },
-): ImportScheduledItemInput {
-  return {
-    approvedItemId: data.approvedItemId,
-    scheduledSurfaceGuid: data.scheduledSurfaceGuid,
-    scheduledDate: new Date(data.scheduledDate).toISOString(),
-    createdAt: fromUnixTime(data.createdAt),
-    createdBy: data.createdBy,
-    updatedAt: fromUnixTime(data.updatedAt),
-    updatedBy: data.updatedBy,
-    source: data.scheduledSource,
-  };
 }
