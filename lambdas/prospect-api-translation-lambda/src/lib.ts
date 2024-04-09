@@ -2,7 +2,7 @@ import { URL } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Prospect, ScheduledSurfaces } from 'prospectapi-common';
-import { Topics, UrlMetadata } from 'content-common';
+import {applyApTitleCase, Topics, UrlMetadata} from 'content-common';
 
 import { SqsProspect } from './types';
 
@@ -239,7 +239,7 @@ export const hydrateProspectMetadata = (
   prospect.isSyndicated = urlMetadata.isSyndicated;
   prospect.language = urlMetadata.language;
   prospect.publisher = urlMetadata.publisher;
-  prospect.title = urlMetadata.title;
+  prospect.title = applyApTitleCase(urlMetadata.title);
   prospect.authors = urlMetadata.authors;
 
   return prospect;

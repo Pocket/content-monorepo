@@ -270,6 +270,9 @@ describe('utils', function () {
         );
       expect(validateImageSpy).toHaveBeenCalled(); //=> true
       expect(output.imageUrl).not.toBeNull();
+      // check that AP style has been applied
+      expect(output.title).not.toEqual('Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.');
+      expect(output.title).toEqual('Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.');
       // should equal https://fake-image-url.com and not https://different-image.com
       expect(output.imageUrl).toEqual('https://fake-image-url.com');
       expect(output).toEqual(expectedOutput);

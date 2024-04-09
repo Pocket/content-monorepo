@@ -258,7 +258,7 @@ describe('lib', () => {
         excerpt: 'test-excerpt',
         imageUrl: 'test-imageUrl',
         language: 'en',
-        title: 'test-title',
+        title: 'Test-Title', // AP style expected
         publisher: 'test-publisher',
         isCollection: false,
         isSyndicated: true,
@@ -282,7 +282,7 @@ describe('lib', () => {
         excerpt: 'test-excerpt',
         imageUrl: 'test-imageUrl',
         language: 'en',
-        title: 'test-title',
+        title: 'Test-Title', // AP style applied
         publisher: 'test-publisher',
         isCollection: false,
         isSyndicated: true,
@@ -308,7 +308,7 @@ describe('lib', () => {
         excerpt: undefined,
         imageUrl: undefined,
         language: undefined,
-        title: undefined,
+        title: '',
         publisher: undefined,
         isCollection: undefined,
         isSyndicated: undefined,

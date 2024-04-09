@@ -1,3 +1,8 @@
+import {
+  SEPARATORS,
+  stop
+} from './types';
+
 /**
  * takes a comma separated string and returns an array of strings
  * @param reasonCsv a string of comma separated values or null
@@ -44,5 +49,49 @@ export const sanitizeText = (input: string, maxLength: number): string => {
   // trim to conform to our max length
   return sanitized.substring(0, maxLength - 1);
 };
+
+/* Taken from https://github.com/Pocket/curation-admin-tools/blob/main/src/_shared/utils/applyApTitleCase.ts*/
+/**
+ * Capitalize first character for string
+ *
+ * @param {string} value
+ * @returns {string}
+ */
+const capitalize = (value: string): string => {
+  if (!value) {
+    return '';
+  }
+  return value.charAt(0).toUpperCase() + value.slice(1);
+};
+
+/**
+ * Helper to convert text to AP title case
+ * adapted from https://github.com/words/ap-style-title-case
+ * text should match https://headlinecapitalization.com/
+ *
+ * @param {string} [value]
+ * @returns {string}
+ */
+export const applyApTitleCase = (value: string): string => {
+  if (!value) {
+    return '';
+  }
+  // split by separators, check if word is first or last
+  // or not blacklisted, then capitalize
+  return value
+      .split(SEPARATORS)
+      .map((word, index, all) => {
+        if (
+            index === 0 ||
+            index === all.length - 1 ||
+            !stop.includes(word.toLowerCase())
+        ) {
+          return capitalize(word);
+        }
+        return word.toLowerCase();
+      })
+      .join('');
+};
+
 
 export * from './types';

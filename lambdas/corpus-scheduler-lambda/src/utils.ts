@@ -5,6 +5,7 @@ import {
 import config from './config';
 import { validateCandidate, validateImageUrl } from './validation';
 import {
+  applyApTitleCase,
   ApprovedItemAuthor,
   CorpusLanguage,
   CreateApprovedCorpusItemApiInput,
@@ -235,7 +236,7 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
 
       const itemToSchedule: CreateApprovedCorpusItemApiInput = {
         url: candidate.scheduled_corpus_item.url, // source = Metaflow
-        title: title,
+        title: applyApTitleCase(title),
         excerpt: excerpt,
         status: candidate.scheduled_corpus_item.status, // source = Metaflow
         language: language,
