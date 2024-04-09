@@ -72,9 +72,9 @@ const capitalize = (value: string): string => {
  * @param {string} [value]
  * @returns {string}
  */
-export const applyApTitleCase = (value: string): string => {
+export const applyApTitleCase = (value: string): string | undefined => {
   if (!value) {
-    return '';
+    return undefined;
   }
   // split by separators, check if word is first or last
   // or not blacklisted, then capitalize
