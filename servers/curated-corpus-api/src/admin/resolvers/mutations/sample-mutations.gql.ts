@@ -27,17 +27,6 @@ export const UPDATE_APPROVED_ITEM = gql`
   ${CuratedItemData}
 `;
 
-export const UPDATE_APPROVED_ITEM_AUTHORS = gql`
-  mutation updateApprovedCorpusItemAuthors(
-    $data: UpdateApprovedCorpusItemAuthorsInput!
-  ) {
-    updateApprovedCorpusItemAuthors(data: $data) {
-      ...CuratedItemData
-    }
-  }
-  ${CuratedItemData}
-`;
-
 export const REJECT_APPROVED_ITEM = gql`
   mutation rejectApprovedItem($data: RejectApprovedCorpusItemInput!) {
     rejectApprovedCorpusItem(data: $data) {
