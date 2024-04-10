@@ -378,6 +378,25 @@ describe('utils', function () {
       parserItem.imageUrl = 'https://fake-image-url.com';
       expectedOutput.imageUrl = parserItem.imageUrl;
     });
+    it('should throw Error on CreateApprovedItemInput if field types are wrong (title)', async () => {
+      mockPocketImageCache(200);
+      const scheduledCandidate = createScheduledCandidate();
+      scheduledCandidate.scheduled_corpus_item.title = undefined;
+      parserItem.title = undefined;
+
+      await expect(
+          mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+              scheduledCandidate,
+              parserItem,
+          ),
+      ).rejects.toThrow(
+          new Error(
+              `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedCorpusItemApiInput. ` +
+              `Reason: Error: Error on typia.assert(): invalid type on $input.title, expect to be string`,
+          ),
+      );
+      parserItem.title = 'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.';
+    });
     it('should throw Error on CreateApprovedItemInput if field types are wrong (publisher)', async () => {
       mockPocketImageCache(200);
       const scheduledCandidate = createScheduledCandidate();

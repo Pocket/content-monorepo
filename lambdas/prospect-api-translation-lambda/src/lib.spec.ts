@@ -344,7 +344,7 @@ describe('lib', () => {
       );
     });
 
-    it('should hydrate prospect when parser has no metadata ', () => {
+    it('should hydrate prospect when parser has no metadata', () => {
       const expected: Prospect = {
         id: 'c3h5n3o9',
         prospectId: validSqsProspect.prospect_id,
