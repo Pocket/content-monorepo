@@ -850,20 +850,6 @@ input UpdateApprovedCorpusItemInput {
 }
 
 """
-Input data for updating an Approved Item's author data.
-"""
-input UpdateApprovedCorpusItemAuthorsInput {
-  """
-  Approved Item ID.
-  """
-  externalId: ID!
-  """
-  A name and sort order for each author.
-  """
-  authors: [CorpusItemAuthorInput!]!
-}
-
-"""
 Input data for rejecting an Approved Item.
 """
 input RejectApprovedCorpusItemInput {
@@ -1090,13 +1076,6 @@ type Mutation {
   """
   updateApprovedCorpusItem(
     data: UpdateApprovedCorpusItemInput!
-  ): ApprovedCorpusItem!
-
-  """
-  Updates authors for an Approved Item.
-  """
-  updateApprovedCorpusItemAuthors(
-    data: UpdateApprovedCorpusItemAuthorsInput!
   ): ApprovedCorpusItem!
 
   """

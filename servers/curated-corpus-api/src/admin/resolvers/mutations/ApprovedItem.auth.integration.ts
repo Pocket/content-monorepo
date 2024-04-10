@@ -7,7 +7,6 @@ import { client } from '../../../database/client';
 import {
   ApprovedItem,
   RejectApprovedItemInput,
-  UpdateApprovedItemAuthorsInput,
   UpdateApprovedItemInput,
 } from '../../../database/types';
 import {
@@ -23,7 +22,6 @@ import {
   CREATE_APPROVED_ITEM,
   REJECT_APPROVED_ITEM,
   UPDATE_APPROVED_ITEM,
-  UPDATE_APPROVED_ITEM_AUTHORS,
   UPLOAD_APPROVED_ITEM_IMAGE,
 } from './sample-mutations.gql';
 import { createReadStream, unlinkSync, writeFileSync } from 'fs';
@@ -258,102 +256,6 @@ describe('mutations: ApprovedItem - authentication checks', () => {
         .set(headers)
         .send({
           query: print(UPDATE_APPROVED_ITEM),
-          variables: { data: input },
-        });
-
-      expect(result.body.data).toBeNull();
-      expect(result.body.errors).not.toBeUndefined();
-      expect(result.body.errors?.[0].message).toContain(ACCESS_DENIED_ERROR);
-    });
-  });
-
-  describe('updateApprovedCorpusItemAuthors mutation', () => {
-    let item: ApprovedItem;
-    let authors: ApprovedItemAuthor[];
-    let input: UpdateApprovedItemAuthorsInput;
-
-    beforeEach(async () => {
-      item = await createApprovedItemHelper(db, {
-        title: "3 Things Everyone Knows About LEGO That You Don't",
-        status: CuratedStatus.RECOMMENDATION,
-        language: 'EN',
-      });
-
-      authors = [
-        { name: 'Author One', sortOrder: 1 },
-        { name: 'Author Two', sortOrder: 2 },
-      ];
-
-      input = {
-        externalId: item.externalId,
-        authors,
-      };
-    });
-
-    it('should succeed if user has access to one of scheduled surfaces', async () => {
-      // Set up auth headers with access to a single Scheduled Surface
-      const headers = {
-        name: 'Test User',
-        username: 'test.user@test.com',
-        groups: `group1,group2,${MozillaAccessGroup.NEW_TAB_CURATOR_ENGB}`,
-      };
-
-      const res = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(UPDATE_APPROVED_ITEM_AUTHORS),
-          variables: { data: input },
-        });
-
-      // Good to check for any errors before proceeding with the rest of the test
-      expect(res.body.errors).toBeUndefined();
-      const data = res.body.data;
-
-      // External ID should be unchanged
-      expect(data?.updateApprovedCorpusItemAuthors.externalId).toEqual(
-        item.externalId,
-      );
-
-      // Updated properties should be... updated
-      expect(data?.updateApprovedCorpusItemAuthors.authors).toEqual(
-        input.authors,
-      );
-
-      // The `updatedBy` field should now be the SSO username of the user
-      // who updated this record
-      expect(data?.updateApprovedCorpusItemAuthors.updatedBy).toEqual(
-        headers.username,
-      );
-    });
-
-    it('should fail if request headers are not supplied', async () => {
-      // With the default context, the headers are empty
-      const result = await request(app)
-        .post(graphQLUrl)
-        .send({
-          query: print(UPDATE_APPROVED_ITEM_AUTHORS),
-          variables: { data: input },
-        });
-
-      expect(result.body.data).toBeNull();
-      expect(result.body.errors).not.toBeUndefined();
-      expect(result.body.errors?.[0].message).toContain(ACCESS_DENIED_ERROR);
-    });
-
-    it("should fail if user doesn't have access to any of scheduled surfaces", async () => {
-      // Set up auth headers with access to something irrelevant here, such as collections
-      const headers = {
-        name: 'Test User',
-        username: 'test.user@test.com',
-        groups: `group1,group2,${MozillaAccessGroup.COLLECTION_CURATOR_FULL}`,
-      };
-
-      const result = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(UPDATE_APPROVED_ITEM_AUTHORS),
           variables: { data: input },
         });
 
