@@ -2,7 +2,7 @@ import { URL } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Prospect, ScheduledSurfaces } from 'prospectapi-common';
-import { Topics, UrlMetadata } from 'content-common';
+import {applyApTitleCase, CorpusLanguage, Topics, UrlMetadata} from 'content-common';
 
 import { SqsProspect } from './types';
 
@@ -224,6 +224,9 @@ export const hydrateProspectMetadata = (
   prospect: Prospect,
   urlMetadata: UrlMetadata,
 ): Prospect => {
+  // check if candidate is EN language to (not) apply title formatting
+  const isCandidateEnglish = urlMetadata.language === CorpusLanguage.EN;
+  const title = isCandidateEnglish ? applyApTitleCase(urlMetadata.title) as string : urlMetadata.title;
   // Mutating the function argument here to avoid creating
   // more objects and be memory efficient
 
@@ -239,7 +242,7 @@ export const hydrateProspectMetadata = (
   prospect.isSyndicated = urlMetadata.isSyndicated;
   prospect.language = urlMetadata.language;
   prospect.publisher = urlMetadata.publisher;
-  prospect.title = urlMetadata.title;
+  prospect.title = title;
   prospect.authors = urlMetadata.authors;
 
   return prospect;

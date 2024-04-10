@@ -145,3 +145,15 @@ export interface UrlMetadata {
 export enum CuratedCorpusApiErrorCodes {
   ALREADY_SCHEDULED = 'ALREADY_SCHEDULED',
 }
+
+/* AP style formatting for title */
+// String of stop words. When a lowercased word is included in this string, it will be in lowercase.
+export const STOP_WORDS =
+    'a an and at but by for in nor of on or so the to up yet';
+
+// special chars separating words, used for splitting
+export const SEPARATORS = /(\s+|[-‑–—,:;!?()“”"])/;
+
+// get the stop word in STOP_WORDS str by splitting by whitespace
+export const stop = STOP_WORDS.split(' ');
+

@@ -1,24 +1,17 @@
 import {
-  generateJwt,
-  getCorpusSchedulerLambdaPrivateKey,
   createAndScheduleCorpusItemHelper,
   createCreateScheduledItemInput,
+  generateJwt,
+  getCorpusSchedulerLambdaPrivateKey,
   mapAuthorToApprovedItemAuthor,
   mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput,
   validateDatePublished,
 } from './utils';
 import config from './config';
-import { mockClient } from 'aws-sdk-client-mock';
-import {
-  GetSecretValueCommand,
-  SecretsManagerClient,
-} from '@aws-sdk/client-secrets-manager';
-import { setupServer } from 'msw/node';
-import {
-  ApprovedItemAuthor,
-  CorpusItemSource,
-  UrlMetadata,
-} from 'content-common';
+import {mockClient} from 'aws-sdk-client-mock';
+import {GetSecretValueCommand, SecretsManagerClient,} from '@aws-sdk/client-secrets-manager';
+import {setupServer} from 'msw/node';
+import {ApprovedItemAuthor, CorpusItemSource, CorpusLanguage, UrlMetadata,} from 'content-common';
 import {
   createScheduledCandidate,
   defaultScheduledDate,
@@ -31,7 +24,7 @@ import {
   mockSnowplow,
   parserItem,
 } from './testHelpers';
-import { getEmitter, getTracker } from 'content-common/snowplow';
+import {getEmitter, getTracker} from 'content-common/snowplow';
 import * as validation from './validation';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -252,7 +245,7 @@ describe('utils', function () {
         ),
       );
     });
-    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput', async () => {
+    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & apply title formatting if candidate is EN', async () => {
       // set parser image url to something different from candidate imageUrl
       parserItem.imageUrl = 'https://different-image.com';
       const scheduledCandidate = createScheduledCandidate();
@@ -270,11 +263,52 @@ describe('utils', function () {
         );
       expect(validateImageSpy).toHaveBeenCalled(); //=> true
       expect(output.imageUrl).not.toBeNull();
+      // check that AP style has been applied
+      expect(output.title).not.toEqual('Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.');
+      expect(output.title).toEqual('Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.');
+      // should be english language
+      expect(output.language).toEqual(CorpusLanguage.EN);
       // should equal https://fake-image-url.com and not https://different-image.com
       expect(output.imageUrl).toEqual('https://fake-image-url.com');
       expect(output).toEqual(expectedOutput);
       // set parser image url to default
       parserItem.imageUrl = scheduledCandidate.scheduled_corpus_item.image_url;
+    });
+    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & NOT apply title formatting if candidate is not EN', async () => {
+      // set parser image url to something different from candidate imageUrl
+      parserItem.imageUrl = 'https://different-image.com';
+      parserItem.language = CorpusLanguage.DE;
+      expectedOutput.language = CorpusLanguage.DE;
+      expectedOutput.title = 'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.';
+      const scheduledCandidate = createScheduledCandidate();
+      scheduledCandidate.scheduled_corpus_item.language = CorpusLanguage.DE;
+      const validateImageSpy = jest
+          .spyOn(validation, 'validateImageUrl')
+          .mockReturnValue(
+              Promise.resolve(
+                  scheduledCandidate.scheduled_corpus_item.image_url as string,
+              ),
+          );
+      const output =
+          await mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+              scheduledCandidate,
+              parserItem,
+          );
+      expect(validateImageSpy).toHaveBeenCalled(); //=> true
+      expect(output.imageUrl).not.toBeNull();
+      // check that AP style has NOT been applied
+      expect(output.title).not.toEqual('Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.');
+      expect(output.title).toEqual('Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.');
+      // should be german language
+      expect(output.language).toEqual(CorpusLanguage.DE);
+      // should equal https://fake-image-url.com and not https://different-image.com
+      expect(output.imageUrl).toEqual('https://fake-image-url.com');
+      expect(output).toEqual(expectedOutput);
+      // reset values to default
+      parserItem.imageUrl = scheduledCandidate.scheduled_corpus_item.image_url;
+      parserItem.language = CorpusLanguage.EN;
+      expectedOutput.language = CorpusLanguage.EN;
+      expectedOutput.title = 'Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.';
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & fallback on Parser fields for undefined optional ScheduledCandidate fields', async () => {
       mockPocketImageCache(200);
@@ -343,6 +377,25 @@ describe('utils', function () {
       // set parser image url to default
       parserItem.imageUrl = 'https://fake-image-url.com';
       expectedOutput.imageUrl = parserItem.imageUrl;
+    });
+    it('should throw Error on CreateApprovedItemInput if field types are wrong (title)', async () => {
+      mockPocketImageCache(200);
+      const scheduledCandidate = createScheduledCandidate();
+      scheduledCandidate.scheduled_corpus_item.title = undefined;
+      parserItem.title = undefined;
+
+      await expect(
+          mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+              scheduledCandidate,
+              parserItem,
+          ),
+      ).rejects.toThrow(
+          new Error(
+              `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedCorpusItemApiInput. ` +
+              `Reason: Error: Error on typia.assert(): invalid type on $input.title, expect to be string`,
+          ),
+      );
+      parserItem.title = 'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.';
     });
     it('should throw Error on CreateApprovedItemInput if field types are wrong (publisher)', async () => {
       mockPocketImageCache(200);

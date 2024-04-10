@@ -4,6 +4,7 @@ import {
   ScheduledCorpusItem,
 } from './types';
 import {
+  applyApTitleCase,
   CorpusItemSource,
   CorpusLanguage,
   CreateApprovedCorpusItemApiInput,
@@ -77,7 +78,7 @@ export const createScheduledCandidate = (
 export const expectedOutput: CreateApprovedCorpusItemApiInput = {
   url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
   title:
-    'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+  applyApTitleCase('Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.') as string,
   excerpt:
     'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
   status: CuratedStatus.RECOMMENDATION,
