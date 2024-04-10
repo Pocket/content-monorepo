@@ -256,7 +256,6 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
         scheduledSurfaceGuid:
           candidate.scheduled_corpus_item.scheduled_surface_guid, // source = Metaflow
       };
-
       // Only add the publication date to the mutation input if the date is available
       if (datePublished) {
         itemToSchedule.datePublished = datePublished;
@@ -264,6 +263,8 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
 
       // assert itemToSchedule against CreateApprovedCorpusItemApiInput before sending to mutation
       assert<CreateApprovedCorpusItemApiInput>(itemToSchedule);
+
+      console.log('item to schedule: ', itemToSchedule);
       return itemToSchedule;
     } catch (e) {
       if (e instanceof TypeGuardError) {
