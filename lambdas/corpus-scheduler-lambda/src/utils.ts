@@ -236,7 +236,7 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
 
       const itemToSchedule: CreateApprovedCorpusItemApiInput = {
         url: candidate.scheduled_corpus_item.url, // source = Metaflow
-        title: applyApTitleCase(title),
+        title: applyApTitleCase(title) as string,
         excerpt: excerpt,
         status: candidate.scheduled_corpus_item.status, // source = Metaflow
         language: language,
