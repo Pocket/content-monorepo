@@ -59,11 +59,6 @@ export type UpdateApprovedItemInput = Omit<
   datePublished?: string;
 };
 
-export type UpdateApprovedItemAuthorsInput = {
-  externalId: string;
-  authors: ApprovedItemAuthor[];
-};
-
 export type RejectApprovedItemInput = {
   externalId: string;
   reason: string;

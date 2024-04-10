@@ -28,12 +28,8 @@ import {
   CREATE_APPROVED_ITEM,
   REJECT_APPROVED_ITEM,
   UPDATE_APPROVED_ITEM,
-  UPDATE_APPROVED_ITEM_AUTHORS,
 } from './sample-mutations.gql';
-import {
-  ApprovedItem,
-  UpdateApprovedItemAuthorsInput,
-} from '../../../database/types';
+import { ApprovedItem } from '../../../database/types';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../events/init';
 import {
   ReviewedCorpusItemEventType,
@@ -914,76 +910,6 @@ describe('mutations: ApprovedItem', () => {
       expect(result.body.errors).toBeUndefined();
       const data = result.body.data;
       expect(data.updateApprovedCorpusItem.language).toEqual('FR');
-    });
-  });
-
-  describe('updateApprovedCorpusAuthorsItem mutation', () => {
-    let item: ApprovedItem;
-    let authors: ApprovedItemAuthor[];
-    let input: UpdateApprovedItemAuthorsInput;
-
-    beforeEach(async () => {
-      item = await createApprovedItemHelper(db, {
-        title: "3 Things Everyone Knows About LEGO That You Don't",
-        status: CuratedStatus.RECOMMENDATION,
-        language: 'EN',
-      });
-
-      authors = [
-        { name: 'Author One', sortOrder: 1 },
-        { name: 'Author Two', sortOrder: 2 },
-      ];
-
-      input = {
-        externalId: item.externalId,
-        authors,
-      };
-    });
-
-    it('should succeed if user has full access', async () => {
-      // Set up event tracking
-      const eventTracker = jest.fn();
-      eventEmitter.on(ReviewedCorpusItemEventType.UPDATE_ITEM, eventTracker);
-
-      const res = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(UPDATE_APPROVED_ITEM_AUTHORS),
-          variables: { data: input },
-        });
-
-      // Good to check for any errors before proceeding with the rest of the test
-      expect(res.body.errors).toBeUndefined();
-      const data = res.body.data;
-
-      // External ID should be unchanged
-      expect(data?.updateApprovedCorpusItemAuthors.externalId).toEqual(
-        item.externalId,
-      );
-
-      // Updated properties should be... updated
-      expect(data?.updateApprovedCorpusItemAuthors.authors).toEqual(
-        input.authors,
-      );
-
-      // The `updatedBy` field should now be the SSO username of the user
-      // who updated this record
-      expect(data?.updateApprovedCorpusItemAuthors.updatedBy).toEqual(
-        headers.username,
-      );
-
-      // Check that the UPDATE_ITEM event was fired successfully:
-      // 1 - Event was fired once!
-      expect(eventTracker).toHaveBeenCalledTimes(1);
-      // 2 - Event has the right type.
-      expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-        ReviewedCorpusItemEventType.UPDATE_ITEM,
-      );
-      // 3- Event has the right entity passed to it.
-      expect(
-        await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
-      ).toEqual(data?.updateApprovedCorpusItemAuthors.externalId);
     });
   });
 
