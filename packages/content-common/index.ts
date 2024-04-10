@@ -57,7 +57,7 @@ export const sanitizeText = (input: string, maxLength: number): string => {
  * @param {string} value
  * @returns {string}
  */
-const capitalize = (value: string): string => {
+export const capitalize = (value: string): string => {
   if (!value) {
     return '';
   }

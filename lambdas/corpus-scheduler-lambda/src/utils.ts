@@ -199,11 +199,6 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
       const topic = candidate.scheduled_corpus_item.topic;
 
       // the following fields are from primary source = Metaflow, fallback on Parser input
-      const title = (
-        candidate.scheduled_corpus_item.title
-          ? candidate.scheduled_corpus_item.title
-          : itemMetadata.title
-      ) as string;
       const excerpt = (
         candidate.scheduled_corpus_item.excerpt
           ? candidate.scheduled_corpus_item.excerpt
@@ -215,6 +210,14 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
           ? candidate.scheduled_corpus_item.language
           : (itemMetadata.language!.toUpperCase() as CorpusLanguage)
       ) as string;
+      // check if candidate is EN language to (not) apply title formatting
+      const isCandidateEnglish = language === CorpusLanguage.EN;
+      let title = (
+          candidate.scheduled_corpus_item.title
+              ? candidate.scheduled_corpus_item.title
+              : itemMetadata.title
+      ) as string;
+      title = isCandidateEnglish ? applyApTitleCase(title) as string : title;
       // validate image_url (Metaflow or Parser input, whichever is provided)
       const imageUrl =
         (await validateImageUrl(
@@ -236,7 +239,7 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
 
       const itemToSchedule: CreateApprovedCorpusItemApiInput = {
         url: candidate.scheduled_corpus_item.url, // source = Metaflow
-        title: applyApTitleCase(title) as string,
+        title: title,
         excerpt: excerpt,
         status: candidate.scheduled_corpus_item.status, // source = Metaflow
         language: language,
