@@ -308,7 +308,7 @@ describe('lib', () => {
         excerpt: undefined,
         imageUrl: undefined,
         language: undefined,
-        title: '',
+        title: undefined,
         publisher: undefined,
         isCollection: undefined,
         isSyndicated: undefined,
