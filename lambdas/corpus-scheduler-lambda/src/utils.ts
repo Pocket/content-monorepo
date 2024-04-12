@@ -6,6 +6,7 @@ import config from './config';
 import { validateCandidate, validateImageUrl } from './validation';
 import {
   applyApTitleCase,
+  applyCurlyQuotes,
   ApprovedItemAuthor,
   CorpusLanguage,
   CreateApprovedCorpusItemApiInput,
@@ -199,11 +200,6 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
       const topic = candidate.scheduled_corpus_item.topic;
 
       // the following fields are from primary source = Metaflow, fallback on Parser input
-      const excerpt = (
-        candidate.scheduled_corpus_item.excerpt
-          ? candidate.scheduled_corpus_item.excerpt
-          : itemMetadata.excerpt
-      ) as string;
       // using toUpperCase on language returned from parser, as parser returns 'en' instead of 'EN'
       const language = (
         candidate.scheduled_corpus_item.language
@@ -213,11 +209,17 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
       // check if candidate is EN language to (not) apply title formatting
       const isCandidateEnglish = language === CorpusLanguage.EN;
       let title = (
-          candidate.scheduled_corpus_item.title
-              ? candidate.scheduled_corpus_item.title
-              : itemMetadata.title
+        candidate.scheduled_corpus_item.title
+          ? candidate.scheduled_corpus_item.title
+          : itemMetadata.title
       ) as string;
-      title = isCandidateEnglish ? applyApTitleCase(title) as string : title;
+      title = isCandidateEnglish ? (applyApTitleCase(title) as string) : title;
+      let excerpt = (
+        candidate.scheduled_corpus_item.excerpt
+          ? candidate.scheduled_corpus_item.excerpt
+          : itemMetadata.excerpt
+      ) as string;
+      excerpt = applyCurlyQuotes(excerpt) as string;
       // validate image_url (Metaflow or Parser input, whichever is provided)
       const imageUrl =
         (await validateImageUrl(

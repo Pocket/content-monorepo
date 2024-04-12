@@ -2,7 +2,13 @@ import { URL } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Prospect, ScheduledSurfaces } from 'prospectapi-common';
-import {applyApTitleCase, CorpusLanguage, Topics, UrlMetadata} from 'content-common';
+import {
+  applyApTitleCase,
+  applyCurlyQuotes,
+  CorpusLanguage,
+  Topics,
+  UrlMetadata,
+} from 'content-common';
 
 import { SqsProspect } from './types';
 
@@ -225,8 +231,12 @@ export const hydrateProspectMetadata = (
   urlMetadata: UrlMetadata,
 ): Prospect => {
   // check if candidate is EN language to (not) apply title formatting
-  const isCandidateEnglish = urlMetadata.language === CorpusLanguage.EN;
-  const title = isCandidateEnglish ? applyApTitleCase(urlMetadata.title) as string : urlMetadata.title;
+  const isCandidateEnglish =
+    urlMetadata.language?.toUpperCase() === CorpusLanguage.EN;
+  const title = isCandidateEnglish
+    ? (applyApTitleCase(urlMetadata.title) as string)
+    : urlMetadata.title;
+  const excerpt = applyCurlyQuotes(urlMetadata.excerpt) as string;
   // Mutating the function argument here to avoid creating
   // more objects and be memory efficient
 
@@ -236,7 +246,7 @@ export const hydrateProspectMetadata = (
 
   // NOTE: individual url metadata fields might be undefined
   prospect.domain = urlMetadata.domain;
-  prospect.excerpt = urlMetadata.excerpt;
+  prospect.excerpt = excerpt;
   prospect.imageUrl = urlMetadata.imageUrl;
   prospect.isCollection = urlMetadata.isCollection;
   prospect.isSyndicated = urlMetadata.isSyndicated;
