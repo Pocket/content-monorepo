@@ -4,7 +4,8 @@ import {
   DataTerraformRemoteState,
   TerraformStack,
   MigrateIds,
-  Aspects, S3Backend,
+  Aspects,
+  S3Backend,
 } from 'cdktf';
 import { config } from './config';
 import {
