@@ -93,5 +93,26 @@ export const applyApTitleCase = (value: string): string | undefined => {
       .join('');
 };
 
+/**
+ * Helper to replace opening and closing curly single and double quotes
+ * Curly quotes represented in unicode
+ * adapted from https://gist.github.com/drdrang/705071
+ *
+ * @param text
+ * @returns string
+ */
+
+export const applyCurlyQuotes = (text: string): string | undefined => {
+  if (!text) {
+    return undefined;
+  }
+  return text
+      .replace(/(^|[-\u2014/([{"\s])'/g, '$1\u2018') // Opening singles (replaces opening ' with ‘)
+      .replace(/'/g, '\u2019') // Closing singles & apostrophes (replaces closing ' with ’)
+      .replace(/(^|[-\u2014/([{\u2018\s])"/g, '$1\u201c') // Opening doubles (replaces opening " with “)
+      .replace(/"/g, '\u201d'); // Closing doubles (replaces closing " with ”)
+};
+
+
 
 export * from './types';
