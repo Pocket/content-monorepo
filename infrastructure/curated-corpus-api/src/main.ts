@@ -2,10 +2,10 @@ import { Construct } from 'constructs';
 import {
   App,
   DataTerraformRemoteState,
-  RemoteBackend,
   TerraformStack,
   MigrateIds,
   Aspects,
+  S3Backend,
 } from 'cdktf';
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { PagerdutyProvider } from '@cdktf/provider-pagerduty/lib/provider';
@@ -38,10 +38,11 @@ class CuratedCorpusAPI extends TerraformStack {
     new NullProvider(this, 'null_provider');
     new PagerdutyProvider(this, 'pagerduty_provider', { token: undefined });
 
-    new RemoteBackend(this, {
-      hostname: 'app.terraform.io',
-      organization: 'Pocket',
-      workspaces: [{ name: `${config.name}-${config.environment}` }],
+    new S3Backend(this, {
+      bucket: `mozilla-content-team-${config.environment.toLowerCase()}-terraform-state`,
+      dynamodbTable: `mozilla-content-team-${config.environment.toLowerCase()}-terraform-state`,
+      key: config.name,
+      region: 'us-east-1',
     });
 
     const caller = new DataAwsCallerIdentity(this, 'caller');

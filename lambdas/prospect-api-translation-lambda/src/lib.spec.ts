@@ -282,7 +282,7 @@ describe('lib', () => {
         excerpt: 'test-excerpt',
         imageUrl: 'test-imageUrl',
         language: 'en',
-        title: 'Test-Title', // AP style applied
+        title: 'test-title',
         publisher: 'test-publisher',
         isCollection: false,
         isSyndicated: true,
@@ -340,7 +340,57 @@ describe('lib', () => {
       };
 
       expect(expected).toEqual(
-          hydrateProspectMetadata(prospectToHydrate, urlMetadata),
+        hydrateProspectMetadata(prospectToHydrate, urlMetadata),
+      );
+    });
+
+    it('should hydrate the prospect with the url meta data fields & apply excerpt curly quotes formatting', () => {
+      const expected: Prospect = {
+        id: 'c3h5n3o9',
+        prospectId: validSqsProspect.prospect_id,
+        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
+        url: validSqsProspect.url,
+        prospectType: validSqsProspect.prospect_source,
+        topic: validSqsProspect.predicted_topic,
+        saveCount: validSqsProspect.save_count,
+        rank: validSqsProspect.rank,
+        domain: 'test-domain',
+        excerpt: `Here’s a quote - ‘To be or not to be’`, // single curly apostrophes should be applied
+        imageUrl: 'test-imageUrl',
+        language: 'en',
+        title: 'Test-Title',
+        publisher: 'test-publisher',
+        isCollection: false,
+        isSyndicated: true,
+        authors: 'questlove,rafael frumkin',
+      };
+
+      const prospectToHydrate = {
+        id: 'c3h5n3o9',
+        prospectId: validSqsProspect.prospect_id,
+        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
+        url: validSqsProspect.url,
+        prospectType: validSqsProspect.prospect_source,
+        topic: validSqsProspect.predicted_topic,
+        saveCount: validSqsProspect.save_count,
+        rank: validSqsProspect.rank,
+      };
+
+      const urlMetadata: UrlMetadata = {
+        url: 'test-url',
+        domain: 'test-domain',
+        excerpt: `Here's a quote - 'To be or not to be'`,
+        imageUrl: 'test-imageUrl',
+        language: 'en',
+        title: 'test-title',
+        publisher: 'test-publisher',
+        isCollection: false,
+        isSyndicated: true,
+        authors: 'questlove,rafael frumkin',
+      };
+
+      expect(expected).toEqual(
+        hydrateProspectMetadata(prospectToHydrate, urlMetadata),
       );
     });
 
