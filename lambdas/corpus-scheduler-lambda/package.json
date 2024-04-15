@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@sentry/serverless": "7.95.0",
+    "@sentry/serverless": "7.110.1",
     "content-common": "workspace:*",
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.5",
