@@ -221,6 +221,10 @@ export type ScheduledCorpusItem = {
    */
   generated_by?: ScheduledItemSource;
   /**
+   * A guid that identifies the original schedule on which the curator action (removed or rescheduled) took place.
+   */
+  original_scheduled_corpus_item_external_id?: string;
+  /**
    * The status of the scheduled_corpus_item, as decided by a curator.
    */
   status?: ScheduledCorpusItemStatus;

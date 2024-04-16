@@ -78,7 +78,7 @@ export default {
       reviewedCorpusItem:
         'iglu:com.pocket/reviewed_corpus_item/jsonschema/1-0-8',
       scheduledCorpusItem:
-        'iglu:com.pocket/scheduled_corpus_item/jsonschema/1-0-7',
+        'iglu:com.pocket/scheduled_corpus_item/jsonschema/1-0-8',
     },
   },
 };
