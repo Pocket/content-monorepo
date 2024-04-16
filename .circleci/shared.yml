@@ -73,7 +73,7 @@ commands:
           name: Install pnpm package manager
           command: |
             sudo corepack enable
-            sudo corepack prepare pnpm@latest-8 --activate
+            sudo corepack prepare pnpm@8.15.3 --activate
       - run:
           name: Install Dependencies
           command: |
@@ -91,7 +91,7 @@ commands:
             . /home/circleci/.codebuild_shims_wrapper.sh
             nvm install
             nvm use
-            npm install -g pnpm   
+            npm install -g pnpm@8.15.3
             pnpm install
   install_codebuild_secrets:
     steps:
