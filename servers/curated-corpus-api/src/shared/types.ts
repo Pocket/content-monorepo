@@ -58,6 +58,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.DISMISSED,
       ProspectType.TITLE_URL_MODELED,
       ProspectType.RSS_LOGISTIC,
+      ProspectType.SLATE_SCHEDULER_V2,
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_DEDE,
   },
