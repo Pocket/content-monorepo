@@ -72,6 +72,7 @@ const scheduledEventData: ScheduledCorpusItemPayload = {
   scheduledCorpusItem: {
     ...scheduledCorpusItem,
     generated_by: ScheduledItemSource.MANUAL,
+    original_scheduled_corpus_item_external_id: 'original-id-123',
     // in the real world this should match the event type, but it's fine to
     // hard-code here just to ensure the value is making it to snowplow
     status: ScheduledCorpusItemStatus.REMOVED,
@@ -120,6 +121,7 @@ describe('ScheduledItemSnowplowHandler', () => {
   new ScheduledItemSnowplowHandler(emitter, tracker, [
     ScheduledCorpusItemEventType.ADD_SCHEDULE,
     ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
+    ScheduledCorpusItemEventType.RESCHEDULE,
   ]);
 
   beforeEach(async () => {
@@ -214,9 +216,9 @@ describe('ScheduledItemSnowplowHandler', () => {
         },
       };
 
-      emitter.emit(ScheduledCorpusItemEventType.ADD_SCHEDULE, {
+      emitter.emit(ScheduledCorpusItemEventType.REMOVE_SCHEDULE, {
         ...scheduledItemWithMlData,
-        eventType: ScheduledCorpusItemEventType.ADD_SCHEDULE,
+        eventType: ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
       });
 
       // wait a sec * 3
@@ -259,9 +261,9 @@ describe('ScheduledItemSnowplowHandler', () => {
         },
       };
 
-      emitter.emit(ScheduledCorpusItemEventType.ADD_SCHEDULE, {
+      emitter.emit(ScheduledCorpusItemEventType.REMOVE_SCHEDULE, {
         ...scheduledItemWithMlData,
-        eventType: ScheduledCorpusItemEventType.ADD_SCHEDULE,
+        eventType: ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
       });
 
       // wait a sec * 3
@@ -302,9 +304,9 @@ describe('ScheduledItemSnowplowHandler', () => {
         },
       };
 
-      emitter.emit(ScheduledCorpusItemEventType.ADD_SCHEDULE, {
+      emitter.emit(ScheduledCorpusItemEventType.REMOVE_SCHEDULE, {
         ...scheduledItemWithMlData,
-        eventType: ScheduledCorpusItemEventType.ADD_SCHEDULE,
+        eventType: ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
       });
 
       // wait a sec * 3
@@ -315,6 +317,101 @@ describe('ScheduledItemSnowplowHandler', () => {
       expect(allEvents.total).toEqual(1);
       expect(allEvents.good).toEqual(0);
       expect(allEvents.bad).toEqual(1);
+    });
+  });
+
+  describe('original_scheduled_corpus_item_external_id value', () => {
+    it('should send a original_scheduled_corpus_item_external_id value when provided', async () => {
+      const scheduledItem: ScheduledCorpusItemPayload = {
+        scheduledCorpusItem: {
+          ...scheduledCorpusItem,
+          generated_by: ScheduledItemSource.ML,
+          status: ScheduledCorpusItemStatus.RESCHEDULED,
+          reasons: ['TOPIC', 'PUBLISHER'],
+          reasonComment: 'why did i rescheudle this? see above',
+          action_screen: ActionScreen.SCHEDULE,
+          original_scheduled_corpus_item_external_id: 'original-id-123',
+        },
+      };
+
+      emitter.emit(ScheduledCorpusItemEventType.RESCHEDULE, {
+        ...scheduledItem,
+        eventType: ScheduledCorpusItemEventType.RESCHEDULE,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(1);
+      expect(allEvents.bad).toEqual(0);
+
+      const goodEvents = await getGoodSnowplowEvents();
+
+      const eventContext = parseSnowplowData(
+        goodEvents[0].rawEvent.parameters.cx,
+      );
+
+      expect(eventContext.data).toMatchObject([
+        {
+          schema: config.snowplow.schemas.scheduledCorpusItem,
+          data: {
+            ...scheduledItemEventContextData,
+            generated_by: ScheduledItemSource.ML,
+            status: ScheduledCorpusItemStatus.RESCHEDULED,
+            action_screen: ActionScreen.SCHEDULE,
+            original_scheduled_corpus_item_external_id: 'original-id-123',
+          },
+        },
+      ]);
+    });
+
+    it('should not send a original_scheduled_corpus_item_external_id value when undefined', async () => {
+      const scheduledItem: ScheduledCorpusItemPayload = {
+        scheduledCorpusItem: {
+          ...scheduledCorpusItem,
+          generated_by: ScheduledItemSource.ML,
+          status: ScheduledCorpusItemStatus.RESCHEDULED,
+          reasons: ['TOPIC', 'PUBLISHER'],
+          reasonComment: 'why did i rescheudle this? see above',
+          action_screen: ActionScreen.SCHEDULE,
+          original_scheduled_corpus_item_external_id: undefined,
+        },
+      };
+
+      emitter.emit(ScheduledCorpusItemEventType.RESCHEDULE, {
+        ...scheduledItem,
+        eventType: ScheduledCorpusItemEventType.RESCHEDULE,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(1);
+      expect(allEvents.bad).toEqual(0);
+
+      const goodEvents = await getGoodSnowplowEvents();
+
+      const eventContext = parseSnowplowData(
+        goodEvents[0].rawEvent.parameters.cx,
+      );
+
+      expect(eventContext.data).toMatchObject([
+        {
+          schema: config.snowplow.schemas.scheduledCorpusItem,
+          data: {
+            ...scheduledItemEventContextData,
+            generated_by: ScheduledItemSource.ML,
+            status: ScheduledCorpusItemStatus.RESCHEDULED,
+            action_screen: ActionScreen.SCHEDULE,
+          },
+        },
+      ]);
     });
   });
 });

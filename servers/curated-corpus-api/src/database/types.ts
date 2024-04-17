@@ -96,9 +96,8 @@ export type DeleteScheduledItemInput = {
   externalId: string;
 };
 
-export type RescheduleScheduledItemInput = {
+export type MoveScheduledItemToBottomInput = {
   externalId: string;
-  scheduledDate: string;
   source: ScheduledItemSource;
 };
 

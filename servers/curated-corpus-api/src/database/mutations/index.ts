@@ -7,5 +7,5 @@ export { createRejectedItem } from './RejectedItem';
 export {
   createScheduledItem,
   deleteScheduledItem,
-  rescheduleScheduledItem,
+  moveScheduledItemToBottom,
 } from './ScheduledItem';
