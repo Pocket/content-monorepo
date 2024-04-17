@@ -12,7 +12,7 @@ import {
   createScheduledItemHelper,
 } from '../../../../test/helpers';
 import { RESCHEDULE_SCHEDULED_ITEM } from '../sample-mutations.gql';
-import { RescheduleScheduledItemInput } from '../../../../database/types';
+import { RescheduleScheduledItemApiInput } from '../../types';
 import { getUnixTimestamp } from '../../fields/UnixTimestamp';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../../events/init';
 import { ScheduledCorpusItemEventType } from '../../../../events/types';
@@ -55,9 +55,9 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
     const eventTracker = jest.fn();
     eventEmitter.on(ScheduledCorpusItemEventType.RESCHEDULE, eventTracker);
 
-    const input: RescheduleScheduledItemInput = {
+    const input: RescheduleScheduledItemApiInput = {
       externalId: 'not-a-valid-ID-string',
-      scheduledDate: '2050-05-04',
+      scheduledDate: '2025-05-05',
       source: ScheduledItemSource.MANUAL,
     };
 
@@ -323,7 +323,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
     });
 
     // try to reschedule the second entry for the same date as the first
-    const input: RescheduleScheduledItemInput = {
+    const input: RescheduleScheduledItemApiInput = {
       externalId: existingScheduledEntry2.externalId,
       scheduledDate: '2050-05-04',
       source: ScheduledItemSource.MANUAL,

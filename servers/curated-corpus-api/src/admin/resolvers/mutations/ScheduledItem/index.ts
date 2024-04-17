@@ -19,7 +19,7 @@ import config from '../../../../config';
 import {
   deleteScheduledItem as dbDeleteScheduledItem,
   createScheduledItem as dbCreateScheduledItem,
-  rescheduleScheduledItem as dbRescheduleScheduledItem,
+  moveScheduledItemToBottom,
 } from '../../../../database/mutations';
 import { ScheduledItem } from '../../../../database/types';
 import {
@@ -261,9 +261,12 @@ export async function rescheduleScheduledItem(
   // sending this data to analytics results in a bad signal, as it isn't a
   // "real" reschedule.
   if (item.scheduledDate.valueOf() === rescheduleData.scheduledDate.valueOf()) {
-    rescheduledItem = await dbRescheduleScheduledItem(
+    rescheduledItem = await moveScheduledItemToBottom(
       context.db,
-      rescheduleData,
+      {
+        externalId: rescheduleData.externalId,
+        source: rescheduleData.source,
+      },
       context.authenticatedUser.username,
     );
   } else {
