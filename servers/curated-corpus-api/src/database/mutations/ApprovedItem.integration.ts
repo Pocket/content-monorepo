@@ -55,58 +55,6 @@ describe('mutations: ApprovedItem', () => {
       // Expect to see all the input data we supplied in the Approved Item
       expect(result).toMatchObject(input);
       expect(result.domainName).toStrictEqual('test.com');
-
-      const domain = await db.domain.findUnique({
-        where: { domainName: 'test.com' },
-      });
-
-      expect(domain).toMatchObject({
-        domainName: 'test.com',
-        isTrusted: false,
-      });
-    });
-
-    it('should create an approved item if the domain already exists', async () => {
-      await db.domain.create({
-        data: {
-          domainName: 'test.com',
-        },
-      });
-
-      const result = await createApprovedItem(db, input, username);
-
-      // Expect to see all the input data we supplied in the Approved Item
-      expect(result).toMatchObject(input);
-      expect(result.domainName).toStrictEqual('test.com');
-
-      const domainCount = await db.domain.count();
-      expect(domainCount).toStrictEqual(1);
-    });
-
-    it('should concurrently create 10 approved items with unique URLs', async () => {
-      const inputs = Array.from({ length: 10 }).map((_, index) => ({
-        ...input,
-        url: `https://test.com/path${index}`,
-      }));
-
-      // Concurrently create approved items
-      const results = await Promise.all(
-        inputs.map((uniqueInput) =>
-          createApprovedItem(db, uniqueInput, username),
-        ),
-      );
-
-      // Assertions to ensure each item was created correctly
-      expect(results).toHaveLength(10);
-      results.forEach((result, index) => {
-        expect(result.domainName).toStrictEqual('test.com');
-      });
-
-      // Verify that all the domains were created and are associated correctly
-      const domainCount = await db.domain.count({
-        where: { domainName: 'test.com' },
-      });
-      expect(domainCount).toStrictEqual(1);
     });
   });
 });

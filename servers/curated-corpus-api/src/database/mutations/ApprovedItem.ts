@@ -8,7 +8,6 @@ import { UserInputError } from '@pocket-tools/apollo-utils';
 import { checkCorpusUrl } from '../helpers/checkCorpusUrl';
 import { GraphQLError } from 'graphql';
 import { getNormalizedDomainName } from '../../shared/utils';
-import retry from 'async-retry';
 
 /**
  * This mutation creates an approved curated item.
@@ -22,45 +21,6 @@ export async function createApprovedItem(
   data: CreateApprovedItemInput,
   username: string,
 ): Promise<ApprovedItem> {
-  return retry(
-    async (bail, attempt) => {
-      try {
-        // Attempt to create the approved item without retry logic.
-        return await createApprovedItemWithoutRetry(db, data, username);
-      } catch (error) {
-        if (error.code === 'P2002') {
-          // Concurrent inserts with the same domain cause a unique constraint failure.
-          // Prisma recommends retrying: https://www.prisma.io/docs/orm/reference/prisma-client-reference#connectorcreate
-          console.log(
-            `Attempt ${attempt}: Unique constraint violation. Retrying...`,
-          );
-          throw error;
-        } else {
-          // For all other errors, do not retry.
-          bail(error);
-        }
-      }
-    },
-    {
-      retries: 3, // Maximum number of retries.
-      factor: 2, // The exponential factor.
-      minTimeout: 500, // The number of milliseconds before starting the first retry.
-      onRetry: (error, attempt) => {
-        console.log(`Retry attempt ${attempt} due to error: ${error.message}`);
-      },
-    },
-  );
-}
-
-/**
- * This tries to create an ApprovedItem without retrying on failure, and should
- * therefore probably not be used directly. Use createApprovedItem instead.
- */
-async function createApprovedItemWithoutRetry(
-  db: PrismaClient,
-  data: CreateApprovedItemInput,
-  username: string,
-): Promise<ApprovedItem> {
   // Check if an item with this URL has already been created in the Curated Corpus.
   await checkCorpusUrl(db, data.url);
 
@@ -69,12 +29,7 @@ async function createApprovedItemWithoutRetry(
   return db.approvedItem.create({
     data: {
       ...data,
-      domain: {
-        connectOrCreate: {
-          create: { domainName },
-          where: { domainName },
-        },
-      },
+      domainName,
       // Use the SSO username here.
       createdBy: username,
       // Authors are stored in its own table, so need to have a nested `create`.

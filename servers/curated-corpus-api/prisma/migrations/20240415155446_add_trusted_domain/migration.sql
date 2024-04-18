@@ -27,19 +27,16 @@ SET `domainName` =
   );
 
 -- CreateTable
-CREATE TABLE `Domain` (
+CREATE TABLE `TrustedDomain` (
     `domainName` VARCHAR(255) NOT NULL,
-    `isTrusted` BOOLEAN NOT NULL DEFAULT false,
     PRIMARY KEY (`domainName`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Insert all domain names into Domain table with isTrusted as True
-INSERT INTO `Domain` (`domainName`, `isTrusted`)
-  SELECT DISTINCT ai.`domainName`, IF(COUNT(si.`id`) > 0, TRUE, FALSE) as `isTrusted`
+-- Insert all domain names into Domain table
+INSERT INTO `TrustedDomain` (`domainName`)
+  SELECT DISTINCT ai.`domainName`
   FROM `ApprovedItem` ai
-  LEFT JOIN `ScheduledItem` si ON ai.`id` = si.`approvedItemId`
-  GROUP BY ai.`domainName`;
+  JOIN `ScheduledItem` si ON ai.`id` = si.`approvedItemId`;
 
 -- Make domainName required
 ALTER TABLE `ApprovedItem` MODIFY COLUMN `domainName` VARCHAR(255) NOT NULL;
-ALTER TABLE `ApprovedItem` ADD CONSTRAINT `ApprovedItem_domainName_fkey` FOREIGN KEY (`domainName`) REFERENCES `Domain`(`domainName`) ON DELETE RESTRICT ON UPDATE CASCADE;

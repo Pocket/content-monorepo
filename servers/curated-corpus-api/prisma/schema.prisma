@@ -19,10 +19,8 @@ model ApprovedItemAuthor {
   @@index([approvedItemId])
 }
 
-model Domain {
-  domainName    String         @id @db.VarChar(255)
-  isTrusted     Boolean        @default(false)
-  approvedItems ApprovedItem[]
+model TrustedDomain {
+  domainName String @id @db.VarChar(255)
 }
 
 model ApprovedItem {
@@ -48,7 +46,6 @@ model ApprovedItem {
   source          CuratedItemSource?
   authors         ApprovedItemAuthor[]
   scheduledItems  ScheduledItem[]
-  domain          Domain               @relation(fields: [domainName], references: [domainName])
   domainName      String               @db.VarChar(255)
 }
 
