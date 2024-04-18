@@ -75,6 +75,11 @@ async function domainNameHasPastScheduledDate(
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Remove the time-part.
 
+  const allItems = await db.scheduledItem.findMany({
+    include: {
+      approvedItem: true,
+    },
+  });
   const result = await db.scheduledItem.findFirst({
     where: {
       scheduledDate: {

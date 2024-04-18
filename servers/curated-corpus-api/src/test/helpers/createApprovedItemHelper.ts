@@ -54,7 +54,7 @@ export async function createApprovedItemHelper(
   }
 
   const url = `${faker.internet.url()}/${faker.lorem.slug()}/${faker.string.uuid()}`;
-  const domainName = getNormalizedDomainName(url);
+  const domainName = getNormalizedDomainName(data.url || url);
 
   // defaults for optional properties
   const createApprovedItemDefaults = {

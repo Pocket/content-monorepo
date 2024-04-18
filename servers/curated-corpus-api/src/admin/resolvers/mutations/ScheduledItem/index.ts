@@ -26,12 +26,16 @@ import {
   ACCESS_DENIED_ERROR,
   ScheduledCorpusItemStatus,
 } from '../../../../shared/types';
-import { scheduledSurfaceAllowedValues } from '../../../../shared/utils';
+import {
+  getNormalizedDomainName,
+  scheduledSurfaceAllowedValues,
+} from '../../../../shared/utils';
 import {
   ScheduledCorpusItemEventType,
   ScheduledCorpusItemPayload,
 } from '../../../../events/types';
 import { IAdminContext } from '../../../context';
+import { createTrustedDomainIfPastScheduledDateExists } from '../../../../database/mutations/TrustedDomain';
 
 /**
  * Deletes an item from the Scheduled Surface schedule.
@@ -186,6 +190,16 @@ export async function createScheduledItem(
     context.emitScheduledCorpusItemEvent(
       ScheduledCorpusItemEventType.ADD_SCHEDULE,
       scheduledItemForEvents,
+    );
+
+    // Make this domain trusted if it was scheduled before today.
+    // If a domainName is not trusted, then curators are warned that the domain name is new.
+    // Doing this update here is a convenient alternative compared with running a daily job.
+    // A domain may retain its warning when viewing a historic schedule date,
+    // if it is only scheduled on a single day.
+    await createTrustedDomainIfPastScheduledDateExists(
+      context.db,
+      getNormalizedDomainName(scheduledItem.approvedItem.url),
     );
 
     return scheduledItem;
