@@ -57,6 +57,9 @@ export type ScheduledCorpusItemPayload = {
   scheduledCorpusItem: ScheduledItem & {
     // the method by which this item was generated (MANUAL or ML, for a scheduled item)
     generated_by?: ScheduledItemSource;
+    // optional field used when the status of a scheduled item is changed
+    // (either rescheduled or deleted)
+    original_scheduled_corpus_item_external_id?: string;
     // multi-purpose field intended to capture the reason(s) for taking the
     // action. currently, this is only when either scheduling or unscheduling.
     // specifically, only when scheduling and unscheduling directly from the

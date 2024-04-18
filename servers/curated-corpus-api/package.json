@@ -46,7 +46,8 @@
     "graphql-scalars": "1.22.4",
     "graphql-upload": "15.0.2",
     "luxon": "3.4.4",
-    "metadata-scraper": "^0.2.61"
+    "metadata-scraper": "^0.2.61",
+    "uuid": "9.0.1"
   },
   "devDependencies": {
     "@aws-sdk/types": "^3.523.0",
