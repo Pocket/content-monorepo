@@ -1,5 +1,7 @@
 -- Add nullable domainName column, and set it based on the url using the above function
 ALTER TABLE `ApprovedItem` ADD COLUMN `domainName` VARCHAR(255);
+CREATE INDEX `ApprovedItem_domainName_idx` ON `ApprovedItem`(`domainName`);
+
 -- Set domainName on ApprovedItem based on the URL. Include subdomains except www.
 UPDATE `ApprovedItem`
 SET `domainName` =

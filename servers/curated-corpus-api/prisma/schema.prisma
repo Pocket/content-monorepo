@@ -47,6 +47,8 @@ model ApprovedItem {
   authors         ApprovedItemAuthor[]
   scheduledItems  ScheduledItem[]
   domainName      String               @db.VarChar(255)
+
+  @@index([domainName])
 }
 
 model RejectedCuratedCorpusItem {
