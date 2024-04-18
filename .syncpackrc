@@ -17,6 +17,17 @@
       "dependencies": [
         "@aws-sdk/**"
       ],
+      "dependencyTypes": [
+        "!dev"
+      ],
+      "pinVersion": "3.529.1",
+      "label": "AWS SDK Dependencies should all have the same version"
+    },
+    {
+      "dependencies": [
+        "@sentry/**"
+      ],
+      "pinVersion": "7.110.1",
       "label": "AWS SDK Dependencies should all have the same version"
     },
     {
