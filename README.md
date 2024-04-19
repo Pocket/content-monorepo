@@ -131,6 +131,58 @@ pnpm dev # this ensures prisma migrations have run
 pnpm test-integrations --filter=curated-corpus-api
 ```
 
+## Tracing
+
+Tracing is performed using the `@pocket-tools/tracing` package, which under the hood uses the `@opentelemetry/sdk-node` package and follows the
+[Open Telemetry](https://opentelemetry.io/) standard. We use AWS X-Ray as our Open Telemetry ingestor and viewer.
+
+### Notable Configurations
+
+- The Open Telemetry collector is set to sample 20% of available traces. This can be adjusted in the config sent to the `nodeSDKBuilder` function
+  call in each implementing service.
+
+### Services Being Traced
+
+(While tracing implementation is in progress, this will be a list of services that _are_ tracing.)
+
+- Curated Corpus API
+
+### Local Tracing
+
+Locally, the Open Telemetry Docker image is used instead of AWS-X Ray. (The collector and viewer of telemetry data are essentially arbitrary.)
+To view traces while running services locally, you can tail the logs from the Open Telemetry Docker container:
+
+`docker compose logs -f otlpcollector`
+
+This will output raw telemetry data to the console. Note - by default, the Open Telemetry container will only capture `error` level traces. If you
+want to inspect more data, you can change the container image `command` value from `error` to `debug` in our `docker-compose.yml` file:
+
+`'--set=service.telemetry.logs.level=debug'`
+
+(A potential improvement - a lightweigh Open Telemetry viewer such as [Grafana](https://grafana.com/blog/2024/03/13/an-opentelemetry-backend-in-a-docker-image-introducing-grafana/otel-lgtm/).)
+
+### Viewing Traces In Prod
+
+#### Exploring Traces
+
+- Log in to AWS and navigate to CloudWatch
+- Click "Traces" in the left hand menu
+- Refine the query by "Node" and enter the url of one of our services (e.g. `curated-corpus-api.getpocket.dev`)
+  - You may need to refine the time period at the top of the page to get results
+- Scroll to the bottom of the page and click any trace ID
+
+### Viewing Specific Error Traces
+
+To view the trace of an error logged to Sentry:
+
+- Navigate to the error in Sentry
+- Expand the "Headers" section and find the `X-Amzn-Trace-Id` key
+- Copy the `Root` trace ID
+- Navigate to AWS CloudWatch
+- Click "Traces" in the left hand menu
+- Find the very obscure "You can also type a trace ID here" link in the top right of the page
+- Paste the trace ID you copied from Sentry in the popup form and click the "Go to trace details" button
+
 ## DynamoDB
 
 Prospect-api uses `dynamodb` as the db system. When running `docker compose up`, the `localstack` container executes a `dynamodb.sh` script where the prospect-api table

@@ -1,5 +1,6 @@
+import { serverLogger } from '@pocket-tools/ts-logger';
+
 import { Prisma, PrismaClient } from '.prisma/client';
-import { serverLogger } from '../express';
 import config from '../config';
 
 let prisma;

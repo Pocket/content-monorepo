@@ -9,7 +9,7 @@ import {
 } from '@aws-sdk/client-eventbridge';
 import { eventBusConfig } from './EventBusConfig';
 import * as Sentry from '@sentry/node';
-import { serverLogger } from '../../express';
+import { serverLogger } from '@pocket-tools/ts-logger';
 
 /**
  * This class listens to events emitted by the application. When the
@@ -50,7 +50,7 @@ export class EventBusHandler {
    */
   constructor(
     protected emitter: EventEmitter,
-    eventHandlerMap?: EventHandlerCallbackMap
+    eventHandlerMap?: EventHandlerCallbackMap,
   ) {
     this.client = new EventBridgeClient({
       region: config.aws.region,
@@ -72,7 +72,7 @@ export class EventBusHandler {
             'EventBusHandler: Failed to send event to event bus',
             {
               error,
-            }
+            },
           );
         }
       });
@@ -98,13 +98,13 @@ export class EventBusHandler {
       ],
     });
     const output: PutEventsCommandOutput = await this.client.send(
-      putEventCommand
+      putEventCommand,
     );
     if (output.FailedEntryCount) {
       const failedEventError = new Error(
         `Failed to send event '${
           eventPayload.eventType
-        }' to event bus. Event Body:\n ${JSON.stringify(eventPayload)}`
+        }' to event bus. Event Body:\n ${JSON.stringify(eventPayload)}`,
       );
       // Don't halt program, but capture the failure in Sentry and Cloudwatch
       Sentry.captureException(failedEventError);

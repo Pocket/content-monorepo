@@ -27,8 +27,15 @@
       "dependencies": [
         "@sentry/**"
       ],
-      "pinVersion": "7.110.1",
+      "pinVersion": "7.112.2",
       "label": "AWS SDK Dependencies should all have the same version"
+    },
+    {
+      "dependencies": [
+        "*prisma/**"
+      ],
+      "pinVersion": "5.13.0",
+      "label": "Prisma"
     },
     {
       "dependencies": [

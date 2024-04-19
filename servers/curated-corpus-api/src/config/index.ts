@@ -59,7 +59,9 @@ export default {
     source: 'curation-migration-datasync',
   },
   sentry: {
-    dsn: process.env.SENTRY_DSN || '',
+    dsn:
+      process.env.SENTRY_DSN ||
+      'https://a74c8237773f4ce48d960bc1657cbbef@o28549.ingest.us.sentry.io/5938284',
     release: process.env.GIT_SHA || '',
     environment: process.env.NODE_ENV || 'development',
     includeLocalVariables: true,
@@ -80,5 +82,10 @@ export default {
       scheduledCorpusItem:
         'iglu:com.pocket/scheduled_corpus_item/jsonschema/1-0-8',
     },
+  },
+  tracing: {
+    // for AWS, it's fine to leave this defaulting to localhost
+    host: process.env.OTLP_COLLECTOR_HOST || 'localhost',
+    serviceName: 'curated-corpus-api',
   },
 };

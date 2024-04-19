@@ -3,13 +3,13 @@ import { Tracker } from '@snowplow/node-tracker';
 import { PayloadBuilder, SelfDescribingJson } from '@snowplow/tracker-core';
 
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
-import { serverLogger } from '../../express';
+import { serverLogger } from '@pocket-tools/ts-logger';
 
 export class CuratedCorpusSnowplowHandler {
   constructor(
     protected emitter: CuratedCorpusEventEmitter,
     protected tracker: Tracker,
-    events: string[]
+    events: string[],
   ) {
     // register handler for item events
     events.forEach((event) => emitter.on(event, (data) => this.process(data)));
@@ -27,7 +27,7 @@ export class CuratedCorpusSnowplowHandler {
    */
   protected async track(
     event: PayloadBuilder,
-    context: SelfDescribingJson[]
+    context: SelfDescribingJson[],
   ): Promise<void> {
     try {
       await this.tracker.track(event, context);
