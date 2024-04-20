@@ -307,6 +307,13 @@ type ApprovedCorpusItem @key(fields: "url") {
   ): [ApprovedCorpusItemScheduledSurfaceHistory!]!
 }
 
+extend type ApprovedCorpusItem @key(fields: "url") {
+  """
+  True if the domain of the corpus item has been scheduled in the past.
+  """
+  hasTrustedDomain: Boolean!
+}
+
 """
 A prospective story that has been rejected by the curators.
 """
