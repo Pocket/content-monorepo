@@ -19,14 +19,15 @@ import { UserInputError } from '@pocket-tools/apollo-utils';
  */
 export async function getScheduledItems(
   db: PrismaClient,
-  filters: ScheduledItemFilterInput
+  filters: ScheduledItemFilterInput,
+  includeHasTrustedDomain: boolean,
 ): Promise<ScheduledItemsResult[]> {
   const { scheduledSurfaceGuid, startDate, endDate } = filters;
 
   // validate scheduledSurfaceGuid
   if (!scheduledSurfaceAllowedValues.includes(scheduledSurfaceGuid)) {
     throw new UserInputError(
-      `${scheduledSurfaceGuid} is not a valid Scheduled Surface GUID`
+      `${scheduledSurfaceGuid} is not a valid Scheduled Surface GUID`,
     );
   }
 
@@ -69,16 +70,43 @@ export async function getScheduledItems(
       return {
         scheduledDate,
         collectionCount: items.filter(
-          (item) => item.approvedItem.isCollection === true
+          (item) => item.approvedItem.isCollection === true,
         ).length,
         syndicatedCount: items.filter(
-          (item) => item.approvedItem.isSyndicated === true
+          (item) => item.approvedItem.isSyndicated === true,
         ).length,
         totalCount: items.length,
         items: items,
       };
-    }
+    },
   );
+
+  // Check if we need to include trusted domain information
+  if (includeHasTrustedDomain) {
+    // Extract domain names from approvedItems
+    const domainNames = items.map((item) => item.approvedItem.domainName);
+
+    // Find all trusted domains for the domain names extracted
+    const trustedDomains = await db.trustedDomain.findMany({
+      where: {
+        domainName: { in: domainNames },
+      },
+    });
+
+    // Create a map of domainName to trusted status
+    const trustedDomainsMap = trustedDomains.reduce((acc, trustedDomain) => {
+      acc[trustedDomain.domainName] = true;
+      return acc;
+    }, {});
+
+    // Set hasTrustedDomain in results
+    results.map((result: ScheduledItemsResult) => {
+      result.items.map((item) => {
+        item.approvedItem.hasTrustedDomain =
+          trustedDomainsMap[item.approvedItem.domainName] || false;
+      });
+    });
+  }
 
   return results;
 }
@@ -94,7 +122,7 @@ export async function getScheduledItems(
 export async function getItemsForScheduledSurface(
   db: PrismaClient,
   id: string,
-  date: string
+  date: string,
 ): Promise<ScheduledSurfaceItem[]> {
   // Get a flat array of scheduled items from Prisma
   const items = await db.scheduledItem.findMany({
@@ -136,7 +164,7 @@ export async function getItemsForScheduledSurface(
  */
 export async function getScheduledItemByUniqueAttributes(
   db: PrismaClient,
-  data
+  data,
 ): Promise<ScheduledItem | null> {
   return db.scheduledItem.findUnique({
     where: {
@@ -157,4 +185,3 @@ export async function getScheduledItemByUniqueAttributes(
     },
   });
 }
-

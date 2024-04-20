@@ -493,6 +493,9 @@ importers:
       express:
         specifier: 4.18.2
         version: 4.18.2
+      graphql-parse-resolve-info:
+        specifier: ^4.13.0
+        version: 4.13.0(graphql@16.8.1)
       graphql-scalars:
         specifier: 1.22.4
         version: 1.22.4(graphql@16.8.1)
@@ -6955,7 +6958,7 @@ packages:
     dependencies:
       semver: 7.6.0
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240416
+      typescript: 5.5.0-dev.20240419
     dev: false
 
   /drange@1.1.1:
@@ -8448,6 +8451,19 @@ packages:
 
   /graphql-fields@2.0.3:
     resolution: {integrity: sha512-x3VE5lUcR4XCOxPIqaO4CE+bTK8u6gVouOdpQX9+EKHr+scqtK5Pp/l8nIGqIpN1TUlkKE6jDCCycm/WtLRAwA==}
+    dev: false
+
+  /graphql-parse-resolve-info@4.13.0(graphql@16.8.1):
+    resolution: {integrity: sha512-VVJ1DdHYcR7hwOGQKNH+QTzuNgsLA8l/y436HtP9YHoX6nmwXRWq3xWthU3autMysXdm0fQUbhTZCx0W9ICozw==}
+    engines: {node: '>=8.6'}
+    peerDependencies:
+      graphql: '>=0.9 <0.14 || ^14.0.2 || ^15.4.0 || ^16.3.0'
+    dependencies:
+      debug: 4.3.4
+      graphql: 16.8.1
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /graphql-scalars@1.22.4(graphql@16.8.1):
@@ -13115,8 +13131,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240416:
-    resolution: {integrity: sha512-hCCgs0+M5vvB2c/G6ft9IBNjbsjd/VL7+pSJMxGJcDjWP/FI+1n6qSLL3hNduxkfbzFh4jL75tbSqJp/Ac0V1Q==}
+  /typescript@5.5.0-dev.20240419:
+    resolution: {integrity: sha512-8ypxI/j8ctX5QljMci0V6iljmCDnSmardVThnbxKC8p3eRc83c2Ip6K4MmGO5yHgeEyz9rpusbM2iY/6lDZBdw==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false

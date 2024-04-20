@@ -5,6 +5,18 @@ import {
   ScheduledItemData,
 } from '../../../shared/fragments.gql';
 
+export const AdminScheduledItemData = gql`
+  fragment AdminScheduledItemData on ScheduledCorpusItem {
+    ...ScheduledItemData
+    approvedItem {
+      ...CuratedItemData
+      hasTrustedDomain
+    }
+  }
+  ${ScheduledItemData}
+  ${CuratedItemData}
+`;
+
 /**
  * Sample queries for Apollo Server integration tests as used in
  * Curation Admin Tools Frontend and this repository's integration tests.
@@ -65,11 +77,11 @@ export const GET_SCHEDULED_ITEMS = gql`
       syndicatedCount
       scheduledDate
       items {
-        ...ScheduledItemData
+        ...AdminScheduledItemData
       }
     }
   }
-  ${ScheduledItemData}
+  ${AdminScheduledItemData}
 `;
 
 export const GET_APPROVED_ITEM_BY_URL = gql`

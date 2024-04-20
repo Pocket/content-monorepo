@@ -15,6 +15,7 @@ import { GET_SCHEDULED_ITEMS } from './sample-queries.gql';
 import { MozillaAccessGroup } from '../../../shared/types';
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
+import { ScheduledItemsResult } from '../../../database/types';
 
 describe('queries: ScheduledCorpusItem', () => {
   let app: Express.Application;
@@ -141,6 +142,50 @@ describe('queries: ScheduledCorpusItem', () => {
       expect(firstItem.approvedItem.excerpt).toBeDefined();
       expect(firstItem.approvedItem.imageUrl).toBeDefined();
       expect(firstItem.approvedItem.createdBy).toBeDefined();
+      expect(firstItem.approvedItem.hasTrustedDomain).toBeDefined();
+    });
+
+    it('should the right values for hasTrustedDomain', async () => {
+      // Make a domain trusted.
+      const trustedApprovedItem = await db.approvedItem.findFirst();
+      await db.trustedDomain.create({
+        data: { domainName: trustedApprovedItem.domainName },
+      });
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .set(headers)
+        .send({
+          query: print(GET_SCHEDULED_ITEMS),
+          variables: {
+            filters: {
+              scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+              startDate: '2000-01-01',
+              endDate: '2050-12-31',
+            },
+          },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+
+      // Check that all hasTrustedDomain values are as expected.
+      const resultArray = result.body.data?.getScheduledCorpusItems;
+      let trustedCount = 0;
+      resultArray.map((result: ScheduledItemsResult) => {
+        result.items.map((item) => {
+          const isTrusted = item.approvedItem.url.includes(
+            trustedApprovedItem.domainName,
+          );
+          expect(item.approvedItem.hasTrustedDomain).toStrictEqual(isTrusted);
+          if (isTrusted) {
+            trustedCount += 1;
+          }
+        });
+      });
+
+      // Check that the trustedApprovedItem was actually returned, to ensure proper test coverage.
+      expect(trustedCount).toBeGreaterThanOrEqual(1);
     });
 
     it('should return all scheduled items with half being MANUAL and half being ML', async () => {
