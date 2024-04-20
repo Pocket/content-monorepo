@@ -229,10 +229,6 @@ type ApprovedCorpusItem @key(fields: "url") {
   """
   url: Url!
   """
-  A domain name is trusted if it has been scheduled in the past. Otherwise curators should be warned that the domain is new.
-  """
-  hasTrustedDomain: Boolean!
-  """
   The title of the story.
   """
   title: String!

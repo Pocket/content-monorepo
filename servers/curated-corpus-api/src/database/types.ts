@@ -103,7 +103,6 @@ export type MoveScheduledItemToBottomInput = {
 
 export type ApprovedItem = ApprovedItemModel & {
   authors: ApprovedItemAuthor[];
-  hasTrustedDomain?: boolean;
 };
 
 /**
