@@ -2,8 +2,8 @@ import { gql } from 'graphql-tag';
 import {
   CuratedItemData,
   RejectedItemData,
-  ScheduledItemData,
 } from '../../../shared/fragments.gql';
+import { AdminScheduledItemData } from '../fragments.gql';
 
 /**
  * Sample queries for Apollo Server integration tests as used in
@@ -25,7 +25,7 @@ export const GET_APPROVED_ITEMS = gql`
       edges {
         cursor
         node {
-          ...CuratedItemData
+          ...AdminCuratedItemData
         }
       }
     }
@@ -65,11 +65,11 @@ export const GET_SCHEDULED_ITEMS = gql`
       syndicatedCount
       scheduledDate
       items {
-        ...ScheduledItemData
+        ...AdminScheduledItemData
       }
     }
   }
-  ${ScheduledItemData}
+  ${AdminScheduledItemData}
 `;
 
 export const GET_APPROVED_ITEM_BY_URL = gql`

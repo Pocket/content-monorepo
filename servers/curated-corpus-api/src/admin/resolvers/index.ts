@@ -26,6 +26,7 @@ import {
   getRejectedItemByUrl as dbGetRejectedItemByUrl,
 } from '../../database/queries';
 import { getOpenGraphFields } from './queries/OpenGraphFields';
+import { hasTrustedDomain } from './queries/TrustedDomain';
 
 export const resolvers = {
   // The custom scalars from GraphQL-Scalars that we find useful.
@@ -56,6 +57,8 @@ export const resolvers = {
     // The `scheduledSurfaceHistory` subquery pulls in data on most recent
     // scheduling of a curated item onto a surface.
     scheduledSurfaceHistory: getScheduledSurfaceHistory,
+
+    hasTrustedDomain,
   },
   RejectedCorpusItem: {
     createdAt: UnixTimestampResolver,
