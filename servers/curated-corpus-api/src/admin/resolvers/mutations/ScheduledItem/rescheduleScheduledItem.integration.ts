@@ -19,6 +19,7 @@ import { ScheduledCorpusItemEventType } from '../../../../events/types';
 import {
   ACCESS_DENIED_ERROR,
   MozillaAccessGroup,
+  ScheduledCorpusItemStatus,
 } from '../../../../shared/types';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
@@ -283,6 +284,14 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
     // 3- Event has the right values
     expect(rescheduleEventCall.scheduledCorpusItem.action_screen).toEqual(
       ActionScreen.SCHEDULE,
+    );
+
+    expect(rescheduleEventCall.scheduledCorpusItem.generated_by).toEqual(
+      ScheduledItemSource.MANUAL,
+    );
+
+    expect(rescheduleEventCall.scheduledCorpusItem.status).toEqual(
+      ScheduledCorpusItemStatus.RESCHEDULED,
     );
 
     // a new externalId should have been generated

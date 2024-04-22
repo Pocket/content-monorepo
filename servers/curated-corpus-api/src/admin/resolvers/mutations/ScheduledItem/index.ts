@@ -303,6 +303,8 @@ export async function rescheduleScheduledItem(
           scheduledCorpusItem: {
             ...rescheduledItem,
             action_screen: actionScreen,
+            generated_by: rescheduleData.source,
+            status: ScheduledCorpusItemStatus.RESCHEDULED,
             original_scheduled_corpus_item_external_id: deletedItem.externalId,
           },
         },
