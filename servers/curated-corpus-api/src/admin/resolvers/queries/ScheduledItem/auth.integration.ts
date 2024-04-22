@@ -2,17 +2,20 @@ import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
-import { client } from '../../../database/client';
+import { client } from '../../../../database/client';
 
 import {
   clearDb,
   createApprovedItemHelper,
   createScheduledItemHelper,
-} from '../../../test/helpers';
-import { GET_SCHEDULED_ITEMS } from './sample-queries.gql';
-import { ACCESS_DENIED_ERROR, MozillaAccessGroup } from '../../../shared/types';
-import { startServer } from '../../../express';
-import { IAdminContext } from '../../context';
+} from '../../../../test/helpers';
+import { GET_SCHEDULED_ITEMS } from '../sample-queries.gql';
+import {
+  ACCESS_DENIED_ERROR,
+  MozillaAccessGroup,
+} from '../../../../shared/types';
+import { startServer } from '../../../../express';
+import { IAdminContext } from '../../../context';
 
 describe('queries: ScheduledCorpusItem - authentication', () => {
   let app: Express.Application;
@@ -148,7 +151,7 @@ describe('queries: ScheduledCorpusItem - authentication', () => {
       // check if the error we get is access denied error
       expect(result.body.errors?.[0].message).toEqual(ACCESS_DENIED_ERROR);
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'UNAUTHENTICATED'
+        'UNAUTHENTICATED',
       );
     });
 
@@ -180,7 +183,7 @@ describe('queries: ScheduledCorpusItem - authentication', () => {
       // check if the error we get is access denied error
       expect(result.body.errors?.[0].message).toEqual(ACCESS_DENIED_ERROR);
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'UNAUTHENTICATED'
+        'UNAUTHENTICATED',
       );
     });
   });

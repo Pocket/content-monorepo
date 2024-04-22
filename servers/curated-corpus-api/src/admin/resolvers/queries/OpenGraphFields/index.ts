@@ -1,4 +1,4 @@
-import { OpenGraphFields } from '../../../shared/types';
+import { OpenGraphFields } from '../../../../shared/types';
 import getMetaData from 'metadata-scraper';
 
 /**
@@ -8,7 +8,7 @@ import getMetaData from 'metadata-scraper';
  */
 export async function getOpenGraphFields(
   parent,
-  { url }
+  { url },
 ): Promise<OpenGraphFields | null> {
   let pageMetadata = null;
   try {

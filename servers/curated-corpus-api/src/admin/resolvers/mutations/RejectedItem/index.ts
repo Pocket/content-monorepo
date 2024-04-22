@@ -3,13 +3,13 @@ import {
   UserInputError,
 } from '@pocket-tools/apollo-utils';
 import { RejectedCuratedCorpusItem } from '.prisma/client';
-import { createRejectedItem as dbCreateRejectedItem } from '../../../database/mutations';
+import { createRejectedItem as dbCreateRejectedItem } from '../../../../database/mutations';
 import {
   RejectedCorpusItemPayload,
   ReviewedCorpusItemEventType,
-} from '../../../events/types';
-import { RejectionReason, ACCESS_DENIED_ERROR } from '../../../shared/types';
-import { IAdminContext } from '../../context';
+} from '../../../../events/types';
+import { RejectionReason, ACCESS_DENIED_ERROR } from '../../../../shared/types';
+import { IAdminContext } from '../../../context';
 
 /**
  * Creates a rejected curated item with data supplied.

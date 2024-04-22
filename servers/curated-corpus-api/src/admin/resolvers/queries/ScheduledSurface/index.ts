@@ -2,11 +2,11 @@ import {
   MozillaAccessGroup,
   ScheduledSurface,
   ScheduledSurfaces,
-} from '../../../shared/types';
+} from '../../../../shared/types';
 import {
   getScheduledSurfaceByAccessGroup,
   scheduledSurfaceAccessGroups,
-} from '../../../shared/utils';
+} from '../../../../shared/utils';
 
 /**
  * This query retrieves Scheduled Surfaces available to the given SSO user
@@ -18,7 +18,7 @@ import {
 export function getScheduledSurfacesForUser(
   parent,
   args,
-  { authenticatedUser }
+  { authenticatedUser },
 ): ScheduledSurface[] {
   let scheduledSurfaces: ScheduledSurface[] = [];
 
@@ -26,7 +26,7 @@ export function getScheduledSurfacesForUser(
   // and read-only users (otherwise the latter won't see anything???)
   if (
     authenticatedUser.groups.includes(
-      MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL
+      MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL,
     ) ||
     authenticatedUser.groups.includes(MozillaAccessGroup.READONLY)
   ) {

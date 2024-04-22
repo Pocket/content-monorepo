@@ -2,13 +2,13 @@ import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
-import { client } from '../../../database/client';
+import { client } from '../../../../database/client';
 
 import {
   ApprovedItem,
   RejectApprovedItemInput,
   UpdateApprovedItemInput,
-} from '../../../database/types';
+} from '../../../../database/types';
 import {
   ApprovedItemAuthor,
   CreateApprovedCorpusItemApiInput,
@@ -16,18 +16,21 @@ import {
   CuratedStatus,
   Topics,
 } from 'content-common';
-import { ACCESS_DENIED_ERROR, MozillaAccessGroup } from '../../../shared/types';
-import { clearDb, createApprovedItemHelper } from '../../../test/helpers';
+import {
+  ACCESS_DENIED_ERROR,
+  MozillaAccessGroup,
+} from '../../../../shared/types';
+import { clearDb, createApprovedItemHelper } from '../../../../test/helpers';
 import {
   CREATE_APPROVED_ITEM,
   REJECT_APPROVED_ITEM,
   UPDATE_APPROVED_ITEM,
   UPLOAD_APPROVED_ITEM_IMAGE,
-} from './sample-mutations.gql';
+} from '../sample-mutations.gql';
 import { createReadStream, unlinkSync, writeFileSync } from 'fs';
 import Upload from 'graphql-upload/Upload.js';
-import { startServer } from '../../../express';
-import { IAdminContext } from '../../context';
+import { startServer } from '../../../../express';
+import { IAdminContext } from '../../../context';
 
 describe('mutations: ApprovedItem - authentication checks', () => {
   let app: Express.Application;

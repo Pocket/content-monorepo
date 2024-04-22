@@ -1,13 +1,13 @@
 import { Connection } from '@devoxa/prisma-relay-cursor-connection';
 import { RejectedCuratedCorpusItem } from '.prisma/client';
-import config from '../../../config';
+import config from '../../../../config';
 import {
   getRejectedItemByUrl as dbGetRejectedItemByUrl,
   getRejectedCuratedCorpusItems as dbGetRejectedCuratedCorpusItems,
-} from '../../../database/queries';
-import { IAdminContext } from '../../context';
+} from '../../../../database/queries';
+import { IAdminContext } from '../../../context';
 import { AuthenticationError } from '@pocket-tools/apollo-utils';
-import { ACCESS_DENIED_ERROR } from '../../../shared/types';
+import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 
 /**
  * This query retrieves rejected curated items from the database.
@@ -19,7 +19,7 @@ import { ACCESS_DENIED_ERROR } from '../../../shared/types';
 export async function getRejectedItems(
   parent,
   args,
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<Connection<RejectedCuratedCorpusItem>> {
   //check if the user has the required permissions to access this query
   if (
@@ -54,7 +54,7 @@ export async function getRejectedItems(
   return await dbGetRejectedCuratedCorpusItems(
     context.db,
     pagination,
-    args.filters
+    args.filters,
   );
 }
 
@@ -70,7 +70,7 @@ export async function getRejectedItems(
 export async function getRejectedItemByUrl(
   parent,
   args,
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<RejectedCuratedCorpusItem | null> {
   //check if the user does not have the permissions to access this query
   if (
