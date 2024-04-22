@@ -7,6 +7,7 @@ import {
 import { UserInputError } from '@pocket-tools/apollo-utils';
 import { checkCorpusUrl } from '../helpers/checkCorpusUrl';
 import { GraphQLError } from 'graphql';
+import { getNormalizedDomainName } from '../../shared/utils';
 
 /**
  * This mutation creates an approved curated item.
@@ -23,9 +24,12 @@ export async function createApprovedItem(
   // Check if an item with this URL has already been created in the Curated Corpus.
   await checkCorpusUrl(db, data.url);
 
+  const domainName = getNormalizedDomainName(data.url);
+
   return db.approvedItem.create({
     data: {
       ...data,
+      domainName,
       // Use the SSO username here.
       createdBy: username,
       // Authors are stored in its own table, so need to have a nested `create`.

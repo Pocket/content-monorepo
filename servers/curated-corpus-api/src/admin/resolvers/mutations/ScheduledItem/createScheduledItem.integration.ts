@@ -24,6 +24,7 @@ import {
 } from '../../../../shared/types';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
+import { toUtcDateString } from '../../../../shared/utils';
 
 describe('mutations: ScheduledItem (createScheduledItem)', () => {
   let app: Express.Application;
@@ -319,6 +320,73 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
     expect(
       await eventTracker.mock.calls[0][0].scheduledCorpusItem.externalId,
     ).toEqual(scheduledItem.externalId);
+  });
+
+  it('should create a TrustedDomain if the domain does have a past scheduled date', async () => {
+    const pastApprovedItem = await createApprovedItemHelper(db, {
+      url: 'https://example.com/article1',
+      title: 'Article 1',
+    });
+
+    // create a scheduled entry in the past for this item
+    await createScheduledItemHelper(db, {
+      approvedItem: pastApprovedItem,
+      scheduledDate: new Date(2024, 1, 1).toISOString(),
+    });
+
+    const newApprovedItem = await createApprovedItemHelper(db, {
+      url: 'https://example.com/article2',
+      title: 'Article 2',
+    });
+
+    const input: CreateScheduledItemApiInput = {
+      approvedItemExternalId: newApprovedItem.externalId,
+      scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+      scheduledDate: toUtcDateString(new Date()),
+      source: ScheduledItemSource.ML,
+    };
+
+    await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(CREATE_SCHEDULED_ITEM),
+        variables: { data: input },
+      });
+
+    // Check that example.com exists as a TrustedDomain in the database.
+    const trustedDomain = await db.trustedDomain.findUnique({
+      where: { domainName: 'example.com' },
+    });
+    expect(trustedDomain).toBeTruthy();
+  });
+
+  it('should not create a TrustedDomain if the domain does not have a past scheduled date', async () => {
+    const approvedItem = await createApprovedItemHelper(db, {
+      url: 'https://example.com/article1',
+      title: 'Article 1',
+    });
+
+    const input: CreateScheduledItemApiInput = {
+      approvedItemExternalId: approvedItem.externalId,
+      scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+      scheduledDate: toUtcDateString(new Date()),
+      source: ScheduledItemSource.ML,
+    };
+
+    await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(CREATE_SCHEDULED_ITEM),
+        variables: { data: input },
+      });
+
+    // Check that example.com does not exist as a TrustedDomain in the database.
+    const trustedDomain = await db.trustedDomain.findUnique({
+      where: { domainName: 'example.com' },
+    });
+    expect(trustedDomain).toBeNull();
   });
 
   it('should fail if user has read-only access', async () => {

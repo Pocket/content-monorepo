@@ -34,6 +34,7 @@ describe('CuratedCorpusEventEmitter', () => {
     externalId: '123-abc',
     prospectId: 'abc-123',
     url: 'https://test.com',
+    domainName: 'test.com',
     status: CuratedStatus.CORPUS,
     id: 123,
     title: 'Test title',
