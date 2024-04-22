@@ -2,13 +2,13 @@ import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
-import { client } from '../../../database/client';
+import { client } from '../../../../database/client';
 
-import { clearDb } from '../../../test/helpers';
-import { GET_SCHEDULED_SURFACES_FOR_USER } from './sample-queries.gql';
-import { MozillaAccessGroup } from '../../../shared/types';
-import { startServer } from '../../../express';
-import { IAdminContext } from '../../context';
+import { clearDb } from '../../../../test/helpers';
+import { GET_SCHEDULED_SURFACES_FOR_USER } from '../sample-queries.gql';
+import { MozillaAccessGroup } from '../../../../shared/types';
+import { startServer } from '../../../../express';
+import { IAdminContext } from '../../../context';
 
 describe('auth: ScheduledSurface', () => {
   let app: Express.Application;

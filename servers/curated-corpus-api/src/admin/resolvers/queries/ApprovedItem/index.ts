@@ -3,19 +3,22 @@ import {
   AuthenticationError,
   UserInputError,
 } from '@pocket-tools/apollo-utils';
-import config from '../../../config';
+import config from '../../../../config';
 import {
   getApprovedItems as dbGetApprovedItems,
   getApprovedItemByUrl as dbGetApprovedItemByUrl,
   getApprovedItemByExternalId as dbGetApprovedItemByExternalId,
   getScheduledSurfaceHistory as dbGetScheduledSurfaceHistory,
-} from '../../../database/queries';
-import { ACCESS_DENIED_ERROR, ScheduledSurfaces } from '../../../shared/types';
-import { IAdminContext } from '../../context';
+} from '../../../../database/queries';
+import {
+  ACCESS_DENIED_ERROR,
+  ScheduledSurfaces,
+} from '../../../../shared/types';
+import { IAdminContext } from '../../../context';
 import {
   ApprovedItem,
   ApprovedItemScheduledSurfaceHistory,
-} from '../../../database/types';
+} from '../../../../database/types';
 
 /**
  * This query retrieves approved items from the database.
@@ -27,7 +30,7 @@ import {
 export async function getApprovedItems(
   parent,
   args,
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<Connection<ApprovedItem>> {
   //check if the user does not have the permissions to access this query
   if (
@@ -72,7 +75,7 @@ export async function getApprovedItems(
 export async function getApprovedItemByUrl(
   parent,
   args,
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<ApprovedItem | null> {
   //check if the user does not have the permissions to access this query
   if (
@@ -97,7 +100,7 @@ export async function getApprovedItemByUrl(
 export async function getApprovedItemByExternalId(
   parent,
   args,
-  context: IAdminContext
+  context: IAdminContext,
 ): Promise<ApprovedItem | null> {
   //check if the user does not have the permissions to access this query
   if (
@@ -117,7 +120,7 @@ export async function getApprovedItemByExternalId(
 export async function getScheduledSurfaceHistory(
   parent,
   args,
-  { db }
+  { db },
 ): Promise<ApprovedItemScheduledSurfaceHistory[]> {
   // Get the external ID of the Approved Item itself
   const { externalId } = parent;
@@ -155,7 +158,7 @@ export async function getScheduledSurfaceHistory(
 
     if (!surface) {
       throw new UserInputError(
-        `Could not find Scheduled Surface with id of "${scheduledSurfaceGuid}".`
+        `Could not find Scheduled Surface with id of "${scheduledSurfaceGuid}".`,
       );
     }
   }
@@ -165,6 +168,6 @@ export async function getScheduledSurfaceHistory(
     db,
     externalId,
     scheduledSurfaceGuid,
-    limit
+    limit,
   );
 }

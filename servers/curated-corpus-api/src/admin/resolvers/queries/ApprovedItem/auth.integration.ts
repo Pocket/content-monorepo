@@ -2,19 +2,22 @@ import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
-import { client } from '../../../database/client';
+import { client } from '../../../../database/client';
 
 import { ApprovedItem } from '.prisma/client';
-import { CuratedStatus } from 'content-common'
-import { ACCESS_DENIED_ERROR, MozillaAccessGroup } from '../../../shared/types';
-import { clearDb, createApprovedItemHelper } from '../../../test/helpers';
+import { CuratedStatus } from 'content-common';
+import {
+  ACCESS_DENIED_ERROR,
+  MozillaAccessGroup,
+} from '../../../../shared/types';
+import { clearDb, createApprovedItemHelper } from '../../../../test/helpers';
 import {
   GET_APPROVED_ITEMS,
   GET_APPROVED_ITEM_BY_URL,
   GET_APPROVED_ITEM_BY_EXTERNAL_ID,
-} from './sample-queries.gql';
-import { startServer } from '../../../express';
-import { IAdminContext } from '../../context';
+} from '../sample-queries.gql';
+import { startServer } from '../../../../express';
+import { IAdminContext } from '../../../context';
 
 describe('queries: approvedCorpusItem - authentication', () => {
   let app: Express.Application;
@@ -127,7 +130,7 @@ describe('queries: approvedCorpusItem - authentication', () => {
       // check if the error we get is access denied error
       expect(result.body.errors?.[0].message).toEqual(ACCESS_DENIED_ERROR);
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'UNAUTHENTICATED'
+        'UNAUTHENTICATED',
       );
     });
 
@@ -150,7 +153,7 @@ describe('queries: approvedCorpusItem - authentication', () => {
       // check if the error we get is access denied error
       expect(result.body.errors?.[0].message).toEqual(ACCESS_DENIED_ERROR);
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'UNAUTHENTICATED'
+        'UNAUTHENTICATED',
       );
     });
   });
@@ -224,7 +227,7 @@ describe('queries: approvedCorpusItem - authentication', () => {
       // check if the error we get is access denied error
       expect(result.body.errors?.[0].message).toEqual(ACCESS_DENIED_ERROR);
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'UNAUTHENTICATED'
+        'UNAUTHENTICATED',
       );
     });
 
@@ -252,7 +255,7 @@ describe('queries: approvedCorpusItem - authentication', () => {
       // check if the error we get is access denied error
       expect(result.body.errors?.[0].message).toEqual(ACCESS_DENIED_ERROR);
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'UNAUTHENTICATED'
+        'UNAUTHENTICATED',
       );
     });
   });
@@ -326,7 +329,7 @@ describe('queries: approvedCorpusItem - authentication', () => {
       // check if the error we get is access denied error
       expect(result.body.errors?.[0].message).toEqual(ACCESS_DENIED_ERROR);
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'UNAUTHENTICATED'
+        'UNAUTHENTICATED',
       );
     });
 
@@ -354,7 +357,7 @@ describe('queries: approvedCorpusItem - authentication', () => {
       // check if the error we get is access denied error
       expect(result.body.errors?.[0].message).toEqual(ACCESS_DENIED_ERROR);
       expect(result.body.errors?.[0].extensions?.code).toEqual(
-        'UNAUTHENTICATED'
+        'UNAUTHENTICATED',
       );
     });
   });

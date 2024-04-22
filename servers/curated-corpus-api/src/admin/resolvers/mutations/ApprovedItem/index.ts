@@ -11,25 +11,28 @@ import {
   createScheduledItem,
   deleteApprovedItem as dbDeleteApprovedItem,
   updateApprovedItem as dbUpdateApprovedItem,
-} from '../../../database/mutations';
-import { getApprovedItemByExternalId } from '../../../database/queries';
+} from '../../../../database/mutations';
+import { getApprovedItemByExternalId } from '../../../../database/queries';
 import {
   ApprovedCorpusItemPayload,
   RejectedCorpusItemPayload,
   ReviewedCorpusItemEventType,
   ScheduledCorpusItemEventType,
   ScheduledCorpusItemPayload,
-} from '../../../events/types';
-import { uploadImageToS3 } from '../../aws/upload';
+} from '../../../../events/types';
+import { uploadImageToS3 } from '../../../aws/upload';
 import {
   ACCESS_DENIED_ERROR,
   ApprovedItemS3ImageUrl,
   RejectionReason,
   ScheduledCorpusItemStatus,
-} from '../../../shared/types';
-import { scheduledSurfaceAllowedValues } from '../../../shared/utils';
-import { ApprovedItem, CreateRejectedItemInput } from '../../../database/types';
-import { IAdminContext } from '../../context';
+} from '../../../../shared/types';
+import { scheduledSurfaceAllowedValues } from '../../../../shared/utils';
+import {
+  ApprovedItem,
+  CreateRejectedItemInput,
+} from '../../../../database/types';
+import { IAdminContext } from '../../../context';
 
 /**
  * Creates an approved curated item with data supplied. Optionally, schedules the freshly
