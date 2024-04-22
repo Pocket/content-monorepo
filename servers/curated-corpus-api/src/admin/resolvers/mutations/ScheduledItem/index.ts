@@ -26,10 +26,7 @@ import {
   ACCESS_DENIED_ERROR,
   ScheduledCorpusItemStatus,
 } from '../../../../shared/types';
-import {
-  getNormalizedDomainName,
-  scheduledSurfaceAllowedValues,
-} from '../../../../shared/utils';
+import { scheduledSurfaceAllowedValues } from '../../../../shared/utils';
 import {
   ScheduledCorpusItemEventType,
   ScheduledCorpusItemPayload,
@@ -199,7 +196,7 @@ export async function createScheduledItem(
     // if it is only scheduled on a single day.
     await createTrustedDomainIfPastScheduledDateExists(
       context.db,
-      getNormalizedDomainName(scheduledItem.approvedItem.url),
+      scheduledItem.approvedItem.domainName,
     );
 
     return scheduledItem;
