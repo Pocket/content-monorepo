@@ -99,6 +99,12 @@ describe('corpus scheduler lambda', () => {
     expect(snowplowEntity.scheduled_corpus_candidate_id).toEqual(
       record.candidates[0].scheduled_corpus_candidate_id,
     );
+    expect(snowplowEntity.scheduled_date).toEqual(
+      record.candidates[0].scheduled_corpus_item.scheduled_date,
+    );
+    expect(snowplowEntity.scheduled_surface_id).toEqual(
+      record.candidates[0].scheduled_corpus_item.scheduled_surface_guid,
+    );
     expect(snowplowEntity.error_name).toBeUndefined();
     expect(snowplowEntity.error_description).toBeUndefined();
   });
@@ -130,6 +136,12 @@ describe('corpus scheduler lambda', () => {
     expect(snowplowEntity.scheduled_corpus_candidate_id).toEqual(
       record.candidates[0].scheduled_corpus_candidate_id,
     );
+    expect(snowplowEntity.scheduled_date).toEqual(
+      record.candidates[0].scheduled_corpus_item.scheduled_date,
+    );
+    expect(snowplowEntity.scheduled_surface_id).toEqual(
+      record.candidates[0].scheduled_corpus_item.scheduled_surface_guid,
+    );
     expect(snowplowEntity.error_name).toBeUndefined();
     expect(snowplowEntity.error_description).toBeUndefined();
   });
@@ -154,6 +166,12 @@ describe('corpus scheduler lambda', () => {
     const snowplowEntity = await extractScheduledCandidateEntity();
     expect(snowplowEntity.scheduled_corpus_candidate_id).toEqual(
       record.candidates[0].scheduled_corpus_candidate_id,
+    );
+    expect(snowplowEntity.scheduled_date).toEqual(
+      record.candidates[0].scheduled_corpus_item.scheduled_date,
+    );
+    expect(snowplowEntity.scheduled_surface_id).toEqual(
+      record.candidates[0].scheduled_corpus_item.scheduled_surface_guid,
     );
     expect(snowplowEntity.error_name).toEqual(
       SnowplowScheduledCorpusCandidateErrorName.ALREADY_SCHEDULED,

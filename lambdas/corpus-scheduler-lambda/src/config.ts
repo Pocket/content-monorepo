@@ -42,9 +42,9 @@ const config = {
     // https://github.com/Pocket/dbt-snowflake/blob/main/macros/validate_snowplow_app_id.sql
     appId: isDev ? 'corpus-scheduler-lambda-dev' : 'corpus-scheduler-lambda',
     schemas: {
-      // published 2024-02-28
+      // published 2024-04-23
       scheduled_corpus_candidate:
-        'iglu:com.pocket/scheduled_corpus_candidate/jsonschema/1-0-2',
+        'iglu:com.pocket/scheduled_corpus_candidate/jsonschema/1-0-4',
       // published 2024-02-28
       objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-17',
     },

@@ -56,12 +56,15 @@ export const generateSnowplowErrorEntity = (
   errorDescription: string,
 ): SnowplowScheduledCorpusCandidate => {
   return {
-    scheduled_corpus_candidate_id: candidate.scheduled_corpus_candidate_id,
     candidate_url: candidate.scheduled_corpus_item.url,
+    error_description: errorDescription,
+    error_name: errorName,
     features: candidate.features,
     run_details: candidate.run_details,
-    error_name: errorName,
-    error_description: errorDescription,
+    scheduled_corpus_candidate_id: candidate.scheduled_corpus_candidate_id,
+    scheduled_date: candidate.scheduled_corpus_item.scheduled_date,
+    scheduled_surface_id:
+      candidate.scheduled_corpus_item.scheduled_surface_guid,
   };
 };
 
@@ -77,12 +80,15 @@ export const generateSnowplowSuccessEntity = (
   scheduledCorpusItemId: string,
 ): SnowplowScheduledCorpusCandidate => {
   return {
-    scheduled_corpus_candidate_id: candidate.scheduled_corpus_candidate_id,
-    candidate_url: candidate.scheduled_corpus_item.url,
     approved_corpus_item_external_id: approvedCorpusItemId,
-    scheduled_corpus_item_external_id: scheduledCorpusItemId,
+    candidate_url: candidate.scheduled_corpus_item.url,
     features: candidate.features,
     run_details: candidate.run_details,
+    scheduled_corpus_candidate_id: candidate.scheduled_corpus_candidate_id,
+    scheduled_corpus_item_external_id: scheduledCorpusItemId,
+    scheduled_date: candidate.scheduled_corpus_item.scheduled_date,
+    scheduled_surface_id:
+      candidate.scheduled_corpus_item.scheduled_surface_guid,
   };
 };
 
