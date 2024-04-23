@@ -1,3 +1,5 @@
+import { ScheduledSurfaces } from 'content-common';
+
 import {
   ScheduledCorpusCandidateFeatures,
   ScheduledCorpusCandidateRunDetails,
@@ -5,14 +7,16 @@ import {
 
 // scheduled_corpus_candidate entity
 export type SnowplowScheduledCorpusCandidate = {
-  scheduled_corpus_candidate_id: string;
-  scheduled_corpus_item_external_id?: string;
   approved_corpus_item_external_id?: string;
   candidate_url: string;
-  error_name?: SnowplowScheduledCorpusCandidateErrorName;
   error_description?: string;
+  error_name?: SnowplowScheduledCorpusCandidateErrorName;
   features: ScheduledCorpusCandidateFeatures;
   run_details: ScheduledCorpusCandidateRunDetails;
+  scheduled_corpus_candidate_id: string;
+  scheduled_corpus_item_external_id?: string;
+  scheduled_date: string; // YYYY-MM-DD
+  scheduled_surface_id: ScheduledSurfaces;
 };
 
 export enum SnowplowScheduledCorpusCandidateErrorName {
