@@ -285,10 +285,12 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       createdAt: createdAtReturned,
       updatedAt: updatedAtReturned,
       authors: authorsReturned,
+      hasTrustedDomain,
       ...otherReturnedApprovedItemProps
     } = scheduledItem.approvedItem;
     expect(getUnixTimestamp(createdAt)).toEqual(createdAtReturned);
     expect(getUnixTimestamp(updatedAt)).toEqual(updatedAtReturned);
+    expect(hasTrustedDomain).toStrictEqual(false);
     expect(otherApprovedItemProps).toMatchObject(
       otherReturnedApprovedItemProps,
     );
