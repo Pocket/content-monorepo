@@ -26,7 +26,7 @@ import {
   getRejectedItemByUrl as dbGetRejectedItemByUrl,
 } from '../../database/queries';
 import { getOpenGraphFields } from './queries/OpenGraphFields';
-import { hasTrustedDomain } from './queries/TrustedDomain';
+import { hasTrustedDomain } from './queries/ApprovedItem/hasTrustedDomain';
 
 export const resolvers = {
   // The custom scalars from GraphQL-Scalars that we find useful.

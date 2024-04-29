@@ -137,6 +137,7 @@ describe('queries: ScheduledCorpusItem (getScheduledCorpusItems)', () => {
     expect(firstItem.approvedItem.externalId).toBeDefined();
     expect(firstItem.approvedItem.title).toBeDefined();
     expect(firstItem.approvedItem.url).toBeDefined();
+    expect(firstItem.approvedItem.hasTrustedDomain).toBeDefined();
     expect(firstItem.approvedItem.excerpt).toBeDefined();
     expect(firstItem.approvedItem.imageUrl).toBeDefined();
     expect(firstItem.approvedItem.createdBy).toBeDefined();

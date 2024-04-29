@@ -92,6 +92,7 @@ describe('queries: ApprovedCorpusItem (approvedCorpusItemByExternalId)', () => {
     expect(typeof item.isCollection).toBe('boolean');
     expect(typeof item.isTimeSensitive).toBe('boolean');
     expect(typeof item.isSyndicated).toBe('boolean');
+    expect(typeof item.hasTrustedDomain).toBe('boolean');
   });
 
   it('should return null when nothing for a given externalId is found', async () => {

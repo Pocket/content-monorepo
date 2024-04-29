@@ -1,7 +1,6 @@
-import { getTrustedDomain } from '../../../database/mutations/TrustedDomain';
-import { getNormalizedDomainName } from '../../../shared/utils';
+import { getTrustedDomain } from '../../../../database/mutations/TrustedDomain';
 import { AuthenticationError } from '@pocket-tools/apollo-utils';
-import { ACCESS_DENIED_ERROR } from '../../../shared/types';
+import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 
 /**
  * Returns true if the ApprovedItem's domain is in the TrustedDomain table.
@@ -21,10 +20,6 @@ export const hasTrustedDomain = async (
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
 
-  const trustedDomain = await getTrustedDomain(
-    context.db,
-    // item.domainName is currently not queryable, so we get the domainName from the url.
-    getNormalizedDomainName(item.url),
-  );
+  const trustedDomain = await getTrustedDomain(context.db, item.domainName);
   return !!trustedDomain;
 };
