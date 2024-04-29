@@ -229,6 +229,10 @@ type ApprovedCorpusItem @key(fields: "url") {
   """
   url: Url!
   """
+  True if the domain of the corpus item has been scheduled in the past.
+  """
+  hasTrustedDomain: Boolean!
+  """
   The title of the story.
   """
   title: String!

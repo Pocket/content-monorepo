@@ -160,6 +160,7 @@ describe('queries: ApprovedCorpusItem (getApprovedCorpusItems)', () => {
     expect(typeof firstItem.isCollection).toBe('boolean');
     expect(typeof firstItem.isTimeSensitive).toBe('boolean');
     expect(typeof firstItem.isSyndicated).toBe('boolean');
+    expect(typeof firstItem.hasTrustedDomain).toBe('boolean');
     expect(firstItem.authors.length).toBeGreaterThan(0);
     expect(firstItem.authors[0].name).toBeDefined();
     expect(firstItem.authors[0].sortOrder).toBeDefined();

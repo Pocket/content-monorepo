@@ -1,9 +1,6 @@
 import { gql } from 'graphql-tag';
-import {
-  CuratedItemData,
-  RejectedItemData,
-  ScheduledItemData,
-} from '../../../shared/fragments.gql';
+import { RejectedItemData } from '../../../shared/fragments.gql';
+import { AdminCuratedItemData, AdminScheduledItemData } from '../fragments.gql';
 
 /**
  * Sample mutations for Apollo Server integration tests as used in
@@ -12,28 +9,28 @@ import {
 export const CREATE_APPROVED_ITEM = gql`
   mutation createApprovedItem($data: CreateApprovedCorpusItemInput!) {
     createApprovedCorpusItem(data: $data) {
-      ...CuratedItemData
+      ...AdminCuratedItemData
     }
   }
-  ${CuratedItemData}
+  ${AdminCuratedItemData}
 `;
 
 export const UPDATE_APPROVED_ITEM = gql`
   mutation updateApprovedCorpusItem($data: UpdateApprovedCorpusItemInput!) {
     updateApprovedCorpusItem(data: $data) {
-      ...CuratedItemData
+      ...AdminCuratedItemData
     }
   }
-  ${CuratedItemData}
+  ${AdminCuratedItemData}
 `;
 
 export const REJECT_APPROVED_ITEM = gql`
   mutation rejectApprovedItem($data: RejectApprovedCorpusItemInput!) {
     rejectApprovedCorpusItem(data: $data) {
-      ...CuratedItemData
+      ...AdminCuratedItemData
     }
   }
-  ${CuratedItemData}
+  ${AdminCuratedItemData}
 `;
 
 export const CREATE_REJECTED_ITEM = gql`
@@ -48,28 +45,28 @@ export const CREATE_REJECTED_ITEM = gql`
 export const CREATE_SCHEDULED_ITEM = gql`
   mutation createScheduledItem($data: CreateScheduledCorpusItemInput!) {
     createScheduledCorpusItem(data: $data) {
-      ...ScheduledItemData
+      ...AdminScheduledItemData
     }
   }
-  ${ScheduledItemData}
+  ${AdminScheduledItemData}
 `;
 
 export const DELETE_SCHEDULED_ITEM = gql`
   mutation deleteScheduledItem($data: DeleteScheduledCorpusItemInput!) {
     deleteScheduledCorpusItem(data: $data) {
-      ...ScheduledItemData
+      ...AdminScheduledItemData
     }
   }
-  ${ScheduledItemData}
+  ${AdminScheduledItemData}
 `;
 
 export const RESCHEDULE_SCHEDULED_ITEM = gql`
   mutation rescheduleScheduledItem($data: RescheduleScheduledCorpusItemInput!) {
     rescheduleScheduledCorpusItem(data: $data) {
-      ...ScheduledItemData
+      ...AdminScheduledItemData
     }
   }
-  ${ScheduledItemData}
+  ${AdminScheduledItemData}
 `;
 
 export const UPLOAD_APPROVED_ITEM_IMAGE = gql`
