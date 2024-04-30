@@ -40,9 +40,13 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
   let prospectIdsProcessed: string[] = [];
 
   // make sure the event payload is JSON-parseable and of SQS shape
+  // this function will send an exception to sentry if the json cannot be
+  // parsed. in that case, it will return an empty object.
   const json = parseJsonFromEvent(event);
 
   // pull prospects out of the event's JSON
+  // this function will send an exception to sentry if prospects cannot be
+  // found in the json. in that case, it will return an empty array.
   const rawSqsProspects: Array<any> = getProspectsFromMessageJson(json);
 
   // iterate over each prospect, populating the metadata and inserting into
@@ -52,14 +56,20 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
 
     // validate all necessary data points are present to conform to the
     // SqsProspect type
+    // this function will send an exception to sentry if the structure is not
+    // valid.
     if (validateStructure(rawSqsProspect)) {
       // if the prospect is a valid SqsProspect, validate property data
+      // this function will send an exception to sentry if any of the
+      // properties of the prospect are invalid.
       if (validateProperties(rawSqsProspect as SqsProspect)) {
         // convert Sqs formatted data to our standard format
         const prospect: Prospect = convertSqsProspectToProspect(rawSqsProspect);
 
         // we have a valid prospect!
         // now get the metadata and put it into dynamo
+        // this function will send an exception to sentry if any part of it
+        // fails.
         prospectIdsProcessed = await processProspect(
           prospect,
           prospectIdsProcessed,
@@ -70,6 +80,8 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
         // on the first pass through the loop only, delete all old prospects
         // of the same scheduled surface and prospect type
         if (i === 0) {
+          // this function will send an exception to sentry if the deletion
+          // process fails.
           const deletedCount = await deleteOldProspects(
             dbClient,
             prospect.scheduledSurfaceGuid,
