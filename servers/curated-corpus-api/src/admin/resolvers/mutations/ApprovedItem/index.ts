@@ -33,6 +33,7 @@ import {
   CreateRejectedItemInput,
 } from '../../../../database/types';
 import { IAdminContext } from '../../../context';
+import { createTrustedDomainIfPastScheduledDateExists } from '../../../../database/mutations/TrustedDomain';
 
 /**
  * Creates an approved curated item with data supplied. Optionally, schedules the freshly
@@ -135,6 +136,12 @@ export async function createApprovedItem(
     context.emitScheduledCorpusItemEvent(
       ScheduledCorpusItemEventType.ADD_SCHEDULE,
       scheduledItemForEvents,
+    );
+
+    // Make this domain trusted if it was scheduled before today.
+    await createTrustedDomainIfPastScheduledDateExists(
+      context.db,
+      scheduledItem.approvedItem.domainName,
     );
   }
 
