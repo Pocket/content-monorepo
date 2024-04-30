@@ -3,7 +3,7 @@ const isDev = environment === 'development';
 
 const config = {
   app: {
-    name: 'Corpus-Scheduler-Lambda',
+    name: 'Prospect-Api-Translation-Lambda',
     environment: environment,
     isDev: isDev,
     sentry: {
