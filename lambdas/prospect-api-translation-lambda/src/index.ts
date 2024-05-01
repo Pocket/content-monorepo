@@ -1,12 +1,7 @@
 import { SQSEvent, SQSHandler } from 'aws-lambda';
 import * as Sentry from '@sentry/serverless';
 
-import {
-  Prospect,
-  dbClient,
-  insertProspect,
-  deriveUrlMetadata,
-} from 'prospectapi-common';
+import { dbClient, Prospect } from 'prospectapi-common';
 
 import config from './config';
 import { SqsProspect } from './types';
@@ -14,8 +9,9 @@ import { SqsProspect } from './types';
 import {
   getProspectsFromMessageJson,
   convertSqsProspectToProspect,
-  hasValidStructure,
-  hydrateProspectMetadata,
+  validateStructure,
+  processProspect,
+  parseJsonFromEvent,
   validateProperties,
 } from './lib';
 
@@ -23,9 +19,10 @@ import { deleteOldProspects } from './dynamodb/lib';
 
 // little sentry initialization. no big deal.
 Sentry.AWSLambda.init({
-  dsn: config.sentry.dsn,
-  release: config.sentry.release,
+  dsn: config.app.sentry.dsn,
+  release: config.app.sentry.release,
   environment: config.environment,
+  serverName: config.app.name,
 });
 
 /**
@@ -35,127 +32,75 @@ Sentry.AWSLambda.init({
  * @param event data from an SQS message - should be an array of prospect
  * objects
  */
-const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
+export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
+  // this is nice to have for easy viewing of the full event in lambda logs
   console.log('raw event:');
   console.log(event);
 
-  let json: any;
-  // this is raw data from SQS so we don't yet know if it conforms to the
-  // Prospect interface - hence `any`
-  let sqsProspects: Array<any> = [];
-  let sqsProspect: SqsProspect;
-  let prospect: Prospect;
-  // store any error that may be encountered while processing for logging
-  let errors: string[] = [];
-  let prospectsProcessed = 0;
-  let prospectsErrored = 0;
+  let prospectIdsProcessed: string[] = [];
 
-  // is the SQS message valid JSON?
-  try {
-    // this is the (odd?) format of an SQS message
-    json = JSON.parse(event.Records[0].body);
+  // make sure the event payload is JSON-parseable and of SQS shape
+  // this function will send an exception to sentry if the json cannot be
+  // parsed. in that case, it will return an empty object.
+  const json = parseJsonFromEvent(event);
 
-    // we encountered some weird SQS behavior where multiple prospect messages
-    // were coming in. this was during an aws incident so may have been a fluke
-    // but - let's log to sentry if this happens again just in case.
+  // pull prospects out of the event's JSON
+  // this function will send an exception to sentry if prospects cannot be
+  // found in the json. in that case, it will return an empty array.
+  const rawSqsProspects: Array<any> = getProspectsFromMessageJson(json);
 
-    // if the above json conversion succeeds, this check should also succeed
-    // (as `Records` is verified to be an array).
-    if (event.Records.length > 1) {
-      Sentry.captureMessage('multiple records found in SQS message');
-    }
-  } catch (e) {
-    Sentry.captureException(
-      'invalid data provided / sqs event.Records[0].body is not valid JSON.',
-    );
+  // iterate over each prospect, populating the metadata and inserting into
+  // dynamo
+  for (let i = 0; i < rawSqsProspects.length; i++) {
+    const rawSqsProspect = rawSqsProspects[i];
 
-    // no need to do any more processing
-    return;
-  }
+    // validate all necessary data points are present to conform to the
+    // SqsProspect type
+    // this function will send an exception to sentry if the structure is not
+    // valid.
+    if (validateStructure(rawSqsProspect)) {
+      // if the prospect is a valid SqsProspect, validate property data
+      // this function will send an exception to sentry if any of the
+      // properties of the prospect are invalid.
+      if (validateProperties(rawSqsProspect as SqsProspect)) {
+        // convert Sqs formatted data to our standard format
+        const prospect: Prospect = convertSqsProspectToProspect(rawSqsProspect);
 
-  // does the SQS JSON contain the expected data?
-  sqsProspects = getProspectsFromMessageJson(json);
+        // we have a valid prospect!
 
-  if (!sqsProspects) {
-    Sentry.captureException(
-      'no `candidates` property exists on the SQS JSON, or `candidates` is not an array.',
-    );
+        // if this is the first pass through the loop, use this opportunity to
+        // delete all existing prospects of this type/surface
+        if (i === 0) {
+          // this function will send an exception to sentry if the deletion
+          // process fails.
+          const deletedCount = await deleteOldProspects(
+            dbClient,
+            prospect.scheduledSurfaceGuid,
+            prospect.prospectType,
+          );
 
-    // we don't have any prospects, so we're done
-    return;
-  }
+          console.log(
+            `deleted ${deletedCount} prospects for ${prospect.scheduledSurfaceGuid} / ${prospect.prospectType}`,
+          );
+        }
 
-  const idsProcessed = [];
-
-  for (let i = 0; i < sqsProspects.length; i++) {
-    // save a local copy for easier reference
-    sqsProspect = sqsProspects[i];
-
-    // validate all necessary data points are present
-    if (hasValidStructure(sqsProspect)) {
-      // if the prospect has a valid structure, validate the property values
-      // for each invalid property, an error message will be added to the
-      // `errors` array
-      errors = validateProperties(sqsProspect);
-    } else {
-      errors.push('prospect is missing one or more properties.');
-    }
-
-    // if there are no errors, we are good to delete old prospects and insert
-    // the new ones
-    if (!errors.length) {
-      // convert Sqs formatted data to our standard format
-      prospect = convertSqsProspectToProspect(sqsProspect);
-
-      // on the first pass through the loop only, delete all old prospects
-      // of the same scheduled surface and prospect type
-      if (i === 0) {
-        const deletedCount = await deleteOldProspects(
-          dbClient,
-          prospect.scheduledSurfaceGuid,
-          prospect.prospectType,
-        );
-
-        console.log(
-          `deleted ${deletedCount} prospects for ${prospect.scheduledSurfaceGuid} / ${prospect.prospectType}`,
+        // now get the metadata and put it into dynamo
+        // this function will send an exception to sentry if any part of it
+        // fails.
+        prospectIdsProcessed = await processProspect(
+          prospect,
+          prospectIdsProcessed,
         );
       }
-      console.log(`Getting url metadata for ${prospect.url}`);
-      const urlMetadata = await deriveUrlMetadata(prospect.url);
-      console.log(`Got url metadata for ${prospect.url}`);
-
-      prospect = hydrateProspectMetadata(prospect, urlMetadata);
-
-      await insertProspect(dbClient, prospect);
-
-      // TODO: should we keep this in prod? matt cooper was unaware this was
-      // happening, so it may be good to keep a record. we don't need to error
-      // here - dynamo will silently replace the existing entry.
-      if (idsProcessed.includes(prospect.id)) {
-        Sentry.captureMessage(
-          `${prospect.id} is a duplicate in this ${prospect.scheduledSurfaceGuid} / ${prospect.prospectType} batch!`,
-        );
-      }
-
-      idsProcessed.push(prospect.id);
-
-      prospectsProcessed++;
-    } else {
-      console.log('FAILED PARSING PROSPECT');
-      console.log(`prospect: ${JSON.stringify(sqsProspect)}`);
-      console.log(`errors: ${errors}`);
-
-      Sentry.captureException(errors.join(' | '));
-
-      prospectsErrored++;
     }
-
-    // reset errors array for next loop iteration
-    errors = [];
   }
 
-  console.log(`${prospectsProcessed} prospects inserted into dynamo.`);
-  console.log(`${prospectsErrored} prospects had errors.`);
+  console.log(`${prospectIdsProcessed.length} prospects inserted into dynamo.`);
+  console.log(
+    `${
+      rawSqsProspects.length - prospectIdsProcessed.length
+    } prospects had errors.`,
+  );
 };
 
 // the actual function has to be wrapped in order for sentry to work

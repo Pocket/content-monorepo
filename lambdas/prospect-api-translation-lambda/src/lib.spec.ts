@@ -1,21 +1,28 @@
+import * as Sentry from '@sentry/serverless';
+import { SQSEvent } from 'aws-lambda';
+
 import { Prospect } from 'prospectapi-common';
 import { ProspectType, Topics, UrlMetadata } from 'content-common';
 
 import {
-  hasValidStructure,
-  hasValidProspectId,
-  hasValidScheduledSurfaceGuid,
-  hasValidPredictedTopic,
-  hasValidProspectSource,
-  hasValidUrl,
-  validateProperties,
   convertSqsProspectToProspect,
-  hasValidSaveCount,
-  hydrateProspectMetadata,
   getProspectsFromMessageJson,
+  hasValidPredictedTopic,
+  hasValidProspectId,
+  hasValidProspectSource,
+  hasValidSaveCount,
+  hasValidScheduledSurfaceGuid,
+  hasValidUrl,
+  hydrateProspectMetadata,
+  parseJsonFromEvent,
+  validateProperties,
+  validateStructure,
 } from './lib';
 
 describe('lib', () => {
+  const captureExceptionSpy = jest
+    .spyOn(Sentry, 'captureException')
+    .mockImplementation();
   let validSqsProspect;
 
   beforeEach(() => {
@@ -28,53 +35,65 @@ describe('lib', () => {
       save_count: 1680,
       rank: 1680,
     };
+
+    captureExceptionSpy.mockClear();
   });
 
-  describe('hasValidStructure', () => {
+  describe('validateStructure', () => {
     it('should return true if object has all prospect properties', () => {
-      expect(hasValidStructure(validSqsProspect)).toBeTruthy();
+      expect(validateStructure(validSqsProspect)).toBeTruthy();
     });
 
     it('should return false if object is missing a prospect_id', () => {
       delete validSqsProspect.prospect_id;
 
-      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
+      expect(validateStructure(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if object is missing a scheduled_surface_guid', () => {
       delete validSqsProspect.scheduled_surface_guid;
 
-      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
+      expect(validateStructure(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if object is missing a predicted_topic', () => {
       delete validSqsProspect.predicted_topic;
 
-      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
+      expect(validateStructure(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if object is missing a prospect_source', () => {
       delete validSqsProspect.prospect_source;
 
-      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
+      expect(validateStructure(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if object is missing a url', () => {
       delete validSqsProspect.url;
 
-      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
+      expect(validateStructure(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if object is missing a save_count', () => {
       delete validSqsProspect.save_count;
 
-      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
+      expect(validateStructure(validSqsProspect)).toBeFalsy();
     });
 
     it('should return false if object is missing a rank', () => {
       delete validSqsProspect.rank;
 
-      expect(hasValidStructure(validSqsProspect)).toBeFalsy();
+      expect(validateStructure(validSqsProspect)).toBeFalsy();
+    });
+
+    it('should call Sentry if object is missing a required field', () => {
+      delete validSqsProspect.prospect_id;
+
+      validateStructure(validSqsProspect);
+
+      expect(captureExceptionSpy).toHaveBeenCalledWith(
+        'prospect does not have a valid structure',
+      );
     });
   });
 
@@ -206,13 +225,17 @@ describe('lib', () => {
   });
 
   describe('validateProperties', () => {
-    it('should return a non-zero array if the prospect has errors', () => {
+    it('should return false and call Sentry if the prospect has errors', () => {
       delete validSqsProspect.scheduled_surface_guid;
-      expect(validateProperties(validSqsProspect).length).toBeGreaterThan(0);
+      expect(validateProperties(validSqsProspect)).toBeFalsy();
+
+      expect(captureExceptionSpy).toHaveBeenCalledWith(
+        'sqsProspect has invalid properties',
+      );
     });
 
-    it('should return an empty array if the prospect is valid', () => {
-      expect(validateProperties(validSqsProspect).length).toEqual(0);
+    it('should return true if the prospect is valid', () => {
+      expect(validateProperties(validSqsProspect)).toBeTruthy();
     });
   });
 
@@ -449,7 +472,7 @@ describe('lib', () => {
       expect(Array.isArray(getProspectsFromMessageJson(json))).toBeTruthy();
     });
 
-    it('should return undefined if candidates is not an array', () => {
+    it('should return an empty array and call Sentry if candidates is not an array', () => {
       // event bridge > SQS
       const json = {
         foo: 'bar',
@@ -458,7 +481,11 @@ describe('lib', () => {
         },
       };
 
-      expect(getProspectsFromMessageJson(json)).toBeUndefined();
+      expect(getProspectsFromMessageJson(json)).toEqual([]);
+
+      expect(captureExceptionSpy).toHaveBeenCalledWith(
+        'no `candidates` property exists on the SQS JSON, or `candidates` is not an array.',
+      );
     });
 
     it('should return undefined given an unexpected json structure', () => {
@@ -467,7 +494,40 @@ describe('lib', () => {
         hammer: 'time',
       };
 
-      expect(getProspectsFromMessageJson(json)).toBeUndefined();
+      expect(getProspectsFromMessageJson(json)).toEqual([]);
+
+      expect(captureExceptionSpy).toHaveBeenCalledWith(
+        'no `candidates` property exists on the SQS JSON, or `candidates` is not an array.',
+      );
+    });
+  });
+
+  describe('parseJsonFromEvent', () => {
+    it('sends a Sentry error if the event payload is not valid json', async () => {
+      const fakeEvent = {
+        Records: [{ messageId: '1', body: 'i am definitely not JSON!' }],
+      } as unknown as SQSEvent;
+
+      parseJsonFromEvent(fakeEvent);
+
+      expect(captureExceptionSpy).toHaveBeenCalledWith(
+        'invalid data provided / sqs event.Records[0].body is not valid JSON.',
+      );
+    });
+
+    it('sends a Sentry error if more than one record was sent in SQS', async () => {
+      const fakeEvent = {
+        Records: [
+          { messageId: '1', body: JSON.stringify({}) },
+          { messageId: '2', body: JSON.stringify({}) },
+        ],
+      } as unknown as SQSEvent;
+
+      parseJsonFromEvent(fakeEvent);
+
+      expect(captureExceptionSpy).toHaveBeenCalledWith(
+        'multiple records found in SQS message',
+      );
     });
   });
 });

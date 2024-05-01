@@ -136,28 +136,40 @@ export const deleteOldProspects = async (
   scheduledSurfaceGuid: string,
   prospectType: ProspectType,
 ): Promise<number> => {
-  // retrieve all prospects matching the scheduledSurfaceGuid and prospectType
-  const prospectsToDelete = await getProspectsForDeletion(
-    dbClient,
-    scheduledSurfaceGuid,
-    prospectType,
-  );
+  try {
+    // retrieve all prospects matching the scheduledSurfaceGuid and prospectType
+    const prospectsToDelete = await getProspectsForDeletion(
+      dbClient,
+      scheduledSurfaceGuid,
+      prospectType,
+    );
 
-  let idsToDelete: string[] = [];
+    let idsToDelete: string[] = [];
 
-  // delete the prospects in batches
-  for (let i = 0; i < prospectsToDelete.length; i++) {
-    idsToDelete.push(prospectsToDelete[i].id);
+    // delete the prospects in batches
+    for (let i = 0; i < prospectsToDelete.length; i++) {
+      idsToDelete.push(prospectsToDelete[i].id);
 
-    if (idsToDelete.length === config.aws.dynamoDb.maxBatchDelete) {
-      await batchDeleteProspects(dbClient, idsToDelete);
-      idsToDelete = [];
+      if (idsToDelete.length === config.aws.dynamoDb.maxBatchDelete) {
+        await batchDeleteProspects(dbClient, idsToDelete);
+        idsToDelete = [];
+      }
     }
-  }
 
-  if (idsToDelete.length) {
-    await batchDeleteProspects(dbClient, idsToDelete);
-  }
+    if (idsToDelete.length) {
+      await batchDeleteProspects(dbClient, idsToDelete);
+    }
 
-  return prospectsToDelete.length;
+    return prospectsToDelete.length;
+  } catch (e) {
+    Sentry.addBreadcrumb({
+      message: 'deleteOldProspects',
+      data: {
+        scheduledSurfaceGuid,
+        prospectType,
+        error: e,
+      },
+    });
+    Sentry.captureException('failed to delete old prospects');
+  }
 };
