@@ -19,6 +19,7 @@ import {
   clearDb,
   createApprovedItemHelper,
   createRejectedCuratedCorpusItemHelper,
+  createScheduledItemHelper,
 } from '../../../../test/helpers';
 import { CREATE_APPROVED_ITEM } from '../sample-mutations.gql';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../../events/init';
@@ -311,6 +312,11 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
 
     expect(result.body.data?.createApprovedCorpusItem).toMatchObject(input);
 
+    // The input domain was not previously scheduled, and is therefore not trusted yet.
+    expect(
+      result.body.data?.createApprovedCorpusItem.hasTrustedDomain,
+    ).toStrictEqual(false);
+
     // The `createdBy` field should now be the SSO username of the user
     // who updated this record
     expect(result.body.data?.createApprovedCorpusItem.createdBy).toEqual(
@@ -349,6 +355,42 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
     expect(
       await eventTracker.mock.calls[1][0].scheduledCorpusItem.externalId,
     ).not.toBeNull();
+  });
+
+  it('should create a TrustedDomain if the domain has a past scheduled date', async () => {
+    // extra inputs - all three must be set to create a scheduled item
+    input.scheduledDate = '2100-01-01';
+    input.scheduledSurfaceGuid = 'NEW_TAB_EN_US';
+    input.scheduledSource = ScheduledItemSource.ML;
+
+    const pastApprovedItem = await createApprovedItemHelper(db, {
+      url: `${input.url}/old-article`,
+      title: 'Old Article',
+    });
+
+    // create a scheduled entry in the past for this item
+    await createScheduledItemHelper(db, {
+      approvedItem: pastApprovedItem,
+      scheduledDate: new Date(2024, 1, 1).toISOString(),
+    });
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(CREATE_APPROVED_ITEM),
+        variables: { data: input },
+      });
+
+    expect(
+      result.body.data?.createApprovedCorpusItem.hasTrustedDomain,
+    ).toStrictEqual(true);
+
+    // Check that example.com exists as a TrustedDomain in the database.
+    const trustedDomain = await db.trustedDomain.findUnique({
+      where: { domainName: 'test.com' },
+    });
+    expect(trustedDomain).toBeTruthy();
   });
 
   it('should not create a scheduled item if one of the scheduled properties was not suppplied', async () => {
