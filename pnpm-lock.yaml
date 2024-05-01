@@ -71,6 +71,22 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tsconfig
 
+  infrastructure/prospect-translation-lambda:
+    dependencies:
+      '@pocket-tools/terraform-modules':
+        specifier: 5.8.6
+        version: 5.8.6(ink@3.2.0)(react@17.0.2)
+      infrastructure-common:
+        specifier: workspace:*
+        version: link:../../packages/infrastructure-common
+    devDependencies:
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../../packages/eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
+
   lambdas/corpus-scheduler-lambda:
     dependencies:
       '@sentry/serverless':
@@ -260,6 +276,19 @@ importers:
       typescript:
         specifier: 5.3.3
         version: 5.3.3
+
+  packages/infrastructure-common:
+    dependencies:
+      '@pocket-tools/terraform-modules':
+        specifier: 5.8.6
+        version: 5.8.6(ink@3.2.0)(react@17.0.2)
+    devDependencies:
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
 
   packages/prospectapi-common:
     dependencies:
@@ -6955,7 +6984,7 @@ packages:
     dependencies:
       semver: 7.6.0
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240416
+      typescript: 5.5.0-dev.20240501
     dev: false
 
   /drange@1.1.1:
@@ -13115,8 +13144,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240416:
-    resolution: {integrity: sha512-hCCgs0+M5vvB2c/G6ft9IBNjbsjd/VL7+pSJMxGJcDjWP/FI+1n6qSLL3hNduxkfbzFh4jL75tbSqJp/Ac0V1Q==}
+  /typescript@5.5.0-dev.20240501:
+    resolution: {integrity: sha512-ry5YMM62bkOOYR6VO0R7oN0neikzkMQIx86y3i3NDrywalpn75kIWPkEPocIcNISml8q92v9j3V0aQ+Ejr9TcA==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
