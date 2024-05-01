@@ -67,18 +67,9 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
         const prospect: Prospect = convertSqsProspectToProspect(rawSqsProspect);
 
         // we have a valid prospect!
-        // now get the metadata and put it into dynamo
-        // this function will send an exception to sentry if any part of it
-        // fails.
-        prospectIdsProcessed = await processProspect(
-          prospect,
-          prospectIdsProcessed,
-        );
 
         // if this is the first pass through the loop, use this opportunity to
         // delete all existing prospects of this type/surface
-        // on the first pass through the loop only, delete all old prospects
-        // of the same scheduled surface and prospect type
         if (i === 0) {
           // this function will send an exception to sentry if the deletion
           // process fails.
@@ -92,6 +83,14 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
             `deleted ${deletedCount} prospects for ${prospect.scheduledSurfaceGuid} / ${prospect.prospectType}`,
           );
         }
+
+        // now get the metadata and put it into dynamo
+        // this function will send an exception to sentry if any part of it
+        // fails.
+        prospectIdsProcessed = await processProspect(
+          prospect,
+          prospectIdsProcessed,
+        );
       }
     }
   }
