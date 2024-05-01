@@ -33,7 +33,6 @@ describe('corpus scheduler lambda', () => {
     jest.restoreAllMocks();
     server.resetHandlers();
   });
-  afterAll(() => server.close());
   afterAll(() => {
     jest.restoreAllMocks();
     server.close();

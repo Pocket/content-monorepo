@@ -174,10 +174,11 @@ export const deriveUrlMetadata = async (
     // catch if the final results from getUrlMetadata *after retries* is an error
     item = await getUrlMetadata(url, retryDelay);
   } catch (e) {
+    Sentry.addBreadcrumb({ message: 'deriveUrlMetadata' });
     Sentry.captureException(e.message, {
       extra: {
         description: 'Failed to retrieve metadata from the parser',
-        url: url,
+        url,
       },
     });
   }
