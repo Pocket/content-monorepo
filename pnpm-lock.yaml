@@ -63,6 +63,9 @@ importers:
       '@pocket-tools/terraform-modules':
         specifier: 5.8.6
         version: 5.8.6(ink@3.2.0)(react@17.0.2)
+      infrastructure-common:
+        specifier: workspace:*
+        version: link:../../packages/infrastructure-common
     devDependencies:
       eslint-config-custom:
         specifier: workspace:*

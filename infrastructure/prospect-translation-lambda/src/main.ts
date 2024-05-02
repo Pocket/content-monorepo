@@ -12,7 +12,6 @@ import {
 } from '@pocket-tools/terraform-modules';
 
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
-import { PagerdutyProvider } from '@cdktf/provider-pagerduty/lib/provider';
 import { NullProvider } from '@cdktf/provider-null/lib/provider';
 import { LocalProvider } from '@cdktf/provider-local/lib/provider';
 import { ArchiveProvider } from '@cdktf/provider-archive/lib/provider';
@@ -28,8 +27,6 @@ class ProspectTranslationLambdaWrapper extends TerraformStack {
     super(scope, name);
 
     new AwsProvider(this, 'aws', { region: 'us-east-1' });
-
-    new PagerdutyProvider(this, 'pagerduty_provider', { token: undefined });
     new NullProvider(this, 'null-provider');
     new LocalProvider(this, 'local-provider');
     new ArchiveProvider(this, 'archive-provider');
@@ -37,14 +34,19 @@ class ProspectTranslationLambdaWrapper extends TerraformStack {
     new S3Backend(this, {
       bucket: `mozilla-content-team-${config.environment.toLowerCase()}-terraform-state`,
       dynamodbTable: `mozilla-content-team-${config.environment.toLowerCase()}-terraform-state`,
-      key: config.name,
+      key: `${config.name}-Sqs-Translation-Lambda`,
       region: 'us-east-1',
     });
 
     new PocketVPC(this, 'pocket-vpc');
     const region = new DataAwsRegion(this, 'region');
     const caller = new DataAwsCallerIdentity(this, 'caller');
-    const dynamodb = new DynamoDB(this, 'dynamodb', config.prefix, config.tags);
+    const dynamodb = new DynamoDB(
+        this,
+        'dynamodb',
+        `${config.shortName}-${config.environment}`,
+        config.tags,
+    );
 
     new TranslationSqsLambda(
       this,
