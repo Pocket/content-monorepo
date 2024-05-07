@@ -1,7 +1,16 @@
+import * as Sentry from '@sentry/serverless';
+import { SQSEvent } from 'aws-lambda';
 import { URL } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Prospect, ScheduledSurfaces } from 'prospectapi-common';
+import {
+  dbClient,
+  deriveUrlMetadata,
+  insertProspect,
+  Prospect,
+  ScheduledSurfaces,
+} from 'prospectapi-common';
+
 import {
   applyApTitleCase,
   applyCurlyQuotes,
@@ -13,40 +22,126 @@ import {
 import { SqsProspect } from './types';
 
 /**
+ * verifies the event coming from SQS can be parsed as JSON
+ * @param event SQSEvent
+ * @returns json object
+ */
+export const parseJsonFromEvent = (event: SQSEvent): any => {
+  let json: any;
+
+  // is the SQS message valid JSON?
+  try {
+    // this is the (odd?) format of an SQS message
+    json = JSON.parse(event.Records[0].body);
+
+    // we encountered some weird SQS behavior where multiple prospect messages
+    // were coming in. this was during an aws incident so may have been a fluke
+    // but - let's log to sentry if this happens again just in case.
+    if (event.Records.length > 1) {
+      Sentry.addBreadcrumb({ message: 'parseJsonFromEvent', data: event });
+      Sentry.captureException('multiple records found in SQS message');
+    }
+  } catch (e) {
+    Sentry.addBreadcrumb({
+      message: 'parseJsonFromEvent',
+      data: {
+        event,
+        error: e,
+      },
+    });
+    Sentry.captureException(
+      'invalid data provided / sqs event.Records[0].body is not valid JSON.',
+    );
+
+    json = {};
+  }
+
+  return json;
+};
+
+/**
  * retrieves prospects from the sqs message
  *
  * @param messageBodyJson JSON in the `body` property of the sqs message
- * @returns either the array of prospects in the JSON or undefined
+ * @returns either the array of prospects in the JSON or an empty array
  */
 export const getProspectsFromMessageJson = (
   messageBodyJson: any,
-): { [key: string]: any }[] | undefined => {
+): { [key: string]: any }[] => {
   if (
     messageBodyJson.detail?.candidates &&
     Array.isArray(messageBodyJson.detail.candidates)
   ) {
     return messageBodyJson.detail.candidates;
   } else {
-    return undefined;
+    Sentry.addBreadcrumb({
+      message: 'getProspectsFromMessageJson',
+      data: messageBodyJson,
+    });
+
+    Sentry.captureException(
+      'no `candidates` property exists on the SQS JSON, or `candidates` is not an array.',
+    );
+
+    return [];
   }
+};
+
+export const processProspect = async (
+  prospect: Prospect,
+  idsProcessed: string[],
+): Promise<string[]> => {
+  const urlMetadata = await deriveUrlMetadata(prospect.url);
+
+  prospect = hydrateProspectMetadata(prospect, urlMetadata);
+
+  await insertProspect(dbClient, prospect);
+
+  // an edge case we've hit before - ML was sending duplicate prospects in a
+  // single batch. we don't need to error here - dynamo will silently replace
+  // the existing entry. logging seems like the best approach for now.
+  if (idsProcessed.includes(prospect.id)) {
+    console.log(
+      `${prospect.id} is a duplicate in this ${prospect.scheduledSurfaceGuid} / ${prospect.prospectType} batch!`,
+    );
+  }
+
+  idsProcessed.push(prospect.id);
+
+  return idsProcessed;
 };
 
 /**
  * ensures prospect conforms to the interface
  *
- * @param prospect an object from an SQS message
+ * @param rawSqsProspect an object from an SQS message
  * @returns boolean
  */
-export const hasValidStructure = (prospect: unknown): prospect is Prospect => {
-  return (
-    Object.prototype.hasOwnProperty.call(prospect, 'prospect_id') &&
-    Object.prototype.hasOwnProperty.call(prospect, 'scheduled_surface_guid') &&
-    Object.prototype.hasOwnProperty.call(prospect, 'predicted_topic') &&
-    Object.prototype.hasOwnProperty.call(prospect, 'prospect_source') &&
-    Object.prototype.hasOwnProperty.call(prospect, 'url') &&
-    Object.prototype.hasOwnProperty.call(prospect, 'save_count') &&
-    Object.prototype.hasOwnProperty.call(prospect, 'rank')
-  );
+export const validateStructure = (
+  rawSqsProspect: unknown,
+): rawSqsProspect is SqsProspect => {
+  if (
+    Object.prototype.hasOwnProperty.call(rawSqsProspect, 'prospect_id') &&
+    Object.prototype.hasOwnProperty.call(
+      rawSqsProspect,
+      'scheduled_surface_guid',
+    ) &&
+    Object.prototype.hasOwnProperty.call(rawSqsProspect, 'predicted_topic') &&
+    Object.prototype.hasOwnProperty.call(rawSqsProspect, 'prospect_source') &&
+    Object.prototype.hasOwnProperty.call(rawSqsProspect, 'url') &&
+    Object.prototype.hasOwnProperty.call(rawSqsProspect, 'save_count') &&
+    Object.prototype.hasOwnProperty.call(rawSqsProspect, 'rank')
+  ) {
+    return true;
+  } else {
+    Sentry.addBreadcrumb({
+      message: 'hasValidStructure',
+      data: rawSqsProspect,
+    });
+    Sentry.captureException('prospect does not have a valid structure');
+
+    return false;
+  }
 };
 
 /**
@@ -163,7 +258,7 @@ export const hasValidUrl = (sqsProspect: SqsProspect): boolean => {
  * @param sqsProspect Prospect
  * @returns array of error messages
  */
-export const validateProperties = (sqsProspect: SqsProspect): string[] => {
+export const validateProperties = (sqsProspect: SqsProspect): boolean => {
   const errors: string[] = [];
 
   if (!hasValidProspectId(sqsProspect)) {
@@ -200,7 +295,21 @@ export const validateProperties = (sqsProspect: SqsProspect): string[] => {
     errors.push(`url '${sqsProspect.url} is not valid.`);
   }
 
-  return errors;
+  if (!errors.length) {
+    return true;
+  } else {
+    Sentry.addBreadcrumb({
+      message: 'validateProperties',
+      data: {
+        sqsProspect,
+        errors,
+      },
+    });
+
+    Sentry.captureException('sqsProspect has invalid properties');
+
+    return false;
+  }
 };
 
 export const convertSqsProspectToProspect = (

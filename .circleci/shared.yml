@@ -431,14 +431,14 @@ jobs:
         environment:
           AWS_XRAY_LOG_LEVEL: silent
           AWS_XRAY_CONTEXT_MISSING: LOG_ERROR
-      - image: mysql:8
+      - image: mysql:8.0
         auth:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
         environment:
           - MYSQL_ALLOW_EMPTY_PASSWORD=yes
           - TZ=UTC
-        command: --default_authentication_plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION" --character-set-server=UTF8MB3 --collation-server=utf8_unicode_ci
+        command: --default_authentication_plugin=mysql_native_password --sql-mode="NO_ENGINE_SUBSTITUTION" --character-set-server=UTF8MB4 --collation-server=utf8mb4_unicode_ci
       - image: localstack/localstack:3.0.2
         auth:
           username: $DOCKERHUB_USERNAME
