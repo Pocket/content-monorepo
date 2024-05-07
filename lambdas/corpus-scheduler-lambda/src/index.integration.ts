@@ -16,7 +16,7 @@ import {
   mockPocketImageCache,
   mockSetTimeoutToReturnImmediately,
 } from './testHelpers';
-import { CorpusLanguage, ScheduledSurfaces } from 'content-common';
+import { CorpusLanguage, ScheduledSurfacesEnum } from 'content-common';
 import {
   resetSnowplowEvents,
   waitForSnowplowEvents,
@@ -299,7 +299,7 @@ describe('corpus scheduler lambda', () => {
 
     // overwrite with NEW_TAB_EN_GB scheduled surface which is not allowed
     record.candidates[0].scheduled_corpus_item.scheduled_surface_guid =
-      ScheduledSurfaces.NEW_TAB_EN_GB;
+      ScheduledSurfacesEnum.NEW_TAB_EN_GB;
     const fakeEvent = {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
     } as unknown as SQSEvent;
@@ -373,7 +373,7 @@ describe('corpus scheduler lambda', () => {
 
     // overwrite with NEW_TAB_EN_GB scheduled surface which is not allowed (but dev, so should be scheduled)
     record.candidates[0].scheduled_corpus_item.scheduled_surface_guid =
-      ScheduledSurfaces.NEW_TAB_EN_GB;
+      ScheduledSurfacesEnum.NEW_TAB_EN_GB;
     await processor(
       fakeEvent,
       null as unknown as Context,
