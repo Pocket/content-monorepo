@@ -14,7 +14,7 @@ import {
   ScheduledCorpusItemPayload,
 } from '../events/types';
 import s3 from './aws/s3';
-import { MozillaAccessGroup } from '../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import {
   getScheduledSurfaceByGuid,
   scheduledSurfaceAccessGroups,

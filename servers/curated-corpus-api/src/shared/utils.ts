@@ -1,4 +1,4 @@
-import { ScheduledSurface, ScheduledSurfaces } from './types';
+import { ScheduledSurface, ScheduledSurfaces } from 'content-common';
 import { ApprovedItem, CorpusItem, CorpusTargetType } from '../database/types';
 import { ApprovedItemAuthor } from 'content-common';
 import { parse } from 'url';

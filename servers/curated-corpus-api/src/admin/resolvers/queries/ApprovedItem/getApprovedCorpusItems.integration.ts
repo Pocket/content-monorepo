@@ -8,7 +8,7 @@ import { CuratedStatus } from 'content-common';
 import { client } from '../../../../database/client';
 import { clearDb, createApprovedItemHelper } from '../../../../test/helpers';
 import { GET_APPROVED_ITEMS } from '../sample-queries.gql';
-import { MozillaAccessGroup } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 

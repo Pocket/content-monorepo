@@ -10,10 +10,8 @@ import {
   getApprovedItemByExternalId as dbGetApprovedItemByExternalId,
   getScheduledSurfaceHistory as dbGetScheduledSurfaceHistory,
 } from '../../../../database/queries';
-import {
-  ACCESS_DENIED_ERROR,
-  ScheduledSurfaces,
-} from '../../../../shared/types';
+import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
+import { ScheduledSurfaces } from 'content-common';
 import { IAdminContext } from '../../../context';
 import {
   ApprovedItem,

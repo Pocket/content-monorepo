@@ -6,7 +6,7 @@ import { PrismaClient } from '.prisma/client';
 import { client } from '../../../../database/client';
 import { clearDb, createApprovedItemHelper } from '../../../../test/helpers';
 import { APPROVED_ITEM_REFERENCE_RESOLVER } from '../sample-queries.gql';
-import { MozillaAccessGroup } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 

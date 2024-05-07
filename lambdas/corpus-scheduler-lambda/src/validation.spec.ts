@@ -7,7 +7,7 @@ import { createScheduledCandidate, mockPocketImageCache } from './testHelpers';
 import {
   CorpusItemSource,
   CorpusLanguage,
-  ScheduledSurfaces,
+  ScheduledSurfacesEnum,
 } from 'content-common';
 import { DateTime, Settings } from 'luxon';
 import config from './config';
@@ -246,7 +246,7 @@ describe('validation', function () {
     it('should throw Error on ScheduleCandidate if types are wrong (scheduled_surface)', async () => {
       const badScheduledCandidate = createScheduledCandidate();
       badScheduledCandidate.scheduled_corpus_item.scheduled_surface_guid =
-        'bad-surface' as ScheduledSurfaces;
+        'bad-surface' as ScheduledSurfacesEnum;
 
       // should throw error
       await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(

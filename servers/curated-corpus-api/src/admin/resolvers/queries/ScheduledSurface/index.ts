@@ -2,7 +2,7 @@ import {
   MozillaAccessGroup,
   ScheduledSurface,
   ScheduledSurfaces,
-} from '../../../../shared/types';
+} from 'content-common';
 import {
   getScheduledSurfaceByAccessGroup,
   scheduledSurfaceAccessGroups,

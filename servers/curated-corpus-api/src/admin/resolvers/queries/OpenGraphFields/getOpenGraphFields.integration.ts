@@ -3,7 +3,7 @@ import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 
 import { GET_OPEN_GRAPH_FIELDS } from '../sample-queries.gql';
-import { MozillaAccessGroup } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 import http from 'http';

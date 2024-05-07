@@ -1,5 +1,5 @@
 import { ScheduledSurface } from '../../../database/types';
-import { ScheduledSurfaces } from '../../../shared/types';
+import { ScheduledSurfaces } from 'content-common';
 import { UserInputError } from '@pocket-tools/apollo-utils';
 
 /**

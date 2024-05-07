@@ -27,7 +27,7 @@ import {
   ReviewedCorpusItemEventType,
   ScheduledCorpusItemEventType,
 } from '../../../../events/types';
-import { MozillaAccessGroup } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 
