@@ -188,7 +188,7 @@ importers:
         specifier: 5.3.3
         version: 5.3.3
 
-  lambdas/prospect-api-translation-lambda:
+  lambdas/prospect-translation-lambda:
     dependencies:
       '@aws-sdk/client-dynamodb':
         specifier: 3.529.1
@@ -6987,7 +6987,7 @@ packages:
     dependencies:
       semver: 7.6.0
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240506
+      typescript: 5.5.0-dev.20240507
     dev: false
 
   /drange@1.1.1:
@@ -13147,8 +13147,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240506:
-    resolution: {integrity: sha512-0lnovJfyTASSjJvryIfT3sYDXAv1n2R0vujhtdXQiAxA+PRpCOTk7UqslELD6wl7t3s9hH5UI/+p5aPeSpmbYw==}
+  /typescript@5.5.0-dev.20240507:
+    resolution: {integrity: sha512-5LtqwNqq8gx+AD5pTThWksRzORSFBNdUGmndlPmQ/fa34MY/1vsE5A/sFM6JD29X8uFiATeIJQepsO+l+tRJ0A==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
