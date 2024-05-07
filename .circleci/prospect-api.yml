@@ -205,19 +205,6 @@ workflows:
           <<: *only_main
           context: pocket
           for: prospect_api
-          name: prospect-api_code_deploy_lambda_prod
-          resource-class: pocket/default-prod
-          codedeploy-app-name: ProspectAPI-Prod-Sqs-Translation-Lambda
-          codedeploy-group-name: ProspectAPI-Prod-Sqs-Translation-Lambda
-          function-name: ProspectAPI-Prod-Sqs-Translation-Function
-          s3-bucket: pocket-prospectapi-prod-sqs-translation
-          requires:
-            - prospect-api_build_lambda_prod
-
-      - code_deploy_lambda:
-          <<: *only_main
-          context: pocket
-          for: prospect_api
           name: prospect-api-bridge_code_deploy_lambda_prod
           resource-class: pocket/default-prod
           codedeploy-app-name: ProspectAPI-Prod-Sqs-Bridge-Lambda
@@ -238,7 +225,6 @@ workflows:
           sentry_org: pocket
           requires:
             - prospect-api_code_deploy_ecs_prod
-            - prospect-api_code_deploy_lambda_prod
 
       # Setup params we may use in Lambdas
       - setup_deploy_params:
@@ -251,4 +237,3 @@ workflows:
           service_name: ProspectAPI
           requires:
             - prospect-api_code_deploy_ecs_prod
-            - prospect-api_code_deploy_lambda_prod
