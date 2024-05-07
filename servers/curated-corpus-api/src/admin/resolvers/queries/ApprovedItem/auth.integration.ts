@@ -6,10 +6,8 @@ import { client } from '../../../../database/client';
 
 import { ApprovedItem } from '.prisma/client';
 import { CuratedStatus } from 'content-common';
-import {
-  ACCESS_DENIED_ERROR,
-  MozillaAccessGroup,
-} from '../../../../shared/types';
+import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { clearDb, createApprovedItemHelper } from '../../../../test/helpers';
 import {
   GET_APPROVED_ITEMS,

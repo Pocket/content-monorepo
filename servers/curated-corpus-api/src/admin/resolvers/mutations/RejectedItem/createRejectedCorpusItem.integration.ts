@@ -13,10 +13,8 @@ import { CREATE_REJECTED_ITEM } from '../sample-mutations.gql';
 import { CreateRejectedCorpusItemApiInput } from '../../types';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../../events/init';
 import { ReviewedCorpusItemEventType } from '../../../../events/types';
-import {
-  ACCESS_DENIED_ERROR,
-  MozillaAccessGroup,
-} from '../../../../shared/types';
+import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 import { ActionScreen, CorpusLanguage } from 'content-common';

@@ -17,7 +17,7 @@ import { REJECT_APPROVED_ITEM } from '../sample-mutations.gql';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../../events/init';
 import { ReviewedCorpusItemEventType } from '../../../../events/types';
 import { GET_REJECTED_ITEMS } from '../../queries/sample-queries.gql';
-import { MozillaAccessGroup } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { RejectApprovedCorpusItemApiInput } from '../../types';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
