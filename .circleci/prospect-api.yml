@@ -50,6 +50,16 @@ workflows:
           dev: false
           apply: false
 
+      - build_lambda:
+            <<: *not_dev_main
+            context: pocket
+            for: prospect_api
+            name: prospect-api-bridge-aws_lambda
+            aws-access-key-id: Dev_AWS_ACCESS_KEY
+            aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
+            aws-region: Dev_AWS_DEFAULT_REGION
+            scope: prospect-api-bridge-aws_lambda
+
       ######
       # Dev Branch Deployment (Dev Environment)
       ######
