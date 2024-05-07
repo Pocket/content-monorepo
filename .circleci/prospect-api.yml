@@ -111,19 +111,6 @@ workflows:
           <<: *only_dev
           context: pocket
           for: prospect_api
-          name: prospect-api_code_deploy_lambda_dev
-          resource-class: pocket/default-dev
-          codedeploy-app-name: ProspectAPI-Dev-Sqs-Translation-Lambda
-          codedeploy-group-name: ProspectAPI-Dev-Sqs-Translation-Lambda
-          function-name: ProspectAPI-Dev-Sqs-Translation-Function
-          s3-bucket: pocket-prospectapi-dev-sqs-translation
-          requires:
-            - prospect-api_build_lambda_dev
-
-      - code_deploy_lambda:
-          <<: *only_dev
-          context: pocket
-          for: prospect_api
           name: prospect-api-bridge_code_deploy_lambda_dev
           resource-class: pocket/default-dev
           codedeploy-app-name: ProspectAPI-Dev-Sqs-Bridge-Lambda
