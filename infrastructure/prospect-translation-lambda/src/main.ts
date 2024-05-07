@@ -15,8 +15,6 @@ import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { NullProvider } from '@cdktf/provider-null/lib/provider';
 import { LocalProvider } from '@cdktf/provider-local/lib/provider';
 import { ArchiveProvider } from '@cdktf/provider-archive/lib/provider';
-import { DataAwsRegion } from '@cdktf/provider-aws/lib/data-aws-region';
-import { DataAwsCallerIdentity } from '@cdktf/provider-aws/lib/data-aws-caller-identity';
 
 import { config } from './config';
 import { DynamoDB } from 'infrastructure-common';
@@ -39,8 +37,6 @@ class ProspectTranslationLambdaWrapper extends TerraformStack {
     });
 
     new PocketVPC(this, 'pocket-vpc');
-    const region = new DataAwsRegion(this, 'region');
-    const caller = new DataAwsCallerIdentity(this, 'caller');
     const dynamodb = new DynamoDB(
         this,
         'dynamodb',
