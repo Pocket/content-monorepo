@@ -28,7 +28,7 @@ workflows:
           for: prospect_translation_lambda
           name: prospect_translation_lambda_infrastructure_plan_prod
           scope: prospect-translation-lambda-cdk
-          stack-output-path: infrastructure/prospect-translation-lambda/cdktf.out/stacks/prospect-api
+          stack-output-path: infrastructure/prospect-translation-lambda/cdktf.out/stacks/prospect-translation-lambda-wrapper
           resource-class: pocket/default-prod
           workspace: Prod
           dev: false
@@ -44,7 +44,7 @@ workflows:
           for: prospect_translation_lambda
           name: prospect_translation_lambda_infrastructure_apply_dev
           scope: prospect-translation-lambda-cdk
-          stack-output-path: infrastructure/prospect-translation-lambda/cdktf.out/stacks/prospect-api
+          stack-output-path: infrastructure/prospect-translation-lambda/cdktf.out/stacks/prospect-translation-lambda-wrapper
           resource-class: pocket/default-dev
           workspace: Dev
           save_app_spec: false
@@ -110,7 +110,7 @@ workflows:
           for: prospect_translation_lambda
           name: prospect_translation_lambda_infrastructure_apply_prod
           scope: prospect-translation-lambda-cdk
-          stack-output-path: infrastructure/prospect-translation-lambda/cdktf.out/stacks/prospect-api
+          stack-output-path: infrastructure/prospect-translation-lambda/cdktf.out/stacks/prospect-translation-lambda-wrapper
           resource-class: pocket/default-prod
           workspace: Prod
           save_app_spec: false
