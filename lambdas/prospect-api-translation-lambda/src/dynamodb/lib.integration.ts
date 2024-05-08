@@ -1,7 +1,7 @@
+import { ProspectType, Topics } from 'content-common';
+
 import {
   Prospect,
-  Topics,
-  ProspectType,
   dbClient,
   getProspectById,
   insertProspect,

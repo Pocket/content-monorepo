@@ -27,14 +27,14 @@ let clientRetryDelay;
  */
 export const getUrlMetadata = async (
   url: string,
-  retryDelay: number = 10000,
+  retryDelay: number = config.app.metadataRetryDelay,
 ): Promise<ClientApiItem | null> => {
   // Move Apollo Client instantiation to inside the function to prevent memory leaks.
   if (!client || clientRetryDelay != retryDelay) {
     client = new ApolloClient({
       link: createHttpLink({
         fetch: fetchRetry(fetch, {
-          retries: 2,
+          retries: config.app.metadataRetries, // set to 2
           // Retry if the status code indicates that the service is temporarily unavailable.
           // By default, fetch-retry only retries on network errors.
           // 504 is the only one that's been observed in production.
@@ -70,6 +70,7 @@ export const getUrlMetadata = async (
           title
           language
           topImageUrl
+          datePublished
           authors {
             name
           }
@@ -84,10 +85,12 @@ export const getUrlMetadata = async (
               name
               url
             }
+            publishedAt
             title
           }
           collection {
             slug
+            publishedAt
           }
         }
       }

@@ -3,9 +3,9 @@ import {
   ScheduledItem,
   Prisma,
   PrismaClient,
-} from '@prisma/client';
+} from '.prisma/client';
 import { faker } from '@faker-js/faker';
-import { ScheduledItemSource } from '../../shared/types';
+import { ScheduledItemSource } from 'content-common';
 
 // the data required to create a scheduled item that goes onto a scheduled surface
 interface CreateScheduledItemHelperRequiredInput {

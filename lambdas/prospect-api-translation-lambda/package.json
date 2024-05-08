@@ -14,20 +14,19 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "3.529.1",
-    "@aws-sdk/client-lambda": "3.529.1",
     "@aws-sdk/lib-dynamodb": "3.529.1",
-    "@sentry/serverless": "6.19.7",
-    "prospectapi-common": "workspace:*",
+    "@sentry/serverless": "7.110.1",
     "content-common": "workspace:*",
+    "prospectapi-common": "workspace:*",
     "uuid": "9.0.1"
   },
   "devDependencies": {
-    "tsconfig": "workspace:*",
-    "eslint-config-custom": "workspace:*",
     "@types/aws-lambda": "8.10.134",
     "@types/jest": "29.5.12",
+    "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
-    "ts-jest": "29.1.2"
+    "ts-jest": "29.1.2",
+    "tsconfig": "workspace:*"
   },
   "files": [
     "dist",

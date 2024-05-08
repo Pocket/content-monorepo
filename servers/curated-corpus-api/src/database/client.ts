@@ -1,30 +1,35 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '.prisma/client';
 import { serverLogger } from '../express';
+import config from '../config';
 
 let prisma;
 
 export function client(): PrismaClient {
   if (prisma) return prisma;
 
+  // This is the level of logging we expect on Production
+  const log: Array<Prisma.LogDefinition> = [
+    {
+      level: 'error',
+      emit: 'event',
+    },
+    {
+      level: 'warn',
+      emit: 'event',
+    },
+    {
+      level: 'info',
+      emit: 'event',
+    },
+  ];
+
+  // For non-prod environments, log all queries, too.
+  if (config.app.environment !== 'production') {
+    log.push({ level: 'query', emit: 'event' });
+  }
+
   prisma = new PrismaClient({
-    log: [
-      {
-        level: 'error',
-        emit: 'event',
-      },
-      {
-        level: 'warn',
-        emit: 'event',
-      },
-      {
-        level: 'info',
-        emit: 'event',
-      },
-      {
-        level: 'query',
-        emit: 'event',
-      },
-    ],
+    log,
   });
 
   prisma.$on('error', (e) => {
@@ -42,10 +47,14 @@ export function client(): PrismaClient {
     serverLogger.info(e);
   });
 
-  prisma.$on('query', (e) => {
-    e.source = 'prisma';
-    serverLogger.debug(e);
-  });
+  // Allow logger to subscribe to query events from Prisma
+  // in non-production environments only.
+  if (config.app.environment !== 'production') {
+    prisma.$on('query', (e) => {
+      e.source = 'prisma';
+      serverLogger.debug(e);
+    });
+  }
 
   return prisma;
 }

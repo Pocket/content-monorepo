@@ -1,10 +1,7 @@
-import { CuratedStatus } from '@prisma/client';
+import { CuratedStatus } from '.prisma/client';
 import { EventBusHandler } from './EventBusHandler';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
-import {
-  ScheduledItemSource,
-} from '../../shared/types';
-import { CorpusItemSource, Topics } from 'content-common';
+import { CorpusItemSource, Topics, ScheduledItemSource } from 'content-common';
 import { ScheduledItem } from '../../database/types';
 import * as Sentry from '@sentry/node';
 import { EventBridgeClient } from '@aws-sdk/client-eventbridge';
@@ -40,6 +37,7 @@ const scheduledCorpusItem: ScheduledItem = {
     externalId: '123-abc',
     prospectId: '456-dfg',
     url: 'https://test.com/a-story',
+    domainName: 'test.com',
     status: CuratedStatus.RECOMMENDATION,
     title: 'Everything you need to know about React',
     excerpt: 'Something here',

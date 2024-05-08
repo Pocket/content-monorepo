@@ -20,8 +20,8 @@ class CorpusSchedulerLambdaWraper extends TerraformStack {
     new ArchiveProvider(this, 'archive-provider');
 
     new S3Backend(this, {
-      bucket: `mozilla-pocket-team-${config.environment.toLowerCase()}-terraform-state`,
-      dynamodbTable: `mozilla-pocket-team-${config.environment.toLowerCase()}-terraform-state`,
+      bucket: `mozilla-content-team-${config.environment.toLowerCase()}-terraform-state`,
+      dynamodbTable: `mozilla-content-team-${config.environment.toLowerCase()}-terraform-state`,
       key: config.name,
       region: 'us-east-1',
     });

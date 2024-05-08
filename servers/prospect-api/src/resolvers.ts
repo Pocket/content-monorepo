@@ -35,7 +35,8 @@ import {
 
 import { GetProspectsFilters, Context } from './types';
 //import { sendEventBridgeEvent } from './events/events';
-import { getEmitter, getTracker, queueSnowplowEvent } from './events/snowplow';
+import { getEmitter, getTracker } from 'content-common/snowplow';
+import { queueSnowplowEvent } from './events/snowplow';
 
 /**
  * Return an object conforming to the Item graphql definition.
@@ -162,7 +163,10 @@ export const resolvers = {
       // in the mean time, send the dismiss event directly to snowplow
       // initialize snowplow tracker
       const snowplowEmitter = getEmitter();
-      const snowplowTracker = getTracker(snowplowEmitter);
+      const snowplowTracker = getTracker(
+        snowplowEmitter,
+        config.snowplow.appId,
+      );
       queueSnowplowEvent(
         snowplowTracker,
         'prospect_reviewed',

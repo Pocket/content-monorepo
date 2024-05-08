@@ -17,10 +17,6 @@ if (!awsEnvironments.includes(process.env.NODE_ENV ?? '')) {
   s3path = `https://${bucket}.s3.amazonaws.com/`;
 }
 
-// Work out the Snowplow HTTP protocol.
-const snowplowHttpProtocol =
-  process.env.NODE_ENV === 'production' ? 'https' : 'http';
-
 // Environment variables below are set in .aws/src/main.ts
 export default {
   app: {
@@ -69,20 +65,20 @@ export default {
     includeLocalVariables: true,
   },
   snowplow: {
-    endpoint: process.env.SNOWPLOW_ENDPOINT || 'localhost:9090',
-    httpProtocol: snowplowHttpProtocol,
-    bufferSize: 1,
-    retries: 3,
-    namespace: 'pocket-backend',
-    appId: 'pocket-backend-curated-corpus-api',
+    // appId should end in '-dev' outside of production such that Dbt can filter events:
+    // https://github.com/Pocket/dbt-snowflake/blob/main/macros/validate_snowplow_app_id.sql
+    appId:
+      process.env.NODE_ENV === 'production'
+        ? 'pocket-backend-curated-corpus-api'
+        : 'pocket-backend-curated-corpus-api-dev',
     corpusItemEvents: ReviewedCorpusItemEventType,
     corpusScheduleEvents: ScheduledCorpusItemEventType,
     schemas: {
       objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-5',
       reviewedCorpusItem:
-        'iglu:com.pocket/reviewed_corpus_item/jsonschema/1-0-7',
+        'iglu:com.pocket/reviewed_corpus_item/jsonschema/1-0-8',
       scheduledCorpusItem:
-        'iglu:com.pocket/scheduled_corpus_item/jsonschema/1-0-4',
+        'iglu:com.pocket/scheduled_corpus_item/jsonschema/1-0-8',
     },
   },
 };

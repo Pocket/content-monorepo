@@ -1,14 +1,16 @@
-import { CuratedStatus, RejectedCuratedCorpusItem } from '@prisma/client';
+import { CuratedStatus } from '.prisma/client';
 import {
-  assertValidSnowplowObjectUpdateEvents,
   getAllSnowplowEvents,
   getGoodSnowplowEvents,
   parseSnowplowData,
   resetSnowplowEvents,
-} from '../../test/helpers/snowplow';
+  waitForSnowplowEvents,
+} from 'content-common/snowplow/test-helpers';
+import { assertValidSnowplowObjectUpdateEvents } from '../../test/helpers/snowplow';
 import config from '../../config';
 import {
   ApprovedCorpusItemPayload,
+  RejectedCorpusItemPayload,
   ReviewedCorpusItemEventType,
   ReviewedCorpusItemPayload,
 } from '../types';
@@ -17,7 +19,12 @@ import { ReviewedItemSnowplowHandler } from './ReviewedItemSnowplowHandler';
 import { tracker } from './tracker';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import { getUnixTimestamp } from '../../shared/utils';
-import { ApprovedItemAuthor, CorpusItemSource, Topics } from 'content-common';
+import {
+  ActionScreen,
+  ApprovedItemAuthor,
+  CorpusItemSource,
+  Topics,
+} from 'content-common';
 
 /**
  * Use a simple mock item instead of using DB helpers
@@ -28,6 +35,7 @@ const approvedItem: ApprovedCorpusItemPayload = {
   externalId: '123-abc',
   prospectId: '456-dfg',
   url: 'https://test.com/a-story',
+  domainName: 'test.com',
   status: CuratedStatus.RECOMMENDATION,
   title: 'Everything you need to know about React',
   excerpt: 'Something here',
@@ -50,7 +58,7 @@ const approvedItem: ApprovedCorpusItemPayload = {
   updatedBy: 'Amy',
 };
 
-const rejectedItem: RejectedCuratedCorpusItem = {
+const rejectedItem: RejectedCorpusItemPayload = {
   id: 123,
   externalId: '123-abc',
   prospectId: '456-dfg',
@@ -75,10 +83,10 @@ const rejectedEventData: ReviewedCorpusItemPayload = {
 function assertValidSnowplowReviewedItemEvents(data) {
   const eventContext = parseSnowplowData(data);
 
-  if (eventContext.data[0].data.approved_corpus_item_external_id) {
-    assertValidSnowplowApprovedItemEvents(eventContext);
-  } else {
+  if (eventContext.data[0].data.corpus_review_status === 'rejected') {
     assertValidSnowplowRejectedItemEvents(eventContext);
+  } else {
+    assertValidSnowplowApprovedItemEvents(eventContext);
   }
 }
 
@@ -117,22 +125,30 @@ function assertValidSnowplowApprovedItemEvents(eventContext) {
 }
 
 function assertValidSnowplowRejectedItemEvents(eventContext) {
+  const matchData: any = {
+    object_version: ObjectVersion.NEW,
+    rejected_corpus_item_external_id: rejectedItem.externalId,
+    corpus_review_status: CorpusReviewStatus.REJECTED,
+    url: rejectedItem.url,
+    title: rejectedItem.title,
+    language: rejectedItem.language,
+    topic: rejectedItem.topic,
+    rejection_reasons: ['COMMERCIAL', 'PAYWALL', 'OTHER'],
+    created_at: getUnixTimestamp(rejectedItem.createdAt),
+    created_by: rejectedItem.createdBy,
+  };
+
+  // if a rejected item has a prospect id, it will not have an approved item external id
+  if (eventContext.data[0].data.prospect_id) {
+    matchData.prospect_id = rejectedItem.prospectId;
+  } else {
+    matchData.approved_corpus_item_external_id = approvedItem.externalId;
+  }
+
   expect(eventContext.data).toMatchObject([
     {
       schema: config.snowplow.schemas.reviewedCorpusItem,
-      data: {
-        object_version: ObjectVersion.NEW,
-        rejected_corpus_item_external_id: rejectedItem.externalId,
-        prospect_id: rejectedItem.prospectId,
-        corpus_review_status: CorpusReviewStatus.REJECTED,
-        url: rejectedItem.url,
-        title: rejectedItem.title,
-        language: rejectedItem.language,
-        topic: rejectedItem.topic,
-        rejection_reasons: ['COMMERCIAL', 'PAYWALL', 'OTHER'],
-        created_at: getUnixTimestamp(rejectedItem.createdAt),
-        created_by: rejectedItem.createdBy,
-      },
+      data: matchData,
     },
   ]);
 }
@@ -169,14 +185,21 @@ describe('ReviewedItemSnowplowHandler', () => {
       ...rejectedEventData,
       eventType: ReviewedCorpusItemEventType.REJECT_ITEM,
     });
-
-    // wait a sec * 3
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    // Emit the rejected item event with an approved item external id
+    // and no prospect id (mirrors case of rejecting an approved item)
+    emitter.emit(ReviewedCorpusItemEventType.REJECT_ITEM, {
+      reviewedCorpusItem: {
+        ...rejectedItem,
+        prospectId: null,
+        approvedCorpusItemExternalId: approvedItem.externalId,
+      },
+      eventType: ReviewedCorpusItemEventType.REJECT_ITEM,
+    });
 
     // make sure we only have good events
-    const allEvents = await getAllSnowplowEvents();
-    expect(allEvents.total).toEqual(4);
-    expect(allEvents.good).toEqual(4);
+    const allEvents = await waitForSnowplowEvents(5);
+    expect(allEvents.total).toEqual(5);
+    expect(allEvents.good).toEqual(5);
     expect(allEvents.bad).toEqual(0);
 
     const goodEvents = await getGoodSnowplowEvents();
@@ -191,6 +214,7 @@ describe('ReviewedItemSnowplowHandler', () => {
         'reviewed_corpus_item_added',
         'reviewed_corpus_item_updated',
         'reviewed_corpus_item_removed',
+        'reviewed_corpus_item_rejected',
         'reviewed_corpus_item_rejected',
       ],
       'reviewed_corpus_item',
@@ -209,11 +233,8 @@ describe('ReviewedItemSnowplowHandler', () => {
         eventType: ReviewedCorpusItemEventType.ADD_ITEM,
       });
 
-      // wait a sec * 3
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
       // make sure we only have good events
-      const allEvents = await getAllSnowplowEvents();
+      const allEvents = await waitForSnowplowEvents();
       expect(allEvents.total).toEqual(1);
       expect(allEvents.good).toEqual(1);
       expect(allEvents.bad).toEqual(0);
@@ -236,17 +257,15 @@ describe('ReviewedItemSnowplowHandler', () => {
     });
   });
 
-  /*
-  TODO: move these tests to ScheduledItemSnowplowHandler.integration.ts in MC-815
-  describe('manual addition reasons for approved items', () => {
-    it('should send a single manual addition reason with no comment', async () => {
-      const approvedItemWithManualAdditionData: ApprovedCorpusItemPayload = {
+  describe('action screen values', () => {
+    it('should send an action screen value successfully when adding an item', async () => {
+      const approvedItemWithActionScreenData: ApprovedCorpusItemPayload = {
         ...approvedItem,
-        manualAdditionReasons: ['TRENDING'],
+        action_screen: ActionScreen.SCHEDULE,
       };
 
       emitter.emit(ReviewedCorpusItemEventType.ADD_ITEM, {
-        reviewedCorpusItem: approvedItemWithManualAdditionData,
+        reviewedCorpusItem: approvedItemWithActionScreenData,
         eventType: ReviewedCorpusItemEventType.ADD_ITEM,
       });
 
@@ -270,22 +289,21 @@ describe('ReviewedItemSnowplowHandler', () => {
           schema: config.snowplow.schemas.reviewedCorpusItem,
           data: {
             ...approvedItemEventContextData,
-            manually_loaded_reasons: ['TRENDING'],
+            action_screen: ActionScreen.SCHEDULE,
           },
         },
       ]);
     });
 
-    it('should send a multiple manual addition reasons with a comment', async () => {
-      const approvedItemWithManualAdditionData: ApprovedCorpusItemPayload = {
+    it('should send an action screen value successfully when rejecting an item', async () => {
+      const approvedItemWithActionScreenData: ApprovedCorpusItemPayload = {
         ...approvedItem,
-        manualAdditionReasons: ['TRENDING', 'FORMAT_DIVERSITY', 'OTHER'],
-        manualAdditionReasonsComment: 'this article had a nice image, too',
+        action_screen: ActionScreen.SCHEDULE,
       };
 
-      emitter.emit(ReviewedCorpusItemEventType.ADD_ITEM, {
-        reviewedCorpusItem: approvedItemWithManualAdditionData,
-        eventType: ReviewedCorpusItemEventType.ADD_ITEM,
+      emitter.emit(ReviewedCorpusItemEventType.REJECT_ITEM, {
+        reviewedCorpusItem: approvedItemWithActionScreenData,
+        eventType: ReviewedCorpusItemEventType.REJECT_ITEM,
       });
 
       // wait a sec * 3
@@ -308,13 +326,31 @@ describe('ReviewedItemSnowplowHandler', () => {
           schema: config.snowplow.schemas.reviewedCorpusItem,
           data: {
             ...approvedItemEventContextData,
-            manually_loaded_reasons: ['TRENDING', 'FORMAT_DIVERSITY', 'OTHER'],
-            manually_loaded_reason_comment:
-              'this article had a nice image, too',
+            action_screen: ActionScreen.SCHEDULE,
           },
         },
       ]);
+    });
+
+    it('should not send an unknown action screen value successfully', async () => {
+      const approvedItemWithActionScreenData: any = {
+        ...approvedItem,
+        action_screen: 'CHAT',
+      };
+
+      emitter.emit(ReviewedCorpusItemEventType.ADD_ITEM, {
+        reviewedCorpusItem: approvedItemWithActionScreenData,
+        eventType: ReviewedCorpusItemEventType.ADD_ITEM,
+      });
+
+      // wait a sec * 3
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // make sure we only have good events
+      const allEvents = await getAllSnowplowEvents();
+      expect(allEvents.total).toEqual(1);
+      expect(allEvents.good).toEqual(0);
+      expect(allEvents.bad).toEqual(1);
     });
   });
-  */
 });

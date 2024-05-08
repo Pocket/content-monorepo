@@ -1,5 +1,5 @@
 import { UserInputError } from '@pocket-tools/apollo-utils';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 
 /**
  * Checks if an item with the given URL already exists in the Curated Corpus database.

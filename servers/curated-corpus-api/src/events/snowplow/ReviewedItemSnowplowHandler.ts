@@ -2,6 +2,7 @@ import { CuratedCorpusSnowplowHandler } from './CuratedCorpusSnowplowHandler';
 import {
   ApprovedCorpusItemPayload,
   BaseEventData,
+  RejectedCorpusItemPayload,
   ReviewedCorpusItemPayload,
 } from '../types';
 import { buildSelfDescribingEvent, Tracker } from '@snowplow/node-tracker';
@@ -15,7 +16,6 @@ import {
   ReviewedCorpusItem,
 } from './schema';
 import { getUnixTimestamp } from '../../shared/utils';
-import { RejectedCuratedCorpusItem } from '@prisma/client';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import {
   ApprovedItemAuthor,
@@ -114,6 +114,7 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
         topic: item.topic || undefined,
         created_at: getUnixTimestamp(item.createdAt),
         created_by: item.createdBy,
+        action_screen: item.action_screen ?? undefined,
       },
     };
 
@@ -125,7 +126,7 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
       );
     } else {
       context = ReviewedItemSnowplowHandler.generateRejectedItemContext(
-        item as RejectedCuratedCorpusItem,
+        item as RejectedCorpusItemPayload,
         context,
       );
     }
@@ -153,17 +154,13 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
       updated_at: getUnixTimestamp(item.updatedAt),
       updated_by: item.updatedBy ?? undefined,
       loaded_from: item.source as CorpusItemSource,
-      // temporarily set to `undefined` until snowplow schema is updated
-      // https://mozilla-hub.atlassian.net/browse/MC-814
-      manually_loaded_reasons: undefined,
-      manually_loaded_reason_comment: undefined,
     };
 
     return context;
   }
 
   private static generateRejectedItemContext(
-    item: RejectedCuratedCorpusItem,
+    item: RejectedCorpusItemPayload,
     context: ReviewedCorpusItemContext,
   ): ReviewedCorpusItemContext {
     context.data = {
@@ -176,12 +173,18 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
     // from the prospects stream (e.g., the Parser hasn't supplied it when parsing
     // the URL), so we only send it to Snowplow if the data is there.
     if (item.title) {
-      context.data = { ...context.data, title: item.title };
+      context.data.title = item.title;
     }
 
     // And we do the exact same thing for the `language` field.
     if (item.language) {
-      context.data = { ...context.data, language: item.language };
+      context.data.language = item.language;
+    }
+
+    // the approved corpus item external id will be available if it's an approved item being rejected
+    if (item.approvedCorpusItemExternalId) {
+      context.data.approved_corpus_item_external_id =
+        item.approvedCorpusItemExternalId;
     }
 
     return context;

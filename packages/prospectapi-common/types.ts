@@ -2,7 +2,7 @@
 // currently is a confluence doc:
 // https://getpocket.atlassian.net/wiki/spaces/PE/pages/2584150049/Pocket+Shared+Data
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
-import { Topics } from 'content-common';
+import { ProspectType, Topics } from 'content-common';
 
 // this is the structure of an `Item` as returned by dynamo
 // just a convenience return type
@@ -11,27 +11,6 @@ export type DynamoItem =
       [key: string]: NativeAttributeValue;
     }
   | undefined;
-
-// these values will need to match those listed in the source of truth doc:
-// https://mozilla-hub.atlassian.net/wiki/spaces/PE/pages/390642851/Pocket+Shared+Data#Prospect-Types
-export enum ProspectType {
-  TIMESPENT = 'TIMESPENT',
-  COUNTS = 'COUNTS',
-  SYNDICATED_NEW = 'SYNDICATED_NEW',
-  SYNDICATED_RERUN = 'SYNDICATED_RERUN',
-  DOMAIN_ALLOWLIST = 'DOMAIN_ALLOWLIST',
-  TOP_SAVED = 'TOP_SAVED',
-  RECOMMENDED = 'RECOMMENDED',
-  COUNTS_MODELED = 'COUNTS_MODELED',
-  TIMESPENT_MODELED = 'TIMESPENT_MODELED',
-  TITLE_URL_MODELED = 'TITLE_URL_MODELED',
-  RSS_LOGISTIC = 'RSS_LOGISTIC',
-  RSS_LOGISTIC_RECENT = 'RSS_LOGISTIC_RECENT',
-  DISMISSED = 'DISMISSED',
-  CONSTRAINT_SCHEDULE = 'CONSTRAINT_SCHEDULE',
-  SLATE_SCHEDULER = 'SLATE_SCHEDULER',
-  SLATE_SCHEDULER_V2 = 'SLATE_SCHEDULER_V2',
-}
 
 // this is the type used in most of the code and in dynamo
 export type Prospect = {
@@ -67,14 +46,6 @@ export type Prospect = {
   rejectedCorpusItem?: { url: string };
 };
 
-// a scheduled surface has a name as well as an array of associated ProspectTypes
-export type ScheduledSurface = {
-  name: string;
-  guid: string;
-  ianaTimezone: string;
-  prospectTypes: ProspectType[];
-};
-
 // all the filters on the `getProspects` query
 export type GetProspectsFilters = {
   scheduledSurfaceGuid: string;
@@ -82,131 +53,6 @@ export type GetProspectsFilters = {
   includePublisher?: string;
   excludePublisher?: string;
 };
-
-// defines all scheduled surfaces and their valid prospect types
-// this will need to be kept in-sync with the source of truth confluence:
-// https://getpocket.atlassian.net/wiki/spaces/PE/pages/2564587582/Prospecting+Candidate+Sets
-// (this data is used in both ML & backend processes - is there a better
-// place to store/reference it? probably not at the moment...)
-export const ScheduledSurfaces: ScheduledSurface[] = [
-  {
-    name: 'New Tab (en-US)',
-    guid: 'NEW_TAB_EN_US',
-    ianaTimezone: 'America/New_York',
-    prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
-      ProspectType.RECOMMENDED,
-      ProspectType.TOP_SAVED,
-      ProspectType.DOMAIN_ALLOWLIST,
-      ProspectType.DISMISSED,
-      ProspectType.SYNDICATED_RERUN,
-      ProspectType.SYNDICATED_NEW,
-      ProspectType.COUNTS_MODELED,
-      ProspectType.TIMESPENT_MODELED,
-      ProspectType.TITLE_URL_MODELED,
-      ProspectType.RSS_LOGISTIC,
-      ProspectType.RSS_LOGISTIC_RECENT,
-      ProspectType.CONSTRAINT_SCHEDULE,
-      ProspectType.SLATE_SCHEDULER,
-      ProspectType.SLATE_SCHEDULER_V2,
-    ],
-  },
-  {
-    name: 'New Tab (de-DE)',
-    guid: 'NEW_TAB_DE_DE',
-    ianaTimezone: 'Europe/Berlin',
-    prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
-      ProspectType.DOMAIN_ALLOWLIST,
-      ProspectType.DISMISSED,
-      ProspectType.TITLE_URL_MODELED,
-    ],
-  },
-  {
-    name: 'New Tab (en-GB)',
-    guid: 'NEW_TAB_EN_GB',
-    ianaTimezone: 'Europe/London',
-    prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
-      ProspectType.RECOMMENDED,
-      ProspectType.DISMISSED,
-    ],
-  },
-  {
-    name: 'New Tab (fr-FR)',
-    guid: 'NEW_TAB_FR_FR',
-    ianaTimezone: 'Europe/Paris',
-    prospectTypes: [ProspectType.DOMAIN_ALLOWLIST],
-  },
-  {
-    name: 'New Tab (it-IT)',
-    guid: 'NEW_TAB_IT_IT',
-    ianaTimezone: 'Europe/Rome',
-    prospectTypes: [ProspectType.DOMAIN_ALLOWLIST],
-  },
-  {
-    name: 'New Tab (es-ES)',
-    guid: 'NEW_TAB_ES_ES',
-    ianaTimezone: 'Europe/Madrid',
-    prospectTypes: [ProspectType.DOMAIN_ALLOWLIST],
-  },
-  {
-    name: 'New Tab (en-INTL)',
-    guid: 'NEW_TAB_EN_INTL',
-    ianaTimezone: 'Asia/Kolkata',
-    prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
-      ProspectType.RECOMMENDED,
-      ProspectType.TITLE_URL_MODELED,
-      ProspectType.DISMISSED,
-    ],
-  },
-  {
-    name: 'Pocket Hits (en-US)',
-    guid: 'POCKET_HITS_EN_US',
-    ianaTimezone: 'America/New_York',
-    prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TOP_SAVED,
-      ProspectType.TIMESPENT,
-      ProspectType.DISMISSED,
-      ProspectType.COUNTS_MODELED,
-      ProspectType.TITLE_URL_MODELED,
-      ProspectType.RSS_LOGISTIC,
-      ProspectType.SYNDICATED_NEW,
-      ProspectType.SYNDICATED_RERUN,
-    ],
-  },
-  {
-    name: 'Pocket Hits (de-DE)',
-    guid: 'POCKET_HITS_DE_DE',
-    ianaTimezone: 'Europe/Berlin',
-    prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
-      ProspectType.TOP_SAVED,
-      ProspectType.DOMAIN_ALLOWLIST,
-      ProspectType.TITLE_URL_MODELED,
-    ],
-  },
-  {
-    name: 'Sandbox',
-    guid: 'SANDBOX',
-    ianaTimezone: 'America/New_York',
-    prospectTypes: [],
-  },
-];
-
-export type ClientApiResponse = {
-  data: {
-    getItemByUrl: ClientApiItem;
-  };
-};
-
 export type ClientApiDomainMeta = {
   name: string;
 };
@@ -219,11 +65,13 @@ export type ClientApiSyndicatedArticle = {
     name?: string;
     url?: string;
   };
+  publishedAt: string;
   title: string;
 };
 
 export type ClientApiCollection = {
   slug: string;
+  publishedAt: string;
 };
 
 export type ClientApiAuthor = {
@@ -234,6 +82,7 @@ export type ClientApiItem = {
   domainMetadata?: ClientApiDomainMeta;
   excerpt?: string;
   language?: string;
+  datePublished?: any;
   resolvedUrl: string;
   syndicatedArticle?: ClientApiSyndicatedArticle;
   title?: string;

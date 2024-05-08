@@ -70,7 +70,7 @@ enum RejectionReason {
 2024-01-29
 
 these reasons are used when dismissing prospects only for the
-SLATE_SCHEDULER prospect type. this is a preliminary step towards ML
+SLATE_SCHEDULE_V2 prospect type. this is a preliminary step towards ML
 scheduling items, and this reason set will *likely* be used when removing ML
 scheduled items as well.
 
@@ -133,8 +133,6 @@ enum ProspectType {
   DISMISSED
   RSS_LOGISTIC
   RSS_LOGISTIC_RECENT
-  CONSTRAINT_SCHEDULE
-  SLATE_SCHEDULER
   SLATE_SCHEDULER_V2
 }
 
@@ -175,6 +173,24 @@ enum ScheduledItemSource {
 }
 
 """
+Indicates where in the Curation Tools UI the action took place
+"""
+enum ActionScreen {
+  """
+  This action took place from the prospecting screen in the admin tool
+  """
+  PROSPECTING
+  """
+  This action took place from the schedule screen in the admin tool
+  """
+  SCHEDULE
+  """
+  This action took place from the corpus screen in the admin tool
+  """
+  CORPUS
+}
+
+"""
 A Scheduled Surface, including its associated Prospect Types.
 """
 type ScheduledSurface {
@@ -212,6 +228,10 @@ type ApprovedCorpusItem @key(fields: "url") {
   The URL of the story.
   """
   url: Url!
+  """
+  True if the domain of the corpus item has been scheduled in the past.
+  """
+  hasTrustedDomain: Boolean!
   """
   The title of the story.
   """
@@ -671,6 +691,10 @@ input CreateApprovedCorpusItemInput {
   Optionally, specify the source of the Scheduled Item. Could be one of: MANUAL or ML
   """
   scheduledSource: ScheduledItemSource
+  """
+  The UI screen where the approved corpus item is being created from.
+  """
+  actionScreen: ActionScreen
 }
 
 """
@@ -822,20 +846,11 @@ input UpdateApprovedCorpusItemInput {
   Example: a story covering an election, or "The best of 202x" collection.
   """
   isTimeSensitive: Boolean!
-}
-
-"""
-Input data for updating an Approved Item's author data.
-"""
-input UpdateApprovedCorpusItemAuthorsInput {
   """
-  Approved Item ID.
+  The UI screen where the approved corpus item is being updated from.
+  Can be on the corpus screen or the schedule screen.
   """
-  externalId: ID!
-  """
-  A name and sort order for each author.
-  """
-  authors: [CorpusItemAuthorInput!]!
+  actionScreen: ActionScreen
 }
 
 """
@@ -850,6 +865,11 @@ input RejectApprovedCorpusItemInput {
   A comma-separated list of rejection reasons.
   """
   reason: String!
+  """
+  The UI screen where the approved corpus item is being rejected from.
+  Can be the schedule screen or the corpus screen.
+  """
+  actionScreen: ActionScreen
 }
 
 """
@@ -885,6 +905,11 @@ input CreateRejectedCorpusItemInput {
   A comma-separated list of rejection reasons.
   """
   reason: String!
+  """
+  The UI screen where the rejected corpus item is being created from.
+  Currently only available on prospect screen.
+  """
+  actionScreen: ActionScreen
 }
 
 """
@@ -910,11 +935,16 @@ input CreateScheduledCorpusItemInput {
   """
   A comma-separated list of reasons for manually scheduling an item. Helps ML improve models for sets of scheduled items.
   """
-  manualScheduleReasons: String
+  reasons: String
   """
   Free-text entered by the curator to give further detail to the manual schedule reason(s) provided.
   """
-  manualScheduleReasonComment: String
+  reasonComment: String
+  """
+  The UI screen where the scheduled corpus item is being created from.
+  Can be from the prospecting, corpus, or schedule screens.
+  """
+  actionScreen: ActionScreen
 }
 
 """
@@ -933,6 +963,11 @@ input RescheduleScheduledCorpusItemInput {
   Source of the Scheduled Item. Could be one of: MANUAL or ML
   """
   source: ScheduledItemSource!
+  """
+  The UI screen where the scheduled corpus item is being resceduled from.
+  Can only be from the schedule screen.
+  """
+  actionScreen: ActionScreen
 }
 
 """
@@ -951,6 +986,11 @@ input DeleteScheduledCorpusItemInput {
   Free-text entered by the curator to give further detail to the reason(s) provided.
   """
   reasonComment: String
+  """
+  The UI screen where the scheduled corpus item is being deleted from.
+  Can only be from the schedule screen.
+  """
+  actionScreen: ActionScreen
 }
 
 type Query {
@@ -1040,13 +1080,6 @@ type Mutation {
   """
   updateApprovedCorpusItem(
     data: UpdateApprovedCorpusItemInput!
-  ): ApprovedCorpusItem!
-
-  """
-  Updates authors for an Approved Item.
-  """
-  updateApprovedCorpusItemAuthors(
-    data: UpdateApprovedCorpusItemAuthorsInput!
   ): ApprovedCorpusItem!
 
   """

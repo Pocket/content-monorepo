@@ -1,10 +1,10 @@
 import {
   RejectedCuratedCorpusItem,
   ScheduledItem as ScheduledItemModel,
-} from '@prisma/client';
+} from '.prisma/client';
 import { ScheduledItem, CorpusItem, ApprovedItem } from '../database/types';
 import { ScheduledCorpusItemStatus } from '../shared/types';
-import { CorpusItemSource } from 'content-common';
+import { ActionScreen, ScheduledItemSource } from 'content-common';
 
 export enum ReviewedCorpusItemEventType {
   ADD_ITEM = 'ADD_ITEM',
@@ -36,30 +36,40 @@ export type BaseEventData = {
 
 // Data for approved items
 // Stub type ready to be extended with non-database properties (for event tracking).
-export type ApprovedCorpusItemPayload = ApprovedItem;
+export type ApprovedCorpusItemPayload = ApprovedItem & {
+  action_screen?: ActionScreen;
+};
+
+// Extended with non DB properties for event tracking.
+export type RejectedCorpusItemPayload = RejectedCuratedCorpusItem & {
+  approvedCorpusItemExternalId?: string;
+  // the admin UI screen that originated the event
+  action_screen?: ActionScreen;
+};
 
 // Data for the events that are fired on changes to curated items
 export type ReviewedCorpusItemPayload = {
-  reviewedCorpusItem: ApprovedCorpusItemPayload | RejectedCuratedCorpusItem;
+  reviewedCorpusItem: ApprovedCorpusItemPayload | RejectedCorpusItemPayload;
 };
 
 // Data for the events that are fired on updates to Scheduled Surface schedule
 export type ScheduledCorpusItemPayload = {
   scheduledCorpusItem: ScheduledItem & {
     // the method by which this item was generated (MANUAL or ML, for a scheduled item)
-    generated_by?: CorpusItemSource;
-    // for some surfaces, curators will provide at least one reason and
-    // optionally a comment when manually scheduling a corpus item.
-    // the purpose here is for ML to know *why* items are manually scheduled
-    // in an effort to improve their modeling.
-    manualScheduleReasons?: string[];
-    manualScheduleReasonsComment?: string;
-    // will only be present when unscheduling an item from a limited set of
-    // surfaces. these inform ML of why an item was unscheduled.
+    generated_by?: ScheduledItemSource;
+    // optional field used when the status of a scheduled item is changed
+    // (either rescheduled or deleted)
+    original_scheduled_corpus_item_external_id?: string;
+    // multi-purpose field intended to capture the reason(s) for taking the
+    // action. currently, this is only when either scheduling or unscheduling.
+    // specifically, only when scheduling and unscheduling directly from the
+    // schedule view in the admin tool.
     reasons?: string[];
     reasonComment?: string;
     // the status of the scheduled_corpus_item, as decided by a curator.
     status?: ScheduledCorpusItemStatus;
+    // the admin UI screen that originated the event
+    action_screen?: ActionScreen;
   };
 };
 

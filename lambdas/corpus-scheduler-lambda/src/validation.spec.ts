@@ -1,6 +1,14 @@
-import { validateCandidate, validateScheduledDate } from './validation';
-import { createScheduledCandidate } from './testHelpers';
-import { CorpusItemSource, CorpusLanguage } from 'content-common';
+import {
+  validateCandidate,
+  validateImageUrl,
+  validateScheduledDate,
+} from './validation';
+import { createScheduledCandidate, mockPocketImageCache } from './testHelpers';
+import {
+  CorpusItemSource,
+  CorpusLanguage,
+  ScheduledSurfacesEnum,
+} from 'content-common';
 import { DateTime, Settings } from 'luxon';
 import config from './config';
 
@@ -173,6 +181,26 @@ describe('validation', function () {
       }
     });
   });
+  describe('validateImageUrl', () => {
+    it('should be null if image is invalid', async () => {
+      // mock error response
+      mockPocketImageCache(404);
+      // should not throw error
+      await expect(
+        validateImageUrl('https://fake-image-url.com'),
+      ).resolves.not.toThrowError();
+
+      // should be undefined & not image_url
+      expect(await validateImageUrl('https://fake-image-url.com')).toBeNull();
+    });
+    it('should validate imageUrl', async () => {
+      // mock return 200 code
+      mockPocketImageCache(200);
+      const imageUrl = await validateImageUrl('https://fake-image-url.com');
+      // should return  imageUrl
+      expect(imageUrl).toEqual('https://fake-image-url.com');
+    });
+  });
   describe('validateCandidate', () => {
     it('should not validate a bad scheduled date when enableScheduledDateValidation is false', async () => {
       // mock the config.app.enableScheduledDateValidation
@@ -186,68 +214,50 @@ describe('validation', function () {
         },
         allowedToSchedule: 'true',
         enableScheduledDateValidation: 'false',
+        version: 'fake-sha',
       });
-      const scheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-        undefined,
-        CorpusItemSource.ML,
-        'bad-scheduled-date',
-      );
+      const scheduledCandidate = createScheduledCandidate({
+        scheduled_date: 'bad-scheduled-date',
+      });
       // should not throw error
       await expect(
         validateCandidate(scheduledCandidate),
       ).resolves.not.toThrowError();
     });
     it('should throw Error on ScheduleCandidate if source is not ML', async () => {
-      const badScheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-        undefined,
-        CorpusItemSource.MANUAL as CorpusItemSource.ML,
-      );
+      const badScheduledCandidate = createScheduledCandidate();
+      badScheduledCandidate.scheduled_corpus_item.source =
+        CorpusItemSource.MANUAL as CorpusItemSource.ML;
 
       await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
         'Error on typia.assert(): invalid type on $input.scheduled_corpus_item.source, expect to be "ML"',
       );
     });
     it('should throw Error on ScheduleCandidate if types are wrong (language)', async () => {
-      const badScheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        'en' as CorpusLanguage,
-        ['Rebecca Jennings'],
-        undefined,
-        CorpusItemSource.ML,
-      );
+      const badScheduledCandidate = createScheduledCandidate();
+      badScheduledCandidate.scheduled_corpus_item.language =
+        'en' as CorpusLanguage;
 
       // should throw error
       await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
         'Error on typia.assert(): invalid type on $input.scheduled_corpus_item.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT" | undefined)',
       );
     });
-    it('should not throw Error on ScheduleCandidate if it validates', async () => {
-      const scheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-        undefined,
-        CorpusItemSource.ML,
+    it('should throw Error on ScheduleCandidate if types are wrong (scheduled_surface)', async () => {
+      const badScheduledCandidate = createScheduledCandidate();
+      badScheduledCandidate.scheduled_corpus_item.scheduled_surface_guid =
+        'bad-surface' as ScheduledSurfacesEnum;
+
+      // should throw error
+      await expect(validateCandidate(badScheduledCandidate)).rejects.toThrow(
+        'Error on typia.assert(): invalid type on $input.scheduled_corpus_item.scheduled_surface_guid, expect to be ("NEW_TAB_DE_DE" | "NEW_TAB_EN_GB" | "NEW_TAB_EN_INT" | "NEW_TAB_EN_US" | "NEW_TAB_ES_ES" | "NEW_TAB_FR_FR" | "NEW_TAB_IT_IT" | "POCKET_HITS_DE_DE" | "POCKET_HITS_EN_US" | "SANDBOX")',
       );
+    });
+    it('should not throw Error on ScheduleCandidate if it validates', async () => {
+      const scheduledCandidate = createScheduledCandidate();
 
       // should not throw error
-      await expect(
-        validateCandidate(scheduledCandidate),
-      ).resolves.not.toThrowError();
+      await validateCandidate(scheduledCandidate);
     });
   });
 });

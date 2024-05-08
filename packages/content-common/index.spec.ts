@@ -1,4 +1,4 @@
-import { parseReasonsCsv, sanitizeText } from './index';
+import {applyApTitleCase, applyCurlyQuotes, capitalize, parseReasonsCsv, sanitizeText} from './index';
 
 // refactor/move if/when needed
 // currently used in all tests below.
@@ -68,6 +68,84 @@ describe('content-common', () => {
 
       expect(sanitizeText(string, maxStringLength)).toEqual(
         'this is a very long string that will be more than one hundred characters. it is a real epic of a co',
+      );
+    });
+  });
+
+  describe('capitalize', () => {
+    it('should return empty str if string is null', () => {
+      const output = capitalize(null as string);
+      expect(output).toEqual('');
+    });
+    it('should capitalize the first char of a string', () => {
+      const string = 'a random string';
+      const output = capitalize(string);
+      expect(output).toEqual('A random string');
+    });
+  });
+
+  describe('applyApTitleCase', () => {
+    it('should return undefined if string is null/undefined/empty string', () => {
+      // null
+      let output = applyApTitleCase(null as string);
+      expect(output).toBeUndefined();
+
+      // undefined
+      output = applyApTitleCase(undefined as string);
+      expect(output).toBeUndefined();
+
+      // empty string
+      output = applyApTitleCase('');
+      expect(output).toBeUndefined();
+    });
+    it('should format string correctly using AP style', () => {
+      const stringToFormat = 'a random String to format! random-string:Random!';
+      const output = applyApTitleCase(stringToFormat);
+      expect(output).toEqual('A Random String to Format! Random-String:Random!');
+    });
+  });
+  // taken from curation admin tools
+  describe('applyCurlyQuotes', () => {
+    it('should return undefined if text is null/undefined/empty string', () => {
+      // null
+      let output = applyCurlyQuotes(null as string);
+      expect(output).toBeUndefined();
+
+      // undefined
+      output = applyCurlyQuotes(undefined as string);
+      expect(output).toBeUndefined();
+
+      // empty string
+      output = applyCurlyQuotes('');
+      expect(output).toBeUndefined();
+    });
+
+    it('adds single open curly apostrophe for straight apostrophe', () => {
+      const result = applyCurlyQuotes("Here's to the great ones!");
+      expect(result).toEqual('Here’s to the great ones!');
+    });
+
+    it('adds double curly apostrophes for straight apostrophe wrapping text', () => {
+      const result = applyCurlyQuotes('Here\'s a quote - "To be or not to be"');
+      expect(result).toEqual('Here’s a quote - “To be or not to be”');
+    });
+
+    it('adds single curly apostrophes for straight apostrophes wrapping text', () => {
+      const result = applyCurlyQuotes("Here's a quote - 'To be or not to be'");
+      expect(result).toEqual('Here’s a quote - ‘To be or not to be’');
+    });
+
+    it('adds single curly apostrophes at the end of quotes', () => {
+      const result = applyCurlyQuotes("Here's a quote - 'To be or not to be.'");
+      expect(result).toEqual('Here’s a quote - ‘To be or not to be.’');
+    });
+
+    it('adds double curly apostrophes at the end of quotes', () => {
+      const result = applyCurlyQuotes(
+          'I tried the workout, and it did more than expected. "Fitness is for Everyone."'
+      );
+      expect(result).toEqual(
+          'I tried the workout, and it did more than expected. “Fitness is for Everyone.”'
       );
     });
   });

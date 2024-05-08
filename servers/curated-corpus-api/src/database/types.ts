@@ -2,41 +2,31 @@ import {
   ApprovedItem as ApprovedItemModel,
   CuratedStatus,
   ScheduledItem as ScheduledItemModel,
-} from '@prisma/client';
-import { ScheduledItemSource } from '../shared/types';
+} from '.prisma/client';
 import {
   ApprovedItemAuthor,
   ApprovedItemRequiredInput,
   CorpusItemSource,
+  CorpusLanguage,
+  ScheduledItemSource,
 } from 'content-common';
 
-export type ImportApprovedItemInput = {
+export type CreateApprovedItemInput = {
+  prospectId?: string;
   url: string;
   title: string;
   excerpt: string;
+  authors: ApprovedItemAuthor[];
   status: CuratedStatus;
-  language: string;
+  language: CorpusLanguage;
   publisher: string;
+  datePublished?: string;
   imageUrl: string;
   topic: string;
   source: CorpusItemSource;
   isCollection: boolean;
+  isTimeSensitive: boolean;
   isSyndicated: boolean;
-  createdAt: Date;
-  createdBy: string;
-  updatedAt: Date;
-  updatedBy: string;
-};
-
-export type ImportScheduledItemInput = {
-  approvedItemId: number;
-  scheduledSurfaceGuid: string;
-  scheduledDate: string;
-  source: ScheduledItemSource;
-  createdAt: Date;
-  createdBy: string;
-  updatedAt: Date;
-  updatedBy: string;
 };
 
 export type PaginationInput = {
@@ -67,11 +57,6 @@ export type UpdateApprovedItemInput = Omit<
 > & {
   externalId: string;
   datePublished?: string;
-};
-
-export type UpdateApprovedItemAuthorsInput = {
-  externalId: string;
-  authors: ApprovedItemAuthor[];
 };
 
 export type RejectApprovedItemInput = {
@@ -111,22 +96,8 @@ export type DeleteScheduledItemInput = {
   externalId: string;
 };
 
-export type CreateScheduledItemInput = {
-  approvedItemExternalId: string;
-  scheduledSurfaceGuid: string;
-  scheduledDate: string;
-  source: ScheduledItemSource;
-};
-
-// type to map to the input coming from the graph mutation
-export type CreateScheduledItemGraphInput = CreateScheduledItemInput & {
-  manualScheduleReasons?: string;
-  manualScheduleReasonComment?: string;
-};
-
-export type RescheduleScheduledItemInput = {
+export type MoveScheduledItemToBottomInput = {
   externalId: string;
-  scheduledDate: string;
   source: ScheduledItemSource;
 };
 

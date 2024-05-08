@@ -2,10 +2,10 @@ import { Construct } from 'constructs';
 import {
   App,
   DataTerraformRemoteState,
-  RemoteBackend,
   TerraformStack,
   MigrateIds,
   Aspects,
+  S3Backend,
 } from 'cdktf';
 
 import {
@@ -42,10 +42,11 @@ class ProspectAPI extends TerraformStack {
     new LocalProvider(this, 'local-provider');
     new ArchiveProvider(this, 'archive-provider');
 
-    new RemoteBackend(this, {
-      hostname: 'app.terraform.io',
-      organization: 'Pocket',
-      workspaces: [{ name: `${config.name}-${config.environment}` }],
+    new S3Backend(this, {
+      bucket: `mozilla-content-team-${config.environment.toLowerCase()}-terraform-state`,
+      dynamodbTable: `mozilla-content-team-${config.environment.toLowerCase()}-terraform-state`,
+      key: config.name,
+      region: 'us-east-1',
     });
 
     new PocketVPC(this, 'pocket-vpc');

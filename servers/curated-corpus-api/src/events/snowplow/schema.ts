@@ -1,6 +1,10 @@
 // Helper types and enums used in the schema
 import { ScheduledCorpusItemStatus } from '../../shared/types';
-import { CorpusItemSource } from 'content-common';
+import {
+  ActionScreen,
+  CorpusItemSource,
+  ScheduledItemSource,
+} from 'content-common';
 
 export type RejectionReason = { reason: string };
 
@@ -66,15 +70,6 @@ export type ReviewedCorpusItem = {
    * Indicates the backend source for an approved corpus item.
    */
   loaded_from?: CorpusItemSource;
-  /**
-   * The reason a curator added the item manually. Filled-in if loaded_from is
-   * set to MANUAL, null for other loaded_from values.
-   */
-  manually_loaded_reasons?: string[];
-  /**
-   * An optional comment added by the curator when adding an item manually.
-   */
-  manually_loaded_reason_comment?: string;
   /**
    * The decision by the curator on the item’s validity for the curated corpus.
    */
@@ -143,6 +138,10 @@ export type ReviewedCorpusItem = {
    * The curator who most recently updated the reviewed corpus item.
    */
   updated_by?: string;
+  /**
+   * Indicates where in the Curation Tools UI the action took place. Null if the action was performed by a backend ML process.
+   */
+  action_screen?: ActionScreen;
 };
 
 /**
@@ -220,9 +219,17 @@ export type ScheduledCorpusItem = {
   /**
    * The method by which this item was generated. Possible values include ML and MANUAL.
    */
-  generated_by?: CorpusItemSource;
+  generated_by?: ScheduledItemSource;
+  /**
+   * A guid that identifies the original schedule on which the curator action (removed or rescheduled) took place.
+   */
+  original_scheduled_corpus_item_external_id?: string;
   /**
    * The status of the scheduled_corpus_item, as decided by a curator.
    */
   status?: ScheduledCorpusItemStatus;
+  /**
+   * Indicates where in the Curation Tools UI the action took place. Null if the action was performed by a backend ML process.
+   */
+  action_screen?: ActionScreen;
 };

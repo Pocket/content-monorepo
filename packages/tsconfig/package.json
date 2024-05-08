@@ -8,13 +8,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@types/node": "^20.11.6",
-    "ts-node": "10.9.2",
+    "@types/node": "^20.12.7",
+    "ts-node": "^10.9.2",
     "tslib": "2.6.2",
     "typescript": "5.3.3",
     "tsup": "8.0.1"
   },
   "engines": {
-    "node": "^20.11"
+    "node": "^20.12"
   }
 }

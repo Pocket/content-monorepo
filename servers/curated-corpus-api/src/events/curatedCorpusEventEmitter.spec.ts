@@ -8,9 +8,13 @@ import {
 import config from '../config';
 import { getUnixTimestamp } from '../shared/utils';
 import { ApprovedItem } from '../database/types';
-import { RejectedCuratedCorpusItem } from '@prisma/client';
-import { ScheduledItemSource, Topics } from '../shared/types';
-import { CorpusItemSource, CuratedStatus } from 'content-common';
+import { RejectedCuratedCorpusItem } from '.prisma/client';
+import { Topics } from 'content-common';
+import {
+  CorpusItemSource,
+  CuratedStatus,
+  ScheduledItemSource,
+} from 'content-common';
 
 describe('CuratedCorpusEventEmitter', () => {
   const emitter = new CuratedCorpusEventEmitter();
@@ -30,6 +34,7 @@ describe('CuratedCorpusEventEmitter', () => {
     externalId: '123-abc',
     prospectId: 'abc-123',
     url: 'https://test.com',
+    domainName: 'test.com',
     status: CuratedStatus.CORPUS,
     id: 123,
     title: 'Test title',

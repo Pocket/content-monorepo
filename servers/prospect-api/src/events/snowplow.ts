@@ -1,71 +1,14 @@
 import * as Sentry from '@sentry/node';
 import {
-  gotEmitter,
-  HttpMethod,
-  HttpProtocol,
-  tracker as snowPlowTracker,
   buildSelfDescribingEvent,
-  Emitter,
   Tracker,
   SelfDescribingEvent,
   SelfDescribingJson,
 } from '@snowplow/node-tracker';
-import { Response, RequestError } from 'got';
 
 import config from '../config';
 import { SnowplowProspect } from './types';
 import { serverLogger } from '../express';
-
-let emitter: Emitter;
-let tracker: Tracker;
-
-/**
- * lazy instantiation of a snowplow emitter
- *
- * @returns Emitter
- */
-export function getEmitter(): Emitter {
-  if (!emitter) {
-    emitter = gotEmitter(
-      config.snowplow.endpoint,
-      config.snowplow.httpProtocol as HttpProtocol,
-      undefined,
-      HttpMethod.POST,
-      config.snowplow.bufferSize,
-      config.snowplow.retries,
-      undefined,
-      // this is the callback function invoked after snowplow flushes their
-      // internal cache.
-      (error?: RequestError, response?: Response<string>) => {
-        if (error) {
-          serverLogger.error('emitter error', { error });
-          Sentry.addBreadcrumb({ message: 'Emitter Data', data: error });
-          Sentry.captureMessage(`Emitter Error`);
-        }
-      }
-    );
-  }
-
-  return emitter;
-}
-
-/**
- * lazy instantiation of a snowplow tracker
- * @param emitter Emitter - a snowplow emitter
- * @returns Tracker
- */
-export const getTracker = (emitter: Emitter): Tracker => {
-  if (!tracker) {
-    tracker = snowPlowTracker(
-      emitter,
-      config.snowplow.namespace,
-      config.snowplow.appId,
-      true
-    );
-  }
-
-  return tracker;
-};
 
 /**
  * creates a snowplow event object
@@ -92,7 +35,7 @@ export const generateEvent = (eventName: string): SelfDescribingEvent => {
  * @returns SelfDescribingJson
  */
 export const generateContext = (
-  prospect: SnowplowProspect
+  prospect: SnowplowProspect,
 ): SelfDescribingJson => {
   return {
     schema: config.snowplow.schemas.prospect,
@@ -113,7 +56,7 @@ export const generateContext = (
 export const queueSnowplowEvent = (
   tracker: Tracker,
   eventName: string,
-  prospect: SnowplowProspect
+  prospect: SnowplowProspect,
 ): void => {
   const event = generateEvent(eventName);
   const contexts: SelfDescribingJson[] = [generateContext(prospect)];

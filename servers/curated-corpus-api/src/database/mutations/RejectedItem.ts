@@ -1,4 +1,4 @@
-import { PrismaClient, RejectedCuratedCorpusItem } from '@prisma/client';
+import { PrismaClient, RejectedCuratedCorpusItem } from '.prisma/client';
 import { CreateRejectedItemInput } from '../types';
 import { checkCorpusUrl } from '../helpers/checkCorpusUrl';
 

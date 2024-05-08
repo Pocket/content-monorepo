@@ -1,8 +1,11 @@
 import {
+  createAndScheduleCorpusItemHelper,
+  createCreateScheduledItemInput,
   generateJwt,
   getCorpusSchedulerLambdaPrivateKey,
   mapAuthorToApprovedItemAuthor,
-  mapScheduledCandidateInputToCreateApprovedItemInput,
+  mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput,
+  validateDatePublished,
 } from './utils';
 import config from './config';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -10,12 +13,27 @@ import {
   GetSecretValueCommand,
   SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
-import { ApprovedItemAuthor, CorpusLanguage } from 'content-common';
+import { setupServer } from 'msw/node';
+import {
+  ApprovedItemAuthor,
+  CorpusItemSource,
+  CorpusLanguage,
+  UrlMetadata,
+} from 'content-common';
 import {
   createScheduledCandidate,
+  defaultScheduledDate,
   expectedOutput,
+  mockCreateApprovedCorpusItemOnce,
+  mockCreateScheduledCorpusItemOnce,
+  mockGetApprovedCorpusItemByUrl,
+  mockGetUrlMetadata,
+  mockPocketImageCache,
+  mockSnowplow,
   parserItem,
 } from './testHelpers';
+import { getEmitter, getTracker } from 'content-common/snowplow';
+import * as validation from './validation';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwt = require('jsonwebtoken');
@@ -24,6 +42,7 @@ const jwkToPem = require('jwk-to-pem');
 
 // Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
 describe('utils', function () {
+  const server = setupServer();
   const ssmMock = mockClient(SecretsManagerClient);
   const testPrivateKey = {
     p: '2NE9Yskv7kZaM_OMvKElEWRKi6peRae3JkMp-TvjqMIO69kV3zQfpb0gfIdcC54_BuGUUUjL9IEDApWas-IBbG33bKoGTzCzNbfML0aQvAHpuvZI6pGAq3OdHgC-kGjb5wyK3tDaP-rS8aVYjrB9jQY7Go-F4xWyikNm-99BJg0',
@@ -51,7 +70,11 @@ describe('utils', function () {
   const now = new Date('2021-01-01 10:20:30');
   const exp = new Date('2021-01-01 10:25:30');
 
+  const emitter = getEmitter();
+  const tracker = getTracker(emitter, config.snowplow.appId);
+
   beforeAll(() => {
+    server.listen();
     jest.useFakeTimers({
       now: now,
       advanceTimers: true,
@@ -60,9 +83,13 @@ describe('utils', function () {
 
   beforeEach(() => ssmMock.reset());
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    server.resetHandlers();
+    jest.clearAllMocks();
+  });
 
   afterAll(() => {
+    server.close();
     jest.restoreAllMocks();
     jest.useRealTimers();
   });
@@ -97,6 +124,96 @@ describe('utils', function () {
       expect(privateKey.my_secret_key).toEqual('my_secret_value');
     });
   });
+  describe('createCreateScheduledItemInput', () => {
+    it('should create CreateScheduledItemInput correctly', async () => {
+      const scheduledCandidate = createScheduledCandidate();
+      const output = await createCreateScheduledItemInput(
+        scheduledCandidate,
+        'fake-approved-external-id',
+      );
+      const expectedApprovedItemOutput = {
+        approvedItemExternalId: 'fake-approved-external-id',
+        scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+        scheduledDate: defaultScheduledDate as string,
+        source: 'ML',
+      };
+
+      expect(output).toEqual(expectedApprovedItemOutput);
+    });
+    it('should throw error on CreateScheduledItemInput if a field type is wrong', async () => {
+      const badCandidate: any = createScheduledCandidate();
+      badCandidate.scheduled_corpus_item['source'] =
+        'bad-source' as CorpusItemSource.ML;
+      await expect(
+        createCreateScheduledItemInput(
+          badCandidate,
+          'fake-approved-external-id',
+        ),
+      ).rejects.toThrow(
+        `failed to create CreateScheduledItemInput for a4b5d99c-4c1b-4d35-bccf-6455c8df07b0. ` +
+          `Reason: Error: Error on typia.assert(): invalid type on $input.source, expect to be ("MANUAL" | "ML")`,
+      );
+    });
+  });
+  describe('createAndScheduleCorpusItemHelper', () => {
+    it('should schedule a previously approved item', async () => {
+      mockSnowplow(server);
+      // approvedCorpusItem should return a response, not null
+      mockGetApprovedCorpusItemByUrl(server);
+      mockGetUrlMetadata(server);
+      mockCreateScheduledCorpusItemOnce(server);
+      mockCreateApprovedCorpusItemOnce(server);
+
+      // spy on console.log
+      const consoleLogSpy = jest.spyOn(global.console, 'log');
+
+      const scheduledCandidate = createScheduledCandidate();
+      // no errors should be thrown from apis
+      await expect(
+        createAndScheduleCorpusItemHelper(
+          scheduledCandidate,
+          'fake-bearer-token',
+          tracker,
+        ),
+      ).resolves.not.toThrowError();
+
+      // we expect the createScheduledCorpusItem to run
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        'CreateScheduledCorpusItem MUTATION OUTPUT: {"data":{"createScheduledCorpusItem":{"externalId":"fake-scheduled-external-id-2","approvedItem":{"externalId":"fake-external-id","url":"https://fake-url.com","title":"Fake title"}}}}',
+      );
+    });
+    it('should create, approve & schedule a new candidate', async () => {
+      mockSnowplow(server);
+      // approvedCorpusItem should return a response, not null
+      mockGetApprovedCorpusItemByUrl(server, {
+        data: {
+          getApprovedCorpusItemByUrl: null,
+        },
+      });
+      mockGetUrlMetadata(server);
+      mockCreateScheduledCorpusItemOnce(server);
+      mockCreateApprovedCorpusItemOnce(server);
+      mockPocketImageCache(200);
+
+      // spy on console.log
+      const consoleLogSpy = jest.spyOn(global.console, 'log');
+
+      const scheduledCandidate = createScheduledCandidate();
+      // no errors should be thrown from apis
+      await expect(
+        createAndScheduleCorpusItemHelper(
+          scheduledCandidate,
+          'fake-bearer-token',
+          tracker,
+        ),
+      ).resolves.not.toThrowError();
+
+      // we expect the createScheduledCorpusItem to run
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        'CreateApprovedCorpusItem MUTATION OUTPUT: {"data":{"createApprovedCorpusItem":{"externalId":"fake-external-id","url":"https://fake-url.com","title":"Fake title","scheduledSurfaceHistory":[{"externalId":"143b8de8-0dc9-4613-b9f0-0e8837a2df1c"}]}}}',
+      );
+    });
+  });
   describe('mapAuthorToApprovedItemAuthor', () => {
     it('should create an ApprovedItemAuthor[] from a string array of author names', async () => {
       const authors = mapAuthorToApprovedItemAuthor([
@@ -116,62 +233,275 @@ describe('utils', function () {
       expect(authors).toEqual(expectedAuthors);
     });
   });
-  describe('mapScheduledCandidateInputToCreateApprovedItemInput', () => {
-    it('should map correctly a ScheduledCandidate to CreateApprovedItemInput', async () => {
-      const scheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-      );
-      const output = await mapScheduledCandidateInputToCreateApprovedItemInput(
-        scheduledCandidate,
-        parserItem,
-      );
-      expect(output).toEqual(expectedOutput);
-    });
-    it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on Parser fields for undefined optional ScheduledCandidate fields', async () => {
-      // all optional fields are undefined and should be taken from the Parser
+  describe('mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput', () => {
+    it('should throw Error on CreateApprovedItemInput if field types are wrong (imageUrl)', async () => {
+      // candidate & parser imageUrl both null
       const scheduledCandidate = createScheduledCandidate();
-      expect(scheduledCandidate.scheduled_corpus_item.title).toBeUndefined();
-      expect(scheduledCandidate.scheduled_corpus_item.excerpt).toBeUndefined();
-      expect(scheduledCandidate.scheduled_corpus_item.language).toBeUndefined();
-      expect(scheduledCandidate.scheduled_corpus_item.authors).toBeUndefined();
-      expect(
-        scheduledCandidate.scheduled_corpus_item.image_url,
-      ).toBeUndefined();
-      const output = await mapScheduledCandidateInputToCreateApprovedItemInput(
-        scheduledCandidate,
-        parserItem,
-      );
-      expect(output).toEqual(expectedOutput);
-    });
-    it('should throw Error on CreateApprovedItemInput if field types are wrong', async () => {
-      const scheduledCandidate = createScheduledCandidate(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-        'https://fake-image-url.com',
-        CorpusLanguage.EN,
-        ['Rebecca Jennings'],
-      );
-      parserItem.publisher = 1 as unknown as string; // force publisher to be the wrong type to trigger an Error
+      scheduledCandidate.scheduled_corpus_item.image_url =
+        null as unknown as string;
+      parserItem.imageUrl = null as unknown as string;
 
       await expect(
-        mapScheduledCandidateInputToCreateApprovedItemInput(
-          scheduledCandidate,
-          parserItem,
-        ),
-      ).rejects.toThrow(Error);
-      await expect(
-        mapScheduledCandidateInputToCreateApprovedItemInput(
+        mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
           scheduledCandidate,
           parserItem,
         ),
       ).rejects.toThrow(
-        `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedItemInput. ` +
-          `Reason: Error: Error on typia.assert(): invalid type on $input.publisher, expect to be string`,
+        new Error(
+          `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedCorpusItemApiInput. ` +
+            `Reason: Error: Error on typia.assert(): invalid type on $input.imageUrl, expect to be string`,
+        ),
       );
+    });
+    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & apply title formatting if candidate is EN', async () => {
+      // set parser image url to something different from candidate imageUrl
+      parserItem.imageUrl = 'https://different-image.com';
+      const scheduledCandidate = createScheduledCandidate();
+      const validateImageSpy = jest
+        .spyOn(validation, 'validateImageUrl')
+        .mockReturnValue(
+          Promise.resolve(
+            scheduledCandidate.scheduled_corpus_item.image_url as string,
+          ),
+        );
+      const output =
+        await mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+          scheduledCandidate,
+          parserItem,
+        );
+      expect(validateImageSpy).toHaveBeenCalled(); //=> true
+      expect(output.imageUrl).not.toBeNull();
+      // check that AP style has been applied
+      expect(output.title).not.toEqual(
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+      );
+      expect(output.title).toEqual(
+        'Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.',
+      );
+      // should be english language
+      expect(output.language).toEqual(CorpusLanguage.EN);
+      // should equal https://fake-image-url.com and not https://different-image.com
+      expect(output.imageUrl).toEqual('https://fake-image-url.com');
+      expect(output).toEqual(expectedOutput);
+      // set parser image url to default
+      parserItem.imageUrl = scheduledCandidate.scheduled_corpus_item.image_url;
+    });
+    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & NOT apply title formatting if candidate is not EN', async () => {
+      // set parser image url to something different from candidate imageUrl
+      parserItem.imageUrl = 'https://different-image.com';
+      parserItem.language = CorpusLanguage.DE;
+      expectedOutput.language = CorpusLanguage.DE;
+      expectedOutput.title =
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.';
+      const scheduledCandidate = createScheduledCandidate();
+      scheduledCandidate.scheduled_corpus_item.language = CorpusLanguage.DE;
+      const validateImageSpy = jest
+        .spyOn(validation, 'validateImageUrl')
+        .mockReturnValue(
+          Promise.resolve(
+            scheduledCandidate.scheduled_corpus_item.image_url as string,
+          ),
+        );
+      const output =
+        await mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+          scheduledCandidate,
+          parserItem,
+        );
+      expect(validateImageSpy).toHaveBeenCalled(); //=> true
+      expect(output.imageUrl).not.toBeNull();
+      // check that AP style has NOT been applied
+      expect(output.title).not.toEqual(
+        'Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.',
+      );
+      expect(output.title).toEqual(
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+      );
+      // should be german language
+      expect(output.language).toEqual(CorpusLanguage.DE);
+      // should equal https://fake-image-url.com and not https://different-image.com
+      expect(output.imageUrl).toEqual('https://fake-image-url.com');
+      expect(output).toEqual(expectedOutput);
+      // reset values to default
+      parserItem.imageUrl = scheduledCandidate.scheduled_corpus_item.image_url;
+      parserItem.language = CorpusLanguage.EN;
+      expectedOutput.language = CorpusLanguage.EN;
+      expectedOutput.title =
+        'Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.';
+    });
+    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & apply curly quotes formatting on excerpt', async () => {
+      // set parser image url to something different from candidate imageUrl
+      parserItem.imageUrl = 'https://different-image.com';
+      const scheduledCandidate = createScheduledCandidate();
+      scheduledCandidate.scheduled_corpus_item.excerpt = `Random "excerpt"`;
+      // curly quotes should be applied
+      expectedOutput.excerpt = `Random “excerpt”`;
+      const validateImageSpy = jest
+        .spyOn(validation, 'validateImageUrl')
+        .mockReturnValue(
+          Promise.resolve(
+            scheduledCandidate.scheduled_corpus_item.image_url as string,
+          ),
+        );
+      const output =
+        await mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+          scheduledCandidate,
+          parserItem,
+        );
+      expect(validateImageSpy).toHaveBeenCalled(); //=> true
+      expect(output.imageUrl).not.toBeNull();
+      // check that double curly apostrophes have been applied
+      expect(output.excerpt).not.toEqual(`Random "excerpt"`);
+      expect(output.excerpt).toEqual(`Random “excerpt”`);
+      // should equal https://fake-image-url.com and not https://different-image.com
+      expect(output.imageUrl).toEqual('https://fake-image-url.com');
+      expect(output).toEqual(expectedOutput);
+      // set parser image url to default
+      parserItem.imageUrl = scheduledCandidate.scheduled_corpus_item.image_url;
+      expectedOutput.excerpt =
+        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.';
+    });
+    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & fallback on Parser fields for undefined optional ScheduledCandidate fields', async () => {
+      mockPocketImageCache(200);
+      // all optional fields are undefined and should be taken from the Parser
+      const scheduledCandidate = createScheduledCandidate({
+        title: undefined,
+        excerpt: undefined,
+        language: undefined,
+        authors: undefined,
+        image_url: undefined,
+      });
+
+      const output =
+        await mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+          scheduledCandidate,
+          parserItem,
+        );
+      expect(output).toEqual(expectedOutput);
+    });
+    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & fallback on Metaflow authors if Parser returns null for authors', async () => {
+      mockPocketImageCache(200);
+      const scheduledCandidate = createScheduledCandidate();
+      const incompleteParserItem: UrlMetadata = {
+        url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
+        title:
+          'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+        excerpt:
+          'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+        language: 'EN',
+        publisher: 'POLITICO',
+        authors: undefined,
+        imageUrl: 'https://fake-image-url.com',
+        isCollection: false,
+        isSyndicated: false,
+      };
+
+      const output =
+        await mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+          scheduledCandidate,
+          incompleteParserItem,
+        );
+      expect(output).toEqual(expectedOutput);
+    });
+    it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on valid Parser imageUrl if Metaflow imageUrl is not valid', async () => {
+      const scheduledCandidate = createScheduledCandidate();
+      // force metaflow imageUrl to be null to fallback on Parser
+      scheduledCandidate.scheduled_corpus_item.image_url =
+        null as unknown as string;
+
+      // set parser.imageUrl
+      parserItem.imageUrl = 'https://new-fake-image.com';
+      expectedOutput.imageUrl = parserItem.imageUrl;
+      const validateImageSpy = jest
+        .spyOn(validation, 'validateImageUrl')
+        .mockReturnValue(Promise.resolve(parserItem.imageUrl as string));
+      const output =
+        await mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+          scheduledCandidate,
+          parserItem,
+        );
+      expect(validateImageSpy).toHaveBeenCalled(); //=> true
+      expect(output.imageUrl).not.toBeNull();
+      expect(output.imageUrl).toEqual('https://new-fake-image.com');
+      expect(output).toEqual(expectedOutput);
+
+      // set parser image url to default
+      parserItem.imageUrl = 'https://fake-image-url.com';
+      expectedOutput.imageUrl = parserItem.imageUrl;
+    });
+    it('should throw Error on CreateApprovedItemInput if field types are wrong (title)', async () => {
+      mockPocketImageCache(200);
+      const scheduledCandidate = createScheduledCandidate();
+      scheduledCandidate.scheduled_corpus_item.title = undefined;
+      parserItem.title = undefined;
+
+      await expect(
+        mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+          scheduledCandidate,
+          parserItem,
+        ),
+      ).rejects.toThrow(
+        new Error(
+          `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedCorpusItemApiInput. ` +
+            `Reason: Error: Error on typia.assert(): invalid type on $input.title, expect to be string`,
+        ),
+      );
+      parserItem.title =
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.';
+    });
+    it('should throw Error on CreateApprovedItemInput if field types are wrong (publisher)', async () => {
+      mockPocketImageCache(200);
+      const scheduledCandidate = createScheduledCandidate();
+
+      const invalidParserItem: any = {
+        ...parserItem,
+        publisher: 1,
+      };
+
+      await expect(
+        mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+          scheduledCandidate,
+          invalidParserItem,
+        ),
+      ).rejects.toThrow(
+        new Error(
+          `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedCorpusItemApiInput. ` +
+            `Reason: Error: Error on typia.assert(): invalid type on $input.publisher, expect to be string`,
+        ),
+      );
+    });
+  });
+
+  describe('validateDatePublished', () => {
+    it('should return null if a date is not provided', () => {
+      const testDate = undefined;
+
+      const returnDate = validateDatePublished(testDate);
+
+      expect(returnDate).toBeNull();
+    });
+
+    it('should return null if an invalid date is provided', () => {
+      const testDate = 'BLIMP';
+
+      const returnDate = validateDatePublished(testDate);
+
+      expect(returnDate).toBeNull();
+    });
+
+    it('should return a formatted date if a Parser-style date is provided', () => {
+      const testDate = '2024-01-03 23:48:34';
+
+      const returnDate = validateDatePublished(testDate);
+
+      expect(returnDate).toEqual('2024-01-03');
+    });
+
+    it('should return a formatted date if a Collections-style date is provided', () => {
+      const testDate = '2024-04-11';
+
+      const returnDate = validateDatePublished(testDate);
+
+      expect(returnDate).toEqual('2024-04-11');
     });
   });
 });

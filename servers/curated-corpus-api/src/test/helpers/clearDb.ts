@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 
 /**
  * A helper method that wipes all data from the database.
@@ -11,4 +11,5 @@ export async function clearDb(prisma: PrismaClient): Promise<void> {
   await prisma.scheduledItem.deleteMany({});
   await prisma.approvedItem.deleteMany({});
   await prisma.rejectedCuratedCorpusItem.deleteMany({});
+  await prisma.trustedDomain.deleteMany({});
 }

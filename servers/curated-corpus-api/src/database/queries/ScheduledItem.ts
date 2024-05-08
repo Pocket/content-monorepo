@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { DateTime } from 'luxon';
 import {
   ScheduledItem,
@@ -157,3 +157,4 @@ export async function getScheduledItemByUniqueAttributes(
     },
   });
 }
+

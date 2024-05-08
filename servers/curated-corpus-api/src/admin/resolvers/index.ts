@@ -11,10 +11,8 @@ import { getRejectedItems } from './queries/RejectedItem';
 import { getScheduledItems } from './queries/ScheduledItem';
 import {
   createApprovedItem,
-  importApprovedItem,
   rejectApprovedItem,
   updateApprovedItem,
-  updateApprovedItemAuthors,
   uploadApprovedItemImage,
 } from './mutations/ApprovedItem';
 import { createRejectedItem } from './mutations/RejectedItem';
@@ -28,6 +26,7 @@ import {
   getRejectedItemByUrl as dbGetRejectedItemByUrl,
 } from '../../database/queries';
 import { getOpenGraphFields } from './queries/OpenGraphFields';
+import { hasTrustedDomain } from './queries/ApprovedItem/hasTrustedDomain';
 
 export const resolvers = {
   // The custom scalars from GraphQL-Scalars that we find useful.
@@ -58,6 +57,8 @@ export const resolvers = {
     // The `scheduledSurfaceHistory` subquery pulls in data on most recent
     // scheduling of a curated item onto a surface.
     scheduledSurfaceHistory: getScheduledSurfaceHistory,
+
+    hasTrustedDomain,
   },
   RejectedCorpusItem: {
     createdAt: UnixTimestampResolver,
@@ -96,12 +97,10 @@ export const resolvers = {
     createApprovedCorpusItem: createApprovedItem,
     rejectApprovedCorpusItem: rejectApprovedItem,
     updateApprovedCorpusItem: updateApprovedItem,
-    updateApprovedCorpusItemAuthors: updateApprovedItemAuthors,
     createRejectedCorpusItem: createRejectedItem,
     createScheduledCorpusItem: createScheduledItem,
     deleteScheduledCorpusItem: deleteScheduledItem,
     rescheduleScheduledCorpusItem: rescheduleScheduledItem,
     uploadApprovedCorpusItemImage: uploadApprovedItemImage,
-    importApprovedCorpusItem: importApprovedItem,
   },
 };

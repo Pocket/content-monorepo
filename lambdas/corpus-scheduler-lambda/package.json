@@ -8,6 +8,7 @@
     "test": "jest \"\\.spec\\.ts\"",
     "watch": "tsc -w & nodemon",
     "dev": "npm run build && npm run watch",
+    "test-integrations": "jest \"\\.integration\\.ts\" --runInBand",
     "lint": "eslint --fix-dry-run \"src/**/*.ts\"",
     "format": "eslint --fix \"src/**/*.ts\"",
     "prepare": "ts-patch install && typia patch"
@@ -15,9 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-lambda": "3.529.1",
-    "@aws-sdk/client-secrets-manager": "3.529.1",
-    "@sentry/serverless": "7.95.0",
+    "@sentry/serverless": "7.110.1",
     "content-common": "workspace:*",
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.5",
@@ -26,7 +25,9 @@
     "typia": "^5.4.0"
   },
   "devDependencies": {
+    "@aws-sdk/client-secrets-manager": "3.529.1",
     "@types/aws-lambda": "8.10.134",
+    "@types/luxon": "3.4.2",
     "@types/jest": "29.5.12",
     "aws-sdk-client-mock": "^3.0.1",
     "eslint-config-custom": "workspace:*",

@@ -1,9 +1,6 @@
 import { gql } from 'graphql-tag';
-import {
-  CuratedItemData,
-  RejectedItemData,
-  ScheduledItemData,
-} from '../../../shared/fragments.gql';
+import { RejectedItemData } from '../../../shared/fragments.gql';
+import { AdminCuratedItemData, AdminScheduledItemData } from '../fragments.gql';
 
 /**
  * Sample queries for Apollo Server integration tests as used in
@@ -25,12 +22,12 @@ export const GET_APPROVED_ITEMS = gql`
       edges {
         cursor
         node {
-          ...CuratedItemData
+          ...AdminCuratedItemData
         }
       }
     }
   }
-  ${CuratedItemData}
+  ${AdminCuratedItemData}
 `;
 
 export const GET_REJECTED_ITEMS = gql`
@@ -65,29 +62,29 @@ export const GET_SCHEDULED_ITEMS = gql`
       syndicatedCount
       scheduledDate
       items {
-        ...ScheduledItemData
+        ...AdminScheduledItemData
       }
     }
   }
-  ${ScheduledItemData}
+  ${AdminScheduledItemData}
 `;
 
 export const GET_APPROVED_ITEM_BY_URL = gql`
   query getApprovedCorpusItemByUrl($url: String!) {
     getApprovedCorpusItemByUrl(url: $url) {
-      ...CuratedItemData
+      ...AdminCuratedItemData
     }
   }
-  ${CuratedItemData}
+  ${AdminCuratedItemData}
 `;
 
 export const GET_APPROVED_ITEM_BY_EXTERNAL_ID = gql`
   query approvedCorpusItemByExternalId($externalId: ID!) {
     approvedCorpusItemByExternalId(externalId: $externalId) {
-      ...CuratedItemData
+      ...AdminCuratedItemData
     }
   }
-  ${CuratedItemData}
+  ${AdminCuratedItemData}
 `;
 
 export const GET_APPROVED_ITEM_WITH_SCHEDULING_HISTORY = gql`
@@ -97,7 +94,7 @@ export const GET_APPROVED_ITEM_WITH_SCHEDULING_HISTORY = gql`
     $limit: NonNegativeInt
   ) {
     getApprovedCorpusItemByUrl(url: $url) {
-      ...CuratedItemData
+      ...AdminCuratedItemData
       scheduledSurfaceHistory(
         filters: { scheduledSurfaceGuid: $scheduledSurfaceGuid, limit: $limit }
       ) {
@@ -108,7 +105,7 @@ export const GET_APPROVED_ITEM_WITH_SCHEDULING_HISTORY = gql`
       }
     }
   }
-  ${CuratedItemData}
+  ${AdminCuratedItemData}
 `;
 
 export const GET_SCHEDULED_SURFACES_FOR_USER = gql`
@@ -126,11 +123,11 @@ export const APPROVED_ITEM_REFERENCE_RESOLVER = gql`
   query ($representations: [_Any!]!) {
     _entities(representations: $representations) {
       ... on ApprovedCorpusItem {
-        ...CuratedItemData
+        ...AdminCuratedItemData
       }
     }
   }
-  ${CuratedItemData}
+  ${AdminCuratedItemData}
 `;
 
 export const REJECTED_ITEM_REFERENCE_RESOLVER = gql`

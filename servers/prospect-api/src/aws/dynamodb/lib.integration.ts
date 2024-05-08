@@ -1,10 +1,10 @@
 import request from 'supertest';
 import { print } from 'graphql';
 
+import { ProspectType } from 'content-common';
 import {
   dbClient,
   Prospect,
-  ProspectType,
   insertProspect,
   getProspectById,
   truncateDb,

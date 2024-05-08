@@ -6,10 +6,8 @@ export {
   DynamoItem,
   GetProspectsFilters,
   Prospect,
-  ProspectType,
-  ScheduledSurfaces,
-  ScheduledSurface,
 } from './types';
+export { ScheduledSurfaces, ScheduledSurface } from 'content-common';
 export { toUnixTimestamp, deriveUrlMetadata } from './lib';
 export {
   scanAllRows,

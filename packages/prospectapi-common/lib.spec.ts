@@ -1,10 +1,19 @@
+import { graphql, HttpResponse } from 'msw';
+import * as Sentry from '@sentry/node';
+import { setupServer } from 'msw/node';
+
+import { UrlMetadata } from 'content-common';
+
+import config from './config';
 import {
   deriveAuthors,
+  deriveDatePublished,
   deriveDomainName,
   deriveExcerpt,
   deriveImageUrl,
   derivePublisher,
   deriveTitle,
+  deriveUrlMetadata,
   toUnixTimestamp,
 } from './lib';
 import { ClientApiItem } from './types';
@@ -56,6 +65,7 @@ describe('lib', () => {
             name: 'The Daily Bugle',
             url: 'https://thedailybugle.com',
           },
+          publishedAt: '2024-01-01',
           title: 'Silly As Needed',
         },
       };
@@ -75,6 +85,45 @@ describe('lib', () => {
     });
 
     it('should return an empty string if no publisher exists', () => {
+      const item: ClientApiItem = {
+        resolvedUrl: 'https://getpocket.com/idk',
+      };
+
+      expect(derivePublisher(item)).toEqual('');
+    });
+  });
+
+  describe('deriveDatePublished', () => {
+    it('should return the syndicated publication date if exists', () => {
+      const item: ClientApiItem = {
+        resolvedUrl: 'https://getpocket.com/idk',
+        syndicatedArticle: {
+          authorNames: [],
+          publisher: {
+            name: 'The Daily Bugle',
+            url: 'https://thedailybugle.com',
+          },
+          publishedAt: '2024-01-01',
+          title: 'Silly As Needed',
+        },
+      };
+
+      expect(deriveDatePublished(item)).toEqual('2024-01-01');
+    });
+
+    it('should return the collection publication date if exists', () => {
+      const item: ClientApiItem = {
+        resolvedUrl: 'https://getpocket.com/idk',
+        collection: {
+          slug: 'idk',
+          publishedAt: '2024-01-01',
+        },
+      };
+
+      expect(deriveDatePublished(item)).toEqual('2024-01-01');
+    });
+
+    it('should return an empty string if no publication date exists', () => {
       const item: ClientApiItem = {
         resolvedUrl: 'https://getpocket.com/idk',
       };
@@ -151,6 +200,7 @@ describe('lib', () => {
           syndicatedArticle: {
             authorNames: ['Octavia Butler', 'V.E. Schwab'],
             title: 'Silly As Needed',
+            publishedAt: '2024-01-02',
           },
         };
 
@@ -163,6 +213,7 @@ describe('lib', () => {
           syndicatedArticle: {
             authorNames: [],
             title: 'Silly As Needed',
+            publishedAt: '2024-02-03',
           },
         };
 
@@ -180,6 +231,7 @@ describe('lib', () => {
           authorNames: [],
           excerpt: 'Your registraton? Hurry up meow.',
           title: 'Silly As Needed',
+          publishedAt: '2024-03-02',
         },
       };
 
@@ -193,6 +245,7 @@ describe('lib', () => {
         syndicatedArticle: {
           authorNames: [],
           title: 'Silly As Needed',
+          publishedAt: '2024-03-02',
         },
       };
 
@@ -207,6 +260,7 @@ describe('lib', () => {
         syndicatedArticle: {
           authorNames: [],
           title: 'Silly As Needed',
+          publishedAt: '2024-01-01',
         },
       };
 
@@ -222,6 +276,7 @@ describe('lib', () => {
         syndicatedArticle: {
           authorNames: [],
           title: 'Silly As Needed',
+          publishedAt: '2024-01-05',
         },
       };
 
@@ -255,6 +310,7 @@ describe('lib', () => {
           authorNames: [],
           title: 'Silly As Needed',
           mainImage: 'https://www.placecage.com/g/300/300',
+          publishedAt: '2024-01-22',
         },
       };
 
@@ -280,6 +336,108 @@ describe('lib', () => {
       };
 
       expect(deriveImageUrl(item)).toEqual(undefined);
+    });
+  });
+
+  describe('deriveUrlMetadata', () => {
+    const captureExceptionSpy = jest
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation();
+
+    const server = setupServer();
+
+    beforeAll(() => server.listen());
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+      server.resetHandlers();
+    });
+
+    afterAll(() => server.close());
+
+    it('returns the expected object after retrieving parser metadata', async () => {
+      const url = 'https://example.com?foo=bar';
+
+      const mockData = {
+        itemByUrl: {
+          resolvedUrl: 'https://example.com',
+          excerpt: 'Example excerpt',
+          title: 'Example Title',
+          authors: [{ name: 'Beyonce' }, { name: 'Questlove' }],
+          datePublished: '2027-04-01',
+          domainMetadata: {
+            name: 'A Publisher',
+          },
+          language: 'en',
+          topImageUrl: 'https://example.com/image.jpg',
+        },
+      };
+
+      server.use(
+        graphql.query('ProspectApiUrlMetadata', () => {
+          return HttpResponse.json({ data: mockData });
+        }),
+      );
+
+      const result = await deriveUrlMetadata(url);
+
+      const expected: UrlMetadata = {
+        authors: 'Beyonce,Questlove',
+        url: mockData.itemByUrl.resolvedUrl,
+        excerpt: mockData.itemByUrl.excerpt,
+        title: mockData.itemByUrl.title,
+        datePublished: mockData.itemByUrl.datePublished,
+        domain: 'example.com',
+        imageUrl: mockData.itemByUrl.topImageUrl,
+        isCollection: false,
+        isSyndicated: false,
+        language: mockData.itemByUrl.language,
+        publisher: mockData.itemByUrl.domainMetadata.name,
+      };
+
+      expect(result).toEqual(expected);
+
+      expect(captureExceptionSpy).toHaveBeenCalledTimes(0);
+    });
+
+    it('calls sentry on an error retrieving url metadata', async () => {
+      const url = 'https://example.com';
+      let clientApiCallCount = 0;
+
+      // force the response to be a 504
+      server.use(
+        graphql.query('ProspectApiUrlMetadata', () => {
+          clientApiCallCount++;
+          return HttpResponse.json({}, { status: 504 });
+        }),
+      );
+
+      const result = await deriveUrlMetadata(url, 100);
+
+      // sentry should capture the exception
+      expect(captureExceptionSpy).toHaveBeenNthCalledWith(
+        1,
+        'Response not successful: Received status code 504',
+        {
+          extra: {
+            description: 'Failed to retrieve metadata from the parser',
+            url: url,
+          },
+        },
+      );
+
+      // make sure retries are happening on the call to client API
+      // should be equal to retries + the initial call
+      expect(clientApiCallCount).toEqual(config.app.metadataRetries + 1);
+
+      // the function should return a minimal object when the parser call fails
+      expect(result).toEqual({
+        url,
+        domain: 'example.com',
+      });
     });
   });
 });

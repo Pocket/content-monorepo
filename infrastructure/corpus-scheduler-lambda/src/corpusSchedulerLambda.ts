@@ -35,18 +35,20 @@ export class CorpusSchedulerSQSLambda extends Construct {
         lambda: {
           runtime: LAMBDA_RUNTIMES.NODEJS20,
           handler: 'index.handler',
-          timeout: 120,
+          timeout: 360,
           memorySizeInMb: 512,
           reservedConcurrencyLimit: 1,
           environment: {
             REGION: this.vpc.region,
             SENTRY_DSN: this.getSentryDsn(),
             ALLOWED_TO_SCHEDULE: this.getAllowedToSchedule(),
-            ENABLE_SCHEDULED_DATE_VALIDATION: this.getEnableScheduledDateValidation(),
+            ENABLE_SCHEDULED_DATE_VALIDATION:
+              this.getEnableScheduledDateValidation(),
             GIT_SHA: this.getGitSha(),
             JWT_KEY: `${config.name}/${config.environment}/JWT_KEY`,
             ENVIRONMENT:
               config.environment === 'Prod' ? 'production' : 'development',
+            SNOWPLOW_ENDPOINT: config.envVars.snowplowEndpoint,
           },
           vpcConfig: {
             securityGroupIds: this.vpc.defaultSecurityGroups.ids,
@@ -93,17 +95,25 @@ export class CorpusSchedulerSQSLambda extends Construct {
   }
 
   private getAllowedToSchedule() {
-    const allowedToSchedule = new DataAwsSsmParameter(this, 'allowed-to-schedule', {
-      name: `/${config.name}/${config.environment}/ALLOWED_TO_SCHEDULE`,
-    });
+    const allowedToSchedule = new DataAwsSsmParameter(
+      this,
+      'allowed-to-schedule',
+      {
+        name: `/${config.name}/${config.environment}/ALLOWED_TO_SCHEDULE`,
+      },
+    );
 
     return allowedToSchedule.value;
   }
 
   private getEnableScheduledDateValidation() {
-    const enableScheduledDateValidation = new DataAwsSsmParameter(this, 'enable-scheduled-date-validation', {
-      name: `/${config.name}/${config.environment}/ENABLE_SCHEDULED_DATE_VALIDATION`,
-    });
+    const enableScheduledDateValidation = new DataAwsSsmParameter(
+      this,
+      'enable-scheduled-date-validation',
+      {
+        name: `/${config.name}/${config.environment}/ENABLE_SCHEDULED_DATE_VALIDATION`,
+      },
+    );
 
     return enableScheduledDateValidation.value;
   }
