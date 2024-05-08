@@ -8,10 +8,8 @@ import {
   clearDb,
   createRejectedCuratedCorpusItemHelper,
 } from '../../../../test/helpers';
-import {
-  ACCESS_DENIED_ERROR,
-  MozillaAccessGroup,
-} from '../../../../shared/types';
+import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { GET_REJECTED_ITEMS } from '../sample-queries.gql';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';

@@ -4,7 +4,7 @@ import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
 import { client } from '../../../../database/client';
 
-import { MozillaAccessGroup } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 import {

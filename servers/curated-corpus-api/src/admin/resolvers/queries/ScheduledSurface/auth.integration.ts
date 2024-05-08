@@ -6,7 +6,7 @@ import { client } from '../../../../database/client';
 
 import { clearDb } from '../../../../test/helpers';
 import { GET_SCHEDULED_SURFACES_FOR_USER } from '../sample-queries.gql';
-import { MozillaAccessGroup } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 

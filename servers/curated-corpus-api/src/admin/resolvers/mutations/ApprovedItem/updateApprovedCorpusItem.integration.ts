@@ -19,7 +19,7 @@ import { UPDATE_APPROVED_ITEM } from '../sample-mutations.gql';
 import { ApprovedItem } from '../../../../database/types';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../../events/init';
 import { ReviewedCorpusItemEventType } from '../../../../events/types';
-import { MozillaAccessGroup } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { UpdateApprovedCorpusItemApiInput } from '../../types';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';

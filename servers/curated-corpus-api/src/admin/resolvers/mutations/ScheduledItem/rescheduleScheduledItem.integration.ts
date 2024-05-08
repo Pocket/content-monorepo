@@ -18,9 +18,9 @@ import { curatedCorpusEventEmitter as eventEmitter } from '../../../../events/in
 import { ScheduledCorpusItemEventType } from '../../../../events/types';
 import {
   ACCESS_DENIED_ERROR,
-  MozillaAccessGroup,
   ScheduledCorpusItemStatus,
 } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 

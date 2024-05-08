@@ -9,7 +9,7 @@ import { client } from '../../../../database/client';
 import { clearDb } from '../../../../test/helpers';
 import Upload from 'graphql-upload/Upload.js';
 import { createReadStream, unlinkSync, writeFileSync } from 'fs';
-import { MozillaAccessGroup } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 import { integrationTestsS3UrlPattern } from '../../../aws/upload.integration';

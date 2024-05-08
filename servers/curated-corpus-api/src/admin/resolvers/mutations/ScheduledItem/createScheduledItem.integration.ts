@@ -20,8 +20,8 @@ import { DateTime } from 'luxon';
 import {
   ACCESS_DENIED_ERROR,
   ManualScheduleReason,
-  MozillaAccessGroup,
 } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 import { toUtcDateString } from '../../../../shared/utils';

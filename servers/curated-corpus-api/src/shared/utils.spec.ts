@@ -1,6 +1,6 @@
 import { CorpusItemSource, CuratedStatus, Topics } from 'content-common';
 
-import { MozillaAccessGroup } from './types';
+import { MozillaAccessGroup } from 'content-common';
 import {
   getCorpusItemFromApprovedItem,
   getScheduledSurfaceByAccessGroup,

@@ -3,7 +3,7 @@ import {
   CorpusLanguage,
   CuratedStatus,
   Topics,
-  ScheduledSurfaces,
+  ScheduledSurfacesEnum,
 } from 'content-common';
 import { tags } from 'typia';
 
@@ -23,7 +23,7 @@ export interface ScheduledCorpusItem {
   source: CorpusItemSource.ML;
   topic: Topics; // Empty string means unknown topic
   scheduled_date: string; // YYYY-MM-DD
-  scheduled_surface_guid: ScheduledSurfaces;
+  scheduled_surface_guid: ScheduledSurfacesEnum;
   title?: string;
   excerpt?: string;
   language?: CorpusLanguage;

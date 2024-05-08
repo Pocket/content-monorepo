@@ -16,10 +16,8 @@ import {
   CuratedStatus,
   Topics,
 } from 'content-common';
-import {
-  ACCESS_DENIED_ERROR,
-  MozillaAccessGroup,
-} from '../../../../shared/types';
+import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { clearDb, createApprovedItemHelper } from '../../../../test/helpers';
 import {
   CREATE_APPROVED_ITEM,

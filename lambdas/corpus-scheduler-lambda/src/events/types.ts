@@ -1,4 +1,4 @@
-import { ScheduledSurfaces } from 'content-common';
+import { ScheduledSurfacesEnum } from 'content-common';
 
 import {
   ScheduledCorpusCandidateFeatures,
@@ -16,7 +16,7 @@ export type SnowplowScheduledCorpusCandidate = {
   scheduled_corpus_candidate_id: string;
   scheduled_corpus_item_external_id?: string;
   scheduled_date: string; // YYYY-MM-DD
-  scheduled_surface_id: ScheduledSurfaces;
+  scheduled_surface_id: ScheduledSurfacesEnum;
 };
 
 export enum SnowplowScheduledCorpusCandidateErrorName {

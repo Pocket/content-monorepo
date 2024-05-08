@@ -10,7 +10,7 @@ import {
   createRejectedCuratedCorpusItemHelper,
 } from '../../../../test/helpers';
 import { GET_REJECTED_ITEMS } from '../sample-queries.gql';
-import { MozillaAccessGroup } from '../../../../shared/types';
+import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 
