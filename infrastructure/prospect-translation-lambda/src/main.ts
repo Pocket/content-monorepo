@@ -17,8 +17,9 @@ import { LocalProvider } from '@cdktf/provider-local/lib/provider';
 import { ArchiveProvider } from '@cdktf/provider-archive/lib/provider';
 
 import { config } from './config';
-import { DynamoDB } from 'infrastructure-common';
 import { TranslationSqsLambda } from './translationSqsLambda';
+import {DataAwsCallerIdentity} from "@cdktf/provider-aws/lib/data-aws-caller-identity";
+import {DataAwsRegion} from "@cdktf/provider-aws/lib/data-aws-region";
 
 class ProspectTranslationLambdaWrapper extends TerraformStack {
   constructor(scope: Construct, name: string) {
@@ -29,6 +30,9 @@ class ProspectTranslationLambdaWrapper extends TerraformStack {
     new LocalProvider(this, 'local-provider');
     new ArchiveProvider(this, 'archive-provider');
 
+    const caller = new DataAwsCallerIdentity(this, 'caller');
+    const region = new DataAwsRegion(this, 'region');
+
     new S3Backend(this, {
       bucket: `mozilla-content-team-${config.environment.toLowerCase()}-terraform-state`,
       dynamodbTable: `mozilla-content-team-${config.environment.toLowerCase()}-terraform-state`,
@@ -37,17 +41,12 @@ class ProspectTranslationLambdaWrapper extends TerraformStack {
     });
 
     new PocketVPC(this, 'pocket-vpc');
-    const dynamodb = new DynamoDB(
-        this,
-        'dynamodb',
-        `${config.shortName}-${config.environment}`,
-        config.tags,
-    );
 
     new TranslationSqsLambda(
       this,
       'translation-lambda',
-      dynamodb.prospectsTable,
+        caller,
+        region
     );
 
     // Pre cdktf 0.17 ids were generated differently so we need to apply a migration aspect

@@ -1,18 +1,20 @@
 import { Construct } from 'constructs';
 import { config } from './config';
 import {
-  ApplicationDynamoDBTable,
   PocketVPC,
 } from '@pocket-tools/terraform-modules';
 import { PocketSQSWithLambdaTarget } from '@pocket-tools/terraform-modules';
 import { LAMBDA_RUNTIMES } from '@pocket-tools/terraform-modules';
 import { DataAwsSsmParameter } from '@cdktf/provider-aws/lib/data-aws-ssm-parameter';
+import {DataAwsCallerIdentity} from "@cdktf/provider-aws/lib/data-aws-caller-identity";
+import {DataAwsRegion} from "@cdktf/provider-aws/lib/data-aws-region";
 
 export class TranslationSqsLambda extends Construct {
   constructor(
     scope: Construct,
     private name: string,
-    prospectsTable: ApplicationDynamoDBTable
+    caller: DataAwsCallerIdentity,
+    region: DataAwsRegion
   ) {
     super(scope, name);
 
@@ -47,13 +49,13 @@ export class TranslationSqsLambda extends Construct {
               'dynamodb:Query',
             ],
             resources: [
-              prospectsTable.dynamodb.arn,
-              `${prospectsTable.dynamodb.arn}/*`,
+              `arn:aws:dynamodb:${region.name}:${caller.accountId}:table/${config.shortName}-${config.environment}-Prospects`,
+              `arn:aws:dynamodb:${region.name}:${caller.accountId}:table/${config.shortName}-${config.environment}-Prospects/*`,
             ],
           },
         ],
         environment: {
-          PROSPECT_API_PROSPECTS_TABLE: prospectsTable.dynamodb.name,
+          PROSPECT_API_PROSPECTS_TABLE: `${config.shortName}-${config.environment}-Prospects`,
           SENTRY_DSN: sentryDsn,
           GIT_SHA: gitSha,
           ENVIRONMENT:

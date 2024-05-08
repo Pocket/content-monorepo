@@ -79,9 +79,6 @@ importers:
       '@pocket-tools/terraform-modules':
         specifier: 5.8.6
         version: 5.8.6(ink@3.2.0)(react@17.0.2)
-      infrastructure-common:
-        specifier: workspace:*
-        version: link:../../packages/infrastructure-common
     devDependencies:
       eslint-config-custom:
         specifier: workspace:*
@@ -6987,7 +6984,7 @@ packages:
     dependencies:
       semver: 7.6.0
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240507
+      typescript: 5.5.0-dev.20240508
     dev: false
 
   /drange@1.1.1:
@@ -13147,8 +13144,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240507:
-    resolution: {integrity: sha512-5LtqwNqq8gx+AD5pTThWksRzORSFBNdUGmndlPmQ/fa34MY/1vsE5A/sFM6JD29X8uFiATeIJQepsO+l+tRJ0A==}
+  /typescript@5.5.0-dev.20240508:
+    resolution: {integrity: sha512-5hkQ+5UaeQFyG4Z4UiupCIQo2pcUZ+e8OZlIxeiljeqei989RyA99QnF+hS0pxZpxvOt/yJCTN9zIdT2m/O1WA==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false

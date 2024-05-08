@@ -22,9 +22,9 @@ export class DynamoDB extends Construct {
     },
   ) {
     super(scope, name);
-    this.prospectsTable = this.setupProspectsTable();
     this.prefix = prefix;
     this.tags = tags;
+    this.prospectsTable = this.setupProspectsTable();
   }
 
   /**
