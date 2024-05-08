@@ -9,7 +9,7 @@ export const config = {
   shortName: 'PROAPI',
   environment,
   tags: {
-    service: name,
+    service: `${name}-Sqs-Translation`,
     environment,
   },
 };

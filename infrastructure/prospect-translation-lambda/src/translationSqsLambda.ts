@@ -74,7 +74,7 @@ export class TranslationSqsLambda extends Construct {
 
   private getEnvVariableValues() {
     const sentryDsn = new DataAwsSsmParameter(this, 'sentry-dsn', {
-      name: `/${config.name}/${config.environment}/SENTRY_DSN`,
+      name: `/${config.name}-Sqs-Translation/${config.environment}/SENTRY_DSN`,
     });
 
     const serviceHash = new DataAwsSsmParameter(this, 'service-hash', {
