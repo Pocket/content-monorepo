@@ -42,7 +42,7 @@
     "cors": "2.8.5",
     "dataloader": "^2.2.2",
     "date-fns": "2.29.3",
-    "express": "4.18.2",
+    "express": "4.19.2",
     "graphql-scalars": "1.22.4",
     "graphql-upload": "15.0.2",
     "luxon": "3.4.4",

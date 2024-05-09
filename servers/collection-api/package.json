@@ -37,7 +37,7 @@
     "cors": "2.8.5",
     "content-common": "workspace:*",
     "dataloader": "^2.2.2",
-    "express": "4.18.2",
+    "express": "4.19.2",
     "graphql-tag": "2.12.6",
     "graphql-upload": "15.0.2",
     "slugify": "1.6.6",
