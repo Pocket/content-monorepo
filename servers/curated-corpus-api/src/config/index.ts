@@ -81,4 +81,9 @@ export default {
         'iglu:com.pocket/scheduled_corpus_item/jsonschema/1-0-8',
     },
   },
+  tracing: {
+    // for AWS, it's fine to leave this defaulting to localhost
+    host: process.env.OTLP_COLLECTOR_HOST || 'localhost',
+    serviceName: 'curated-corpus-api',
+  },
 };

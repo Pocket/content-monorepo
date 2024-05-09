@@ -15,7 +15,7 @@ import {
 import config from '../../config';
 import { setTimeout } from 'timers/promises';
 import EventEmitter from 'events';
-import { serverLogger } from '../../express';
+import { serverLogger } from '@pocket-tools/ts-logger';
 
 /**
  * Mock event payload
@@ -67,7 +67,9 @@ describe('EventBusHandler', () => {
     .mockImplementation(() => '');
   const serverLoggerErrorStub: jest.SpyInstance = jest
     .spyOn(serverLogger, 'error')
-    .mockImplementation(() => Promise.resolve());
+    .mockImplementation(() => {
+      return serverLogger;
+    });
   const emitter = new CuratedCorpusEventEmitter();
   new EventBusHandler(emitter);
   const scheduledEventData: ScheduledCorpusItemPayload = {

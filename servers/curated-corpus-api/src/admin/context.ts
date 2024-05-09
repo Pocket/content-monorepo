@@ -85,6 +85,7 @@ export class AdminContextManager implements IAdminContext {
     const hasFullAccess = accessGroups.includes(
       MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL,
     );
+
     const hasReadOnly = accessGroups.includes(MozillaAccessGroup.READONLY);
 
     const user: AdminAPIUser = {
