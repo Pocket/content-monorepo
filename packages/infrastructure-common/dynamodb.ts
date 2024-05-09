@@ -1,5 +1,4 @@
 import { Construct } from 'constructs';
-import { config } from './config';
 import {
   ApplicationDynamoDBTable,
   ApplicationDynamoDBTableCapacityMode,
@@ -7,9 +6,24 @@ import {
 
 export class DynamoDB extends Construct {
   public readonly prospectsTable: ApplicationDynamoDBTable;
+  public readonly prefix: string;
+  public readonly tags: {
+    service: string;
+    environment: string;
+  };
 
-  constructor(scope: Construct, name: string) {
+  constructor(
+    scope: Construct,
+    name: string,
+    prefix: string,
+    tags: {
+      service: string;
+      environment: string;
+    },
+  ) {
     super(scope, name);
+    this.prefix = prefix;
+    this.tags = tags;
     this.prospectsTable = this.setupProspectsTable();
   }
 
@@ -21,8 +35,8 @@ export class DynamoDB extends Construct {
     // note that this config is mirrored in .docker/localstack/dynamodb/
     // if config changes here, that file should also be updated
     return new ApplicationDynamoDBTable(this, `prospects`, {
-      tags: config.tags,
-      prefix: `${config.shortName}-${config.environment}-Prospects`,
+      tags: this.tags,
+      prefix: `${this.prefix}-Prospects`,
       capacityMode: ApplicationDynamoDBTableCapacityMode.ON_DEMAND,
       tableConfig: {
         hashKey: 'id',

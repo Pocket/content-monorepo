@@ -27,8 +27,7 @@ import { DataAwsKmsAlias } from '@cdktf/provider-aws/lib/data-aws-kms-alias';
 import { CloudwatchLogGroup } from '@cdktf/provider-aws/lib/cloudwatch-log-group';
 
 import { config } from './config';
-import { DynamoDB } from './dynamodb';
-import { TranslationSqsLambda } from './translationSqsLambda';
+import { DynamoDB } from 'infrastructure-common';
 import { BridgeSqsLambda } from './bridgeSqsLambda';
 
 class ProspectAPI extends TerraformStack {
@@ -52,12 +51,11 @@ class ProspectAPI extends TerraformStack {
     new PocketVPC(this, 'pocket-vpc');
     const region = new DataAwsRegion(this, 'region');
     const caller = new DataAwsCallerIdentity(this, 'caller');
-    const dynamodb = new DynamoDB(this, 'dynamodb');
-
-    new TranslationSqsLambda(
-      this,
-      'translation-lambda',
-      dynamodb.prospectsTable,
+    const dynamodb = new DynamoDB(
+        this,
+        'dynamodb',
+        `${config.shortName}-${config.environment}`,
+        config.tags,
     );
 
     new BridgeSqsLambda(this, 'bridge-lambda', { region, caller });

@@ -38,26 +38,6 @@ workflows:
           push: false
           extra-build-args: --build-arg GIT_SHA=${CIRCLE_SHA1} --build-arg SCOPE=prospect-api --build-arg PORT=4026
 
-      - build_lambda:
-            <<: *not_dev_main
-            context: pocket
-            for: prospect_api
-            name: prospect-api_build_lambda
-            aws-access-key-id: Dev_AWS_ACCESS_KEY
-            aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
-            aws-region: Dev_AWS_DEFAULT_REGION
-            scope: prospect-api-translation-aws_lambda
-
-      - build_lambda:
-            <<: *not_dev_main
-            context: pocket
-            for: prospect_api
-            name: prospect-api-bridge-aws_lambda
-            aws-access-key-id: Dev_AWS_ACCESS_KEY
-            aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
-            aws-region: Dev_AWS_DEFAULT_REGION
-            scope: prospect-api-translation-aws_lambda
-
       - infrastructure:
           <<: *not_dev_main
           context: pocket
@@ -69,6 +49,16 @@ workflows:
           workspace: Prod
           dev: false
           apply: false
+
+      - build_lambda:
+            <<: *not_dev_main
+            context: pocket
+            for: prospect_api
+            name: prospect-api-bridge-aws_lambda
+            aws-access-key-id: Dev_AWS_ACCESS_KEY
+            aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
+            aws-region: Dev_AWS_DEFAULT_REGION
+            scope: prospect-api-bridge-aws_lambda
 
       ######
       # Dev Branch Deployment (Dev Environment)
@@ -118,19 +108,6 @@ workflows:
           <<: *only_dev
           context: pocket
           for: prospect_api
-          name: prospect-api_build_lambda_dev
-          aws-access-key-id: Dev_AWS_ACCESS_KEY
-          aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
-          aws-region: Dev_AWS_DEFAULT_REGION
-          scope: prospect-api-translation-aws_lambda
-          s3-bucket: pocket-prospectapi-dev-sqs-translation
-          requires:
-            - prospect-api_infrastructure_apply_dev
-
-      - build_lambda:
-          <<: *only_dev
-          context: pocket
-          for: prospect_api
           name: prospect-api-bridge_build_lambda_dev
           aws-access-key-id: Dev_AWS_ACCESS_KEY
           aws-secret-access-key: Dev_AWS_SECRET_ACCESS_KEY
@@ -139,19 +116,6 @@ workflows:
           s3-bucket: pocket-prospectapi-dev-sqs-bridge
           requires:
             - prospect-api_infrastructure_apply_dev
-
-      - code_deploy_lambda:
-          <<: *only_dev
-          context: pocket
-          for: prospect_api
-          name: prospect-api_code_deploy_lambda_dev
-          resource-class: pocket/default-dev
-          codedeploy-app-name: ProspectAPI-Dev-Sqs-Translation-Lambda
-          codedeploy-group-name: ProspectAPI-Dev-Sqs-Translation-Lambda
-          function-name: ProspectAPI-Dev-Sqs-Translation-Function
-          s3-bucket: pocket-prospectapi-dev-sqs-translation
-          requires:
-            - prospect-api_build_lambda_dev
 
       - code_deploy_lambda:
           <<: *only_dev
@@ -190,7 +154,6 @@ workflows:
           service_name: ProspectAPI
           requires:
             - prospect-api_code_deploy_ecs_dev
-            - prospect-api_code_deploy_lambda_dev
             - prospect-api-bridge_code_deploy_lambda_dev
       ######
       # Main Branch Deployment (Prod Environment)
@@ -239,19 +202,6 @@ workflows:
           <<: *only_main
           context: pocket
           for: prospect_api
-          name: prospect-api_build_lambda_prod
-          aws-access-key-id: Prod_AWS_ACCESS_KEY
-          aws-secret-access-key: Prod_AWS_SECRET_ACCESS_KEY
-          aws-region: Prod_AWS_DEFAULT_REGION
-          scope: prospect-api-translation-aws_lambda
-          s3-bucket: pocket-prospectapi-prod-sqs-translation
-          requires:
-            - prospect-api_infrastructure_apply_prod
-
-      - build_lambda:
-          <<: *only_main
-          context: pocket
-          for: prospect_api
           name: prospect-api-bridge_build_lambda_prod
           aws-access-key-id: Prod_AWS_ACCESS_KEY
           aws-secret-access-key: Prod_AWS_SECRET_ACCESS_KEY
@@ -260,19 +210,6 @@ workflows:
           s3-bucket: pocket-prospectapi-prod-sqs-bridge
           requires:
             - prospect-api_infrastructure_apply_prod
-
-      - code_deploy_lambda:
-          <<: *only_main
-          context: pocket
-          for: prospect_api
-          name: prospect-api_code_deploy_lambda_prod
-          resource-class: pocket/default-prod
-          codedeploy-app-name: ProspectAPI-Prod-Sqs-Translation-Lambda
-          codedeploy-group-name: ProspectAPI-Prod-Sqs-Translation-Lambda
-          function-name: ProspectAPI-Prod-Sqs-Translation-Function
-          s3-bucket: pocket-prospectapi-prod-sqs-translation
-          requires:
-            - prospect-api_build_lambda_prod
 
       - code_deploy_lambda:
           <<: *only_main
@@ -298,7 +235,6 @@ workflows:
           sentry_org: pocket
           requires:
             - prospect-api_code_deploy_ecs_prod
-            - prospect-api_code_deploy_lambda_prod
 
       # Setup params we may use in Lambdas
       - setup_deploy_params:
@@ -311,4 +247,3 @@ workflows:
           service_name: ProspectAPI
           requires:
             - prospect-api_code_deploy_ecs_prod
-            - prospect-api_code_deploy_lambda_prod
