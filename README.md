@@ -133,8 +133,17 @@ pnpm test-integrations --filter=curated-corpus-api
 
 ## Tracing
 
+### Quick Definitions
+
+Taken form the [Open Telemetry website](https://opentelemetry.io/docs/concepts/signals/traces/):
+
+> Traces give us the big picture of what happens when a request is made to an application. Whether your application is a monolith with a single database or a sophisticated mesh of services, traces are essential to understanding the full “path” a request takes in your application.
+
+> A span represents a unit of work or operation. Spans are the building blocks of Traces. In OpenTelemetry, they include the following information:
+> Name, Parent span ID (empty for root spans), Start and End Timestamps, Span Context, Attributes, Span Events, Span Links, Span Status
+
 Tracing is performed using the `@pocket-tools/tracing` package, which under the hood uses the `@opentelemetry/sdk-node` package and follows the
-[Open Telemetry](https://opentelemetry.io/) standard. We use AWS X-Ray as our Open Telemetry ingestor and viewer.
+[Open Telemetry](https://opentelemetry.io/) standard. We use AWS X-Ray as our Open Telemetry ingestor and viewer in production.
 
 ### Notable Configurations
 
@@ -159,9 +168,9 @@ want to inspect more data, you can change the container image `command` value fr
 
 `'--set=service.telemetry.logs.level=debug'`
 
-(A potential improvement - a lightweigh Open Telemetry viewer such as [Grafana](https://grafana.com/blog/2024/03/13/an-opentelemetry-backend-in-a-docker-image-introducing-grafana/otel-lgtm/).)
+(A potential improvement - a lightweight Open Telemetry viewer such as [Grafana](https://grafana.com/blog/2024/03/13/an-opentelemetry-backend-in-a-docker-image-introducing-grafana/otel-lgtm/).)
 
-### Viewing Traces In Prod
+### Cloud Tracing (Dev & Prod)
 
 #### Exploring Traces
 
@@ -170,6 +179,7 @@ want to inspect more data, you can change the container image `command` value fr
 - Refine the query by "Node" and enter the url of one of our services (e.g. `curated-corpus-api.getpocket.dev`)
   - You may need to refine the time period at the top of the page to get results
 - Scroll to the bottom of the page and click any trace ID
+- Click around on the map and the different spans displayed, checking the flyout right hand menu details menu for each.
 
 ### Viewing Specific Error Traces
 
@@ -181,7 +191,7 @@ To view the trace of an error logged to Sentry:
 - Navigate to AWS CloudWatch
 - Click "Traces" in the left hand menu
 - Find the very obscure "You can also type a trace ID here" link in the top right of the page
-- Paste the trace ID you copied from Sentry in the popup form and click the "Go to trace details" button
+- Paste the trace ID you copied from Sentry in the modal form and click the "Go to trace details" button
 
 ## DynamoDB
 

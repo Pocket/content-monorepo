@@ -35,15 +35,11 @@ export async function startServer(port: number): Promise<{
     includeLocalVariables: true,
     maxValueLength: 2000,
     integrations: [
-      // Autoload will pull in mysql, apollo and graphql
-      // https://github.com/getsentry/sentry-javascript/blob/1f3a796e904e2f84148db80304cb5bdb83a04cb1/packages/tracing-internal/src/node/integrations/lazy.ts#L13
-      //...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations(),
-      // apollo integration is broken
+      // apollo integration is broken at the moment 😕
       // https://github.com/getsentry/sentry-javascript/issues/6899
       //new Sentry.Integrations.Apollo(),
       new Sentry.Integrations.GraphQL(),
-      // mysql cannot load for some reason?
-      //new Sentry.Integrations.Mysql(),
+      new Sentry.Integrations.Mysql(),
       // enable HTTP calls tracing
       new Sentry.Integrations.Http({ tracing: true }),
       // enable Express.js middleware tracing

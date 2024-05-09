@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/node';
 import { S3 } from '@aws-sdk/client-s3';
 import { IncomingHttpHeaders } from 'http';
 import Express from 'express';
@@ -83,13 +82,9 @@ export class AdminContextManager implements IAdminContext {
     const groups = this.config.request.headers.groups as string;
     const accessGroups = groups ? groups.split(',') : [];
 
-    /*
     const hasFullAccess = accessGroups.includes(
       MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL,
     );
-    */
-
-    const hasFullAccess = true;
 
     const hasReadOnly = accessGroups.includes(MozillaAccessGroup.READONLY);
 
@@ -121,18 +116,6 @@ export class AdminContextManager implements IAdminContext {
       // Whether the authenticated user can execute mutations for a given
       // scheduled surface
       canWriteToSurface: (scheduledSurfaceGuid: string): boolean => {
-        // testing adding a breadcrumb to traces
-        /*
-        Sentry.addBreadcrumb({
-          message: 'checking if user can write to surface',
-          category: 'user',
-          data: {
-            hasFullAccess,
-            username: user.username,
-          },
-        });
-        */
-
         // Full access to everything is an automatic "Yes".
         if (hasFullAccess) {
           return true;

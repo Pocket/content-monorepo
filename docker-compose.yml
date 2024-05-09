@@ -59,7 +59,7 @@ services:
     # volumes:
     #   - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
     ports:
-      # these are the defaults - we probably only need the gRPC?
-      # but this is all local anyway so, it's fine
+      # there are lots more ports available, but these are the only one's
+      # currently being used
       - 4317:4317 # OTLP gRPC receiver
       - 4318:4318 # OTLP http receiver

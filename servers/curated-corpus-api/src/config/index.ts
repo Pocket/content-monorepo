@@ -59,9 +59,7 @@ export default {
     source: 'curation-migration-datasync',
   },
   sentry: {
-    dsn:
-      process.env.SENTRY_DSN ||
-      'https://a74c8237773f4ce48d960bc1657cbbef@o28549.ingest.us.sentry.io/5938284',
+    dsn: process.env.SENTRY_DSN || '',
     release: process.env.GIT_SHA || '',
     environment: process.env.NODE_ENV || 'development',
     includeLocalVariables: true,

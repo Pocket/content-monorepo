@@ -34,8 +34,7 @@ nodeSDKBuilder({
 });
 
 // the rest of the imports need to come *after* initializing the nodeSDKBuilder
-// above, because the SDKBuilder swizzles the code
-// TODO: explain this better
+// above, as it monkey patches code
 import {
   curatedCorpusEventEmitter,
   initItemEventHandlers,
