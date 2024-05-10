@@ -258,6 +258,25 @@ class CollectionAPI extends TerraformStack {
             },
           ],
         },
+        {
+          name: 'aws-otel-collector',
+          command: ['--config=/etc/ecs/ecs-xray.yaml'],
+          containerImage: 'amazon/aws-otel-collector',
+          essential: true,
+          logMultilinePattern: '^\\S.+',
+          logGroup: this.createCustomLogGroup('aws-otel-collector'),
+          portMappings: [
+            {
+              hostPort: 4138,
+              containerPort: 4138,
+            },
+            {
+              hostPort: 4137,
+              containerPort: 4137,
+            },
+          ],
+          repositoryCredentialsParam: `arn:aws:secretsmanager:${region.name}:${caller.accountId}:secret:Shared/DockerHub`,
+        },
       ],
       codeDeploy: {
         useCodeDeploy: true,
@@ -315,6 +334,22 @@ class CollectionAPI extends TerraformStack {
             ],
             effect: 'Allow',
           },
+          {
+            actions: [
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
+              'logs:CreateLogStream',
+              'logs:DescribeLogStreams',
+              'logs:DescribeLogGroups',
+              'xray:PutTraceSegments',
+              'xray:PutTelemetryRecords',
+              'xray:GetSamplingRules',
+              'xray:GetSamplingTargets',
+              'xray:GetSamplingStatisticSummaries',
+            ],
+            resources: ['*'],
+            effect: 'Allow',
+          },
         ],
         taskExecutionDefaultAttachmentArn:
           'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy',
@@ -353,7 +388,6 @@ class CollectionAPI extends TerraformStack {
       {
         name: `/Backend/${config.prefix}/ecs/${containerName}`,
         retentionInDays: 90,
-        skipDestroy: true,
         tags: config.tags,
       },
     );

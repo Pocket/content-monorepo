@@ -1,53 +1,43 @@
-import { ApolloServer, GraphQLRequestContext } from '@apollo/server';
-import { buildSubgraphSchema } from '@apollo/subgraph';
-import { typeDefsPublic } from '../typeDefs';
-import { resolvers } from './resolvers';
-import { errorHandler, sentryPlugin } from '@pocket-tools/apollo-utils';
-import responseCachePlugin from '@apollo/server-plugin-response-cache';
-import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
-import {
-  ApolloServerPluginLandingPageDisabled,
-  ApolloServerPluginInlineTraceDisabled,
-  ApolloServerPluginUsageReportingDisabled,
-} from '@apollo/server/plugin/disabled';
-import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace';
-import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { IPublicContext } from './context';
 import { Server } from 'http';
 
+import { ApolloServer, GraphQLRequestContext } from '@apollo/server';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { ApolloServerPluginUsageReportingDisabled } from '@apollo/server/plugin/disabled';
+import { buildSubgraphSchema } from '@apollo/subgraph';
+import responseCachePlugin from '@apollo/server-plugin-response-cache';
+
+import { errorHandler, sentryPlugin } from '@pocket-tools/apollo-utils';
+
+import { typeDefsPublic } from '../typeDefs';
+import { resolvers } from './resolvers';
+import { IPublicContext } from './context';
+
 export function getPublicServer(
-  httpServer: Server
+  httpServer: Server,
 ): ApolloServer<IPublicContext> {
-  const defaultPlugins = [
+  const plugins = [
     sentryPlugin,
-    //Copied from Apollo docs, the sessionID signifies if we should separate out caches by user.
+    ApolloServerPluginDrainHttpServer({ httpServer }),
+    // All our subgraphs are behind a VPC and a VPN so its safe to enable the Landing Page
+    ApolloServerPluginLandingPageLocalDefault({ footer: false }),
+    // Enable the ftv trace in our response which will be used by the gateway, and ensure we include errors so we can see them in apollo studio.
+    ApolloServerPluginInlineTrace({ includeErrors: { unmodified: true } }),
+    // Disable Usage reporting on all subgraphs in all environments because our gateway/router will be the one reporting that.
+    ApolloServerPluginUsageReportingDisabled(),
     responseCachePlugin({
-      //https://www.apollographql.com/docs/apollo-server/performance/caching/#saving-full-responses-to-a-cache
-      //The user id is added to the request header by the apollo gateway (client api)
+      // https://www.apollographql.com/docs/apollo-server/performance/caching/#saving-full-responses-to-a-cache
+      // The user id is added to the request header by the apollo gateway (client api)
       sessionId: async (
-        requestContext: GraphQLRequestContext<IPublicContext>
+        requestContext: GraphQLRequestContext<IPublicContext>,
       ) =>
         requestContext?.request?.http?.headers?.has('userId')
           ? requestContext?.request?.http?.headers?.get('userId')
           : null,
     }),
-    ApolloServerPluginDrainHttpServer({ httpServer }),
-  ];
-  const prodPlugins = [
-    ApolloServerPluginLandingPageDisabled(),
-    ApolloServerPluginInlineTrace(),
-  ];
-  const nonProdPlugins = [
-    ApolloServerPluginLandingPageLocalDefault(),
-    ApolloServerPluginInlineTraceDisabled(),
-    // Usage reporting is enabled by default if you have APOLLO_KEY in your environment
-    ApolloServerPluginUsageReportingDisabled(),
   ];
 
-  const plugins =
-    process.env.NODE_ENV === 'production'
-      ? defaultPlugins.concat(prodPlugins)
-      : defaultPlugins.concat(nonProdPlugins);
   return new ApolloServer<IPublicContext>({
     schema: buildSubgraphSchema({ typeDefs: typeDefsPublic, resolvers }),
     plugins,
@@ -56,7 +46,7 @@ export function getPublicServer(
 }
 
 export async function startPublicServer(
-  httpServer: Server
+  httpServer: Server,
 ): Promise<ApolloServer<IPublicContext>> {
   const server = getPublicServer(httpServer);
   await server.start();
