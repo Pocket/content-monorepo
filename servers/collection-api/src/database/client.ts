@@ -1,6 +1,8 @@
 import { serverLogger } from '@pocket-tools/ts-logger';
 
 import { Prisma, PrismaClient } from '.prisma/client';
+
+import { collectionStoryInjectItemMiddleware } from '../middleware/prisma';
 import config from '../config';
 
 let prisma;
@@ -56,6 +58,11 @@ export function client(): PrismaClient {
       serverLogger.debug(e);
     });
   }
+
+  // this is a middleware function that injects non-database / non-prisma
+  // data into each CollectionStory. this extra data is necessary to relate
+  // a CollectionStory with a parser Item.
+  prisma.$use(collectionStoryInjectItemMiddleware);
 
   return prisma;
 }
