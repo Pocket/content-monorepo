@@ -54,4 +54,9 @@ export default {
     release: process.env.GIT_SHA || '',
     environment: process.env.NODE_ENV || 'development',
   },
+  tracing: {
+    // for AWS, it's fine to leave this defaulting to localhost
+    host: process.env.OTLP_COLLECTOR_HOST || 'localhost',
+    serviceName: 'collection-api',
+  },
 };

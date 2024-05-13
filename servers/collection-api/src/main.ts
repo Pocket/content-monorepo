@@ -1,12 +1,28 @@
-import { startServer } from './express';
-import config from './config';
+// nodeSDKBuilder must be the first import!!
+import {
+  nodeSDKBuilder,
+  AdditionalInstrumentation,
+} from '@pocket-tools/tracing';
 
-(async () => {
+import config from './config';
+import { serverLogger } from '@pocket-tools/ts-logger';
+
+nodeSDKBuilder({
+  host: config.tracing.host,
+  serviceName: config.tracing.serviceName,
+  release: config.sentry.release,
+  logger: serverLogger,
+  additionalInstrumentations: [AdditionalInstrumentation.PRISMA],
+}).then(async () => {
   const { adminUrl, publicUrl } = await startServer(config.app.port);
-  console.log(
-    `🚀 Public server ready at http://localhost:${config.app.port}${publicUrl}`,
+
+  serverLogger.info(
+    `🚀 Public server is ready at http://localhost:${config.app.port}${publicUrl}`,
   );
-  console.log(
-    `🚀 Admin server ready at http://localhost:${config.app.port}${adminUrl}`,
+
+  serverLogger.info(
+    `🚀 Admin server is ready at http://localhost:${config.app.port}${adminUrl}`,
   );
-})();
+});
+
+import { startServer } from './express';

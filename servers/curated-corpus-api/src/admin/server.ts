@@ -1,14 +1,17 @@
-import { ApolloServer, GraphQLRequestContext } from '@apollo/server';
 import { Server } from 'http';
-import { buildSubgraphSchema } from '@apollo/subgraph';
-import { typeDefsAdmin } from '../typeDefs';
-import { resolvers as resolversAdmin } from './resolvers';
-import responseCachePlugin from '@apollo/server-plugin-response-cache';
-import { errorHandler, sentryPlugin } from '@pocket-tools/apollo-utils';
+
+import { ApolloServer, GraphQLRequestContext } from '@apollo/server';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { ApolloServerPluginUsageReportingDisabled } from '@apollo/server/plugin/disabled';
-import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace';
-import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { buildSubgraphSchema } from '@apollo/subgraph';
+import responseCachePlugin from '@apollo/server-plugin-response-cache';
+
+import { errorHandler, sentryPlugin } from '@pocket-tools/apollo-utils';
+
+import { typeDefsAdmin } from '../typeDefs';
+import { resolvers as resolversAdmin } from './resolvers';
 import { IAdminContext } from './context';
 
 /**
@@ -20,7 +23,7 @@ import { IAdminContext } from './context';
 export function getAdminServer(
   httpServer: Server,
 ): ApolloServer<IAdminContext> {
-  const defaultPlugins = [
+  const plugins = [
     sentryPlugin,
     ApolloServerPluginDrainHttpServer({ httpServer }),
     // All our subgraphs are behind a VPC and a VPN so its safe to enable the Landing Page
@@ -46,7 +49,7 @@ export function getAdminServer(
       typeDefs: typeDefsAdmin,
       resolvers: resolversAdmin,
     }),
-    plugins: defaultPlugins,
+    plugins,
     formatError: errorHandler,
   });
 }

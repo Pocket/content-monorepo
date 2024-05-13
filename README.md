@@ -155,6 +155,7 @@ Tracing is performed using the `@pocket-tools/tracing` package, which under the 
 (While tracing implementation is in progress, this will be a list of services that _are_ tracing.)
 
 - Curated Corpus API
+- Collection API
 
 ### Local Tracing
 

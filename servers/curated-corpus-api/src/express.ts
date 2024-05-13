@@ -78,7 +78,7 @@ export async function startServer(port: number): Promise<{
   app.get('/.well-known/apollo/server-health', async (req, res) => {
     try {
       const db = client();
-      await db.$queryRaw`SELECT 1`;
+      await db.$queryRaw`SELECT 'corpus API'`;
       res.status(200).send('ok');
       return;
     } catch (e) {
