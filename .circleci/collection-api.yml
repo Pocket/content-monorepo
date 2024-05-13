@@ -17,6 +17,7 @@ workflows:
           prod_graph_url: https://collection-api.readitlater.com
           dev_graph_url: https://collection-api.getpocket.dev
           apollo_key_env: ADMIN_APOLLO_KEY
+          scope: collection-api
 
       - test_integrations:
           <<: *not_dev_main
