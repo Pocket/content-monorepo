@@ -72,6 +72,9 @@ export const CollectionStoryData = gql`
     authors {
       ...CollectionStoryAuthorData
     }
+    item {
+      givenUrl
+    }
     publisher
     sortOrder
     fromPartner

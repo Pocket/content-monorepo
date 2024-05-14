@@ -138,6 +138,7 @@ describe('public queries: Collection', () => {
           curationCategory.name,
         );
         expect(collections[i].stories[0].authors).not.to.be.empty;
+        expect(collections[i].stories[0].item.givenUrl).not.to.be.null;
         expect(collections[i].IABParentCategory.name).to.equal(
           IABParentCategory.name,
         );
@@ -853,6 +854,7 @@ describe('public queries: Collection', () => {
       expect(collection.title).to.equal('ultra suede is a miracle');
       expect(collection.authors.length).to.equal(1);
       expect(collection.stories.length).to.be.greaterThan(0);
+      expect(collection.stories[0].item.givenUrl).not.to.be.null;
       expect(collection.curationCategory.name).to.equal(curationCategory.name);
       expect(collection.stories[0].authors).not.to.be.empty;
       expect(collection.IABParentCategory.name).to.equal(
