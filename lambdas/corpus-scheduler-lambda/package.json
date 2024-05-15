@@ -22,7 +22,7 @@
     "jwk-to-pem": "^2.0.5",
     "luxon": "3.4.4",
     "node-fetch": "^2.6.7",
-    "typia": "^5.4.0"
+    "typia": "^6.0.0"
   },
   "devDependencies": {
     "@aws-sdk/client-secrets-manager": "3.529.1",

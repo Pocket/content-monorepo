@@ -108,8 +108,8 @@ importers:
         specifier: ^2.6.7
         version: 2.7.0
       typia:
-        specifier: ^5.4.0
-        version: 5.5.10(typescript@5.3.3)
+        specifier: ^6.0.0
+        version: 6.0.3(typescript@5.3.3)
     devDependencies:
       '@aws-sdk/client-secrets-manager':
         specifier: 3.529.1
@@ -154,8 +154,8 @@ importers:
         specifier: 7.112.2
         version: 7.112.2
       typia:
-        specifier: ^5.4.0
-        version: 5.5.10(typescript@5.3.3)
+        specifier: ^6.0.0
+        version: 6.0.3(typescript@5.3.3)
     devDependencies:
       '@types/aws-lambda':
         specifier: 8.10.134
@@ -4074,6 +4074,10 @@ packages:
     resolution: {integrity: sha512-hw437iINopmQuxWPSUEvqE56NCPsiU8N4AYtfHmJFckclktzK9YQJieD3XkDCDH4OjL+C7zgPUh73R/nrcHrqw==}
     dev: true
 
+  /@samchon/openapi@0.1.21:
+    resolution: {integrity: sha512-IUCOZpLOx8IZzxW87ySvFRSyGMRRQS5vpUwhUddzVR9vlDvTfVYjQjFuiJBqQIeGSdZExV3JzuHJCogacmd0/g==}
+    dev: false
+
   /@sentry-internal/tracing@7.101.1:
     resolution: {integrity: sha512-ihjWG8x4x0ozx6t+EHoXLKbsPrgzYLCpeBLWyS+M6n3hn6cmHM76c8nZw3ldhUQi5UYL3LFC/JZ50b4oSxtlrg==}
     engines: {node: '>=8'}
@@ -6898,7 +6902,7 @@ packages:
     dependencies:
       semver: 7.6.2
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240510
+      typescript: 5.5.0-dev.20240515
     dev: false
 
   /drange@1.1.1:
@@ -12370,18 +12374,19 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240510:
-    resolution: {integrity: sha512-3gFPNJ5OUK03t5wwejsRTnUPIuZMCu2feY3b3TvQd98IVIJWQmiOUdEBWQaCpwXTtgHS6veyVSbCIDvh0HQwYg==}
+  /typescript@5.5.0-dev.20240515:
+    resolution: {integrity: sha512-l2Rtvs3xAcEVgF5wOML5AASB79iMHrw9RGXEMY/oeV11IwP0nxOtB1Q5fLvmdPkbsP0PKeTfvd46sOWRATqAiA==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
 
-  /typia@5.5.10(typescript@5.3.3):
-    resolution: {integrity: sha512-IhSzSNW/CrFmrP9cgBMFj6oEJpDD9+mXSepaJu/E0/5mOUkH+riXsZSM6BjaMtBRtlhYeYyTRSyToL7XxZlueg==}
+  /typia@6.0.3(typescript@5.3.3):
+    resolution: {integrity: sha512-Yq69N1EbVcU3kXxeEQEdl9J9mhWRJLfGiKBl9e2zLCIVfzYt/WVjEidlpy1BAPybfOTuIZ+jFtsooZ4FQNJffw==}
     hasBin: true
     peerDependencies:
       typescript: '>=4.8.0 <5.5.0'
     dependencies:
+      '@samchon/openapi': 0.1.21
       commander: 10.0.1
       comment-json: 4.2.3
       inquirer: 8.2.6
