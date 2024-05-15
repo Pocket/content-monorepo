@@ -17,7 +17,8 @@ const config = {
     version: process.env.GIT_SHA || '',
   },
   validation: {
-    timeZone: 'America/Los_Angeles',
+    LosAngelesTimeZone: 'America/Los_Angeles',
+    BerlinTimeZone: 'Europe/Berlin',
     ISO_SUNDAY: 7, // ISO sunday is day #7 in the week (note: JS getDay returns 0 for Sunday)
     MON_SAT_MIN_DIFF: 14, // Regular cutoff is 10am. 24:00 - 10:00 = 14 hours
     SUNDAY_MIN_DIFF: 32, // Sunday cutoff is Friday 4pm. 2 days - 16 hours = 32 hours
