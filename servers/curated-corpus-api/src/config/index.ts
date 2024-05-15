@@ -56,6 +56,7 @@ export default {
     removeScheduledItemEventType: 'remove-scheduled-item',
     updateScheduledItemEventType: 'update-scheduled-item',
     updateApprovedItemEventType: 'update-approved-item',
+    addApprovedItemEventType: 'add-approved-item',
     source: 'curation-migration-datasync',
   },
   sentry: {
