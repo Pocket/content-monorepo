@@ -1,28 +1,32 @@
-import { pocketImageCache, ScheduledCandidate } from './types';
-import { assert } from 'typia';
-import { DateTime, Interval } from 'luxon';
+import {pocketImageCache, ScheduledCandidate} from './types';
+import {assert} from 'typia';
+import {DateTime, Interval} from 'luxon';
 import config from './config';
+import {ScheduledSurfacesEnum} from "content-common";
 
 /**
- * Validates the scheduled date for a candidate
+ * Validates the scheduled date for a candidate in a specified time zone
  * Calculates the time difference (between current date & scheduled date (12 am))
  * If a candidate is scheduled for Monday - Saturday, time diff >= 14 hrs
  * If a candidate is scheduled for Sunday, time diff >= 32 hrs
  * @param scheduledDate scheduledDate for an item from Metaflow
+ * @param timeZone the time zone to do the validation in
  */
 export const validateScheduledDate = async (
   scheduledDate: string,
+  timeZone: string,
+
 ): Promise<void> => {
   // get the DateTime from an ISO scheduled date string
   const isoScheduledDateTime = DateTime.fromISO(scheduledDate, {
-    zone: config.validation.timeZone,
+    zone: timeZone,
   });
 
-  // 1. get the current date time for America/Los_Angeles
+  // 1. get the current date time for specified time zone
   const currentTime = DateTime.fromObject(
     {},
     {
-      zone: config.validation.timeZone,
+      zone: timeZone,
     },
   ).toISO();
 
@@ -97,6 +101,12 @@ export async function validateCandidate(
   // validate candidate scheduled date
   // if ENABLE_SCHEDULED_DATE_VALIDATION env var is true, validate the scheduled date
   if (config.app.enableScheduledDateValidation === 'true') {
-    await validateScheduledDate(candidate.scheduled_corpus_item.scheduled_date);
+    // default to PST timezone
+    let timeZone  = config.validation.LosAngelesTimeZone;
+    //  if candidate is for NEW_TAB_DE_DE, use Berlin time (CET) scheduled date validation
+    if(candidate.scheduled_corpus_item.scheduled_surface_guid === ScheduledSurfacesEnum.NEW_TAB_DE_DE) {
+      timeZone = config.validation.BerlinTimeZone;
+    }
+    await validateScheduledDate(candidate.scheduled_corpus_item.scheduled_date, timeZone);
   }
 }
