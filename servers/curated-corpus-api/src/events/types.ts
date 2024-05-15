@@ -106,9 +106,13 @@ export type ApprovedItemEventBusPayload = BaseEventBusPayload &
       | 'isSyndicated'
       | 'createdBy'
       | 'authors'
+      | 'isCollection'
+      | 'domainName'
+      | 'isTimeSensitive'
     >
   > & {
     approvedItemExternalId: string; // externalId of ApprovedItem
     createdAt?: string; // UTC timestamp string
     updatedAt: string; // UTC timestamp string;
+    datePublished?: string; // UTC timestamp string;
   };
