@@ -110,6 +110,10 @@ describe('EventBusHandler', () => {
         updatedAt: new Date(1648225373000).toUTCString(),
         eventType: config.eventBridge.updateApprovedItemEventType,
         authors: scheduledCorpusItem.approvedItem.authors,
+        isCollection: false,
+        isTimeSensitive: false,
+        datePublished: undefined,
+        domainName: 'test.com',
       };
       emitter.emit(ReviewedCorpusItemEventType.UPDATE_ITEM, {
         reviewedCorpusItem: scheduledCorpusItem.approvedItem,
