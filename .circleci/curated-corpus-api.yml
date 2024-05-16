@@ -17,6 +17,7 @@ workflows:
           prod_graph_url: https://curated-corpus-api.readitlater.com
           dev_graph_url: https://curated-corpus-api.getpocket.dev
           apollo_key_env: ADMIN_APOLLO_KEY
+          scope: curated-corpus-api
 
       - test_integrations:
           <<: *not_dev_main
