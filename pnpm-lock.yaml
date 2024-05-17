@@ -607,6 +607,9 @@ importers:
       '@pocket-tools/apollo-utils':
         specifier: 3.5.0
         version: 3.5.0
+      '@pocket-tools/tracing':
+        specifier: 1.1.2
+        version: 1.1.2(@opentelemetry/api@1.8.0)
       '@pocket-tools/ts-logger':
         specifier: ^1.6.0
         version: 1.8.0
@@ -6852,7 +6855,7 @@ packages:
     dependencies:
       semver: 7.6.2
       shelljs: 0.8.5
-      typescript: 5.5.0-dev.20240513
+      typescript: 5.5.0-dev.20240517
     dev: false
 
   /drange@1.1.1:
@@ -12329,8 +12332,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.5.0-dev.20240513:
-    resolution: {integrity: sha512-EaabRW/mNcpehitpeUkoIg8mNRGl5twGUzHJEJE9qTMlvVzoctff/XFZGKrxu9PUUcYluaMQTBNdNuqOZMqvTw==}
+  /typescript@5.5.0-dev.20240517:
+    resolution: {integrity: sha512-xpneJT+1seecSblhCb/6RarVhdJzwhEWl0iY26aJxOvtHUiI2tFOajGJALNTy++pwG69iEOeQAR9ax7cKwT9IQ==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
