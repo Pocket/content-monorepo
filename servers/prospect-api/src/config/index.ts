@@ -41,4 +41,9 @@ export default {
       objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-16',
     },
   },
+  tracing: {
+    // for AWS, it's fine to leave this defaulting to localhost
+    host: process.env.OTLP_COLLECTOR_HOST || 'localhost',
+    serviceName: 'prospect-api',
+  },
 };
