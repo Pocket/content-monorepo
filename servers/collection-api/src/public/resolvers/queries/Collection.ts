@@ -44,6 +44,13 @@ export async function getCollections(
   },
   { db },
 ): Promise<CollectionsResult> {
+  // guard against null values
+  // note: graphql will accept `null` for any optional input field, regardless
+  // of type. there may be a custom schema extension way to handle this at the
+  // graph level...
+  page = page ?? 1;
+  perPage = perPage ?? config.app.pagination.collectionsPerPage;
+
   const totalResults = await countPublishedCollections(db, filters);
   const collections = await getPublishedCollections(db, page, perPage, filters);
 
