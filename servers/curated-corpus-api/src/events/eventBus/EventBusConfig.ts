@@ -38,6 +38,12 @@ export const eventBusConfig: EventHandlerCallbackMap = {
       data,
     );
   },
+  [ReviewedCorpusItemEventType.ADD_ITEM]: (data: any) => {
+    return payloadBuilders.approvedItemEvent(
+      config.eventBridge.addApprovedItemEventType,
+      data,
+    );
+  },
 };
 
 // To add a new event handler, create a function that generates the

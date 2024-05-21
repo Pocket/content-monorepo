@@ -15,6 +15,7 @@ workflows:
           prod_graph_url: https://prospect-api.readitlater.com
           dev_graph_url: https://prospect-api.getpocket.dev
           apollo_key_env: ADMIN_APOLLO_KEY
+          scope: prospect-api
 
       - test_integrations:
           <<: *not_dev_main

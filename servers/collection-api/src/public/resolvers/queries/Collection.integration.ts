@@ -35,6 +35,7 @@ import {
 } from '.prisma/client';
 import { startServer } from '../../../express';
 import { IPublicContext } from '../../context';
+import config from '../../../config';
 
 describe('public queries: Collection', () => {
   let app: Express.Application;
@@ -327,6 +328,36 @@ describe('public queries: Collection', () => {
       expect(pagination.currentPage).to.equal(2);
     });
 
+    it('should get collections with null page and perPage inputs', async () => {
+      await createCollectionHelper(db, {
+        title: 'label-test-collection',
+        author,
+        status: CollectionStatus.PUBLISHED,
+        language: CollectionLanguage.EN,
+      });
+
+      // request collections with the only one label provided in the filters
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(GET_COLLECTIONS),
+          variables: {
+            page: null,
+            perPage: null,
+          },
+        });
+
+      // we should get only one collection back
+      expect(result.body.data?.getCollections?.collections.length).to.equal(1);
+
+      const pagination = result.body.data?.getCollections?.pagination;
+
+      expect(pagination.currentPage).to.equal(1);
+      expect(pagination.perPage).to.equal(
+        config.app.pagination.collectionsPerPage,
+      );
+    });
+
     it('should get only `EN` published collections if no language is specified', async () => {
       await createCollectionHelper(db, {
         title: 'first',
@@ -538,7 +569,7 @@ describe('public queries: Collection', () => {
       );
     });
 
-    it('should get collection with the specified label filter', async () => {
+    it('should get collections with the specified label filter', async () => {
       const testCollection = await createCollectionHelper(db, {
         title: 'label-test-collection',
         author,

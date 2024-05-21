@@ -10,7 +10,8 @@
         "transform": "typia/lib/transform"
       }
     ],
-    "strict": true
+    "strict": true,
+    "strictNullChecks": true
   },
   "exclude": [
     "node_modules",
@@ -20,7 +21,5 @@
     "jest.config.js",
     "jest.setup.js"
   ],
-  "include": [
-    "src/**/*.ts",
-  ]
+  "include": ["src/**/*.ts"]
 }
