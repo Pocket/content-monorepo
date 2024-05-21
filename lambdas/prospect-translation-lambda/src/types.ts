@@ -1,5 +1,3 @@
-import {tags} from 'typia';
-
 // this is the raw data from metaflow/sqs
 export interface SqsProspect {
   prospect_id: string;
@@ -14,7 +12,7 @@ export interface SqsProspect {
 
 export type ProspectFeatures = {
   data_source: string;
-  rank: number & tags.Type<'int64'>; // rank is integer in Snowplow schema
+  rank: number''
   save_count: number;
   predicted_topic: string;
   [key: string]: string | number; // ML controls which additional features are sent
