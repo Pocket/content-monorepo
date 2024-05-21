@@ -113,6 +113,14 @@ export enum ProspectType {
   TOP_SAVED = 'TOP_SAVED',
 }
 
+export enum ProspectReviewStatus {
+  Created = 'created',
+  Recommendation = 'recommendation',
+  Corpus = 'corpus',
+  Rejected = 'rejected',
+  Dismissed = 'dismissed', // the only one being implemented
+}
+
 export enum ScheduledSurfacesEnum {
   NEW_TAB_EN_US = 'NEW_TAB_EN_US',
   NEW_TAB_DE_DE = 'NEW_TAB_DE_DE',

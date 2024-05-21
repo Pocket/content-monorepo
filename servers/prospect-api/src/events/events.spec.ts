@@ -7,7 +7,8 @@ import {
   sendEventBridgeEvent,
 } from './events';
 import { CorpusLanguage, MozillaAccessGroup, Topics, UserAuth } from '../types';
-import { EventBridgeEventType, ProspectReviewStatus } from './types';
+import { EventBridgeEventType } from './types';
+import { ProspectReviewStatus} from 'content-common';
 import { EventBridgeClient } from '@aws-sdk/client-eventbridge';
 import config from '../config';
 import { serverLogger } from '../express';

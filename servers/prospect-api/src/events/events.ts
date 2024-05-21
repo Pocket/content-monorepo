@@ -9,8 +9,8 @@ import config from '../config/';
 import {
   EventBridgeEventType,
   ProspectDismissEventBusPayload,
-  ProspectReviewStatus,
 } from './types';
+import { ProspectReviewStatus} from 'content-common';
 import { UserAuth } from '../types';
 import { eventBridgeClient } from '../aws/eventBridgeClient';
 import { serverLogger } from '../express';

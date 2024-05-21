@@ -5,7 +5,7 @@ import { Prospect } from 'prospectapi-common';
 import { ProspectType, Topics, UrlMetadata } from 'content-common';
 
 import {
-  convertSqsProspectToProspect,
+  convertSqsProspectToProspect, getProspectRunDetailsFromMessageJson,
   getProspectsFromMessageJson,
   hasValidPredictedTopic,
   hasValidProspectId,
@@ -18,6 +18,7 @@ import {
   validateProperties,
   validateStructure,
 } from './lib';
+import {ProspectRunDetails} from "./types";
 
 describe('lib', () => {
   const captureExceptionSpy = jest
@@ -456,6 +457,58 @@ describe('lib', () => {
 
       expect(expected).toEqual(
         hydrateProspectMetadata(prospectToHydrate, urlMetadata),
+      );
+    });
+  });
+
+  describe('getProspectRunDetailsFromMessageJson', () => {
+    it('should get prospect run details from the  SQS formatted message', () => {
+      const json = {
+        foo: 'bar',
+        detail: {
+          id: '1abc',
+          flow: 'GlobalProspectsFlow',
+          run: 'sfn-05612',
+          expires_at: 1716488367,
+          candidates: [{ id: 1 }, { id: 2 }],
+        },
+      };
+
+      const expectedRunDetails: ProspectRunDetails = {
+        candidate_set_id: '1abc',
+        flow: 'GlobalProspectsFlow',
+        run_id: 'sfn-05612',
+        expires_at: 1716488367,
+      };
+
+      expect(getProspectRunDetailsFromMessageJson(json)).toEqual(expectedRunDetails);
+    });
+
+    it('should return an empty obj and call Sentry if no detail obj found in JSON', () => {
+      const json = {
+        foo: 'bar',
+      };
+
+      expect(getProspectRunDetailsFromMessageJson(json)).toEqual({});
+
+      expect(captureExceptionSpy).toHaveBeenCalledWith(
+          'no `detail` property exists on the SQS JSON.',
+      );
+    });
+
+    it('should return empty obj and call Sentry if details obj is present but no run details present', () => {
+      const json = {
+        foo: 'bar',
+        detail: {
+          bar: 'bar',
+          candidates: [{ id: 1 }, { id: 2 }],
+        },
+      };
+
+      expect(getProspectRunDetailsFromMessageJson(json)).toEqual({});
+
+      expect(captureExceptionSpy).toHaveBeenCalledWith(
+          '`detail` property exists on the SQS JSON but no run details present.',
       );
     });
   });

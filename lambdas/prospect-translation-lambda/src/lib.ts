@@ -19,7 +19,13 @@ import {
   UrlMetadata,
 } from 'content-common';
 
-import { SqsProspect } from './types';
+import {
+  SqsProspect,
+  ProspectFeatures,
+  ProspectRunDetails
+} from './types';
+import {generateSnowplowEntity, queueSnowplowEvent} from './events/snowplow';
+import { Tracker } from '@snowplow/node-tracker';
 
 /**
  * verifies the event coming from SQS can be parsed as JSON
@@ -87,9 +93,63 @@ export const getProspectsFromMessageJson = (
   }
 };
 
+/**
+ * retrieves prospect run details from the sqs message
+ *
+ * @param messageBodyJson JSON in the `body` property of the sqs message
+ * @returns either SqsProspectRunDetails obj in the JSON or an empty SqsProspectRunDetails
+ */
+export const getProspectRunDetailsFromMessageJson = (
+    messageBodyJson: any,
+): ProspectRunDetails => {
+  let runDetails = {};
+  if ( messageBodyJson.detail ) {
+    if(messageBodyJson.detail.id){
+      runDetails['candidate_set_id'] = messageBodyJson.detail.id;
+    }
+    if(messageBodyJson.detail.flow) {
+      runDetails['flow'] = messageBodyJson.detail.flow;
+    }
+    if(messageBodyJson.detail.run) {
+      runDetails['run_id'] = messageBodyJson.detail.run;
+    }
+    if(messageBodyJson.detail.expires_at) {
+      runDetails['expires_at'] = messageBodyJson.detail.expires_at;
+    }
+    // if run details are not present in the SQS message, send to Sentry
+    if(Object.keys(runDetails).length === 0) {
+      Sentry.addBreadcrumb({
+        message: 'getProspectRunDetailsFromMessageJson',
+        data: messageBodyJson,
+      });
+
+      Sentry.captureException(
+          '`detail` property exists on the SQS JSON but no run details present.',
+      );
+    }
+
+    return runDetails as ProspectRunDetails;
+  } else {
+    Sentry.addBreadcrumb({
+      message: 'getProspectRunDetailsFromMessageJson',
+      data: messageBodyJson,
+    });
+
+    Sentry.captureException(
+        'no `detail` property exists on the SQS JSON.',
+    );
+
+    return runDetails as ProspectRunDetails;
+  }
+};
+
 export const processProspect = async (
   prospect: Prospect,
   idsProcessed: string[],
+  prospectSource: string,
+  runDetails: ProspectRunDetails,
+  features: ProspectFeatures,
+  tracker: Tracker
 ): Promise<string[]> => {
   const urlMetadata = await deriveUrlMetadata(prospect.url);
 
@@ -107,6 +167,17 @@ export const processProspect = async (
   }
 
   idsProcessed.push(prospect.id);
+
+  // Finally, Send a Snowplow event after the prospect got successfully created in dynamo.
+  queueSnowplowEvent(
+      tracker,
+      generateSnowplowEntity(
+          prospect,
+          prospectSource,
+          runDetails,
+          features
+      ),
+  );
 
   return idsProcessed;
 };
