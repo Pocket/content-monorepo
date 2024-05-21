@@ -1,10 +1,3 @@
-// export enum ProspectReviewStatus {
-//   Created = 'created',
-//   Recommendation = 'recommendation',
-//   Corpus = 'corpus',
-//   Rejected = 'rejected',
-//   Dismissed = 'dismissed', // the only one being implemented
-// }
 import { ProspectReviewStatus} from 'content-common';
 
 export type EventBridgeProspect = {

@@ -12,7 +12,7 @@ export interface SqsProspect {
 
 export type ProspectFeatures = {
   data_source: string;
-  rank: number''
+  rank: number;
   save_count: number;
   predicted_topic: string;
   [key: string]: string | number; // ML controls which additional features are sent
