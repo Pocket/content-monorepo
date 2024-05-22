@@ -15,7 +15,6 @@ export type ProspectFeatures = {
   rank: number;
   save_count: number;
   predicted_topic: string;
-  [key: string]: string | number; // ML controls which additional features are sent
 };
 
 export type ProspectRunDetails = {
@@ -24,5 +23,4 @@ export type ProspectRunDetails = {
   expires_at: number;
   flow: string;
   run_id: string;
-  [key: string]: any; // ML controls which additional run debug info is sent
 };

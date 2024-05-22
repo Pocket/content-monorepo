@@ -116,18 +116,6 @@ export const getProspectRunDetailsFromMessageJson = (
     if(messageBodyJson.detail.expires_at) {
       runDetails['expires_at'] = messageBodyJson.detail.expires_at;
     }
-    // if run details are not present in the SQS message, send to Sentry
-    if(Object.keys(runDetails).length === 0) {
-      Sentry.addBreadcrumb({
-        message: 'getProspectRunDetailsFromMessageJson',
-        data: messageBodyJson,
-      });
-
-      Sentry.captureException(
-          '`detail` property exists on the SQS JSON but no run details present.',
-      );
-    }
-
     return runDetails as ProspectRunDetails;
   } else {
     Sentry.addBreadcrumb({

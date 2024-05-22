@@ -118,7 +118,7 @@ export enum ProspectReviewStatus {
   Recommendation = 'recommendation',
   Corpus = 'corpus',
   Rejected = 'rejected',
-  Dismissed = 'dismissed', // the only one being implemented
+  Dismissed = 'dismissed',
 }
 
 export enum ScheduledSurfacesEnum {

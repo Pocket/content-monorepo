@@ -57,7 +57,7 @@ export const generateSnowplowEntity = (
         scheduled_surface_id: prospect.scheduledSurfaceGuid,
         prospect_review_status: ProspectReviewStatus.Created,
         url: prospect.url,
-        created_at: prospect.createdAt || Date.now(),
+        created_at: prospect.createdAt || (Date.now() / 1000), // date in seconds
         features: {
             data_source: features.data_source,
             rank: features.rank,

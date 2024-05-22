@@ -496,7 +496,7 @@ describe('lib', () => {
       );
     });
 
-    it('should return empty obj and call Sentry if details obj is present but no run details present', () => {
+    it('should return empty obj if details obj is present but no run details present', () => {
       const json = {
         foo: 'bar',
         detail: {
@@ -506,10 +506,6 @@ describe('lib', () => {
       };
 
       expect(getProspectRunDetailsFromMessageJson(json)).toEqual({});
-
-      expect(captureExceptionSpy).toHaveBeenCalledWith(
-          '`detail` property exists on the SQS JSON but no run details present.',
-      );
     });
   });
 
