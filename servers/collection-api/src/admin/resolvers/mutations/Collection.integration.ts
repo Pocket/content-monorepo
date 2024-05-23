@@ -391,24 +391,6 @@ describe('mutations: Collection', () => {
       // assert that the event emitter function is called once
       expect(sendEventBridgeEventStub.calledOnce).to.be.true;
     });
-
-    it('should NOT send event bridge event for collection_created event when collection status is not PUBLISHED or ARCHIVED', async () => {
-      await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(CREATE_COLLECTION),
-          variables: {
-            data: {
-              ...minimumData,
-              status: CollectionStatus.DRAFT,
-            },
-          },
-        });
-
-      // assert that the event emitter function is not called
-      expect(sendEventBridgeEventStub.calledOnce).to.be.false;
-    });
   });
 
   describe('updateCollection', () => {
@@ -1072,30 +1054,6 @@ describe('mutations: Collection', () => {
         });
 
       expect(sendEventBridgeEventStub.calledOnce).to.be.true;
-    });
-
-    it('should NOT send event bridge event for collection_updated event when collection status is not PUBLISHED or ARCHIVED', async () => {
-      const input: UpdateCollectionInput = {
-        authorExternalId: author.externalId,
-        externalId: initial.externalId,
-        language: CollectionLanguage.EN,
-        slug: initial.slug,
-        status: CollectionStatus.DRAFT,
-        title: 'second iteration',
-        excerpt: 'once upon a time, the internet...',
-      };
-
-      await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(UPDATE_COLLECTION),
-          variables: {
-            data: input,
-          },
-        });
-
-      expect(sendEventBridgeEventStub.calledOnce).to.be.false;
     });
   });
 

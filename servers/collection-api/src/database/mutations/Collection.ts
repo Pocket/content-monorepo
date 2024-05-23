@@ -127,18 +127,11 @@ export async function createCollection(
     },
   });
 
-  // send event bridge event for collection_created event type
-  // note that we are only sending events for collections that are published or archived
-  if (
-    collection.status === CollectionStatus.PUBLISHED ||
-    collection.status === CollectionStatus.ARCHIVED
-  ) {
-    await sendEventBridgeEvent(
-      db,
-      EventBridgeEventType.COLLECTION_CREATED,
-      collection,
-    );
-  }
+  await sendEventBridgeEvent(
+    db,
+    EventBridgeEventType.COLLECTION_CREATED,
+    collection,
+  );
 
   return collection;
 }
@@ -317,17 +310,11 @@ export async function updateCollection(
   });
 
   // send event bridge event for collection_updated event type
-  // note that we are only sending events for collections that are published or archived
-  if (
-    collection.status === CollectionStatus.PUBLISHED ||
-    collection.status === CollectionStatus.ARCHIVED
-  ) {
-    await sendEventBridgeEvent(
-      db,
-      EventBridgeEventType.COLLECTION_UPDATED,
-      collection,
-    );
-  }
+  await sendEventBridgeEvent(
+    db,
+    EventBridgeEventType.COLLECTION_UPDATED,
+    collection,
+  );
 
   return collection;
 }
@@ -347,7 +334,7 @@ export async function updateCollectionImageUrl(
     throw new NotFoundError(`A collection by that ID could not be found`);
   }
 
-  return db.collection.update({
+  const collection = await db.collection.update({
     where: { externalId: data.externalId },
     data: { ...data },
     include: {
@@ -366,4 +353,12 @@ export async function updateCollectionImageUrl(
       },
     },
   });
+
+  // send event bridge event for collection_updated event type
+  await sendEventBridgeEvent(
+    db,
+    EventBridgeEventType.COLLECTION_UPDATED,
+    collection,
+  );
+  return collection;
 }

@@ -8,6 +8,7 @@ import {
   UpdateCollectionPartnerAssociationInput,
 } from '../types';
 import { getCollectionPartnerAssociation } from '../queries';
+import { sendEventBridgeEventUpdateFromInternalCollectionId } from '../../events/events';
 
 /**
  * @param db
@@ -33,12 +34,20 @@ export async function createCollectionPartnerAssociation(
     collection: { connect: { externalId: collectionExternalId } },
   };
 
-  return db.collectionPartnership.create({
+  const partnership = await db.collectionPartnership.create({
     data: dbData,
     include: {
       partner: true,
+      collection: true,
     },
   });
+  // Send to event bridge. We use the internal id, because prisma won't return
+  // the joined authors data from the above call, so we let the eventBridge function grab what it needs
+  await sendEventBridgeEventUpdateFromInternalCollectionId(
+    db,
+    partnership.collection.id,
+  );
+  return partnership;
 }
 
 /**
@@ -63,13 +72,21 @@ export async function updateCollectionPartnerAssociation(
     partner: { connect: { externalId: partnerExternalId } },
   };
 
-  return db.collectionPartnership.update({
+  const partnership = await db.collectionPartnership.update({
     where: { externalId: data.externalId },
     data: dbData,
     include: {
       partner: true,
+      collection: true,
     },
   });
+  // Send to event bridge. We use the internal id, because prisma won't return
+  // the joined authors data from the above call, so we let the eventBridge function grab what it needs
+  await sendEventBridgeEventUpdateFromInternalCollectionId(
+    db,
+    partnership.collection.id,
+  );
+  return partnership;
 }
 
 /**
@@ -84,13 +101,21 @@ export async function updateCollectionPartnerAssociationImageUrl(
     throw new UserInputError('externalId must be provided.');
   }
 
-  return db.collectionPartnership.update({
+  const partnership = await db.collectionPartnership.update({
     where: { externalId: data.externalId },
     data: { ...data },
     include: {
       partner: true,
+      collection: true,
     },
   });
+  // Send to event bridge. We use the internal id, because prisma won't return
+  // the joined authors data from the above call, so we let the eventBridge function grab what it needs
+  await sendEventBridgeEventUpdateFromInternalCollectionId(
+    db,
+    partnership.collection.id,
+  );
+  return partnership;
 }
 
 /**
@@ -127,6 +152,13 @@ export async function deleteCollectionPartnerAssociation(
     where: { collectionId: association.collectionId, fromPartner: true },
     data: { fromPartner: false },
   });
+
+  // Send to event bridge. We use the internal id, because prisma won't return
+  // the joined authors data from the above call, so we let the eventBridge function grab what it needs
+  await sendEventBridgeEventUpdateFromInternalCollectionId(
+    db,
+    association.collectionId,
+  );
 
   // to conform with the schema, we return the association
   // as it was before we deleted it
