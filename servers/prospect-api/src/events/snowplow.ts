@@ -7,7 +7,7 @@ import {
 } from '@snowplow/node-tracker';
 
 import config from '../config';
-import { SnowplowProspect } from './types';
+import { SnowplowProspect } from 'content-common';
 import { serverLogger } from '../express';
 
 /**

@@ -4,6 +4,7 @@ export interface SqsProspect {
   scheduled_surface_guid: string;
   predicted_topic: string;
   prospect_source: string;
+  data_source?: string;
   url: string;
   save_count: number;
   rank: number;

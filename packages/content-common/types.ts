@@ -113,6 +113,62 @@ export enum ProspectType {
   TOP_SAVED = 'TOP_SAVED',
 }
 
+export enum ProspectReviewStatus {
+  Created = 'created',
+  Recommendation = 'recommendation',
+  Corpus = 'corpus',
+  Rejected = 'rejected',
+  Dismissed = 'dismissed',
+}
+
+// used in prospect translation lambda
+export type ProspectFeatures = {
+  data_source: string;
+  rank: number;
+  save_count: number;
+  predicted_topic: string;
+};
+
+// used in prospect translation lambda
+export type ProspectRunDetails = {
+  candidate_set_id: string;
+  // unix timestamp
+  expires_at: number;
+  flow: string;
+  run_id: string;
+};
+
+// referenced from snowplow schema directly (used by prospect-api, prospect translation lambda)
+export type SnowplowProspect = {
+  object_version: 'new' | 'old';
+  // the prospect ID supplied by ML
+  prospect_id: string;
+  url: string;
+  title?: string;
+  excerpt?: string;
+  image_url?: string;
+  language?: string;
+  topic?: string;
+  is_collection?: boolean;
+  is_syndicated?: boolean;
+  authors?: string[];
+  publisher?: string;
+  domain?: string;
+  prospect_source: string;
+  scheduled_surface_id: string;
+  created_at: number;
+  prospect_review_status: ProspectReviewStatus;
+  // The Unix timestamp in seconds.
+  reviewed_at?: number;
+  // The LDAP string of the curator who reviewed this prospect - for now, only removing prospect.
+  reviewed_by?: string;
+  // optional removal reasons and comment provided by a curator - only when removing.
+  status_reasons?: string[];
+  status_reason_comment?: string;
+  features?: ProspectFeatures;
+  run_details?: ProspectRunDetails;
+};
+
 export enum ScheduledSurfacesEnum {
   NEW_TAB_EN_US = 'NEW_TAB_EN_US',
   NEW_TAB_DE_DE = 'NEW_TAB_DE_DE',

@@ -60,6 +60,7 @@ export class TranslationSqsLambda extends Construct {
           GIT_SHA: gitSha,
           ENVIRONMENT:
             config.environment === 'Prod' ? 'production' : 'development',
+          SNOWPLOW_ENDPOINT: config.envVars.snowplowEndpoint,
         },
         vpcConfig: {
           securityGroupIds: vpc.internalSecurityGroups.ids,

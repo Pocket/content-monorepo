@@ -5,6 +5,10 @@ import { dbClient, Prospect } from 'prospectapi-common';
 
 import config from './config';
 import { SqsProspect } from './types';
+import {
+  ProspectFeatures,
+  ProspectRunDetails
+} from 'content-common';
 
 import {
   getProspectsFromMessageJson,
@@ -12,10 +16,11 @@ import {
   validateStructure,
   processProspect,
   parseJsonFromEvent,
-  validateProperties,
+  validateProperties, getProspectRunDetailsFromMessageJson,
 } from './lib';
 
 import { deleteOldProspects } from './dynamodb/lib';
+import { getEmitter, getTracker } from 'content-common/snowplow';
 
 // little sentry initialization. no big deal.
 Sentry.AWSLambda.init({
@@ -33,6 +38,10 @@ Sentry.AWSLambda.init({
  * objects
  */
 export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
+
+  const emitter = getEmitter();
+  const tracker = getTracker(emitter, config.snowplow.appId);
+
   // this is nice to have for easy viewing of the full event in lambda logs
   console.log('raw event:');
   console.log(event);
@@ -63,6 +72,15 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
       // this function will send an exception to sentry if any of the
       // properties of the prospect are invalid.
       if (validateProperties(rawSqsProspect as SqsProspect)) {
+        // the run details for the prospects in the SQS message
+        const runDetails: ProspectRunDetails = getProspectRunDetailsFromMessageJson(json);
+        // the ML features
+        const features: ProspectFeatures = {
+          data_source: rawSqsProspect.data_source || 'prospect',
+          rank: rawSqsProspect.rank,
+          save_count: rawSqsProspect.save_count,
+          predicted_topic: rawSqsProspect.predicted_topic,
+        }
         // convert Sqs formatted data to our standard format
         const prospect: Prospect = convertSqsProspectToProspect(rawSqsProspect);
 
@@ -90,6 +108,10 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
         prospectIdsProcessed = await processProspect(
           prospect,
           prospectIdsProcessed,
+          rawSqsProspect.prospect_source,
+          runDetails,
+          features,
+          tracker
         );
       }
     }

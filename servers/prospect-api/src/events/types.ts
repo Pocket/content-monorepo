@@ -1,10 +1,4 @@
-export enum ProspectReviewStatus {
-  Created = 'created',
-  Recommendation = 'recommendation',
-  Corpus = 'corpus',
-  Rejected = 'rejected',
-  Dismissed = 'dismissed', // the only one being implemented
-}
+import { ProspectReviewStatus} from 'content-common';
 
 export type EventBridgeProspect = {
   // a GUID we generate prior to inserting into dynamo
@@ -47,33 +41,4 @@ export type ProspectDismissEventBusPayload = {
   eventType: EventBridgeEventType;
   object_version: string;
   prospect: EventBridgeProspect;
-};
-
-// referenced from snowplow schema directly
-export type SnowplowProspect = {
-  object_version: 'new' | 'old';
-  // the prospect ID supplied by ML
-  prospect_id: string;
-  url: string;
-  title?: string;
-  excerpt?: string;
-  image_url?: string;
-  language?: string;
-  topic?: string;
-  is_collection?: boolean;
-  is_syndicated?: boolean;
-  authors?: string[];
-  publisher?: string;
-  domain?: string;
-  prospect_source: string;
-  scheduled_surface_id: string;
-  created_at: number;
-  prospect_review_status: ProspectReviewStatus;
-  // The Unix timestamp in seconds.
-  reviewed_at?: number;
-  // The LDAP string of the curator who reviewed this prospect - for now, only removing prospect.
-  reviewed_by?: string;
-  // optional removal reasons and comment provided by a curator - only when removing.
-  status_reasons?: string[];
-  status_reason_comment?: string;
 };
