@@ -9,8 +9,7 @@ import {
 
 import config from './config';
 import { CorpusLanguage, SortedRankedProspects } from './types';
-import { SnowplowProspect } from './events/types';
-import { ProspectReviewStatus} from 'content-common';
+import { SnowplowProspect, ProspectReviewStatus } from 'content-common';
 
 /**
  * checks the given new tab GUID to make sure it's valid

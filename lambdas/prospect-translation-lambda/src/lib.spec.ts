@@ -2,7 +2,12 @@ import * as Sentry from '@sentry/serverless';
 import { SQSEvent } from 'aws-lambda';
 
 import { Prospect } from 'prospectapi-common';
-import { ProspectType, Topics, UrlMetadata } from 'content-common';
+import {
+  ProspectType,
+  ProspectRunDetails,
+  Topics,
+  UrlMetadata
+} from 'content-common';
 
 import {
   convertSqsProspectToProspect, getProspectRunDetailsFromMessageJson,
@@ -18,7 +23,6 @@ import {
   validateProperties,
   validateStructure,
 } from './lib';
-import {ProspectRunDetails} from "./types";
 
 describe('lib', () => {
   const captureExceptionSpy = jest

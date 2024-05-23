@@ -9,18 +9,3 @@ export interface SqsProspect {
   save_count: number;
   rank: number;
 }
-
-export type ProspectFeatures = {
-  data_source: string;
-  rank: number;
-  save_count: number;
-  predicted_topic: string;
-};
-
-export type ProspectRunDetails = {
-  candidate_set_id: string;
-  // unix timestamp
-  expires_at: number;
-  flow: string;
-  run_id: string;
-};

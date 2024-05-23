@@ -4,11 +4,11 @@ import * as Sentry from '@sentry/serverless';
 import { dbClient, Prospect } from 'prospectapi-common';
 
 import config from './config';
+import { SqsProspect } from './types';
 import {
-  SqsProspect,
   ProspectFeatures,
   ProspectRunDetails
-} from './types';
+} from 'content-common';
 
 import {
   getProspectsFromMessageJson,

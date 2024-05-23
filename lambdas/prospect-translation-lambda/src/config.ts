@@ -26,7 +26,7 @@ const config = {
   snowplow: {
     // appId should end in '-dev' outside of production such that Dbt can filter events:
     // https://github.com/Pocket/dbt-snowflake/blob/main/macros/validate_snowplow_app_id.sql
-    appId: isDev ? 'prospect-translation-lambda-dev' : 'prospect-translation-lambda',
+    appId: isDev ? 'pocket-prospect-translation-lambda-dev' : 'pocket-prospect-translation-lambda',
     schemas: {
       // published 2024-05-02
       prospect: 'iglu:com.pocket/prospect/jsonschema/1-0-4',

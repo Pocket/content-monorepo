@@ -16,14 +16,12 @@ import {
   applyCurlyQuotes,
   CorpusLanguage,
   Topics,
+  ProspectFeatures,
+  ProspectRunDetails,
   UrlMetadata,
 } from 'content-common';
 
-import {
-  SqsProspect,
-  ProspectFeatures,
-  ProspectRunDetails
-} from './types';
+import { SqsProspect } from './types';
 import {generateSnowplowEntity, queueSnowplowEvent} from './events/snowplow';
 import { Tracker } from '@snowplow/node-tracker';
 

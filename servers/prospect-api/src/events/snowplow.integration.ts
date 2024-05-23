@@ -4,8 +4,7 @@ import {
 } from 'content-common/snowplow/test-helpers';
 import { getEmitter, getTracker } from 'content-common/snowplow';
 import { queueSnowplowEvent } from './snowplow';
-import { SnowplowProspect } from './types';
-import { ProspectReviewStatus} from 'content-common';
+import { SnowplowProspect, ProspectReviewStatus } from 'content-common';
 import config from '../config';
 
 export const prospect: SnowplowProspect = {

@@ -1,6 +1,5 @@
 import {buildSelfDescribingEvent, SelfDescribingEvent, SelfDescribingJson, Tracker,} from '@snowplow/node-tracker';
-import { SnowplowProspect } from './types';
-import { ProspectFeatures, ProspectRunDetails } from '../types';
+import { SnowplowProspect, ProspectFeatures, ProspectRunDetails } from 'content-common';
 import config from '../config';
 import {ProspectReviewStatus} from 'content-common';
 import {Prospect} from 'prospectapi-common';
@@ -55,9 +54,19 @@ export const generateSnowplowEntity = (
         prospect_id: prospect.prospectId,
         prospect_source: prospectSource,
         scheduled_surface_id: prospect.scheduledSurfaceGuid,
-        prospect_review_status: ProspectReviewStatus.Created,
         url: prospect.url,
-        created_at: prospect.createdAt || (Date.now() / 1000), // date in seconds
+        title: prospect.title,
+        excerpt: prospect.excerpt,
+        image_url: prospect.imageUrl,
+        language: prospect.language,
+        topic: prospect.topic,
+        is_collection: prospect.isCollection,
+        is_syndicated: prospect.isSyndicated,
+        authors: prospect.authors.split(','),
+        publisher: prospect.publisher,
+        domain: prospect.domain,
+        created_at: prospect.createdAt || Math.round((Date.now() / 1000)), // date in seconds (snowplow expects integer & not number)
+        prospect_review_status: ProspectReviewStatus.Created,
         features: {
             data_source: features.data_source,
             rank: features.rank,

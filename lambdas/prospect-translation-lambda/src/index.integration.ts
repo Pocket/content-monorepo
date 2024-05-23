@@ -1,8 +1,12 @@
 import { setupServer } from 'msw/node';
 import { Callback, Context } from 'aws-lambda';
 import { processor } from './';
-import {getGoodSnowplowEvents, parseSnowplowData, waitForSnowplowEvents} from 'content-common/snowplow/test-helpers';
-import {SnowplowProspect} from "./events/types";
+import {
+  getGoodSnowplowEvents,
+  parseSnowplowData,
+  waitForSnowplowEvents
+} from 'content-common/snowplow/test-helpers';
+import { SnowplowProspect } from 'content-common';
 
 /**
  * these tests are primarily to verify the entry function can run end to end.
