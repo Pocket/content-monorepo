@@ -42,6 +42,38 @@ export async function getCollection(
 }
 
 /**
+ * this is primarily an admin query, which is why we don't return any author
+ * or story information.
+ *
+ * @param db
+ * @param externalId
+ */
+export async function getCollectionByInternalId(
+  db: PrismaClient,
+  internalId: number,
+): Promise<CollectionComplete> {
+  return await db.collection.findUnique({
+    where: { id: internalId },
+    include: {
+      authors: true,
+      curationCategory: true,
+      IABChildCategory: true,
+      IABParentCategory: true,
+      labels: true,
+      partnership: true,
+      stories: {
+        include: {
+          authors: {
+            orderBy: [{ sortOrder: 'asc' }],
+          },
+        },
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      },
+    },
+  });
+}
+
+/**
  * this is primarily a client query, which is why we include authors and
  * stories by default.
  *

@@ -8,6 +8,7 @@ export {
 export {
   countPublishedCollections,
   getCollection,
+  getCollectionByInternalId,
   getCollectionBySlug,
   getCollectionsBySlugs,
   getPublishedCollections,

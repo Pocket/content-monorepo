@@ -9,6 +9,11 @@ import {
   UpdateCollectionStorySortOrderInput,
   UpdateCollectionStoryImageUrlInput,
 } from '../types';
+import {
+  sendEventBridgeEvent,
+  sendEventBridgeEventUpdateFromInternalCollectionId,
+} from '../../events/events';
+import { EventBridgeEventType } from '../../events/types';
 
 /**
  * @param db
@@ -35,7 +40,7 @@ export async function createCollectionStory(
   // delete the collectionExternalId property
   // so data matches the expected prisma type
   delete data.collectionExternalId;
-  return await db.collectionStory.create({
+  const story = await db.collectionStory.create({
     data: {
       ...data,
       collectionId: collection.id,
@@ -49,6 +54,12 @@ export async function createCollectionStory(
       },
     },
   });
+  await sendEventBridgeEvent(
+    db,
+    EventBridgeEventType.COLLECTION_UPDATED,
+    collection,
+  );
+  return story;
 }
 
 /**
@@ -86,7 +97,7 @@ export async function updateCollectionStory(
     },
   });
 
-  return await db.collectionStory.update({
+  const story = await db.collectionStory.update({
     where: { externalId: data.externalId },
     data: {
       ...data,
@@ -100,6 +111,13 @@ export async function updateCollectionStory(
       },
     },
   });
+
+  // Send to event bridge that the collection was updated
+  await sendEventBridgeEventUpdateFromInternalCollectionId(
+    db,
+    existingStory.collectionId,
+  );
+  return story;
 }
 
 /**
@@ -112,7 +130,7 @@ export async function updateCollectionStorySortOrder(
   db: PrismaClient,
   data: UpdateCollectionStorySortOrderInput,
 ): Promise<CollectionStoryWithAuthors> {
-  return db.collectionStory.update({
+  const story = await db.collectionStory.update({
     where: { externalId: data.externalId },
     data: {
       sortOrder: data.sortOrder,
@@ -123,6 +141,13 @@ export async function updateCollectionStorySortOrder(
       },
     },
   });
+
+  // Send to event bridge that the collection was updated
+  await sendEventBridgeEventUpdateFromInternalCollectionId(
+    db,
+    story.collectionId,
+  );
+  return story;
 }
 
 /**
@@ -135,7 +160,7 @@ export async function updateCollectionStoryImageUrl(
   db: PrismaClient,
   data: UpdateCollectionStoryImageUrlInput,
 ): Promise<CollectionStoryWithAuthors> {
-  return db.collectionStory.update({
+  const story = await db.collectionStory.update({
     where: { externalId: data.externalId },
     data: {
       imageUrl: data.imageUrl,
@@ -146,6 +171,12 @@ export async function updateCollectionStoryImageUrl(
       },
     },
   });
+  // Send to event bridge that the collection was updated
+  await sendEventBridgeEventUpdateFromInternalCollectionId(
+    db,
+    story.collectionId,
+  );
+  return story;
 }
 
 /**
@@ -164,6 +195,7 @@ export async function deleteCollectionStory(
       `Cannot delete a collection story with external ID "${externalId}"`,
     );
   }
+  const collectionId = existingStory.collectionId;
 
   // delete all associated collection story authors
   await db.collectionStoryAuthor.deleteMany({
@@ -176,6 +208,9 @@ export async function deleteCollectionStory(
   await db.collectionStory.delete({
     where: { externalId },
   });
+
+  // Send to event bridge that the collection was updated
+  await sendEventBridgeEventUpdateFromInternalCollectionId(db, collectionId);
 
   // to conform with the scheam, we need to return a CollectionStory with
   // authors, which can't be done in the `.delete` call above because we

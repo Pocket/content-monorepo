@@ -38,6 +38,7 @@ import {
 } from '.prisma/client';
 
 import { getLabelById } from '../shared/resolvers/types';
+import { getCollectionByInternalId } from '../database/queries';
 
 /** Transformation functions below to map collection object's sub types to the ones in snowplow schema  */
 
@@ -243,6 +244,38 @@ export async function generateEventBridgePayload(
     eventType: eventType,
     object_version: 'new',
   };
+}
+
+/**
+ *
+ * Function called in the collection stories database mutation functions for create and update to emit to eventbridge
+ */
+export async function sendEventBridgeEventUpdateFromInternalCollectionId(
+  dbClient: PrismaClient,
+  collectionId: number,
+) {
+  Sentry.addBreadcrumb({
+    level: 'debug',
+    message: 'fetching collection for eventbridge',
+    data: { collectionId },
+  });
+  // retrieve the current record, pre-update
+  const collection = await getCollectionByInternalId(dbClient, collectionId);
+
+  if (!collection) {
+    Sentry.captureEvent({
+      message:
+        'Could not find collection to send to event bridge for an update',
+    });
+    // No-op because not being able to send an event should not be a fatal error
+    return;
+  }
+  // Send to event bridge with the data
+  await sendEventBridgeEvent(
+    dbClient,
+    EventBridgeEventType.COLLECTION_UPDATED,
+    collection,
+  );
 }
 
 /**
