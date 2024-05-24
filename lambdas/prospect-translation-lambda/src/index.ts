@@ -26,7 +26,7 @@ import { getEmitter, getTracker } from 'content-common/snowplow';
 Sentry.AWSLambda.init({
   dsn: config.app.sentry.dsn,
   release: config.app.sentry.release,
-  environment: config.environment,
+  environment: config.app.environment,
   serverName: config.app.name,
 });
 
