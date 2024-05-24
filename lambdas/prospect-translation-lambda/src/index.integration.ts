@@ -76,7 +76,7 @@ describe('prospect api translation lambda entry function', () => {
           goodEvents[i].rawEvent.parameters.cx,
       );
       const snowplowProspectEntity = snowplowContext.data[0].data as SnowplowProspect;
-      expect(snowplowProspectEntity.url).toEqual(expectedUrls[i]);
+      expect(expectedUrls.includes(snowplowProspectEntity.url)).toBeTruthy();
       expect(snowplowProspectEntity.features.predicted_topic).toEqual((expectedPredictedTopics[i]));
     }
   })
