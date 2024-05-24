@@ -62,7 +62,7 @@ export const generateSnowplowEntity = (
         topic: prospect.topic,
         is_collection: prospect.isCollection,
         is_syndicated: prospect.isSyndicated,
-        authors: prospect.authors.split(','),
+        authors: prospect.authors?.split(','),
         publisher: prospect.publisher,
         domain: prospect.domain,
         created_at: prospect.createdAt || Math.round((Date.now() / 1000)), // date in seconds (snowplow expects integer & not number)
