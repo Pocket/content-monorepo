@@ -12,7 +12,6 @@ const config = {
     },
     version: process.env.GIT_SHA || '',
   },
-  environment: process.env.ENVIRONMENT || 'development',
   aws: {
     localEndpoint: process.env.AWS_ENDPOINT,
     region: process.env.AWS_DEFAULT_REGION || 'us-east-1',
