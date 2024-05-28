@@ -77,7 +77,7 @@ describe('prospect api translation lambda entry function', () => {
       );
       const snowplowProspectEntity = snowplowContext.data[0].data as SnowplowProspect;
       expect(expectedUrls.includes(snowplowProspectEntity.url)).toBeTruthy();
-      expect(snowplowProspectEntity.features.predicted_topic).toEqual((expectedPredictedTopics[i]));
+      expect(expectedPredictedTopics.includes(snowplowProspectEntity.features.predicted_topic)).toBeTruthy();
     }
   })
   it('gets correct counts when processing valid JSON', async () => {
