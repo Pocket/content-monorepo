@@ -156,9 +156,10 @@ export type SnowplowProspect = {
   domain?: string;
   prospect_source: string;
   scheduled_surface_id: string;
+  // The Unix timestamp in seconds.
   created_at: number;
   prospect_review_status: ProspectReviewStatus;
-  // The Unix timestamp in seconds.
+  // The Unix timestamp in milliseconds.
   reviewed_at?: number;
   // The LDAP string of the curator who reviewed this prospect - for now, only removing prospect.
   reviewed_by?: string;

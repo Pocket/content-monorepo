@@ -25,10 +25,11 @@ export const prospect: SnowplowProspect = {
   domain: 'nytimes.com',
   prospect_source: 'COUNTS_LOGISTIC_APPROVAL',
   scheduled_surface_id: 'NEW_TAB_EN_US',
+  // The Unix timestamp in seconds.
   created_at: 1668100357,
   prospect_review_status: ProspectReviewStatus.Dismissed,
-  // The Unix timestamp in seconds.
-  reviewed_at: 1668100358,
+  // The Unix timestamp in milliseconds.
+  reviewed_at: 1668110696000,
   // The LDAP string of the curator who reviewed this prospect - for now, only dismissing prospect.
   reviewed_by: 'sso-user',
 };
