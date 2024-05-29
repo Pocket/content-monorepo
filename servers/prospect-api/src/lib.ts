@@ -273,9 +273,10 @@ export const prospectToSnowplowProspect = (
     domain: prospect.domain,
     prospect_source: prospect.prospectType,
     scheduled_surface_id: prospect.scheduledSurfaceGuid,
-    // not sure how a prospect could be missing a `createdAt` value...
-    created_at: prospect.createdAt || Date.now(),
+    // in seconds
+    created_at: prospect.createdAt || Math.round((Date.now() / 1000)),
     prospect_review_status: ProspectReviewStatus.Dismissed,
+    // in milliseconds
     reviewed_at: Date.now(),
     reviewed_by: authUserName,
   };

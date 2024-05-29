@@ -30,7 +30,7 @@ describe('event helpers: ', () => {
     saveCount: 333,
     rank: 222,
     curated: false,
-    createdAt: 160000000,
+    createdAt: 1668100357,
     domain: 'test.com',
     excerpt: 'Once upon a time...',
     imageUrl: 'https://www.test.com/a-story.jpg',
@@ -57,7 +57,7 @@ describe('event helpers: ', () => {
       ...prospect,
       prospectReviewStatus: ProspectReviewStatus.Dismissed,
       reviewedBy: authUser.username,
-      reviewedAt: 1600000,
+      reviewedAt: 1668110696000, // milliseconds
     },
     eventType: EventBridgeEventType.PROSPECT_DISMISS,
     object_version: 'new',
