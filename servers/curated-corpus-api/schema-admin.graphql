@@ -271,6 +271,10 @@ type ApprovedCorpusItem @key(fields: "url") {
   """
   topic: String!
   """
+  The quality grade associated with this CorpusItem.
+  """
+  grade: ApprovedItemGrade
+  """
   The source of the corpus item.
   """
   source: CorpusItemSource!
@@ -659,9 +663,12 @@ input CreateApprovedCorpusItemInput {
   imageUrl: Url!
   """
   A topic this story best fits in.
-  Temporarily a string value that will be provided by Prospect API, possibly an enum in the future.
   """
   topic: String!
+  """
+  The quality grade associated with this CorpusItem.
+  """
+  grade: ApprovedItemGrade
   """
   The source of the corpus item.
   """
@@ -838,9 +845,12 @@ input UpdateApprovedCorpusItemInput {
   imageUrl: Url!
   """
   A topic this story best fits in.
-  Temporarily a string value that will be provided by Prospect API, possibly an enum in the future.
   """
   topic: String!
+  """
+  The quality grade associated with this CorpusItem.
+  """
+  grade: ApprovedItemGrade
   """
   A flag to ML to not recommend this item long term after it is added to the corpus.
   Example: a story covering an election, or "The best of 202x" collection.

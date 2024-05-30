@@ -17,6 +17,7 @@ export const CuratedItemData = gql`
     }
     status
     topic
+    grade
     source
     isCollection
     isTimeSensitive

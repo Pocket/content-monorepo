@@ -1,6 +1,7 @@
 import {
   ActionScreen,
   ApprovedItemAuthor,
+  ApprovedItemGrade,
   CorpusLanguage,
   CreateScheduledItemInput,
   CuratedStatus,
@@ -19,6 +20,7 @@ export type UpdateApprovedCorpusItemApiInput = {
   datePublished?: string;
   imageUrl: string;
   topic: string;
+  grade?: ApprovedItemGrade;
   isTimeSensitive: boolean;
   actionScreen?: ActionScreen; // non-db, analytics only
 };

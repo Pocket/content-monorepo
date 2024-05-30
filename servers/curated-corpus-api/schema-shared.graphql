@@ -1,14 +1,8 @@
 extend schema
-    @link(
-        url: "https://specs.apollo.dev/federation/v2.0"
-        import: [
-            "@key"
-            "@shareable"
-            "@requires"
-            "@external"
-            "@inaccessible"
-        ]
-    )
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.0"
+    import: ["@key", "@shareable", "@requires", "@external", "@inaccessible"]
+  )
 
 """
 A URL - usually, for an interesting story on the internet that's worth saving to Pocket.
@@ -27,46 +21,55 @@ scalar NonNegativeInt
 Valid language codes for curated corpus items.
 """
 enum CorpusLanguage {
-    "German"
-    DE
-    "English"
-    EN
-    "Italian"
-    IT
-    "French"
-    FR
-    "Spanish"
-    ES
+  "German"
+  DE
+  "English"
+  EN
+  "Italian"
+  IT
+  "French"
+  FR
+  "Spanish"
+  ES
+}
+
+"""
+Valid grade values for CorpusItem (public graph) and ApprovedItem (admin graph)
+"""
+enum ApprovedItemGrade {
+  A
+  B
+  C
 }
 
 """
 An author associated with a CorpusItem.
 """
 type CorpusItemAuthor {
-    name: String!
-    sortOrder: Int!
+  name: String!
+  sortOrder: Int!
 }
 
 """
 Information about pagination in a connection.
 """
 type PageInfo @shareable {
-    """
-    When paginating forwards, the cursor to continue.
-    """
-    endCursor: String
-    """
-    When paginating forwards, are there more items?
-    """
-    hasNextPage: Boolean!
-    """
-    When paginating backwards, are there more items?
-    """
-    hasPreviousPage: Boolean!
-    """
-    When paginating backwards, the cursor to continue.
-    """
-    startCursor: String
+  """
+  When paginating forwards, the cursor to continue.
+  """
+  endCursor: String
+  """
+  When paginating forwards, are there more items?
+  """
+  hasNextPage: Boolean!
+  """
+  When paginating backwards, are there more items?
+  """
+  hasPreviousPage: Boolean!
+  """
+  When paginating backwards, the cursor to continue.
+  """
+  startCursor: String
 }
 """
 Pagination request. To determine which edges to return, the connection
@@ -76,24 +79,24 @@ value for either `first` or `last`, not both). If all fields are null,
 by default will return a page with the first 30 elements.
 """
 input PaginationInput {
-    """
-    Returns the elements in the list that come after the specified cursor.
-    The specified cursor is not included in the result.
-    """
-    after: String
-    """
-    Returns the elements in the list that come before the specified cursor.
-    The specified cursor is not included in the result.
-    """
-    before: String
-    """
-    Returns the first _n_ elements from the list. Must be a non-negative integer.
-    If `first` contains a value, `last` should be null/omitted in the input.
-    """
-    first: Int
-    """
-    Returns the last _n_ elements from the list. Must be a non-negative integer.
-    If `last` contains a value, `first` should be null/omitted in the input.
-    """
-    last: Int
+  """
+  Returns the elements in the list that come after the specified cursor.
+  The specified cursor is not included in the result.
+  """
+  after: String
+  """
+  Returns the elements in the list that come before the specified cursor.
+  The specified cursor is not included in the result.
+  """
+  before: String
+  """
+  Returns the first _n_ elements from the list. Must be a non-negative integer.
+  If `first` contains a value, `last` should be null/omitted in the input.
+  """
+  first: Int
+  """
+  Returns the last _n_ elements from the list. Must be a non-negative integer.
+  If `last` contains a value, `first` should be null/omitted in the input.
+  """
+  last: Int
 }

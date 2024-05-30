@@ -72,6 +72,7 @@ const payloadBuilders = {
       publisher: data.scheduledCorpusItem.approvedItem.publisher,
       imageUrl: data.scheduledCorpusItem.approvedItem.imageUrl,
       topic: data.scheduledCorpusItem.approvedItem.topic,
+      grade: data.scheduledCorpusItem.approvedItem.grade,
       isSyndicated: data.scheduledCorpusItem.approvedItem.isSyndicated,
       createdAt: data.scheduledCorpusItem.createdAt.toUTCString(),
       createdBy: data.scheduledCorpusItem.createdBy,
@@ -84,6 +85,8 @@ const payloadBuilders = {
       // will be discarded. it is added now only for potential future use
       // by clients consuming from event bridge.
       authors: data.scheduledCorpusItem.approvedItem.authors,
+      // this is the source of the scheduled item, *not* the approved item
+      source: data.scheduledCorpusItem.source,
     };
   },
   approvedItemEvent(
@@ -91,7 +94,7 @@ const payloadBuilders = {
     data: ReviewedCorpusItemPayload,
   ): ApprovedItemEventBusPayload {
     // The nullish coalesce and checking for properties are due to
-    // union type in ReviewedCorpusItemPayload
+    // union type of ApprovedItem and RejectedItem in ReviewedCorpusItemPayload
     const item = data.reviewedCorpusItem;
     return {
       eventType: eventType,
@@ -117,6 +120,7 @@ const payloadBuilders = {
         'datePublished' in item ? item.datePublished?.toUTCString() : undefined,
       isTimeSensitive:
         'isTimeSensitive' in item ? item.isTimeSensitive : undefined,
+      source: 'source' in item ? item.source : undefined,
     };
   },
 };

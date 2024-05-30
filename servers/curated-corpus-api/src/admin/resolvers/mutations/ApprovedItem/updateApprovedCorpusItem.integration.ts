@@ -10,6 +10,7 @@ import {
   CuratedStatus,
   CorpusLanguage,
   Topics,
+  ApprovedItemGrade,
 } from 'content-common';
 
 import { client } from '../../../../database/client';
@@ -58,6 +59,7 @@ describe('mutations: ApprovedItem (updateApprovedCorpusItem)', () => {
       title: "3 Things Everyone Knows About LEGO That You Don't",
       status: CuratedStatus.RECOMMENDATION,
       language: 'EN',
+      grade: ApprovedItemGrade.B,
     });
 
     // authors from `item` above do not go through graphql and therefore
@@ -83,6 +85,7 @@ describe('mutations: ApprovedItem (updateApprovedCorpusItem)', () => {
       publisher: 'Cloud Factory',
       datePublished: '2024-02-24',
       topic: Topics.BUSINESS,
+      grade: ApprovedItemGrade.A,
       isTimeSensitive: true,
     };
   });
@@ -127,23 +130,26 @@ describe('mutations: ApprovedItem (updateApprovedCorpusItem)', () => {
     ).toEqual(data?.updateApprovedCorpusItem.externalId);
   });
 
-  it('should succeed if publication date is not provided', async () => {
+  it('should succeed if optional data is not provided', async () => {
     // Set up event tracking
     const eventTracker = jest.fn();
     eventEmitter.on(ReviewedCorpusItemEventType.UPDATE_ITEM, eventTracker);
 
     // clone the input
-    const inputWithoutDatePublished = { ...input };
+    const inputWithoutOptionalFields = { ...input };
 
     // delete the publication date (not all items will have this data)
-    delete inputWithoutDatePublished.datePublished;
+    delete inputWithoutOptionalFields.datePublished;
+
+    // delete grade (not all items will have this data)
+    delete inputWithoutOptionalFields.grade;
 
     const res = await request(app)
       .post(graphQLUrl)
       .set(headers)
       .send({
         query: print(UPDATE_APPROVED_ITEM),
-        variables: { data: inputWithoutDatePublished },
+        variables: { data: inputWithoutOptionalFields },
       });
 
     // Good to check for any errors before proceeding with the rest of the test
@@ -155,12 +161,66 @@ describe('mutations: ApprovedItem (updateApprovedCorpusItem)', () => {
 
     // Updated properties should be... updated
     expect(data?.updateApprovedCorpusItem).toMatchObject(
-      inputWithoutDatePublished,
+      inputWithoutOptionalFields,
     );
 
     // Publication date was not provided by the test helper and should
     // remain empty after this update
     expect(data?.updateApprovedCorpusItem.datePublished).toBeNull();
+
+    // grade value should be unchanged
+    expect(data?.updateApprovedCorpusItem.grade).toEqual(item.grade);
+
+    // The `updatedBy` field should now be the SSO username of the user
+    // who updated this record
+    expect(data?.updateApprovedCorpusItem.updatedBy).toEqual(headers.username);
+
+    // Check that the UPDATE_ITEM event was fired successfully:
+    // 1 - Event was fired once!
+    expect(eventTracker).toHaveBeenCalledTimes(1);
+    // 2 - Event has the right type.
+    expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
+      ReviewedCorpusItemEventType.UPDATE_ITEM,
+    );
+    // 3- Event has the right entity passed to it.
+    expect(
+      await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
+    ).toEqual(data?.updateApprovedCorpusItem.externalId);
+  });
+
+  it('should successfully unset optional properties', async () => {
+    // Set up event tracking
+    const eventTracker = jest.fn();
+    eventEmitter.on(ReviewedCorpusItemEventType.UPDATE_ITEM, eventTracker);
+
+    // clone the input
+    const inputUnsettingOptionalFields = { ...input };
+
+    // delete grade (not all items will have this data)
+    inputUnsettingOptionalFields.grade = null;
+
+    const res = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(UPDATE_APPROVED_ITEM),
+        variables: { data: inputUnsettingOptionalFields },
+      });
+
+    // Good to check for any errors before proceeding with the rest of the test
+    expect(res.body.errors).toBeUndefined();
+    const data = res.body.data;
+
+    // External ID should be unchanged
+    expect(data?.updateApprovedCorpusItem.externalId).toEqual(item.externalId);
+
+    // Updated properties should be... updated
+    expect(data?.updateApprovedCorpusItem).toMatchObject(
+      inputUnsettingOptionalFields,
+    );
+
+    // grade value should be unset
+    expect(data?.updateApprovedCorpusItem.grade).toBeNull();
 
     // The `updatedBy` field should now be the SSO username of the user
     // who updated this record

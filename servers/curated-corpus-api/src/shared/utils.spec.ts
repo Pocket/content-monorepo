@@ -1,4 +1,9 @@
-import { CorpusItemSource, CuratedStatus, Topics } from 'content-common';
+import {
+  ApprovedItemGrade,
+  CorpusItemSource,
+  CuratedStatus,
+  Topics,
+} from 'content-common';
 
 import { MozillaAccessGroup } from 'content-common';
 import {
@@ -76,7 +81,7 @@ describe('shared/utils', () => {
         prospectId: 'abc-123',
         url: 'https://test.com',
         domainName: 'test.com',
-        grade: null,
+        grade: ApprovedItemGrade.A,
         status: CuratedStatus.CORPUS,
         id: 123,
         title: 'Test title',

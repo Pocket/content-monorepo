@@ -20,6 +20,7 @@ import { getUnixTimestamp } from '../../shared/utils';
 import { ScheduledCorpusItemStatus } from '../../shared/types';
 import {
   ActionScreen,
+  ApprovedItemGrade,
   CorpusItemSource,
   ScheduledItemSource,
   Topics,
@@ -49,7 +50,7 @@ const scheduledCorpusItem: ScheduledItem = {
     prospectId: '456-dfg',
     url: 'https://test.com/a-story',
     domainName: 'test.com',
-    grade: null,
+    grade: ApprovedItemGrade.A,
     status: CuratedStatus.RECOMMENDATION,
     title: 'Everything you need to know about React',
     excerpt: 'Something here',

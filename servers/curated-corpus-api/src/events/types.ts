@@ -80,7 +80,7 @@ export interface BaseEventBusPayload {
 
 // Data for events sent to event bus for Scheduled Surface schedule
 export type ScheduledItemEventBusPayload = BaseEventBusPayload &
-  Pick<ScheduledItemModel, 'createdBy' | 'scheduledSurfaceGuid'> &
+  Pick<ScheduledItemModel, 'createdBy' | 'scheduledSurfaceGuid' | 'source'> &
   Pick<
     ApprovedItem,
     'topic' | 'isSyndicated' | keyof Omit<CorpusItem, 'id' | 'image' | 'target'>
@@ -109,6 +109,7 @@ export type ApprovedItemEventBusPayload = BaseEventBusPayload &
       | 'isCollection'
       | 'domainName'
       | 'isTimeSensitive'
+      | 'source'
     >
   > & {
     approvedItemExternalId: string; // externalId of ApprovedItem

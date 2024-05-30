@@ -1,11 +1,14 @@
 import { Prisma, PrismaClient } from '.prisma/client';
 import { faker } from '@faker-js/faker';
-import { ApprovedItem } from '../../database/types';
+
 import {
   ApprovedItemAuthor,
+  ApprovedItemGrade,
   CorpusItemSource,
   CuratedStatus,
 } from 'content-common';
+
+import { ApprovedItem } from '../../database/types';
 import { getNormalizedDomainName } from '../../shared/utils';
 
 // the minimum of data required to create a approved curated item
@@ -24,6 +27,7 @@ interface CreateApprovedItemHelperOptionalInput {
   imageUrl?: string;
   createdBy?: string;
   topic?: string;
+  grade?: ApprovedItemGrade;
   source?: CorpusItemSource;
   isCollection?: boolean;
   isTimeSensitive?: boolean;
