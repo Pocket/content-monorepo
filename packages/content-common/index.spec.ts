@@ -1,7 +1,7 @@
 import {
   applyApTitleCase,
-  applyGermanQuotesEMDash,
-  applyCurlyQuotesEN,
+  formatQuotesDashesDE,
+  formatQuotesEN,
   capitalize,
   parseReasonsCsv,
   sanitizeText
@@ -112,43 +112,43 @@ describe('content-common', () => {
     });
   });
   // taken from curation admin tools
-  describe('applyCurlyQuotesEN', () => {
+  describe('formatQuotesEN', () => {
     it('should return undefined if text is null/undefined/empty string', () => {
       // null
-      let output = applyCurlyQuotesEN(null as string);
+      let output = formatQuotesEN(null as string);
       expect(output).toBeUndefined();
 
       // undefined
-      output = applyCurlyQuotesEN(undefined as string);
+      output = formatQuotesEN(undefined as string);
       expect(output).toBeUndefined();
 
       // empty string
-      output = applyCurlyQuotesEN('');
+      output = formatQuotesEN('');
       expect(output).toBeUndefined();
     });
 
     it('adds single open curly apostrophe for straight apostrophe', () => {
-      const result = applyCurlyQuotesEN("Here's to the great ones!");
+      const result = formatQuotesEN("Here's to the great ones!");
       expect(result).toEqual('Here’s to the great ones!');
     });
 
     it('adds double curly apostrophes for straight apostrophe wrapping text', () => {
-      const result = applyCurlyQuotesEN('Here\'s a quote - "To be or not to be"');
+      const result = formatQuotesEN('Here\'s a quote - "To be or not to be"');
       expect(result).toEqual('Here’s a quote - “To be or not to be”');
     });
 
     it('adds single curly apostrophes for straight apostrophes wrapping text', () => {
-      const result = applyCurlyQuotesEN("Here's a quote - 'To be or not to be'");
+      const result = formatQuotesEN("Here's a quote - 'To be or not to be'");
       expect(result).toEqual('Here’s a quote - ‘To be or not to be’');
     });
 
     it('adds single curly apostrophes at the end of quotes', () => {
-      const result = applyCurlyQuotesEN("Here's a quote - 'To be or not to be.'");
+      const result = formatQuotesEN("Here's a quote - 'To be or not to be.'");
       expect(result).toEqual('Here’s a quote - ‘To be or not to be.’');
     });
 
     it('adds double curly apostrophes at the end of quotes', () => {
-      const result = applyCurlyQuotesEN(
+      const result = formatQuotesEN(
           'I tried the workout, and it did more than expected. "Fitness is for Everyone."'
       );
       expect(result).toEqual(
@@ -157,58 +157,58 @@ describe('content-common', () => {
     });
   });
 
-  describe('applyCurlyQuotesDE', () => {
+  describe('formatQuotesDashesDE', () => {
     it('should return undefined if text is null/undefined/empty string', () => {
       // null
-      let output = applyGermanQuotesEMDash(null as string);
+      let output = formatQuotesDashesDE(null as string);
       expect(output).toBeUndefined();
 
       // undefined
-      output = applyGermanQuotesEMDash(undefined as string);
+      output = formatQuotesDashesDE(undefined as string);
       expect(output).toBeUndefined();
 
       // empty string
-      output = applyGermanQuotesEMDash('');
+      output = formatQuotesDashesDE('');
       expect(output).toBeUndefined();
     });
     it('Successfully does all replacements', () => {
-      const result = applyGermanQuotesEMDash('“Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus “Tote Mädchen lügen nicht” und “Élite” – das musst du darüber wissen');
+      const result = formatQuotesDashesDE('“Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus “Tote Mädchen lügen nicht” und “Élite” – das musst du darüber wissen');
       expect(result).toEqual('„Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus „Tote Mädchen lügen nicht” und „Élite” – das musst du darüber wissen');
     });
     it('Replaces opening » with „', () => {
-      const result = applyGermanQuotesEMDash('»Here\'s to the great ones!');
+      const result = formatQuotesDashesDE('»Here\'s to the great ones!');
       expect(result).toEqual('„Here\'s to the great ones!');
     });
     it('Replaces closing « with “', () => {
-      const result = applyGermanQuotesEMDash('Here\'s to the great ones!«');
+      const result = formatQuotesDashesDE('Here\'s to the great ones!«');
       expect(result).toEqual('Here\'s to the great ones!”');
     });
     it('Replaces » with „ and « with “', () => {
-      const result = applyGermanQuotesEMDash('»Here\'s to the great ones!«');
+      const result = formatQuotesDashesDE('»Here\'s to the great ones!«');
       expect(result).toEqual('„Here\'s to the great ones!”');
     });
     it('Replaces opening " with „', () => {
-      const result = applyGermanQuotesEMDash('"Here\'s to the great ones!');
+      const result = formatQuotesDashesDE('"Here\'s to the great ones!');
       expect(result).toEqual('„Here\'s to the great ones!');
     });
     it('Replaces closing " with “', () => {
-      const result = applyGermanQuotesEMDash('Here\'s to the great ones!"');
+      const result = formatQuotesDashesDE('Here\'s to the great ones!"');
       expect(result).toEqual('Here\'s to the great ones!”');
     });
     it('Replaces opening " with „ and closing " with “', () => {
-      const result = applyGermanQuotesEMDash('"Here\'s to the great ones!"');
+      const result = formatQuotesDashesDE('"Here\'s to the great ones!"');
       expect(result).toEqual('„Here\'s to the great ones!”');
     });
     it('Replaces opening “ with „', () => {
-      const result = applyGermanQuotesEMDash('“Here\'s to the great ones!"');
+      const result = formatQuotesDashesDE('“Here\'s to the great ones!"');
       expect(result).toEqual('„Here\'s to the great ones!”');
     });
     it('Replaces short dash (with whitespaces) with long em dash', () => {
-      const result = applyGermanQuotesEMDash('"Here\'s to the great - ones!"');
+      const result = formatQuotesDashesDE('"Here\'s to the great - ones!"');
       expect(result).toEqual('„Here\'s to the great — ones!”');
     });
     it('Should not replace short dash (-) with long em dash (—) if no whitespaces in short dash', () => {
-      const result = applyGermanQuotesEMDash('"Here\'s to the great-ones!"');
+      const result = formatQuotesDashesDE('"Here\'s to the great-ones!"');
       expect(result).toEqual('„Here\'s to the great-ones!”');
     });
   });

@@ -102,7 +102,7 @@ export const applyApTitleCase = (value: string): string | undefined => {
  * @returns string
  */
 
-export const applyCurlyQuotesEN = (text: string): string | undefined => {
+export const formatQuotesEN = (text: string): string | undefined => {
   if (!text) {
     return undefined;
   }
@@ -121,7 +121,7 @@ export const applyCurlyQuotesEN = (text: string): string | undefined => {
  * @returns string
  */
 
-export const applyGermanQuotesEMDash = (text: string): string | undefined => {
+export const formatQuotesDashesDE = (text: string): string | undefined => {
   if (!text) {
     return undefined;
   }

@@ -6,8 +6,8 @@ import config from './config';
 import { validateCandidate, validateImageUrl } from './validation';
 import {
   applyApTitleCase,
-  applyCurlyQuotesEN,
-  applyGermanQuotesEMDash,
+  formatQuotesEN,
+  formatQuotesDashesDE,
   ApprovedItemAuthor,
   CorpusLanguage,
   CreateApprovedCorpusItemApiInput,
@@ -216,13 +216,13 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
           ? candidate.scheduled_corpus_item.title
           : itemMetadata.title
       ) as string;
-      title = isCandidateEnglish ? (applyApTitleCase(title) as string) : isCandidateGerman ? (applyGermanQuotesEMDash(title) as string) : title;
+      title = isCandidateEnglish ? (applyApTitleCase(title) as string) : isCandidateGerman ? (formatQuotesDashesDE(title) as string) : title;
       let excerpt = (
         candidate.scheduled_corpus_item.excerpt
           ? candidate.scheduled_corpus_item.excerpt
           : itemMetadata.excerpt
       ) as string;
-      excerpt = isCandidateEnglish ? applyCurlyQuotesEN(excerpt) as string : isCandidateGerman ? applyGermanQuotesEMDash(excerpt) as string : excerpt;
+      excerpt = isCandidateEnglish ? formatQuotesEN(excerpt) as string : isCandidateGerman ? formatQuotesDashesDE(excerpt) as string : excerpt;
       // validate image_url (Metaflow or Parser input, whichever is provided)
       const imageUrl =
         (await validateImageUrl(
