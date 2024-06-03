@@ -2,8 +2,10 @@ import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
-import { client } from '../../../database/client';
 
+import { ApprovedItemGrade } from 'content-common';
+
+import { client } from '../../../database/client';
 import {
   clearDb,
   createApprovedItemHelper,
@@ -86,6 +88,20 @@ describe('queries: ScheduledCuratedCorpusItem', () => {
           scheduledDate: new Date('3030-01-01').toISOString(),
         });
       }
+
+      // Create a few records with grades (to model optional data)
+      for (let i = 0; i < 3; i++) {
+        const approvedItem = await createApprovedItemHelper(db, {
+          title: `Batch 5, Story #${i + 1}`,
+          grade: ApprovedItemGrade.A,
+        });
+
+        await createScheduledItemHelper(db, {
+          scheduledSurfaceGuid: 'NEW_TAB_ES_ES',
+          approvedItem,
+          scheduledDate: new Date('3030-02-02').toISOString(),
+        });
+      }
     });
 
     it('should return all requested items', async () => {
@@ -160,6 +176,7 @@ describe('queries: ScheduledCuratedCorpusItem', () => {
         expect(item.corpusItem.imageUrl).toEqual(item.corpusItem.image.url);
         expect(item.corpusItem.publisher).toBeDefined();
         expect(item.corpusItem.topic).toBeDefined();
+        expect(item.corpusItem.grade).toBeDefined();
       });
     });
 
@@ -176,6 +193,24 @@ describe('queries: ScheduledCuratedCorpusItem', () => {
 
       result.body.data?.scheduledSurface.items.forEach((item) => {
         expect(item.corpusItem.topic).toBeNull();
+      });
+    });
+
+    it('should return a grade when the approved item has a value', async () => {
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(GET_SCHEDULED_SURFACE_WITH_ITEMS),
+          variables: {
+            id: 'NEW_TAB_ES_ES',
+            date: '3030-02-02',
+          },
+        });
+
+      result.body.data?.scheduledSurface.items.forEach((item) => {
+        // all results for this query are guaranteed to have a grade of "A"
+        // based on the seeding in `beforeAll` above
+        expect(item.corpusItem.grade).toEqual(ApprovedItemGrade.A);
       });
     });
 

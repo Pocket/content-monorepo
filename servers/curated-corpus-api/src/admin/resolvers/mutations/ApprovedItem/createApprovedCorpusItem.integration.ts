@@ -6,6 +6,7 @@ import { PrismaClient } from '.prisma/client';
 
 import {
   ActionScreen,
+  ApprovedItemGrade,
   CreateApprovedCorpusItemApiInput,
   CorpusItemSource,
   CuratedStatus,
@@ -72,6 +73,7 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
       publisher: 'Convective Cloud',
       datePublished: '2024-02-29',
       topic: Topics.TECHNOLOGY,
+      grade: ApprovedItemGrade.A,
       source: CorpusItemSource.PROSPECT,
       isCollection: false,
       isTimeSensitive: true,
@@ -118,70 +120,29 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
     ).toEqual(result.body.data?.createApprovedCorpusItem.externalId);
   });
 
-  it('should create an approved item without a prospectId', async () => {
+  it('should create an approved item without optional properties', async () => {
     // Set up event tracking
     const eventTracker = jest.fn();
     eventEmitter.on(ReviewedCorpusItemEventType.ADD_ITEM, eventTracker);
 
     // clone the input
-    const inputWithoutProspectId = { ...input };
+    const inputWithoutOptionalFields = { ...input };
 
     // delete the prospectId (as it will not be sent from the frontend for manually added items)
-    delete inputWithoutProspectId.prospectId;
-
-    const result = await request(app)
-      .post(graphQLUrl)
-      .set(headers)
-      .send({
-        query: print(CREATE_APPROVED_ITEM),
-        variables: { data: inputWithoutProspectId },
-      });
-
-    expect(result.body.errors).toBeUndefined();
-    expect(result.body.data).not.toBeNull();
-
-    // Expect to see all the input data we supplied in the Approved Item
-    // returned by the mutation
-    expect(result.body.data?.createApprovedCorpusItem).toMatchObject(
-      inputWithoutProspectId,
-    );
-
-    // The `createdBy` field should now be the SSO username of the user
-    // who updated this record
-    expect(result.body.data?.createApprovedCorpusItem.createdBy).toEqual(
-      headers.username,
-    );
-
-    // Check that the ADD_ITEM event was fired successfully:
-    // 1 - Event was fired once!
-    expect(eventTracker).toHaveBeenCalledTimes(1);
-    // 2 - Event has the right type.
-    expect(await eventTracker.mock.calls[0][0].eventType).toEqual(
-      ReviewedCorpusItemEventType.ADD_ITEM,
-    );
-    // 3- Event has the right entity passed to it.
-    expect(
-      await eventTracker.mock.calls[0][0].reviewedCorpusItem.externalId,
-    ).toEqual(result.body.data?.createApprovedCorpusItem.externalId);
-  });
-
-  it('should create an approved item without a publication date', async () => {
-    // Set up event tracking
-    const eventTracker = jest.fn();
-    eventEmitter.on(ReviewedCorpusItemEventType.ADD_ITEM, eventTracker);
-
-    // clone the input
-    const inputWithoutDatePublished = { ...input };
+    delete inputWithoutOptionalFields.prospectId;
 
     // delete the publication date (not all items will have this data)
-    delete inputWithoutDatePublished.datePublished;
+    delete inputWithoutOptionalFields.datePublished;
+
+    // delete the grade (not all items will have this data)
+    delete inputWithoutOptionalFields.grade;
 
     const result = await request(app)
       .post(graphQLUrl)
       .set(headers)
       .send({
         query: print(CREATE_APPROVED_ITEM),
-        variables: { data: inputWithoutDatePublished },
+        variables: { data: inputWithoutOptionalFields },
       });
 
     expect(result.body.errors).toBeUndefined();
@@ -190,7 +151,7 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
     // Expect to see all the input data we supplied in the Approved Item
     // returned by the mutation
     expect(result.body.data?.createApprovedCorpusItem).toMatchObject(
-      inputWithoutDatePublished,
+      inputWithoutOptionalFields,
     );
 
     // The `createdBy` field should now be the SSO username of the user

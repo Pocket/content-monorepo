@@ -1,5 +1,5 @@
 type Image @key(fields: "url") {
-    url: Url!
+  url: Url!
 }
 
 """
@@ -7,33 +7,33 @@ A scheduled entry for an CorpusItem to appear on a Scheduled Surface.
 For example, a story that is scheduled to appear on December 31st, 2021 on the Scheduled Surface in Firefox for the US audience.
 """
 type ScheduledSurfaceItem {
-    """
-    A backend GUID that represents this scheduled run
-    """
-    id: ID!
+  """
+  A backend GUID that represents this scheduled run
+  """
+  id: ID!
 
-    """
-    Agreed on GUID that is from our shared data pocket confluence
-    """
-    surfaceId: ID!
+  """
+  Agreed on GUID that is from our shared data pocket confluence
+  """
+  surfaceId: ID!
 
-    """
-    The date the item should run at
-    """
-    scheduledDate: Date!
+  """
+  The date the item should run at
+  """
+  scheduledDate: Date!
 
-    """
-    The curated item that should run
-    """
-    corpusItem: CorpusItem!
+  """
+  The curated item that should run
+  """
+  corpusItem: CorpusItem!
 }
 
 type SyndicatedArticle @key(fields: "slug") {
-    slug: String!
+  slug: String!
 }
 
 type Collection @key(fields: "slug") {
-    slug: String!
+  slug: String!
 }
 
 """
@@ -47,77 +47,81 @@ Represents an item that is in the Corpus and its associated manually edited meta
 TODO: CorpusItem to implement PocketResource when it becomes available.
 """
 type CorpusItem @key(fields: "id") @key(fields: "url") {
-    """
-    The GUID that is stored on an approved corpus item
-    """
-    id: ID!
-    """
-    The URL of the Approved Item.
-    """
-    url: Url!
-    """
-    The title of the Approved Item.
-    """
-    title: String!
-    """
-    The excerpt of the Approved Item.
-    """
-    excerpt: String!
-    """
-    What language this item is in. This is a two-letter code, for example, 'EN' for English.
-    """
-    language: CorpusLanguage!
-    """
-    The name of the online publication that published this story.
-    """
-    publisher: String!
-    """
-    The publication date for this story.
-    """
-    datePublished: Date
-    """
-    The image URL for this item's accompanying picture.
-    """
-    imageUrl: Url!
+  """
+  The GUID that is stored on an approved corpus item
+  """
+  id: ID!
+  """
+  The URL of the Approved Item.
+  """
+  url: Url!
+  """
+  The title of the Approved Item.
+  """
+  title: String!
+  """
+  The excerpt of the Approved Item.
+  """
+  excerpt: String!
+  """
+  What language this item is in. This is a two-letter code, for example, 'EN' for English.
+  """
+  language: CorpusLanguage!
+  """
+  The name of the online publication that published this story.
+  """
+  publisher: String!
+  """
+  The publication date for this story.
+  """
+  datePublished: Date
+  """
+  The image URL for this item's accompanying picture.
+  """
+  imageUrl: Url!
 
-    """
-    The image for this item's accompanying picture.
-    """
-    image: Image!
+  """
+  The image for this item's accompanying picture.
+  """
+  image: Image!
 
-    """
-    The author names and sort orders associated with this CorpusItem.
-    """
-    authors: [CorpusItemAuthor!]!
-    """
-    The topic associated with the Approved Item.
-    """
-    topic: String
+  """
+  The author names and sort orders associated with this CorpusItem.
+  """
+  authors: [CorpusItemAuthor!]!
+  """
+  The topic associated with this CorpusItem.
+  """
+  topic: String
+  """
+  The quality grade associated with this CorpusItem.
+  """
+  grade: ApprovedItemGrade
 
-    """
-    If the Corpus Item is pocket owned with a specific type, this is the associated object (Collection or SyndicatedArticle).
-    """
-    target: CorpusTarget
+  """
+  If the Corpus Item is pocket owned with a specific type, this is the associated object (Collection or SyndicatedArticle).
+  """
+  target: CorpusTarget
 }
 
 """
 Represents a surface that has scheduled items by day
 """
 type ScheduledSurface {
-    """
-    Agreed on GUID that is from our shared data pocket confluence
-    """
-    id: ID!
+  """
+  Agreed on GUID that is from our shared data pocket confluence
+  """
+  id: ID!
 
-    """
-    Internal name of the surface
-    """
-    name: String!
+  """
+  Internal name of the surface
+  """
+  name: String!
 
-    """
-    Subquery to get the ScheduledSurfaceItems to display to a user for a given date
-    """
-    items(date: Date!): [ScheduledSurfaceItem!]!
+  """
+  Subquery to get the ScheduledSurfaceItems to display to a user for a given date
+  """
+  items(date: Date!): [ScheduledSurfaceItem!]!
 }
 
 """
@@ -127,25 +131,24 @@ This is a future improvement, not needed now.
 union Surface = ScheduledSurface
 
 type Query {
-    scheduledSurface(id: ID!): ScheduledSurface!
-    """
-    This is a future improvement, not needed now.
-    """
-    surface(id: ID!): Surface!
+  scheduledSurface(id: ID!): ScheduledSurface!
+  """
+  This is a future improvement, not needed now.
+  """
+  surface(id: ID!): Surface!
 }
 
 type SavedItem @key(fields: "url") {
-    """
-    key field to identify the SavedItem entity in the ListApi service
-    """
-    url: String! @external
+  """
+  key field to identify the SavedItem entity in the ListApi service
+  """
+  url: String! @external
 
-    """
-    If the item is in corpus allow the saved item to reference it.  Exposing curated info for consistent UX
-    """
-    corpusItem: CorpusItem
+  """
+  If the item is in corpus allow the saved item to reference it.  Exposing curated info for consistent UX
+  """
+  corpusItem: CorpusItem
 }
-
 
 # Commented out until RecsAPI implements the fields that lets us extend Recommendation
 #extend type Recommendation  @key(fields: "corpusItemId") {

@@ -51,34 +51,34 @@ export function toUtcDateString(date: Date) {
 export const scheduledSurfaceAllowedValues = ScheduledSurfaces.map(
   (surface) => {
     return surface.guid;
-  }
+  },
 );
 
 // array for easy access to scheduled surface access groups
 export const scheduledSurfaceAccessGroups = ScheduledSurfaces.map(
   (surface: ScheduledSurface) => {
     return surface.accessGroup;
-  }
+  },
 );
 
 export const getScheduledSurfaceByAccessGroup = (
-  group: string
+  group: string,
 ): ScheduledSurface | undefined => {
   return ScheduledSurfaces.find(
-    (surface: ScheduledSurface) => surface.accessGroup === group
+    (surface: ScheduledSurface) => surface.accessGroup === group,
   );
 };
 
 export const getScheduledSurfaceByGuid = (
-  guid: string
+  guid: string,
 ): ScheduledSurface | undefined => {
   return ScheduledSurfaces.find(
-    (surface: ScheduledSurface) => surface.guid === guid
+    (surface: ScheduledSurface) => surface.guid === guid,
   );
 };
 
 export const getCorpusItemFromApprovedItem = (
-  approvedItem: ApprovedItem
+  approvedItem: ApprovedItem,
 ): CorpusItem => {
   const target = getPocketPath(approvedItem.url);
 
@@ -102,6 +102,7 @@ export const getCorpusItemFromApprovedItem = (
     // i wonder why typescript won't accept both. is there some deep dark
     // JS reason? or is it just better practice?
     topic: approvedItem.topic ?? undefined,
+    grade: approvedItem.grade ?? undefined,
     target: target?.key && {
       slug: target.key,
       __typename: target.type,
@@ -153,7 +154,7 @@ export const getUrlId = (path: string): string => {
  *          {locale, path} when its a pocket URL but the entities are not known.
  */
 export const getPocketPath = (
-  url: string
+  url: string,
 ): {
   locale: string;
   path: string;

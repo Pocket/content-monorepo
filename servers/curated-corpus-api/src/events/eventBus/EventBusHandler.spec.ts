@@ -1,7 +1,12 @@
 import { CuratedStatus } from '.prisma/client';
 import { EventBusHandler } from './EventBusHandler';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
-import { CorpusItemSource, Topics, ScheduledItemSource } from 'content-common';
+import {
+  CorpusItemSource,
+  Topics,
+  ScheduledItemSource,
+  ApprovedItemGrade,
+} from 'content-common';
 import { ScheduledItem } from '../../database/types';
 import * as Sentry from '@sentry/node';
 import { EventBridgeClient } from '@aws-sdk/client-eventbridge';
@@ -38,7 +43,7 @@ const scheduledCorpusItem: ScheduledItem = {
     prospectId: '456-dfg',
     url: 'https://test.com/a-story',
     domainName: 'test.com',
-    grade: null,
+    grade: ApprovedItemGrade.A,
     status: CuratedStatus.RECOMMENDATION,
     title: 'Everything you need to know about React',
     excerpt: 'Something here',
@@ -115,6 +120,7 @@ describe('EventBusHandler', () => {
         isTimeSensitive: false,
         datePublished: undefined,
         domainName: 'test.com',
+        source: CorpusItemSource.PROSPECT,
       };
       emitter.emit(ReviewedCorpusItemEventType.ADD_ITEM, {
         reviewedCorpusItem: scheduledCorpusItem.approvedItem,
@@ -163,6 +169,7 @@ describe('EventBusHandler', () => {
         isTimeSensitive: false,
         datePublished: undefined,
         domainName: 'test.com',
+        source: CorpusItemSource.PROSPECT,
       };
       emitter.emit(ReviewedCorpusItemEventType.UPDATE_ITEM, {
         reviewedCorpusItem: scheduledCorpusItem.approvedItem,
@@ -206,6 +213,7 @@ describe('EventBusHandler', () => {
       imageUrl: 'https://test.com/image.png',
       language: 'EN',
       topic: 'EDUCATION',
+      grade: 'A',
       isSyndicated: false,
       createdAt: new Date(1648225373000).toUTCString(),
       createdBy: 'Amy',
@@ -218,6 +226,7 @@ describe('EventBusHandler', () => {
           sortOrder: 1,
         },
       ],
+      source: CorpusItemSource.MANUAL,
     };
     it.each([
       [

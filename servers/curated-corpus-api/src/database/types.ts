@@ -1,5 +1,6 @@
 import {
   ApprovedItem as ApprovedItemModel,
+  ApprovedItemGrade,
   CuratedStatus,
   ScheduledItem as ScheduledItemModel,
 } from '.prisma/client';
@@ -23,6 +24,7 @@ export type CreateApprovedItemInput = {
   datePublished?: string;
   imageUrl: string;
   topic: string;
+  grade?: ApprovedItemGrade;
   source: CorpusItemSource;
   isCollection: boolean;
   isTimeSensitive: boolean;
@@ -131,6 +133,7 @@ export type CorpusItem = {
   imageUrl: string;
   image: Image;
   topic?: string;
+  grade?: ApprovedItemGrade;
   target?: CorpusTarget;
 };
 

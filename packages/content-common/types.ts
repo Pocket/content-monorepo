@@ -18,6 +18,13 @@ export enum CorpusLanguage {
   IT = 'IT',
 }
 
+// quality grade associated with approved corpus items
+export enum ApprovedItemGrade {
+  A = 'A',
+  B = 'B',
+  C = 'C',
+}
+
 export enum Topics {
   BUSINESS = 'BUSINESS',
   CAREER = 'CAREER',
@@ -85,6 +92,7 @@ export type CreateApprovedCorpusItemApiInput = ApprovedItemRequiredInput & {
   datePublished?: string;
   // Optional value specifying which admin screen the action originated from.
   actionScreen?: ActionScreen; // non-db, analytics only
+  grade?: ApprovedItemGrade; // quality grade of the approved item
 };
 
 export type CreateScheduledItemInput = {
@@ -352,11 +360,10 @@ export enum CuratedCorpusApiErrorCodes {
 /* AP style formatting for title */
 // String of stop words. When a lowercased word is included in this string, it will be in lowercase.
 export const STOP_WORDS =
-    'a an and at but by for in nor of on or so the to up yet';
+  'a an and at but by for in nor of on or so the to up yet';
 
 // special chars separating words, used for splitting
 export const SEPARATORS = /(\s+|[-‑–—,:;!?()“”"])/;
 
 // get the stop word in STOP_WORDS str by splitting by whitespace
 export const stop = STOP_WORDS.split(' ');
-
