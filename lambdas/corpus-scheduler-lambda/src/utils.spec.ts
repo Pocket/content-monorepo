@@ -8,18 +8,10 @@ import {
   validateDatePublished,
 } from './utils';
 import config from './config';
-import { mockClient } from 'aws-sdk-client-mock';
-import {
-  GetSecretValueCommand,
-  SecretsManagerClient,
-} from '@aws-sdk/client-secrets-manager';
-import { setupServer } from 'msw/node';
-import {
-  ApprovedItemAuthor,
-  CorpusItemSource,
-  CorpusLanguage,
-  UrlMetadata,
-} from 'content-common';
+import {mockClient} from 'aws-sdk-client-mock';
+import {GetSecretValueCommand, SecretsManagerClient,} from '@aws-sdk/client-secrets-manager';
+import {setupServer} from 'msw/node';
+import {ApprovedItemAuthor, CorpusItemSource, CorpusLanguage, UrlMetadata,} from 'content-common';
 import {
   createScheduledCandidate,
   defaultScheduledDate,
@@ -32,7 +24,7 @@ import {
   mockSnowplow,
   parserItem,
 } from './testHelpers';
-import { getEmitter, getTracker } from 'content-common/snowplow';
+import {getEmitter, getTracker} from 'content-common/snowplow';
 import * as validation from './validation';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -328,7 +320,7 @@ describe('utils', function () {
       expectedOutput.title =
         'Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.';
     });
-    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & apply curly quotes formatting on excerpt', async () => {
+    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & apply English curly quotes formatting on excerpt if candidate is EN', async () => {
       // set parser image url to something different from candidate imageUrl
       parserItem.imageUrl = 'https://different-image.com';
       const scheduledCandidate = createScheduledCandidate();
@@ -359,6 +351,53 @@ describe('utils', function () {
       parserItem.imageUrl = scheduledCandidate.scheduled_corpus_item.image_url;
       expectedOutput.excerpt =
         'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.';
+    });
+    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & apply German curly quotes formatting on excerpt if candidate is DE', async () => {
+      // set parser image url to something different from candidate imageUrl
+      parserItem.imageUrl = 'https://different-image.com';
+      const scheduledCandidate = createScheduledCandidate();
+      scheduledCandidate.scheduled_corpus_item.excerpt = `Random "excerpt"`;
+      scheduledCandidate.scheduled_corpus_item.language = CorpusLanguage.DE;
+      scheduledCandidate.scheduled_corpus_item.title = 'Romantic norms are in flux. No wonder - everyone’s obsessed with »polyamory«.';
+      // German quote rules should be applied
+      expectedOutput.excerpt = `Random „excerpt”`;
+      expectedOutput.language = CorpusLanguage.DE;
+      // capitalization for title for German candidates shouldn't change, but German quote formatting applies
+      expectedOutput.title = 'Romantic norms are in flux. No wonder — everyone’s obsessed with „polyamory”.'
+      const validateImageSpy = jest
+          .spyOn(validation, 'validateImageUrl')
+          .mockReturnValue(
+              Promise.resolve(
+                  scheduledCandidate.scheduled_corpus_item.image_url as string,
+              ),
+          );
+      const output =
+          await mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+              scheduledCandidate,
+              parserItem,
+          );
+      expect(validateImageSpy).toHaveBeenCalled(); //=> true
+      expect(output.imageUrl).not.toBeNull();
+      // check that German quotes have been applied
+      expect(output.excerpt).not.toEqual(`Random "excerpt"`);
+      expect(output.excerpt).toEqual(`Random „excerpt”`);
+      // check that English AP style has not been applied but German quotes have been applied to title
+      expect(output.title).not.toEqual(
+          'Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.',
+      );
+      expect(output.title).toEqual(
+          'Romantic norms are in flux. No wonder — everyone’s obsessed with „polyamory”.',
+      );
+      // should equal https://fake-image-url.com and not https://different-image.com
+      expect(output.imageUrl).toEqual('https://fake-image-url.com');
+      expect(output).toEqual(expectedOutput);
+      // set parser image url to default
+      parserItem.imageUrl = scheduledCandidate.scheduled_corpus_item.image_url;
+      expectedOutput.excerpt =
+          'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.';
+      expectedOutput.language = CorpusLanguage.EN;
+      expectedOutput.title = 'Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.'
+      scheduledCandidate.scheduled_corpus_item.language = CorpusLanguage.EN;
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & fallback on Parser fields for undefined optional ScheduledCandidate fields', async () => {
       mockPocketImageCache(200);

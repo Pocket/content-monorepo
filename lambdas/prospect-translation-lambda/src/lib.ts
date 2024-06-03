@@ -13,7 +13,7 @@ import {
 
 import {
   applyApTitleCase,
-  applyCurlyQuotes,
+  applyCurlyQuotesEN,
   CorpusLanguage,
   Topics,
   ProspectFeatures,
@@ -402,7 +402,7 @@ export const hydrateProspectMetadata = (
   const title = isCandidateEnglish
     ? (applyApTitleCase(urlMetadata.title) as string)
     : urlMetadata.title;
-  const excerpt = applyCurlyQuotes(urlMetadata.excerpt) as string;
+  const excerpt = applyCurlyQuotesEN(urlMetadata.excerpt) as string;
   // Mutating the function argument here to avoid creating
   // more objects and be memory efficient
 
