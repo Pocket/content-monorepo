@@ -14,6 +14,7 @@ import {
 import {
   applyApTitleCase,
   applyCurlyQuotesEN,
+  applyGermanQuotesEMDash,
   CorpusLanguage,
   Topics,
   ProspectFeatures,
@@ -399,10 +400,16 @@ export const hydrateProspectMetadata = (
   // check if candidate is EN language to (not) apply title formatting
   const isCandidateEnglish =
     urlMetadata.language?.toUpperCase() === CorpusLanguage.EN;
+  // check if candidate is German language to apply German formatting for quotes / dashes
+  const isCandidateGerman =
+      urlMetadata.language?.toUpperCase() === CorpusLanguage.DE;
+  console.log('english: ', isCandidateEnglish);
+  console.log('german: ', isCandidateGerman);
   const title = isCandidateEnglish
     ? (applyApTitleCase(urlMetadata.title) as string)
-    : urlMetadata.title;
-  const excerpt = applyCurlyQuotesEN(urlMetadata.excerpt) as string;
+    : isCandidateGerman ? (applyGermanQuotesEMDash(urlMetadata.title) as string) : urlMetadata.title;
+  const excerpt = isCandidateEnglish ? (applyCurlyQuotesEN(urlMetadata.excerpt) as string)
+      : isCandidateGerman ? (applyGermanQuotesEMDash(urlMetadata.excerpt) as string) : urlMetadata.excerpt;
   // Mutating the function argument here to avoid creating
   // more objects and be memory efficient
 

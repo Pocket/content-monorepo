@@ -322,6 +322,56 @@ describe('lib', () => {
       );
     });
 
+    it('should hydrate the prospect with the url meta data fields & apply German formatting to title if prospect is DE', () => {
+      const expected: Prospect = {
+        id: 'c3h5n3o9',
+        prospectId: validSqsProspect.prospect_id,
+        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
+        url: validSqsProspect.url,
+        prospectType: validSqsProspect.prospect_source,
+        topic: validSqsProspect.predicted_topic,
+        saveCount: validSqsProspect.save_count,
+        rank: validSqsProspect.rank,
+        domain: 'test-domain',
+        excerpt: 'test-excerpt',
+        imageUrl: 'test-imageUrl',
+        language: 'de',
+        title: 'Test-title — „Test”', // German quotes / dash formatting expected
+        publisher: 'test-publisher',
+        isCollection: false,
+        isSyndicated: true,
+        authors: 'questlove,rafael frumkin',
+      };
+
+      const prospectToHydrate = {
+        id: 'c3h5n3o9',
+        prospectId: validSqsProspect.prospect_id,
+        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
+        url: validSqsProspect.url,
+        prospectType: validSqsProspect.prospect_source,
+        topic: validSqsProspect.predicted_topic,
+        saveCount: validSqsProspect.save_count,
+        rank: validSqsProspect.rank,
+      };
+
+      const urlMetadata: UrlMetadata = {
+        url: 'test-url',
+        domain: 'test-domain',
+        excerpt: 'test-excerpt',
+        imageUrl: 'test-imageUrl',
+        language: 'de',
+        title: 'Test-title - »Test«',
+        publisher: 'test-publisher',
+        isCollection: false,
+        isSyndicated: true,
+        authors: 'questlove,rafael frumkin',
+      };
+
+      expect(expected).toEqual(
+          hydrateProspectMetadata(prospectToHydrate, urlMetadata),
+      );
+    });
+
     it('should hydrate the prospect with the url meta data fields & NOT apply title formatting if prospect is not EN', () => {
       const expected: Prospect = {
         id: 'c3h5n3o9',
@@ -372,7 +422,57 @@ describe('lib', () => {
       );
     });
 
-    it('should hydrate the prospect with the url meta data fields & apply excerpt curly quotes formatting', () => {
+    it('should hydrate the prospect with the url meta data fields & NOT apply title formatting if prospect is not EN or DE', () => {
+      const expected: Prospect = {
+        id: 'c3h5n3o9',
+        prospectId: validSqsProspect.prospect_id,
+        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
+        url: validSqsProspect.url,
+        prospectType: validSqsProspect.prospect_source,
+        topic: validSqsProspect.predicted_topic,
+        saveCount: validSqsProspect.save_count,
+        rank: validSqsProspect.rank,
+        domain: 'test-domain',
+        excerpt: 'test-excerpt',
+        imageUrl: 'test-imageUrl',
+        language: 'es',
+        title: 'test - title', // AP style NOT expected, German em dash not expected
+        publisher: 'test-publisher',
+        isCollection: false,
+        isSyndicated: true,
+        authors: 'questlove,rafael frumkin',
+      };
+
+      const prospectToHydrate = {
+        id: 'c3h5n3o9',
+        prospectId: validSqsProspect.prospect_id,
+        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
+        url: validSqsProspect.url,
+        prospectType: validSqsProspect.prospect_source,
+        topic: validSqsProspect.predicted_topic,
+        saveCount: validSqsProspect.save_count,
+        rank: validSqsProspect.rank,
+      };
+
+      const urlMetadata: UrlMetadata = {
+        url: 'test-url',
+        domain: 'test-domain',
+        excerpt: 'test-excerpt',
+        imageUrl: 'test-imageUrl',
+        language: 'es',
+        title: 'test - title',
+        publisher: 'test-publisher',
+        isCollection: false,
+        isSyndicated: true,
+        authors: 'questlove,rafael frumkin',
+      };
+
+      expect(expected).toEqual(
+          hydrateProspectMetadata(prospectToHydrate, urlMetadata),
+      );
+    });
+
+    it('should hydrate the prospect with the url meta data fields & apply excerpt English curly quotes formatting if candidate is EN', () => {
       const expected: Prospect = {
         id: 'c3h5n3o9',
         prospectId: validSqsProspect.prospect_id,
@@ -419,6 +519,56 @@ describe('lib', () => {
 
       expect(expected).toEqual(
         hydrateProspectMetadata(prospectToHydrate, urlMetadata),
+      );
+    });
+
+    it('should hydrate the prospect with the url meta data fields & apply excerpt German quotes/dash formatting if candidate is DE', () => {
+      const expected: Prospect = {
+        id: 'c3h5n3o9',
+        prospectId: validSqsProspect.prospect_id,
+        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
+        url: validSqsProspect.url,
+        prospectType: validSqsProspect.prospect_source,
+        topic: validSqsProspect.predicted_topic,
+        saveCount: validSqsProspect.save_count,
+        rank: validSqsProspect.rank,
+        domain: 'test-domain',
+        excerpt: '„Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus „Tote Mädchen lügen nicht” und „Élite” – das musst du darüber wissen', // German quotes / dash formatting expected
+        imageUrl: 'test-imageUrl',
+        language: 'de',
+        title: 'Test-title — „Test”', // German quotes / dash formatting expected
+        publisher: 'test-publisher',
+        isCollection: false,
+        isSyndicated: true,
+        authors: 'questlove,rafael frumkin',
+      };
+
+      const prospectToHydrate = {
+        id: 'c3h5n3o9',
+        prospectId: validSqsProspect.prospect_id,
+        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
+        url: validSqsProspect.url,
+        prospectType: validSqsProspect.prospect_source,
+        topic: validSqsProspect.predicted_topic,
+        saveCount: validSqsProspect.save_count,
+        rank: validSqsProspect.rank,
+      };
+
+      const urlMetadata: UrlMetadata = {
+        url: 'test-url',
+        domain: 'test-domain',
+        excerpt: '“Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus “Tote Mädchen lügen nicht” und “Élite” – das musst du darüber wissen',
+        imageUrl: 'test-imageUrl',
+        language: 'de',
+        title: 'Test-title - »Test«',
+        publisher: 'test-publisher',
+        isCollection: false,
+        isSyndicated: true,
+        authors: 'questlove,rafael frumkin',
+      };
+
+      expect(expected).toEqual(
+          hydrateProspectMetadata(prospectToHydrate, urlMetadata),
       );
     });
 
