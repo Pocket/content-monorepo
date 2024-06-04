@@ -332,7 +332,7 @@ describe('lib', () => {
       expected.language = 'de';
       expected.title = 'Test-title — „Test”'; // German quotes / dash formatting expected
 
-      urlMetadata.title = 'Test-title - »Test«';
+      urlMetadata.title = 'Test-title - «Test»';
       urlMetadata.language = 'de';
 
       expect(expected).toEqual(
@@ -364,7 +364,7 @@ describe('lib', () => {
 
     it('should hydrate the prospect with the url meta data fields & apply excerpt German quotes/dash formatting if candidate is DE', () => {
       // German quotes / dash formatting expected
-      expected.excerpt = '„Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus „Tote Mädchen lügen nicht” und „Élite” – das musst du darüber wissen';
+      expected.excerpt = '„Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus „Tote Mädchen lügen nicht” und „Élite” — das musst du darüber wissen';
       expected.language = 'de';
       expected.title = 'test-title';
 
