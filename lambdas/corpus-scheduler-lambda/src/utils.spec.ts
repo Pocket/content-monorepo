@@ -347,7 +347,7 @@ describe('utils', function () {
       const scheduledCandidate = createScheduledCandidate();
       scheduledCandidate.scheduled_corpus_item.excerpt = `Random "excerpt"`;
       scheduledCandidate.scheduled_corpus_item.language = CorpusLanguage.DE;
-      scheduledCandidate.scheduled_corpus_item.title = 'Romantic norms are in flux. No wonder - everyone’s obsessed with »polyamory«.';
+      scheduledCandidate.scheduled_corpus_item.title = 'Romantic norms are in flux. No wonder - everyone’s obsessed with «polyamory».';
       // German quote rules should be applied
       expectedCreateApprovedCorpusItemApiOutput.excerpt = `Random „excerpt”`;
       expectedCreateApprovedCorpusItemApiOutput.language = CorpusLanguage.DE;
