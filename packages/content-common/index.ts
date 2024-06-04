@@ -94,7 +94,7 @@ export const applyApTitleCase = (value: string): string | undefined => {
 };
 
 /**
- * Helper to replace opening and closing curly single and double quotes
+ * Helper to replace opening and closing curly single and double quotes for English
  * Curly quotes represented in unicode
  * adapted from https://gist.github.com/drdrang/705071
  *
@@ -102,7 +102,7 @@ export const applyApTitleCase = (value: string): string | undefined => {
  * @returns string
  */
 
-export const applyCurlyQuotes = (text: string): string | undefined => {
+export const formatQuotesEN = (text: string): string | undefined => {
   if (!text) {
     return undefined;
   }
@@ -111,6 +111,27 @@ export const applyCurlyQuotes = (text: string): string | undefined => {
       .replace(/'/g, '\u2019') // Closing singles & apostrophes (replaces closing ' with ’)
       .replace(/(^|[-\u2014/([{\u2018\s])"/g, '$1\u201c') // Opening doubles (replaces opening " with “)
       .replace(/"/g, '\u201d'); // Closing doubles (replaces closing " with ”)
+};
+
+/**
+ * Helper to replace opening and closing quotes, arrow brackets (» «) for German
+ * Quotes represented in unicode
+ *
+ * @param text
+ * @returns string
+ */
+
+export const formatQuotesDashesDE = (text: string): string | undefined => {
+  if (!text) {
+    return undefined;
+  }
+  return text
+      .replace(/(^|[-\u2014/([{\u2018\s])\u00BB/g, '$1\u201E') // Replaces opening » with „
+      .replace(/\u00AB/g, '\u201D') // Replaces closing « with ”
+      .replace(/(^|[-\u2014/([{\u2018\s])"/g, '$1\u201E') // Opening doubles (replaces opening " with „)
+      .replace(/"/g, '\u201D') // Closing doubles (replaces closing " with ”)
+      .replace(/(^|[-\u2014/([{\u2018\s])\u201c/g, '$1\u201E') // Replaces opening “ with „
+      .replace(/\s-\s/g, ' \u2014 '); // Replace short dash (-) with long em dash (—)
 };
 
 

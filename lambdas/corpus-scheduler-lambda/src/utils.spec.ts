@@ -8,31 +8,29 @@ import {
   validateDatePublished,
 } from './utils';
 import config from './config';
-import { mockClient } from 'aws-sdk-client-mock';
-import {
-  GetSecretValueCommand,
-  SecretsManagerClient,
-} from '@aws-sdk/client-secrets-manager';
-import { setupServer } from 'msw/node';
+import {mockClient} from 'aws-sdk-client-mock';
+import {GetSecretValueCommand, SecretsManagerClient,} from '@aws-sdk/client-secrets-manager';
+import {setupServer} from 'msw/node';
 import {
   ApprovedItemAuthor,
   CorpusItemSource,
   CorpusLanguage,
+  CreateApprovedCorpusItemApiInput,
   UrlMetadata,
 } from 'content-common';
 import {
   createScheduledCandidate,
   defaultScheduledDate,
-  expectedOutput,
+  getCreateApprovedCorpusItemApiOutput,
+  getParserItem,
   mockCreateApprovedCorpusItemOnce,
   mockCreateScheduledCorpusItemOnce,
   mockGetApprovedCorpusItemByUrl,
   mockGetUrlMetadata,
   mockPocketImageCache,
   mockSnowplow,
-  parserItem,
 } from './testHelpers';
-import { getEmitter, getTracker } from 'content-common/snowplow';
+import {getEmitter, getTracker} from 'content-common/snowplow';
 import * as validation from './validation';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -67,6 +65,9 @@ describe('utils', function () {
     alg: 'RS256',
     n: 'm6XkeQIGIK44RK44g__-UwzW2cApDNy1H2dCnisrYmJj8QuyEBcFQs9y8PZtYTV3u1fm9awVs-E_SNqy62I6IaTaDwABetjQSNV1-q0NgwpBjcvwldNc2gyt9NNvxE5Yto5RKolZejkAU4GcPgNXah3fgoGZ59IJLVLDl9y9dnYtQwhHZ08k0RqsWTtQTUU9DFN6N7c9d0mOMCet8HbvcTYpT7zcRjAwplpvmo2TAN3iiNRlalyGrxNx2NECewsrDz7oiCutppWUWSa0oIJc0xRGegx4zOMEyPd72Z2Q6-JcxCKjcAIRknOhGyp3pMZZT3lTuoSYK0kbDDFlv90JsQ',
   };
+
+  let expectedCreateApprovedCorpusItemApiOutput: CreateApprovedCorpusItemApiInput;
+  let parserItem: UrlMetadata;
   const now = new Date('2021-01-01 10:20:30');
   const exp = new Date('2021-01-01 10:25:30');
 
@@ -81,7 +82,11 @@ describe('utils', function () {
     });
   });
 
-  beforeEach(() => ssmMock.reset());
+  beforeEach(() =>{
+    ssmMock.reset();
+    parserItem = getParserItem();
+    expectedCreateApprovedCorpusItemApiOutput = getCreateApprovedCorpusItemApiOutput();
+  });
 
   afterEach(() => {
     server.resetHandlers();
@@ -282,16 +287,14 @@ describe('utils', function () {
       expect(output.language).toEqual(CorpusLanguage.EN);
       // should equal https://fake-image-url.com and not https://different-image.com
       expect(output.imageUrl).toEqual('https://fake-image-url.com');
-      expect(output).toEqual(expectedOutput);
-      // set parser image url to default
-      parserItem.imageUrl = scheduledCandidate.scheduled_corpus_item.image_url;
+      expect(output).toEqual(expectedCreateApprovedCorpusItemApiOutput);
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & NOT apply title formatting if candidate is not EN', async () => {
       // set parser image url to something different from candidate imageUrl
       parserItem.imageUrl = 'https://different-image.com';
       parserItem.language = CorpusLanguage.DE;
-      expectedOutput.language = CorpusLanguage.DE;
-      expectedOutput.title =
+      expectedCreateApprovedCorpusItemApiOutput.language = CorpusLanguage.DE;
+      expectedCreateApprovedCorpusItemApiOutput.title =
         'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.';
       const scheduledCandidate = createScheduledCandidate();
       scheduledCandidate.scheduled_corpus_item.language = CorpusLanguage.DE;
@@ -309,32 +312,17 @@ describe('utils', function () {
         );
       expect(validateImageSpy).toHaveBeenCalled(); //=> true
       expect(output.imageUrl).not.toBeNull();
-      // check that AP style has NOT been applied
-      expect(output.title).not.toEqual(
-        'Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.',
-      );
-      expect(output.title).toEqual(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-      );
-      // should be german language
-      expect(output.language).toEqual(CorpusLanguage.DE);
       // should equal https://fake-image-url.com and not https://different-image.com
       expect(output.imageUrl).toEqual('https://fake-image-url.com');
-      expect(output).toEqual(expectedOutput);
-      // reset values to default
-      parserItem.imageUrl = scheduledCandidate.scheduled_corpus_item.image_url;
-      parserItem.language = CorpusLanguage.EN;
-      expectedOutput.language = CorpusLanguage.EN;
-      expectedOutput.title =
-        'Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.';
+      expect(output).toEqual(expectedCreateApprovedCorpusItemApiOutput);
     });
-    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & apply curly quotes formatting on excerpt', async () => {
+    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & apply English curly quotes formatting on excerpt if candidate is EN', async () => {
       // set parser image url to something different from candidate imageUrl
       parserItem.imageUrl = 'https://different-image.com';
       const scheduledCandidate = createScheduledCandidate();
       scheduledCandidate.scheduled_corpus_item.excerpt = `Random "excerpt"`;
       // curly quotes should be applied
-      expectedOutput.excerpt = `Random “excerpt”`;
+      expectedCreateApprovedCorpusItemApiOutput.excerpt = `Random “excerpt”`;
       const validateImageSpy = jest
         .spyOn(validation, 'validateImageUrl')
         .mockReturnValue(
@@ -349,16 +337,40 @@ describe('utils', function () {
         );
       expect(validateImageSpy).toHaveBeenCalled(); //=> true
       expect(output.imageUrl).not.toBeNull();
-      // check that double curly apostrophes have been applied
-      expect(output.excerpt).not.toEqual(`Random "excerpt"`);
-      expect(output.excerpt).toEqual(`Random “excerpt”`);
       // should equal https://fake-image-url.com and not https://different-image.com
       expect(output.imageUrl).toEqual('https://fake-image-url.com');
-      expect(output).toEqual(expectedOutput);
-      // set parser image url to default
-      parserItem.imageUrl = scheduledCandidate.scheduled_corpus_item.image_url;
-      expectedOutput.excerpt =
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.';
+      expect(output).toEqual(expectedCreateApprovedCorpusItemApiOutput);
+    });
+    it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & apply German curly quotes formatting on excerpt if candidate is DE', async () => {
+      // set parser image url to something different from candidate imageUrl
+      parserItem.imageUrl = 'https://different-image.com';
+      const scheduledCandidate = createScheduledCandidate();
+      scheduledCandidate.scheduled_corpus_item.excerpt = `Random "excerpt"`;
+      scheduledCandidate.scheduled_corpus_item.language = CorpusLanguage.DE;
+      scheduledCandidate.scheduled_corpus_item.title = 'Romantic norms are in flux. No wonder - everyone’s obsessed with »polyamory«.';
+      // German quote rules should be applied
+      expectedCreateApprovedCorpusItemApiOutput.excerpt = `Random „excerpt”`;
+      expectedCreateApprovedCorpusItemApiOutput.language = CorpusLanguage.DE;
+      // capitalization for title for German candidates shouldn't change, but German quote formatting applies
+      expectedCreateApprovedCorpusItemApiOutput.title = 'Romantic norms are in flux. No wonder — everyone’s obsessed with „polyamory”.'
+      const validateImageSpy = jest
+          .spyOn(validation, 'validateImageUrl')
+          .mockReturnValue(
+              Promise.resolve(
+                  scheduledCandidate.scheduled_corpus_item.image_url as string,
+              ),
+          );
+      const output =
+          await mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+              scheduledCandidate,
+              parserItem,
+          );
+      expect(validateImageSpy).toHaveBeenCalled(); //=> true
+      expect(output.imageUrl).not.toBeNull();
+      // should equal https://fake-image-url.com and not https://different-image.com
+      expect(output.imageUrl).toEqual('https://fake-image-url.com');
+      expect(output).toEqual(expectedCreateApprovedCorpusItemApiOutput);
+      scheduledCandidate.scheduled_corpus_item.language = CorpusLanguage.EN;
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & fallback on Parser fields for undefined optional ScheduledCandidate fields', async () => {
       mockPocketImageCache(200);
@@ -376,7 +388,7 @@ describe('utils', function () {
           scheduledCandidate,
           parserItem,
         );
-      expect(output).toEqual(expectedOutput);
+      expect(output).toEqual(expectedCreateApprovedCorpusItemApiOutput);
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedCorpusItemApiInput & fallback on Metaflow authors if Parser returns null for authors', async () => {
       mockPocketImageCache(200);
@@ -400,7 +412,7 @@ describe('utils', function () {
           scheduledCandidate,
           incompleteParserItem,
         );
-      expect(output).toEqual(expectedOutput);
+      expect(output).toEqual(expectedCreateApprovedCorpusItemApiOutput);
     });
     it('should map correctly a ScheduledCandidate to CreateApprovedItemInput & fallback on valid Parser imageUrl if Metaflow imageUrl is not valid', async () => {
       const scheduledCandidate = createScheduledCandidate();
@@ -410,7 +422,7 @@ describe('utils', function () {
 
       // set parser.imageUrl
       parserItem.imageUrl = 'https://new-fake-image.com';
-      expectedOutput.imageUrl = parserItem.imageUrl;
+      expectedCreateApprovedCorpusItemApiOutput.imageUrl = parserItem.imageUrl;
       const validateImageSpy = jest
         .spyOn(validation, 'validateImageUrl')
         .mockReturnValue(Promise.resolve(parserItem.imageUrl as string));
@@ -422,11 +434,7 @@ describe('utils', function () {
       expect(validateImageSpy).toHaveBeenCalled(); //=> true
       expect(output.imageUrl).not.toBeNull();
       expect(output.imageUrl).toEqual('https://new-fake-image.com');
-      expect(output).toEqual(expectedOutput);
-
-      // set parser image url to default
-      parserItem.imageUrl = 'https://fake-image-url.com';
-      expectedOutput.imageUrl = parserItem.imageUrl;
+      expect(output).toEqual(expectedCreateApprovedCorpusItemApiOutput);
     });
     it('should throw Error on CreateApprovedItemInput if field types are wrong (title)', async () => {
       mockPocketImageCache(200);
@@ -445,8 +453,6 @@ describe('utils', function () {
             `Reason: Error: Error on typia.assert(): invalid type on $input.title, expect to be string`,
         ),
       );
-      parserItem.title =
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.';
     });
     it('should throw Error on CreateApprovedItemInput if field types are wrong (publisher)', async () => {
       mockPocketImageCache(200);

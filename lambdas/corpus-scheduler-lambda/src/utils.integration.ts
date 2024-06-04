@@ -1,6 +1,6 @@
 import { mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput } from './utils';
 import { UrlMetadata } from 'content-common/types';
-import { createScheduledCandidate, parserItem } from './testHelpers';
+import { createScheduledCandidate, getParserItem } from './testHelpers';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 import {
   resetSnowplowEvents,
@@ -9,8 +9,10 @@ import {
 import { extractScheduledCandidateEntity } from './events/testHelpers';
 
 describe('utils integrations', function () {
+  let parserItem: UrlMetadata;
   beforeEach(async () => {
     await resetSnowplowEvents();
+    parserItem = getParserItem();
   });
 
   describe('mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput', () => {

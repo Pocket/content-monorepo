@@ -75,41 +75,47 @@ export const createScheduledCandidate = (
     },
   };
 };
-export const expectedOutput: CreateApprovedCorpusItemApiInput = {
-  url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
-  title: applyApTitleCase(
-    'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-  ) as string,
-  excerpt:
-    'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-  status: CuratedStatus.RECOMMENDATION,
-  language: 'EN',
-  publisher: 'POLITICO',
-  authors: [{ name: 'Rebecca Jennings', sortOrder: 1 }],
-  imageUrl: 'https://fake-image-url.com',
-  topic: Topics.SELF_IMPROVEMENT,
-  source: CorpusItemSource.ML,
-  scheduledSource: ScheduledItemSource.ML,
-  isCollection: false,
-  isSyndicated: false,
-  isTimeSensitive: false,
-  scheduledDate: defaultScheduledDate as string,
-  scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+
+export const getCreateApprovedCorpusItemApiOutput = (
+): CreateApprovedCorpusItemApiInput => {
+  return {
+    url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
+    title: applyApTitleCase(
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+    ) as string,
+    excerpt:
+        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+    status: CuratedStatus.RECOMMENDATION,
+    language: 'EN',
+    publisher: 'POLITICO',
+    authors: [{ name: 'Rebecca Jennings', sortOrder: 1 }],
+    imageUrl: 'https://fake-image-url.com',
+    topic: Topics.SELF_IMPROVEMENT,
+    source: CorpusItemSource.ML,
+    scheduledSource: ScheduledItemSource.ML,
+    isCollection: false,
+    isSyndicated: false,
+    isTimeSensitive: false,
+    scheduledDate: defaultScheduledDate as string,
+    scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+  }
 };
 
-export const parserItem: UrlMetadata = {
-  url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
-  title:
-    'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-  excerpt:
-    'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-  language: 'EN',
-  publisher: 'POLITICO',
-  authors: 'Rebecca Jennings',
-  imageUrl: 'https://fake-image-url.com',
-  isCollection: false,
-  isSyndicated: false,
-};
+export const getParserItem = (): UrlMetadata => {
+  return {
+    url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
+    title:
+        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+    excerpt:
+        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+    language: 'EN',
+    publisher: 'POLITICO',
+    authors: 'Rebecca Jennings',
+    imageUrl: 'https://fake-image-url.com',
+    isCollection: false,
+    isSyndicated: false,
+  }
+}
 
 export const getUrlMetadataBody = {
   data: {

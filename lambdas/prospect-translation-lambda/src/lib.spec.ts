@@ -29,6 +29,9 @@ describe('lib', () => {
     .spyOn(Sentry, 'captureException')
     .mockImplementation();
   let validSqsProspect;
+  let expected: Prospect;
+  let prospectToHydrate;
+  let urlMetadata: UrlMetadata;
 
   beforeEach(() => {
     validSqsProspect = {
@@ -39,6 +42,50 @@ describe('lib', () => {
       url: 'https://getpocket.com',
       save_count: 1680,
       rank: 1680,
+    };
+
+    expected = {
+      id: 'c3h5n3o9',
+      prospectId: validSqsProspect.prospect_id,
+      scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
+      url: validSqsProspect.url,
+      prospectType: validSqsProspect.prospect_source,
+      topic: validSqsProspect.predicted_topic,
+      saveCount: validSqsProspect.save_count,
+      rank: validSqsProspect.rank,
+      domain: 'test-domain',
+      excerpt: 'test-excerpt',
+      imageUrl: 'test-imageUrl',
+      language: 'en',
+      title: 'Test-Title',
+      publisher: 'test-publisher',
+      isCollection: false,
+      isSyndicated: true,
+      authors: 'questlove,rafael frumkin',
+    };
+
+    prospectToHydrate = {
+      id: 'c3h5n3o9',
+      prospectId: validSqsProspect.prospect_id,
+      scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
+      url: validSqsProspect.url,
+      prospectType: validSqsProspect.prospect_source,
+      topic: validSqsProspect.predicted_topic,
+      saveCount: validSqsProspect.save_count,
+      rank: validSqsProspect.rank,
+    };
+
+    urlMetadata = {
+      url: 'test-url',
+      domain: 'test-domain',
+      excerpt: 'test-excerpt',
+      imageUrl: 'test-imageUrl',
+      language: 'en',
+      title: 'test-title',
+      publisher: 'test-publisher',
+      isCollection: false,
+      isSyndicated: true,
+      authors: 'questlove,rafael frumkin',
     };
 
     captureExceptionSpy.mockClear();
@@ -273,166 +320,66 @@ describe('lib', () => {
 
   describe('hydrateProspectMetaData', () => {
     it('should hydrate the prospect with the url meta data fields & apply title formatting if prospect is EN', () => {
-      const expected: Prospect = {
-        id: 'c3h5n3o9',
-        prospectId: validSqsProspect.prospect_id,
-        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
-        url: validSqsProspect.url,
-        prospectType: validSqsProspect.prospect_source,
-        topic: validSqsProspect.predicted_topic,
-        saveCount: validSqsProspect.save_count,
-        rank: validSqsProspect.rank,
-        domain: 'test-domain',
-        excerpt: 'test-excerpt',
-        imageUrl: 'test-imageUrl',
-        language: 'en',
-        title: 'Test-Title', // AP style expected
-        publisher: 'test-publisher',
-        isCollection: false,
-        isSyndicated: true,
-        authors: 'questlove,rafael frumkin',
-      };
-
-      const prospectToHydrate = {
-        id: 'c3h5n3o9',
-        prospectId: validSqsProspect.prospect_id,
-        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
-        url: validSqsProspect.url,
-        prospectType: validSqsProspect.prospect_source,
-        topic: validSqsProspect.predicted_topic,
-        saveCount: validSqsProspect.save_count,
-        rank: validSqsProspect.rank,
-      };
-
-      const urlMetadata: UrlMetadata = {
-        url: 'test-url',
-        domain: 'test-domain',
-        excerpt: 'test-excerpt',
-        imageUrl: 'test-imageUrl',
-        language: 'en',
-        title: 'test-title',
-        publisher: 'test-publisher',
-        isCollection: false,
-        isSyndicated: true,
-        authors: 'questlove,rafael frumkin',
-      };
+      expected.title = 'Test-Title'; // AP style expected
+      urlMetadata.title = 'test-title';
 
       expect(expected).toEqual(
         hydrateProspectMetadata(prospectToHydrate, urlMetadata),
       );
     });
 
-    it('should hydrate the prospect with the url meta data fields & NOT apply title formatting if prospect is not EN', () => {
-      const expected: Prospect = {
-        id: 'c3h5n3o9',
-        prospectId: validSqsProspect.prospect_id,
-        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
-        url: validSqsProspect.url,
-        prospectType: validSqsProspect.prospect_source,
-        topic: validSqsProspect.predicted_topic,
-        saveCount: validSqsProspect.save_count,
-        rank: validSqsProspect.rank,
-        domain: 'test-domain',
-        excerpt: 'test-excerpt',
-        imageUrl: 'test-imageUrl',
-        language: 'de',
-        title: 'test-title', // AP style NOT expected (should have been converted to Test-Title)
-        publisher: 'test-publisher',
-        isCollection: false,
-        isSyndicated: true,
-        authors: 'questlove,rafael frumkin',
-      };
+    it('should hydrate the prospect with the url meta data fields & apply German formatting to title if prospect is DE', () => {
+      expected.language = 'de';
+      expected.title = 'Test-title — „Test”'; // German quotes / dash formatting expected
 
-      const prospectToHydrate = {
-        id: 'c3h5n3o9',
-        prospectId: validSqsProspect.prospect_id,
-        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
-        url: validSqsProspect.url,
-        prospectType: validSqsProspect.prospect_source,
-        topic: validSqsProspect.predicted_topic,
-        saveCount: validSqsProspect.save_count,
-        rank: validSqsProspect.rank,
-      };
+      urlMetadata.title = 'Test-title - »Test«';
+      urlMetadata.language = 'de';
 
-      const urlMetadata: UrlMetadata = {
-        url: 'test-url',
-        domain: 'test-domain',
-        excerpt: 'test-excerpt',
-        imageUrl: 'test-imageUrl',
-        language: 'de',
-        title: 'test-title', // AP style should NOT be applied
-        publisher: 'test-publisher',
-        isCollection: false,
-        isSyndicated: true,
-        authors: 'questlove,rafael frumkin',
-      };
+      expect(expected).toEqual(
+          hydrateProspectMetadata(prospectToHydrate, urlMetadata),
+      );
+    });
+
+    it('should hydrate the prospect with the url meta data fields & NOT apply title formatting if prospect is not EN or DE', () => {
+      expected.language = 'es';
+      expected.title = 'test-title';
+
+      urlMetadata.language = 'es';
+      urlMetadata.title = 'test-title'; // AP style should NOT be applied
 
       expect(expected).toEqual(
         hydrateProspectMetadata(prospectToHydrate, urlMetadata),
       );
     });
 
-    it('should hydrate the prospect with the url meta data fields & apply excerpt curly quotes formatting', () => {
-      const expected: Prospect = {
-        id: 'c3h5n3o9',
-        prospectId: validSqsProspect.prospect_id,
-        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
-        url: validSqsProspect.url,
-        prospectType: validSqsProspect.prospect_source,
-        topic: validSqsProspect.predicted_topic,
-        saveCount: validSqsProspect.save_count,
-        rank: validSqsProspect.rank,
-        domain: 'test-domain',
-        excerpt: `Here’s a quote - ‘To be or not to be’`, // single curly apostrophes should be applied
-        imageUrl: 'test-imageUrl',
-        language: 'en',
-        title: 'Test-Title',
-        publisher: 'test-publisher',
-        isCollection: false,
-        isSyndicated: true,
-        authors: 'questlove,rafael frumkin',
-      };
+    it('should hydrate the prospect with the url meta data fields & apply excerpt English curly quotes formatting if candidate is EN', () => {
+      expected.excerpt = `Here’s a quote - ‘To be or not to be’`; // single curly apostrophes should be applied
 
-      const prospectToHydrate = {
-        id: 'c3h5n3o9',
-        prospectId: validSqsProspect.prospect_id,
-        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
-        url: validSqsProspect.url,
-        prospectType: validSqsProspect.prospect_source,
-        topic: validSqsProspect.predicted_topic,
-        saveCount: validSqsProspect.save_count,
-        rank: validSqsProspect.rank,
-      };
-
-      const urlMetadata: UrlMetadata = {
-        url: 'test-url',
-        domain: 'test-domain',
-        excerpt: `Here's a quote - 'To be or not to be'`,
-        imageUrl: 'test-imageUrl',
-        language: 'en',
-        title: 'test-title',
-        publisher: 'test-publisher',
-        isCollection: false,
-        isSyndicated: true,
-        authors: 'questlove,rafael frumkin',
-      };
+      urlMetadata.excerpt = `Here's a quote - 'To be or not to be'`;
 
       expect(expected).toEqual(
         hydrateProspectMetadata(prospectToHydrate, urlMetadata),
+      );
+    });
+
+    it('should hydrate the prospect with the url meta data fields & apply excerpt German quotes/dash formatting if candidate is DE', () => {
+      // German quotes / dash formatting expected
+      expected.excerpt = '„Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus „Tote Mädchen lügen nicht” und „Élite” – das musst du darüber wissen';
+      expected.language = 'de';
+      expected.title = 'test-title';
+
+      urlMetadata.excerpt = '“Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus “Tote Mädchen lügen nicht” und “Élite” – das musst du darüber wissen';
+      urlMetadata.language = 'de';
+      urlMetadata.title = 'test-title';
+
+      expect(expected).toEqual(
+          hydrateProspectMetadata(prospectToHydrate, urlMetadata),
       );
     });
 
     it('should hydrate prospect when parser has no metadata', () => {
-      const expected: Prospect = {
-        id: 'c3h5n3o9',
-        prospectId: validSqsProspect.prospect_id,
-        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
-        url: validSqsProspect.url,
-        prospectType: validSqsProspect.prospect_source,
-        topic: validSqsProspect.predicted_topic,
-        saveCount: validSqsProspect.save_count,
-        rank: validSqsProspect.rank,
-        domain: 'test-domain',
+      const expectedProspect: Prospect = {
+        ...expected,
         excerpt: undefined,
         imageUrl: undefined,
         language: undefined,
@@ -443,23 +390,12 @@ describe('lib', () => {
         authors: undefined,
       };
 
-      const prospectToHydrate = {
-        id: 'c3h5n3o9',
-        prospectId: validSqsProspect.prospect_id,
-        scheduledSurfaceGuid: validSqsProspect.scheduled_surface_guid,
-        url: validSqsProspect.url,
-        prospectType: validSqsProspect.prospect_source,
-        topic: validSqsProspect.predicted_topic,
-        saveCount: validSqsProspect.save_count,
-        rank: validSqsProspect.rank,
-      };
-
       const urlMetadata: UrlMetadata = {
         url: 'test-url',
         domain: 'test-domain',
       };
 
-      expect(expected).toEqual(
+      expect(expectedProspect).toEqual(
         hydrateProspectMetadata(prospectToHydrate, urlMetadata),
       );
     });
