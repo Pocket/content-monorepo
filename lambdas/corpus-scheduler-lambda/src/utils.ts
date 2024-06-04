@@ -216,7 +216,7 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
           ? candidate.scheduled_corpus_item.title
           : itemMetadata.title
       ) as string;
-      title = isCandidateEnglish ? (applyApTitleCase(title) as string) : isCandidateGerman ? (formatQuotesDashesDE(title) as string) : title;
+      title = isCandidateEnglish ? (formatQuotesEN(applyApTitleCase(title) as string) as string) : isCandidateGerman ? (formatQuotesDashesDE(title) as string) : title;
       let excerpt = (
         candidate.scheduled_corpus_item.excerpt
           ? candidate.scheduled_corpus_item.excerpt

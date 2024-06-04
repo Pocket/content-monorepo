@@ -404,7 +404,7 @@ export const hydrateProspectMetadata = (
   const isCandidateGerman =
       urlMetadata.language?.toUpperCase() === CorpusLanguage.DE;
   const title = isCandidateEnglish
-    ? (applyApTitleCase(urlMetadata.title) as string)
+    ? (formatQuotesEN(applyApTitleCase(urlMetadata.title)) as string)
     : isCandidateGerman ? (formatQuotesDashesDE(urlMetadata.title) as string) : urlMetadata.title;
   const excerpt = isCandidateEnglish ? (formatQuotesEN(urlMetadata.excerpt) as string)
       : isCandidateGerman ? (formatQuotesDashesDE(urlMetadata.excerpt) as string) : urlMetadata.excerpt;
