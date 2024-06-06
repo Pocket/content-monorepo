@@ -17,5 +17,8 @@ export const config = {
   tags: {
     service: `${name}-Sqs-Translation`,
     environment,
+    app_code: 'content',
+    component_code: `content-${name.toLowerCase()}`,
+    env_code: isDev ? 'dev' : 'prod',
   },
 };
