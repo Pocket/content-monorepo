@@ -34,7 +34,10 @@ class ProspectAPI extends TerraformStack {
   constructor(scope: Construct, name: string) {
     super(scope, name);
 
-    new AwsProvider(this, 'aws', { region: 'us-east-1' });
+    new AwsProvider(this, 'aws', {
+      region: 'us-east-1',
+      defaultTags: [{ tags: config.tags }],
+    });
 
     new PagerdutyProvider(this, 'pagerduty_provider', { token: undefined });
     new NullProvider(this, 'null-provider');
