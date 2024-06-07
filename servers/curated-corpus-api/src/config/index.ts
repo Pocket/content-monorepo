@@ -77,7 +77,7 @@ export default {
     schemas: {
       objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-5',
       reviewedCorpusItem:
-        'iglu:com.pocket/reviewed_corpus_item/jsonschema/1-0-8',
+        'iglu:com.pocket/reviewed_corpus_item/jsonschema/1-0-9',
       scheduledCorpusItem:
         'iglu:com.pocket/scheduled_corpus_item/jsonschema/1-0-8',
     },

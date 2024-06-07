@@ -142,6 +142,11 @@ export type ReviewedCorpusItem = {
    * Indicates where in the Curation Tools UI the action took place. Null if the action was performed by a backend ML process.
    */
   action_screen?: ActionScreen;
+
+  /**
+   * The quality grade of the reviewed_corpus_item.
+   */
+  grade?: string;
 };
 
 /**

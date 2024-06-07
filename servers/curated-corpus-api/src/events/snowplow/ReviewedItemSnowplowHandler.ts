@@ -154,6 +154,7 @@ export class ReviewedItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
       updated_at: getUnixTimestamp(item.updatedAt),
       updated_by: item.updatedBy ?? undefined,
       loaded_from: item.source as CorpusItemSource,
+      grade: item.grade,
     };
 
     return context;

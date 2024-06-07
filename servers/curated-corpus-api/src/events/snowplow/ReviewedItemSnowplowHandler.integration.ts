@@ -107,6 +107,7 @@ const approvedItemEventContextData = {
   image_url: approvedItem.imageUrl,
   language: approvedItem.language,
   topic: approvedItem.topic,
+  grade: approvedItem.grade,
   is_collection: approvedItem.isCollection,
   is_time_sensitive: approvedItem.isTimeSensitive,
   is_syndicated: approvedItem.isSyndicated,
