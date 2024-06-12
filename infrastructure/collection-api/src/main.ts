@@ -31,7 +31,10 @@ class CollectionAPI extends TerraformStack {
     super(scope, name);
 
     new ArchiveProvider(this, 'archive-provider');
-    new AwsProvider(this, 'aws', { region: 'us-east-1' });
+    new AwsProvider(this, 'aws', {
+      region: 'us-east-1',
+      defaultTags: [{ tags: config.tags }],
+    });
     new LocalProvider(this, 'local_provider');
     new NullProvider(this, 'null_provider');
     new PagerdutyProvider(this, 'pagerduty_provider', { token: undefined });
