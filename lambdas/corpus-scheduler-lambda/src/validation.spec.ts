@@ -5,8 +5,12 @@ import {
 } from './validation';
 import {
     createScheduledCandidate,
-    currentMockTimeMondaySaturday, currentMockTimeSundayMonday, currentMockTimeTuesdaySaturday,
-    mockPocketImageCache, scheduledDateMonday, scheduledDateSaturday,
+    currentMockTimeMondaySaturday,
+    currentMockTimeSundayMonday,
+    currentMockTimeTuesdaySaturday,
+    mockPocketImageCache,
+    scheduledDateMonday,
+    scheduledDateSaturday,
     scheduledDateSunday
 } from './testHelpers';
 import {
