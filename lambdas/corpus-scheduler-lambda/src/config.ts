@@ -17,11 +17,18 @@ const config = {
     version: process.env.GIT_SHA || '',
   },
   validation: {
-    LosAngelesTimeZone: 'America/Los_Angeles',
-    BerlinTimeZone: 'Europe/Berlin',
-    ISO_SUNDAY: 7, // ISO sunday is day #7 in the week (note: JS getDay returns 0 for Sunday)
-    MON_SAT_MIN_DIFF: 14, // Regular cutoff is 10am. 24:00 - 10:00 = 14 hours
-    SUNDAY_MIN_DIFF: 32, // Sunday cutoff is Friday 4pm. 2 days - 16 hours = 32 hours
+    ISO_SUNDAY: 7, // ISO Sunday is day #7 in the week (note: JS getDay returns 0 for Sunday)
+    ISO_MONDAY: 1, // ISO Monday is day #1 in the week
+    EN_US: {
+      timeZone: 'America/Los_Angeles',
+      MON_SAT_MIN_DIFF: 14, // Regular cutoff is 10am. 24:00 - 10:00 = 14 hours
+      SUNDAY_MIN_DIFF: 32, // Sunday cutoff is Friday 4pm. 2 days - 16 hours = 32 hours
+    },
+    DE_DE: {
+      timeZone: 'Europe/Berlin',
+      SUNDAY_MONDAY_MIN_DIFF: 12, // Latest cutoff is noon (12 pm). Shown Saturday & Sunday afternoons. 24:00 - 12:00 = 12 hours
+      TUESDAY_SATURDAY_MIN_DIFF: 14, // Latest cutoff is 10 am. Shown Monday-Friday mornings. 24:00 - 10:00 = 14 hours
+    }
   },
   aws: {
     localEndpoint: process.env.AWS_ENDPOINT,

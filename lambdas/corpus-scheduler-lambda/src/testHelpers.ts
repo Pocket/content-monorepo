@@ -17,7 +17,81 @@ import {
 import { DateTime } from 'luxon';
 import { graphql, http, HttpResponse } from 'msw';
 import { SetupServer } from 'msw/node';
+import config from "./config";
 
+//Saturday, December 30, 2023 11 AM PST
+export const currentMockTimeMondaySaturday  =
+  DateTime.fromObject(
+      {
+        year: 2023,
+        month: 12,
+        day: 30,
+        hour: 11,
+        minute: 0,
+        second: 0,
+      },
+      {zone: config.validation.EN_US.timeZone},
+  );
+
+//Sunday, December 31, 2023 11 AM DE
+export const currentMockTimeTuesdaySaturday  =
+    DateTime.fromObject(
+      {
+        year: 2023,
+        month: 12,
+        day: 31,
+        hour: 11,
+        minute: 0,
+        second: 0,
+      },
+      {zone: config.validation.DE_DE.timeZone},
+  );
+
+//Friday, December 29, 2023 1 PM DE
+export const currentMockTimeSundayMonday =
+    DateTime.fromObject(
+    {
+      year: 2023,
+      month: 12,
+      day: 29,
+      hour: 13,
+      minute: 0,
+      second: 0,
+    },
+    {zone: config.validation.DE_DE.timeZone},
+);
+
+//Sunday, December 31, 2023 12 AM PST
+export const scheduledDateSunday =
+    DateTime.fromObject(
+    {
+      year: 2023,
+      month: 12,
+      day: 31,
+    },
+    {zone: config.validation.EN_US.timeZone},
+);
+
+//Monday, January 1, 2024 12 AM DE
+export const scheduledDateMonday =
+    DateTime.fromObject(
+    {
+      year: 2024,
+      month: 1,
+      day: 1,
+    },
+    {zone: config.validation.DE_DE.timeZone},
+);
+
+export const scheduledDateSaturday =
+    DateTime.fromObject(
+        {
+          year: 2023,
+          month: 12,
+          day: 30,
+        },
+        {zone: config.validation.DE_DE.timeZone},
+    );
 export const defaultScheduledDate = DateTime.fromObject(
   {},
   {
