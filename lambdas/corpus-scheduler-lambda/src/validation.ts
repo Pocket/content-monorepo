@@ -50,7 +50,7 @@ export const validateScheduledDate = async (
     if (scheduledDay === config.validation.ISO_SUNDAY) {
       if (timeDifference < config.validation.EN_US.SUNDAY_MIN_DIFF) {
         throw new Error(
-            'validateScheduledDate: candidate scheduled for Sunday needs to arrive minimum 32 hours in advance',
+            `validateScheduledDate: candidate scheduled for Sunday needs to arrive minimum ${config.validation.EN_US.SUNDAY_MIN_DIFF} hours in advance`,
         );
       }
     }
@@ -58,7 +58,7 @@ export const validateScheduledDate = async (
     else {
       if (timeDifference < config.validation.EN_US.MON_SAT_MIN_DIFF) {
         throw new Error(
-            'validateScheduledDate: candidate scheduled for Monday - Saturday needs to arrive minimum 14 hours in advance',
+            `validateScheduledDate: candidate scheduled for Monday - Saturday needs to arrive minimum ${config.validation.EN_US.MON_SAT_MIN_DIFF} hours in advance`,
         );
       }
     }
@@ -70,7 +70,7 @@ export const validateScheduledDate = async (
     if (scheduledDay === config.validation.ISO_SUNDAY || scheduledDay === config.validation.ISO_MONDAY) {
       if (timeDifference < config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF) {
         throw new Error(
-            'validateScheduledDate: candidate scheduled for Sunday - Monday needs to arrive minimum 12 hours in advance',
+            `validateScheduledDate: candidate scheduled for Sunday - Monday needs to arrive minimum ${config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF} hours in advance`,
         );
       }
     }
@@ -78,7 +78,7 @@ export const validateScheduledDate = async (
     else {
       if (timeDifference < config.validation.DE_DE.TUESDAY_SATURDAY_MIN_DIFF) {
         throw new Error(
-            'validateScheduledDate: candidate scheduled for Tuesday - Saturday needs to arrive minimum 14 hours in advance',
+            `validateScheduledDate: candidate scheduled for Tuesday - Saturday needs to arrive minimum ${config.validation.DE_DE.TUESDAY_SATURDAY_MIN_DIFF} hours in advance`,
         );
       }
     }

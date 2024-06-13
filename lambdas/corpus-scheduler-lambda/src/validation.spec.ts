@@ -35,21 +35,21 @@ describe('validation', function () {
       [
           config.validation.EN_US.timeZone,
           'Monday - Saturday',
-          14,
+          config.validation.EN_US.MON_SAT_MIN_DIFF,
           currentMockTimeMondaySaturday,
           scheduledDateSunday
       ],
       [
           config.validation.DE_DE.timeZone,
           'Tuesday - Saturday',
-          14,
+          config.validation.DE_DE.TUESDAY_SATURDAY_MIN_DIFF,
           currentMockTimeTuesdaySaturday,
           scheduledDateMonday
       ],
       [
           config.validation.DE_DE.timeZone,
           'Sunday - Monday',
-          12,
+          config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF,
           currentMockTimeSundayMonday,
           scheduledDateSaturday
       ]
@@ -59,6 +59,14 @@ describe('validation', function () {
       const isTimeZoneEnUS = timeZone === config.validation.EN_US.timeZone;
       let currentMockTime: DateTime;
       let scheduledTime: DateTime;
+      // number of days to iterate thru depending on timeZone and minimum hr diff
+      let numberODaysRange = 7;
+      if(timeZone === config.validation.DE_DE.timeZone && minHours === config.validation.EN_US.MON_SAT_MIN_DIFF) {
+          numberODaysRange = 6;
+      }
+      if(timeZone === config.validation.DE_DE.timeZone && minHours === config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF) {
+          numberODaysRange = 3;
+      }
       beforeEach(() => {
           currentMockTime = currentMockTimeDefault;
           scheduledTime = scheduledTimeDefault;
@@ -104,14 +112,7 @@ describe('validation', function () {
           // expected to fail as min time diff is 14 hours/12 hours
           // let currentMockTime = currentMockTimeDefault;
           // let scheduledTime = scheduledTimeDefault;
-          let range = 7;
-          if(timeZone === config.validation.DE_DE.timeZone && minHours === 14) {
-              range = 6;
-          }
-          if(timeZone === config.validation.DE_DE.timeZone && minHours === 12) {
-              range = 3;
-          }
-          for (let i = 1; i < range; i++) {
+          for (let i = 1; i < numberODaysRange; i++) {
               currentMockTime = currentMockTime.plus({days: 1}); // add 1 day to the current time
               Settings.now = () => currentMockTime.toMillis(); // make sure current time is mocked by settings
               scheduledTime = scheduledTime.plus({days: 1}); // add 1 day to the scheduled time
@@ -168,17 +169,9 @@ describe('validation', function () {
       it(`should succeed if candidate is scheduled for ${dayRange} at least ${minHours} hours in advance`, async () => {
           // subtract 1 hour to set current time to 10 AM (exactly 14 hours)
           currentMockTime = currentMockTime.minus({hours: 1});
-
-          let range = 7;
-          if(timeZone === config.validation.DE_DE.timeZone && minHours === 14) {
-              range = 6;
-          }
-          if(timeZone === config.validation.DE_DE.timeZone && minHours === 12) {
-              range = 3;
-          }
           // should try scheduling on Sunday (scheduled for Monday) -> Friday (scheduled for Saturday)
           // expected to succeed, time diff is exactly 14 hours
-          for (let i = 1; i < range; i++) {
+          for (let i = 1; i < numberODaysRange; i++) {
               currentMockTime = currentMockTime.plus({days: 1}); // add 1 day to the current time
               Settings.now = () => currentMockTime.toMillis(); // make sure current time is mocked by settings
               scheduledTime = scheduledTime.plus({days: 1}); // add 1 day to the scheduled time
