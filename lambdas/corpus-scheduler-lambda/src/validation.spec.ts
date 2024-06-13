@@ -60,12 +60,12 @@ describe('validation', function () {
       let currentMockTime: DateTime;
       let scheduledTime: DateTime;
       // number of days to iterate thru depending on timeZone and minimum hr diff
-      let numberODaysRange = 7;
+      let numberOfDaysRange = 7;
       if(timeZone === config.validation.DE_DE.timeZone && minHours === config.validation.EN_US.MON_SAT_MIN_DIFF) {
-          numberODaysRange = 6;
+          numberOfDaysRange = 6;
       }
       if(timeZone === config.validation.DE_DE.timeZone && minHours === config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF) {
-          numberODaysRange = 3;
+          numberOfDaysRange = 3;
       }
       beforeEach(() => {
           currentMockTime = currentMockTimeDefault;
@@ -112,7 +112,7 @@ describe('validation', function () {
           // expected to fail as min time diff is 14 hours/12 hours
           // let currentMockTime = currentMockTimeDefault;
           // let scheduledTime = scheduledTimeDefault;
-          for (let i = 1; i < numberODaysRange; i++) {
+          for (let i = 1; i < numberOfDaysRange; i++) {
               currentMockTime = currentMockTime.plus({days: 1}); // add 1 day to the current time
               Settings.now = () => currentMockTime.toMillis(); // make sure current time is mocked by settings
               scheduledTime = scheduledTime.plus({days: 1}); // add 1 day to the scheduled time
@@ -171,7 +171,7 @@ describe('validation', function () {
           currentMockTime = currentMockTime.minus({hours: 1});
           // should try scheduling on Sunday (scheduled for Monday) -> Friday (scheduled for Saturday)
           // expected to succeed, time diff is exactly 14 hours
-          for (let i = 1; i < numberODaysRange; i++) {
+          for (let i = 1; i < numberOfDaysRange; i++) {
               currentMockTime = currentMockTime.plus({days: 1}); // add 1 day to the current time
               Settings.now = () => currentMockTime.toMillis(); // make sure current time is mocked by settings
               scheduledTime = scheduledTime.plus({days: 1}); // add 1 day to the scheduled time
