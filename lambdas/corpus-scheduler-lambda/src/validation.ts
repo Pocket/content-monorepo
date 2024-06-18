@@ -11,19 +11,21 @@ import {ScheduledSurfacesEnum} from "content-common";
  * If a candidate is scheduled for Sunday, time diff >= 32 hrs
  * @param scheduledDate scheduledDate for an item from Metaflow
  * @param timeZone the time zone to do the validation in
+ * @param publishHour the time when content gets published in specific time zone. Used in the base DateTime to calculate time diff.
  */
 export const validateScheduledDate = async (
   scheduledDate: string,
   timeZone: string,
+  publishHour: number
 ): Promise<void> => {
-  // get the DateTime from an ISO scheduled date string in PST (Los Angeles).
-  // This is midnight in PST.
-  // Convert midnight PST to specified timezone:
+  // get the DateTime from an ISO scheduled date string in 12 AM of specified timezone.
+  // Convert to appropriate hour:
+  // PST = 12 AM
   // EST = 3 AM
   // Europe/Berlin = 9 AM
   const isoScheduledDateTime = DateTime.fromISO(scheduledDate, {
-    zone: 'America/Los_Angeles',
-  }).setZone(timeZone);
+    zone: timeZone,
+  }).plus({hours: publishHour});
 
   // 1. get the current date time for specified time zone
   const currentTime = DateTime.fromObject(
@@ -127,12 +129,14 @@ export async function validateCandidate(
   // validate candidate scheduled date
   // if ENABLE_SCHEDULED_DATE_VALIDATION env var is true, validate the scheduled date
   if (config.app.enableScheduledDateValidation === 'true') {
-    // default to PST timezone
+    // default to EST timezone
     let timeZone  = config.validation.EN_US.timeZone;
+    let publishHour = config.validation.EN_US.publishHour;
     //  if candidate is for NEW_TAB_DE_DE, use Berlin time (CET) scheduled date validation
     if(candidate.scheduled_corpus_item.scheduled_surface_guid === ScheduledSurfacesEnum.NEW_TAB_DE_DE) {
       timeZone = config.validation.DE_DE.timeZone;
+      publishHour = config.validation.DE_DE.publishHour;
     }
-    await validateScheduledDate(candidate.scheduled_corpus_item.scheduled_date, timeZone);
+    await validateScheduledDate(candidate.scheduled_corpus_item.scheduled_date, timeZone, publishHour);
   }
 }
