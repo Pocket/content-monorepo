@@ -11,16 +11,21 @@ import {ScheduledSurfacesEnum} from "content-common";
  * If a candidate is scheduled for Sunday, time diff >= 32 hrs
  * @param scheduledDate scheduledDate for an item from Metaflow
  * @param timeZone the time zone to do the validation in
+ * @param publishHour the time when content gets published in specific time zone. Used in the base DateTime to calculate time diff.
  */
 export const validateScheduledDate = async (
   scheduledDate: string,
   timeZone: string,
-
+  publishHour: number
 ): Promise<void> => {
-  // get the DateTime from an ISO scheduled date string
+  // get the DateTime from an ISO scheduled date string in 12 AM of specified timezone.
+  // Convert to appropriate hour:
+  // PST = 12 AM
+  // EST = 3 AM
+  // Europe/Berlin = 9 AM
   const isoScheduledDateTime = DateTime.fromISO(scheduledDate, {
     zone: timeZone,
-  });
+  }).plus({hours: publishHour});
 
   // 1. get the current date time for specified time zone
   const currentTime = DateTime.fromObject(
@@ -45,20 +50,43 @@ export const validateScheduledDate = async (
     );
   }
 
-  // 4. If scheduled date is Sunday, min time diff is 32 hrs
-  if (scheduledDay === config.validation.ISO_SUNDAY) {
-    if (timeDifference < config.validation.SUNDAY_MIN_DIFF) {
-      throw new Error(
-        'validateScheduledDate: candidate scheduled for Sunday needs to arrive minimum 32 hours in advance',
-      );
+  // IF EN_US
+  if(timeZone === config.validation.EN_US.timeZone) {
+    // 4. If scheduled date is Sunday, min time diff is 32 hrs
+    if (scheduledDay === config.validation.ISO_SUNDAY) {
+      if (timeDifference < config.validation.EN_US.SUNDAY_MIN_DIFF) {
+        throw new Error(
+            `validateScheduledDate: candidate scheduled for Sunday needs to arrive minimum ${config.validation.EN_US.SUNDAY_MIN_DIFF} hours in advance`,
+        );
+      }
+    }
+    // 5. else, scheduled date is for Monday - Saturday, min time diff is 14 hrs
+    else {
+      if (timeDifference < config.validation.EN_US.MON_SAT_MIN_DIFF) {
+        throw new Error(
+            `validateScheduledDate: candidate scheduled for Monday - Saturday needs to arrive minimum ${config.validation.EN_US.MON_SAT_MIN_DIFF} hours in advance`,
+        );
+      }
     }
   }
-  // 5. else, scheduled date is for Monday - Saturday, min time diff is 14 hrs
-  else {
-    if (timeDifference < config.validation.MON_SAT_MIN_DIFF) {
-      throw new Error(
-        'validateScheduledDate: candidate scheduled for Monday - Saturday needs to arrive minimum 14 hours in advance',
-      );
+
+  // IF DE_DE
+  else if(timeZone === config.validation.DE_DE.timeZone) {
+    // 4. If scheduled date is Sunday-Monday, min time diff is 12 hrs
+    if (scheduledDay === config.validation.ISO_SUNDAY || scheduledDay === config.validation.ISO_MONDAY) {
+      if (timeDifference < config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF) {
+        throw new Error(
+            `validateScheduledDate: candidate scheduled for Sunday - Monday needs to arrive minimum ${config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF} hours in advance`,
+        );
+      }
+    }
+    // 5. else, scheduled date is for Tuesday - Saturday, min time diff is 14 hrs
+    else {
+      if (timeDifference < config.validation.DE_DE.TUESDAY_SATURDAY_MIN_DIFF) {
+        throw new Error(
+            `validateScheduledDate: candidate scheduled for Tuesday - Saturday needs to arrive minimum ${config.validation.DE_DE.TUESDAY_SATURDAY_MIN_DIFF} hours in advance`,
+        );
+      }
     }
   }
 };
@@ -101,12 +129,14 @@ export async function validateCandidate(
   // validate candidate scheduled date
   // if ENABLE_SCHEDULED_DATE_VALIDATION env var is true, validate the scheduled date
   if (config.app.enableScheduledDateValidation === 'true') {
-    // default to PST timezone
-    let timeZone  = config.validation.LosAngelesTimeZone;
+    // default to EST timezone
+    let timeZone  = config.validation.EN_US.timeZone;
+    let publishHour = config.validation.EN_US.publishHour;
     //  if candidate is for NEW_TAB_DE_DE, use Berlin time (CET) scheduled date validation
     if(candidate.scheduled_corpus_item.scheduled_surface_guid === ScheduledSurfacesEnum.NEW_TAB_DE_DE) {
-      timeZone = config.validation.BerlinTimeZone;
+      timeZone = config.validation.DE_DE.timeZone;
+      publishHour = config.validation.DE_DE.publishHour;
     }
-    await validateScheduledDate(candidate.scheduled_corpus_item.scheduled_date, timeZone);
+    await validateScheduledDate(candidate.scheduled_corpus_item.scheduled_date, timeZone, publishHour);
   }
 }
