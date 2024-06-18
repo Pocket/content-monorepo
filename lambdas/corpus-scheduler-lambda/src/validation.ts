@@ -65,7 +65,7 @@ export const validateScheduledDate = async (
   }
 
   // IF DE_DE
-  if(timeZone === config.validation.DE_DE.timeZone) {
+  else if(timeZone === config.validation.DE_DE.timeZone) {
     // 4. If scheduled date is Sunday-Monday, min time diff is 12 hrs
     if (scheduledDay === config.validation.ISO_SUNDAY || scheduledDay === config.validation.ISO_MONDAY) {
       if (timeDifference < config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF) {

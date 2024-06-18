@@ -24,6 +24,9 @@ const config = {
       MON_SAT_MIN_DIFF: 14, // Regular cutoff is 10am. 24:00 - 10:00 = 14 hours
       SUNDAY_MIN_DIFF: 32, // Sunday cutoff is Friday 4pm. 2 days - 16 hours = 32 hours
     },
+    // from https://mozilla-hub.atlassian.net/browse/MC-1102?focusedCommentId=891687
+    // When daylight savings starts / ends there will be a one hour difference between a delta based specification and a time based specification.
+    // Since the scheduler uses the local timezone when producing content, there will be a mismatch and the window would be 1 hour smaller.
     DE_DE: {
       timeZone: 'Europe/Berlin',
       SUNDAY_MONDAY_MIN_DIFF: 12, // Latest cutoff is noon (12 pm). Shown Saturday & Sunday afternoons. 24:00 - 12:00 = 12 hours
