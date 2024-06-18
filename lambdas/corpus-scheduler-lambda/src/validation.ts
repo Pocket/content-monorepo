@@ -16,10 +16,14 @@ export const validateScheduledDate = async (
   scheduledDate: string,
   timeZone: string,
 ): Promise<void> => {
-  // get the DateTime from an ISO scheduled date string
+  // get the DateTime from an ISO scheduled date string in PST (Los Angeles).
+  // This is midnight in PST.
+  // Convert midnight PST to specified timezone:
+  // EST = 3 AM
+  // Europe/Berlin = 9 AM
   const isoScheduledDateTime = DateTime.fromISO(scheduledDate, {
-    zone: timeZone,
-  });
+    zone: 'America/Los_Angeles',
+  }).setZone(timeZone);
 
   // 1. get the current date time for specified time zone
   const currentTime = DateTime.fromObject(

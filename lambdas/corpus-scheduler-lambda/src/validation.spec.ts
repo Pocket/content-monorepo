@@ -71,7 +71,7 @@ describe('validation', function () {
           currentMockTime = currentMockTimeDefault;
           scheduledTime = scheduledTimeDefault;
       });
-      it('should throw Error if scheduled date is corrupt & time difference cannot be computed', async () => {
+      it(`should throw Error if scheduled date is corrupt & time difference cannot be computed for ${timeZone} time zone`, async () => {
           // set scheduled candidate time to 2023-11-10 12 AM (PST, CET) (Friday)
           // this is an earlier date than the current time, we expect this candidate to fail validation
           // computed time difference is NaN
@@ -105,7 +105,7 @@ describe('validation', function () {
               'validateScheduledDate: cannot compute the time difference',
           );
       });
-      it(`should throw Error if candidate is scheduled for ${dayRange} less than ${minHours} hrs in advance`, async () => {
+      it(`should throw Error if candidate is scheduled for ${dayRange} less than ${minHours} hrs in advance for ${timeZone} time zone`, async () => {
           // should try scheduling on Sunday (scheduled for Monday) -> Friday (scheduled for Saturday) (EN_US) hrDiff=13
           // should try scheduling on Monday (scheduled for Tuesday) -> Friday (scheduled for Saturday) (DE_DE) hrDiff=13
           // should try scheduling on Saturday (scheduled for Sunday) -> Sunday (scheduled for Monday) (DE_DE) hrDiff=11
@@ -125,7 +125,7 @@ describe('validation', function () {
           }
       });
       // EN_US test only
-      itif(isTimeZoneEnUS)('should throw Error if candidate is scheduled for Sunday less than 32 hrs in advance', async () => {
+      itif(isTimeZoneEnUS)(`should throw Error if candidate is scheduled for Sunday less than 32 hrs in advance for ${timeZone} time zone`, async () => {
           // set current time to 2024-01-27 7 AM (PST, CET) (Saturday)
           const currentMockTime = DateTime.fromObject(
               {
@@ -146,7 +146,7 @@ describe('validation', function () {
           );
       });
       // EN_US test only
-      itif(isTimeZoneEnUS)('should succeed if candidate is scheduled for Sunday at least 32 hours in advance', async () => {
+      itif(isTimeZoneEnUS)(`should succeed if candidate is scheduled for Sunday at least 32 hours in advance for ${timeZone} time zone`, async () => {
           // set current time to 2024-01-26 4 PM (PST, CET) (Friday)
           const currentMockTime = DateTime.fromObject(
               {
@@ -166,7 +166,7 @@ describe('validation', function () {
               validateScheduledDate('2024-01-28', timeZone),
           ).resolves.not.toThrowError();
       });
-      it(`should succeed if candidate is scheduled for ${dayRange} at least ${minHours} hours in advance`, async () => {
+      it(`should succeed if candidate is scheduled for ${dayRange} at least ${minHours} hours in advance for ${timeZone} time zone`, async () => {
           // subtract 1 hour to set current time to 10 AM (exactly 14 hours)
           currentMockTime = currentMockTime.minus({hours: 1});
           // should try scheduling on Sunday (scheduled for Monday) -> Friday (scheduled for Saturday)
