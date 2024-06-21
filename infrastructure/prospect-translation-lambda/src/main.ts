@@ -20,6 +20,7 @@ import { config } from './config';
 import { TranslationSqsLambda } from './translationSqsLambda';
 import {DataAwsCallerIdentity} from "@cdktf/provider-aws/lib/data-aws-caller-identity";
 import {DataAwsRegion} from "@cdktf/provider-aws/lib/data-aws-region";
+import { MlIamUserPolicy } from './iam';
 
 class ProspectTranslationLambdaWrapper extends TerraformStack {
   constructor(scope: Construct, name: string) {
@@ -45,11 +46,17 @@ class ProspectTranslationLambdaWrapper extends TerraformStack {
 
     new PocketVPC(this, 'pocket-vpc');
 
-    new TranslationSqsLambda(
+    const sqsLambda = new TranslationSqsLambda(
       this,
       'translation-lambda',
         caller,
         region
+    );
+
+    new MlIamUserPolicy(
+        this,
+        'corpus-scheduler-ml-user-policy',
+        sqsLambda.sqsQueue,
     );
 
     // Pre cdktf 0.17 ids were generated differently so we need to apply a migration aspect

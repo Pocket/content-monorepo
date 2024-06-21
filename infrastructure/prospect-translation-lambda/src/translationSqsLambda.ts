@@ -8,8 +8,11 @@ import { LAMBDA_RUNTIMES } from '@pocket-tools/terraform-modules';
 import { DataAwsSsmParameter } from '@cdktf/provider-aws/lib/data-aws-ssm-parameter';
 import {DataAwsCallerIdentity} from "@cdktf/provider-aws/lib/data-aws-caller-identity";
 import {DataAwsRegion} from "@cdktf/provider-aws/lib/data-aws-region";
+import {SqsQueue} from "@cdktf/provider-aws/lib/sqs-queue";
+import {DataAwsSqsQueue} from "@cdktf/provider-aws/lib/data-aws-sqs-queue";
 
 export class TranslationSqsLambda extends Construct {
+  public readonly sqsQueue: SqsQueue | DataAwsSqsQueue;
   constructor(
     scope: Construct,
     private name: string,
@@ -22,7 +25,7 @@ export class TranslationSqsLambda extends Construct {
 
     const { sentryDsn, gitSha } = this.getEnvVariableValues();
 
-    new PocketSQSWithLambdaTarget(this, 'translation-sqs-lambda', {
+    const sqsLambda = new PocketSQSWithLambdaTarget(this, 'translation-sqs-lambda', {
       name: `${config.prefix}-Sqs-Translation`,
       // batch size is 1 so SQS doesn't get smart and try to combine them
       // (a combined message will mean a skipped candidate set from ML)
@@ -73,6 +76,8 @@ export class TranslationSqsLambda extends Construct {
       },
       tags: config.tags,
     });
+
+    this.sqsQueue = sqsLambda.sqsQueueResource;
   }
 
   private getEnvVariableValues() {
