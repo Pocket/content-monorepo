@@ -17,7 +17,7 @@ export class MlIamUserPolicy extends Construct {
         const iamUserName = `${config.prefix}-Queue-User`;
 
         const iamUserPolicy = new IamPolicy(this, 'iam-sqs-policy', {
-            name: `IAM-${config.prefix}-QueuePolicy`,
+            name: `IAM-ML-${config.prefix}-QueuePolicy`,
             policy: new DataAwsIamPolicyDocument(this, `iam_sqs_policy`, {
                 statement: [
                     {
