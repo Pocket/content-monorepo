@@ -27,6 +27,8 @@ import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 
 describe('corpus scheduler lambda', () => {
   const server = setupServer();
+  let captureExceptionSpy: jest.SpyInstance<string, [exception: any, hint?: any], any>;
+  let consoleLogSpy: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]], any>;
   beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
   afterEach(() => {
     // restoreAllMocks restores all mocks and replaced properties. clearAllMocks only clears mocks.
@@ -50,6 +52,12 @@ describe('corpus scheduler lambda', () => {
     jest
       .spyOn(Utils, 'getCorpusSchedulerLambdaPrivateKey')
       .mockReturnValue(Promise.resolve('my_secret_value'));
+    // spy on Sentry captureException
+    captureExceptionSpy = jest
+        .spyOn(Sentry, 'captureException')
+        .mockImplementation();
+    // spy on console.log
+    consoleLogSpy = jest.spyOn(global.console, 'log');
   });
 
   const scheduledCandidate = createScheduledCandidate({
@@ -195,10 +203,6 @@ describe('corpus scheduler lambda', () => {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
     } as unknown as SQSEvent;
 
-    const captureExceptionSpy = jest
-      .spyOn(Sentry, 'captureException')
-      .mockImplementation();
-
     await processor(fakeEvent, sqsContext, sqsCallback);
 
     expect(captureExceptionSpy).toHaveBeenCalled();
@@ -214,10 +218,6 @@ describe('corpus scheduler lambda', () => {
     });
     mockGetUrlMetadata(server);
     mockCreateApprovedCorpusItemOnce(server, { data: null });
-
-    const captureExceptionSpy = jest
-      .spyOn(Sentry, 'captureException')
-      .mockImplementation();
 
     await processor(fakeEvent, sqsContext, sqsCallback);
 
@@ -248,9 +248,6 @@ describe('corpus scheduler lambda', () => {
       enableScheduledDateValidation: 'true',
       version: 'fake-sha',
     });
-
-    // spy on console.log
-    const consoleLogSpy = jest.spyOn(global.console, 'log');
 
     const fakeEvent = {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
@@ -294,9 +291,6 @@ describe('corpus scheduler lambda', () => {
     mockGetUrlMetadata(server);
     mockCreateApprovedCorpusItemOnce(server, { data: null });
 
-    // spy on console.log
-    const consoleLogSpy = jest.spyOn(global.console, 'log');
-
     // overwrite with NEW_TAB_EN_GB scheduled surface which is not allowed
     record.candidates[0].scheduled_corpus_item.scheduled_surface_guid =
       ScheduledSurfacesEnum.NEW_TAB_EN_GB;
@@ -318,7 +312,7 @@ describe('corpus scheduler lambda', () => {
     );
   }, 7000);
 
-  it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (prod)', async () => {
+  it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (prod) (EN_US)', async () => {
     mockPocketImageCache(200);
     // mock the config.app.isDev
     jest.replaceProperty(config, 'app', {
@@ -343,10 +337,6 @@ describe('corpus scheduler lambda', () => {
     mockGetUrlMetadata(server);
     mockCreateApprovedCorpusItemOnce(server);
 
-    const captureExceptionSpy = jest
-      .spyOn(Sentry, 'captureException')
-      .mockImplementation();
-
     await processor(
       fakeEvent,
       null as unknown as Context,
@@ -354,7 +344,57 @@ describe('corpus scheduler lambda', () => {
     );
 
     expect(captureExceptionSpy).not.toHaveBeenCalled();
+    // expect console.log to log that item has been created & scheduled
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining('CreateApprovedCorpusItem MUTATION OUTPUT')
+    );
   }, 7000);
+
+  it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (prod) (DE_DE)', async () => {
+    mockPocketImageCache(200);
+    // mock the config.app.isDev
+    jest.replaceProperty(config, 'app', {
+      name: 'Corpus-Scheduler-Lambda',
+      environment: 'test',
+      isDev: false, // should be prod env
+      sentry: {
+        dsn: '',
+        release: '',
+      },
+      allowedToSchedule: 'true',
+      enableScheduledDateValidation: 'true',
+      version: 'fake-sha',
+    });
+
+    // returns null as we are trying to create & schedule a new item
+    mockGetApprovedCorpusItemByUrl(server, {
+      data: {
+        getApprovedCorpusItemByUrl: null,
+      },
+    });
+    mockGetUrlMetadata(server);
+    mockCreateApprovedCorpusItemOnce(server);
+
+    // overwrite with NEW_TAB_DE_DE scheduled surface
+    record.candidates[0].scheduled_corpus_item.scheduled_surface_guid =
+        ScheduledSurfacesEnum.NEW_TAB_DE_DE;
+    const fakeEvent = {
+      Records: [{ messageId: '1', body: JSON.stringify(record) }],
+    } as unknown as SQSEvent;
+
+    await processor(
+        fakeEvent,
+        null as unknown as Context,
+        null as unknown as Callback,
+    );
+
+    expect(captureExceptionSpy).not.toHaveBeenCalled();
+    // expect console.log to log that item has been created & scheduled
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining('CreateApprovedCorpusItem MUTATION OUTPUT')
+    );
+  }, 7000);
+
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful & valid scheduled surface but not allowed for scheduling (approve & schedule candidate) (dev)', async () => {
     mockPocketImageCache(200);
@@ -366,10 +406,6 @@ describe('corpus scheduler lambda', () => {
     });
     mockGetUrlMetadata(server);
     mockCreateApprovedCorpusItemOnce(server);
-
-    const captureExceptionSpy = jest
-      .spyOn(Sentry, 'captureException')
-      .mockImplementation();
 
     // overwrite with NEW_TAB_EN_GB scheduled surface which is not allowed (but dev, so should be scheduled)
     record.candidates[0].scheduled_corpus_item.scheduled_surface_guid =
@@ -394,10 +430,6 @@ describe('corpus scheduler lambda', () => {
     mockGetUrlMetadata(server);
     mockCreateApprovedCorpusItemOnce(server);
 
-    const captureExceptionSpy = jest
-      .spyOn(Sentry, 'captureException')
-      .mockImplementation();
-
     await processor(
       fakeEvent,
       null as unknown as Context,
@@ -411,10 +443,6 @@ describe('corpus scheduler lambda', () => {
     // returns an approved corpus item so only needs to be scheduled
     mockGetApprovedCorpusItemByUrl(server);
     mockCreateScheduledCorpusItemOnce(server);
-
-    const captureExceptionSpy = jest
-      .spyOn(Sentry, 'captureException')
-      .mockImplementation();
 
     await processor(
       fakeEvent,
