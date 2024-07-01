@@ -60,6 +60,7 @@ export async function updateApprovedItem(
   if (!data.externalId) {
     throw new UserInputError('externalId must be provided.');
   }
+
   return db.approvedItem.update({
     where: { externalId: data.externalId },
     data: {
