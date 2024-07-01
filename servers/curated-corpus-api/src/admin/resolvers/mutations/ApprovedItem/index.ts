@@ -334,7 +334,7 @@ export async function uploadApprovedItemImage(
  * Updates the grade value associated with the approved corpus item.
  *
  * @param parent
- * @param param1
+ * @param data
  * @param context
  * @returns ApprovedItem
  */
