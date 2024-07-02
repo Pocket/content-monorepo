@@ -1003,6 +1003,24 @@ input DeleteScheduledCorpusItemInput {
   actionScreen: ActionScreen
 }
 
+"""
+Input data for updating the grade of an Approved Item.
+"""
+input UpdateApprovedCorpusItemGradeInput {
+  """
+  Approved Item ID.
+  """
+  externalId: ID!
+  """
+  The quality grade associated with this CorpusItem.
+  """
+  grade: ApprovedItemGrade!
+  """
+  The UI screen where the approved corpus item is being graded from.
+  """
+  actionScreen: ActionScreen!
+}
+
 type Query {
   """
   Retrieves a paginated, filterable list of Approved Items.
@@ -1124,6 +1142,13 @@ type Mutation {
   Uploads an image to S3 for an Approved Item
   """
   uploadApprovedCorpusItemImage(data: Upload!): ApprovedCorpusImageUrl!
+
+  """
+  Updates the grade of an Approved Item
+  """
+  updateApprovedCorpusItemGrade(
+    data: UpdateApprovedCorpusItemGradeInput!
+  ): ApprovedCorpusItem!
 }
 
 """

@@ -25,6 +25,13 @@ export type UpdateApprovedCorpusItemApiInput = {
   actionScreen?: ActionScreen; // non-db, analytics only
 };
 
+// this maps to the UpdateApprovedCorpusItemGradeInput graph input
+export type UpdateApprovedCorpusItemGradeApiInput = {
+  externalId: string;
+  grade: ApprovedItemGrade;
+  actionScreen: ActionScreen; // non-db, analytics only
+};
+
 // type to map to the input coming from the graph mutation
 export type CreateScheduledItemApiInput = CreateScheduledItemInput & {
   reasons?: string; // non-db, analytics only
