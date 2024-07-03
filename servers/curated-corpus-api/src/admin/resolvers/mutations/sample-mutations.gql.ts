@@ -24,6 +24,17 @@ export const UPDATE_APPROVED_ITEM = gql`
   ${AdminCuratedItemData}
 `;
 
+export const UPDATE_APPROVED_ITEM_GRADE = gql`
+  mutation updateApprovedCorpusItemGrade(
+    $data: UpdateApprovedCorpusItemGradeInput!
+  ) {
+    updateApprovedCorpusItemGrade(data: $data) {
+      ...AdminCuratedItemData
+    }
+  }
+  ${AdminCuratedItemData}
+`;
+
 export const REJECT_APPROVED_ITEM = gql`
   mutation rejectApprovedItem($data: RejectApprovedCorpusItemInput!) {
     rejectApprovedCorpusItem(data: $data) {
