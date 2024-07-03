@@ -91,21 +91,21 @@ describe('validation', function () {
           await expect(
               validateScheduledDate(scheduledDate as string, timeZone, publishHour),
           ).rejects.toThrow(
-              'validateScheduledDate: cannot compute the time difference',
+              `validateScheduledDate (${timeZone}): cannot compute the time difference`,
           );
 
           // test for scheduledDate === null, expect to fail
           await expect(
               validateScheduledDate(null as unknown as string, timeZone, publishHour),
           ).rejects.toThrow(
-              'validateScheduledDate: cannot compute the time difference',
+              `validateScheduledDate (${timeZone}): cannot compute the time difference`,
           );
 
           // test for scheduledDate === undefined, expect to fail
           await expect(
               validateScheduledDate(undefined as unknown as string, timeZone, publishHour),
           ).rejects.toThrow(
-              'validateScheduledDate: cannot compute the time difference',
+              `validateScheduledDate (${timeZone}): cannot compute the time difference`,
           );
       });
       it(`should throw Error if candidate is scheduled for ${dayRange} less than ${minHours} hrs in advance for ${timeZone} time zone`, async () => {
@@ -123,7 +123,7 @@ describe('validation', function () {
               await expect(
                   validateScheduledDate(scheduledDate as string, timeZone, publishHour),
               ).rejects.toThrow(
-                  `validateScheduledDate: candidate scheduled for ${dayRange} needs to arrive minimum ${minHours} hours in advance`,
+                  `validateScheduledDate (${timeZone}): candidate scheduled for ${dayRange} needs to arrive minimum ${minHours} hours in advance`,
               );
           }
       });
@@ -145,7 +145,7 @@ describe('validation', function () {
           // scheduled date is set to 2024-01-28 (Sunday)
           // 17 hour diff, expected to fail as min time diff is 32 hours
           await expect(validateScheduledDate('2024-01-28', timeZone, publishHour)).rejects.toThrow(
-              'validateScheduledDate: candidate scheduled for Sunday needs to arrive minimum 32 hours in advance',
+              `validateScheduledDate (${timeZone}): candidate scheduled for Sunday needs to arrive minimum 32 hours in advance`,
           );
       });
       // EN_US test only
