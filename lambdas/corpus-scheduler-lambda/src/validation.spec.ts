@@ -6,11 +6,9 @@ import {
 import {
     createScheduledCandidate,
     currentMockTimeMondaySaturday,
-    currentMockTimeSundayMonday,
     currentMockTimeTuesdaySaturday,
     mockPocketImageCache,
     scheduledDateMonday,
-    scheduledDateSaturday,
     scheduledDateSunday
 } from './testHelpers';
 import {
