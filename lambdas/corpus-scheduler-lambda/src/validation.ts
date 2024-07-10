@@ -46,7 +46,7 @@ export const validateScheduledDate = async (
 
   if (!timeDifference) {
     throw new Error(
-      'validateScheduledDate: cannot compute the time difference',
+      `validateScheduledDate (${timeZone}): cannot compute the time difference`,
     );
   }
 
@@ -56,7 +56,7 @@ export const validateScheduledDate = async (
     if (scheduledDay === config.validation.ISO_SUNDAY) {
       if (timeDifference < config.validation.EN_US.SUNDAY_MIN_DIFF) {
         throw new Error(
-            `validateScheduledDate: candidate scheduled for Sunday needs to arrive minimum ${config.validation.EN_US.SUNDAY_MIN_DIFF} hours in advance`,
+            `validateScheduledDate (${timeZone}): candidate scheduled for Sunday needs to arrive minimum ${config.validation.EN_US.SUNDAY_MIN_DIFF} hours in advance`,
         );
       }
     }
@@ -64,7 +64,7 @@ export const validateScheduledDate = async (
     else {
       if (timeDifference < config.validation.EN_US.MON_SAT_MIN_DIFF) {
         throw new Error(
-            `validateScheduledDate: candidate scheduled for Monday - Saturday needs to arrive minimum ${config.validation.EN_US.MON_SAT_MIN_DIFF} hours in advance`,
+            `validateScheduledDate (${timeZone}): candidate scheduled for Monday - Saturday needs to arrive minimum ${config.validation.EN_US.MON_SAT_MIN_DIFF} hours in advance`,
         );
       }
     }
@@ -72,22 +72,11 @@ export const validateScheduledDate = async (
 
   // IF DE_DE
   else if(timeZone === config.validation.DE_DE.timeZone) {
-    // 4. If scheduled date is Sunday-Monday, min time diff is 12 hrs
-    if (scheduledDay === config.validation.ISO_SUNDAY || scheduledDay === config.validation.ISO_MONDAY) {
-      if (timeDifference < config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF) {
+      if (timeDifference < config.validation.DE_DE.MONDAY_SUNDAY_MIN_DIFF) {
         throw new Error(
-            `validateScheduledDate: candidate scheduled for Sunday - Monday needs to arrive minimum ${config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF} hours in advance`,
+            `validateScheduledDate (${timeZone}): candidate scheduled for Monday - Sunday needs to arrive minimum ${config.validation.DE_DE.MONDAY_SUNDAY_MIN_DIFF} hours in advance`,
         );
       }
-    }
-    // 5. else, scheduled date is for Tuesday - Saturday, min time diff is 14 hrs
-    else {
-      if (timeDifference < config.validation.DE_DE.TUESDAY_SATURDAY_MIN_DIFF) {
-        throw new Error(
-            `validateScheduledDate: candidate scheduled for Tuesday - Saturday needs to arrive minimum ${config.validation.DE_DE.TUESDAY_SATURDAY_MIN_DIFF} hours in advance`,
-        );
-      }
-    }
   }
 };
 /**

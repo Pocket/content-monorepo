@@ -6,11 +6,9 @@ import {
 import {
     createScheduledCandidate,
     currentMockTimeMondaySaturday,
-    currentMockTimeSundayMonday,
     currentMockTimeTuesdaySaturday,
     mockPocketImageCache,
     scheduledDateMonday,
-    scheduledDateSaturday,
     scheduledDateSunday
 } from './testHelpers';
 import {
@@ -42,20 +40,12 @@ describe('validation', function () {
       ],
       [
           config.validation.DE_DE.timeZone,
-          'Tuesday - Saturday',
-          config.validation.DE_DE.TUESDAY_SATURDAY_MIN_DIFF,
+          'Monday - Sunday',
+          config.validation.DE_DE.MONDAY_SUNDAY_MIN_DIFF,
           currentMockTimeTuesdaySaturday,
           scheduledDateMonday,
           9
       ],
-      [
-          config.validation.DE_DE.timeZone,
-          'Sunday - Monday',
-          config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF,
-          currentMockTimeSundayMonday,
-          scheduledDateSaturday,
-          9
-      ]
   ])('validateScheduledDate', (timeZone, dayRange, minHours, currentMockTimeDefault, scheduledTimeDefault, publishHour) => {
       // indicates if a test needs to be run based on condition
       const itif = (condition: boolean) => condition ? it : it.skip;
@@ -66,9 +56,6 @@ describe('validation', function () {
       let numberOfDaysRange = 7;
       if(timeZone === config.validation.DE_DE.timeZone && minHours === config.validation.EN_US.MON_SAT_MIN_DIFF) {
           numberOfDaysRange = 6;
-      }
-      if(timeZone === config.validation.DE_DE.timeZone && minHours === config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF) {
-          numberOfDaysRange = 3;
       }
       beforeEach(() => {
           currentMockTime = currentMockTimeDefault;
@@ -91,30 +78,27 @@ describe('validation', function () {
           await expect(
               validateScheduledDate(scheduledDate as string, timeZone, publishHour),
           ).rejects.toThrow(
-              'validateScheduledDate: cannot compute the time difference',
+              `validateScheduledDate (${timeZone}): cannot compute the time difference`,
           );
 
           // test for scheduledDate === null, expect to fail
           await expect(
               validateScheduledDate(null as unknown as string, timeZone, publishHour),
           ).rejects.toThrow(
-              'validateScheduledDate: cannot compute the time difference',
+              `validateScheduledDate (${timeZone}): cannot compute the time difference`,
           );
 
           // test for scheduledDate === undefined, expect to fail
           await expect(
               validateScheduledDate(undefined as unknown as string, timeZone, publishHour),
           ).rejects.toThrow(
-              'validateScheduledDate: cannot compute the time difference',
+              `validateScheduledDate (${timeZone}): cannot compute the time difference`,
           );
       });
       it(`should throw Error if candidate is scheduled for ${dayRange} less than ${minHours} hrs in advance for ${timeZone} time zone`, async () => {
           // should try scheduling on Sunday (scheduled for Monday) -> Friday (scheduled for Saturday) (EN_US) hrDiff=13
           // should try scheduling on Monday (scheduled for Tuesday) -> Friday (scheduled for Saturday) (DE_DE) hrDiff=13
-          // should try scheduling on Saturday (scheduled for Sunday) -> Sunday (scheduled for Monday) (DE_DE) hrDiff=11
-          // expected to fail as min time diff is 14 hours/12 hours
-          // let currentMockTime = currentMockTimeDefault;
-          // let scheduledTime = scheduledTimeDefault;
+          // expected to fail as min time diff is 14 hours for both time zones
           for (let i = 1; i < numberOfDaysRange; i++) {
               currentMockTime = currentMockTime.plus({days: 1}); // add 1 day to the current time
               Settings.now = () => currentMockTime.toMillis(); // make sure current time is mocked by settings
@@ -123,7 +107,7 @@ describe('validation', function () {
               await expect(
                   validateScheduledDate(scheduledDate as string, timeZone, publishHour),
               ).rejects.toThrow(
-                  `validateScheduledDate: candidate scheduled for ${dayRange} needs to arrive minimum ${minHours} hours in advance`,
+                  `validateScheduledDate (${timeZone}): candidate scheduled for ${dayRange} needs to arrive minimum ${minHours} hours in advance`,
               );
           }
       });
@@ -145,11 +129,11 @@ describe('validation', function () {
           // scheduled date is set to 2024-01-28 (Sunday)
           // 17 hour diff, expected to fail as min time diff is 32 hours
           await expect(validateScheduledDate('2024-01-28', timeZone, publishHour)).rejects.toThrow(
-              'validateScheduledDate: candidate scheduled for Sunday needs to arrive minimum 32 hours in advance',
+              `validateScheduledDate (${timeZone}): candidate scheduled for Sunday needs to arrive minimum ${config.validation.EN_US.SUNDAY_MIN_DIFF} hours in advance`,
           );
       });
       // EN_US test only
-      itif(isTimeZoneEnUS)(`should succeed if candidate is scheduled for Sunday at least 32 hours in advance for ${timeZone} time zone`, async () => {
+      itif(isTimeZoneEnUS)(`should succeed if candidate is scheduled for Sunday at least ${config.validation.EN_US.SUNDAY_MIN_DIFF} hours in advance for ${timeZone} time zone`, async () => {
           // set current time to 2024-01-26 4 PM (PST, CET) (Friday)
           const currentMockTime = DateTime.fromObject(
               {

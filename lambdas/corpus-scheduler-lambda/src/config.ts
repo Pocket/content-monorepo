@@ -31,8 +31,7 @@ const config = {
     DE_DE: {
       timeZone: 'Europe/Berlin',
       publishHour: 9,
-      SUNDAY_MONDAY_MIN_DIFF: 12, // Latest cutoff is noon (12 pm). Shown Saturday & Sunday afternoons. 24:00 - 12:00 = 12 hours
-      TUESDAY_SATURDAY_MIN_DIFF: 14, // Latest cutoff is 10 am. Shown Monday-Friday mornings. 24:00 - 10:00 = 14 hours
+      MONDAY_SUNDAY_MIN_DIFF: 14, // Latest cutoff is 10 am. Shown Monday-Sunday mornings. 24:00 - 10:00 = 14 hours
     }
   },
   aws: {
