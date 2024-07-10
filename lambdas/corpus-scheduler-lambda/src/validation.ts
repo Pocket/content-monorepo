@@ -112,8 +112,8 @@ export async function validateImageUrl(
 export async function validateCandidate(
     candidate: ScheduledCandidate,
 ): Promise<void> {
-  // // validate candidate input against ScheduledCandidate
-  // // this also validates if values are in enums
+  // validate candidate input against ScheduledCandidate
+  // this also validates if values are in enums
   assert<ScheduledCandidate>(candidate);
   // validate candidate scheduled date
   // if ENABLE_SCHEDULED_DATE_VALIDATION env var is true, validate the scheduled date
