@@ -47,19 +47,6 @@ export const currentMockTimeTuesdaySaturday  =
       {zone: config.validation.DE_DE.timeZone},
   );
 
-// Friday, December 29, 2023 22.00 DE
-export const currentMockTimeSundayMonday =
-    DateTime.fromObject(
-    {
-      year: 2023,
-      month: 12,
-      day: 29,
-      hour: 22,
-      minute: 0,
-      second: 0,
-    },
-    {zone: config.validation.DE_DE.timeZone},
-);
 
 // Sunday, December 31, 2023 3 AM EST
 export const scheduledDateSunday =
@@ -89,19 +76,6 @@ export const scheduledDateMonday =
     {zone: config.validation.DE_DE.timeZone},
 );
 
-// Saturday, December 30, 2023 9 AM DE
-export const scheduledDateSaturday =
-    DateTime.fromObject(
-        {
-          year: 2023,
-          month: 12,
-          day: 30,
-          hour: 9,
-          minute: 0,
-          second: 0,
-        },
-        {zone: config.validation.DE_DE.timeZone},
-    );
 export const defaultScheduledDate = DateTime.fromObject(
   {},
   {

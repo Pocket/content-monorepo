@@ -14,9 +14,9 @@ import {ScheduledSurfacesEnum} from "content-common";
  * @param publishHour the time when content gets published in specific time zone. Used in the base DateTime to calculate time diff.
  */
 export const validateScheduledDate = async (
-  scheduledDate: string,
-  timeZone: string,
-  publishHour: number
+    scheduledDate: string,
+    timeZone: string,
+    publishHour: number
 ): Promise<void> => {
   // get the DateTime from an ISO scheduled date string in 12 AM of specified timezone.
   // Convert to appropriate hour:
@@ -29,10 +29,10 @@ export const validateScheduledDate = async (
 
   // 1. get the current date time for specified time zone
   const currentTime = DateTime.fromObject(
-    {},
-    {
-      zone: timeZone,
-    },
+      {},
+      {
+        zone: timeZone,
+      },
   ).toISO();
 
   // 2. get the day # of the week for the scheduled date using weekday func from DateTime
@@ -40,13 +40,13 @@ export const validateScheduledDate = async (
 
   // 3. Calculate the time difference between current date & scheduled date in hours
   const timeDifference = Interval.fromDateTimes(
-    DateTime.fromISO(currentTime!),
-    isoScheduledDateTime,
+      DateTime.fromISO(currentTime!),
+      isoScheduledDateTime,
   ).length('hours');
 
   if (!timeDifference) {
     throw new Error(
-      `validateScheduledDate (${timeZone}): cannot compute the time difference`,
+        `validateScheduledDate (${timeZone}): cannot compute the time difference`,
     );
   }
 
@@ -72,21 +72,10 @@ export const validateScheduledDate = async (
 
   // IF DE_DE
   else if(timeZone === config.validation.DE_DE.timeZone) {
-    // 4. If scheduled date is Sunday-Monday, min time diff is 12 hrs
-    if (scheduledDay === config.validation.ISO_SUNDAY || scheduledDay === config.validation.ISO_MONDAY) {
-      if (timeDifference < config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF) {
-        throw new Error(
-            `validateScheduledDate (${timeZone}): candidate scheduled for Sunday - Monday needs to arrive minimum ${config.validation.DE_DE.SUNDAY_MONDAY_MIN_DIFF} hours in advance`,
-        );
-      }
-    }
-    // 5. else, scheduled date is for Tuesday - Saturday, min time diff is 14 hrs
-    else {
-      if (timeDifference < config.validation.DE_DE.TUESDAY_SATURDAY_MIN_DIFF) {
-        throw new Error(
-            `validateScheduledDate (${timeZone}): candidate scheduled for Tuesday - Saturday needs to arrive minimum ${config.validation.DE_DE.TUESDAY_SATURDAY_MIN_DIFF} hours in advance`,
-        );
-      }
+    if (timeDifference < config.validation.DE_DE.MONDAY_SUNDAY_MIN_DIFF) {
+      throw new Error(
+          `validateScheduledDate (${timeZone}): candidate scheduled for Monday - Sunday needs to arrive minimum ${config.validation.DE_DE.MONDAY_SUNDAY_MIN_DIFF} hours in advance`,
+      );
     }
   }
 };
@@ -96,7 +85,7 @@ export const validateScheduledDate = async (
  * @returs string or null
  */
 export async function validateImageUrl(
-  imageUrl: string,
+    imageUrl: string,
 ): Promise<string | null> {
   if (!imageUrl) {
     return null;
@@ -121,7 +110,7 @@ export async function validateImageUrl(
  * @param candidate ScheduledCandidate received from Metaflow
  */
 export async function validateCandidate(
-  candidate: ScheduledCandidate,
+    candidate: ScheduledCandidate,
 ): Promise<void> {
   // // validate candidate input against ScheduledCandidate
   // // this also validates if values are in enums
