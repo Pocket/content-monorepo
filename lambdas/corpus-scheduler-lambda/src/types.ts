@@ -31,7 +31,7 @@ export interface ScheduledCorpusItem {
   authors?: string[];
 }
 
-export const allowedScheduledSurfaces: string[] = ['NEW_TAB_EN_US'];
+export const allowedScheduledSurfaces: string[] = ['NEW_TAB_EN_US', 'NEW_TAB_DE_DE'];
 
 export const pocketImageCache =
   'https://pocket-image-cache.com/x/filters:format(jpeg):quality(100):no_upscale():strip_exif()/';
