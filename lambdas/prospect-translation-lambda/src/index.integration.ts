@@ -4,7 +4,7 @@ import { processor } from './';
 import {
   getGoodSnowplowEvents,
   parseSnowplowData,
-  waitForSnowplowEvents
+  waitForSnowplowEvents,
 } from 'content-common/snowplow/test-helpers';
 import { SnowplowProspect } from 'content-common';
 
@@ -34,8 +34,8 @@ describe('prospect api translation lambda entry function', () => {
 
   it('emits a Snowplow event if prospect is successfully inserted into dynamo', async () => {
     const expectedUrls = [
-        'https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all',
-      'https://getpocket.com/explore/item/my-discomfort-with-comfort-food'
+      'https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all',
+      'https://getpocket.com/explore/item/my-discomfort-with-comfort-food',
     ];
     const expectedPredictedTopics = ['ENTERTAINMENT', 'FOOD'];
     const fakePayload = {
@@ -54,9 +54,9 @@ describe('prospect api translation lambda entry function', () => {
           md5OfBody: 'ab6181399b03008ffaada54b68c77574',
           eventSource: 'aws:sqs',
           eventSourceARN:
-              'arn:aws:sqs:us-east-1:996905175585:ProspectAPI-Prod-Sqs-Translation-Queue',
+            'arn:aws:sqs:us-east-1:996905175585:ProspectAPI-Prod-Sqs-Translation-Queue',
           awsRegion: 'us-east-1',
-          body: `{"version":"0","id":"ab02d85b-4cb6-9de9-b549-b572166b278f","detail-type":"prospect-generation","source":"prospect-events","account":"996905175585","time":"2024-04-16T00:05:59Z","region":"us-east-1","resources":[],"detail":{"id":"c71504d1-f14f-4181-a654-730d5855ec48","version":3,"candidates":[{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"f920104e-bd7e-5a19-94e3-767c5f30e073","url":"https://getpocket.com/explore/item/my-discomfort-with-comfort-food","prospect_source":"SYNDICATED_NEW","save_count":0,"predicted_topic":"FOOD","rank":1,"data_source":"prospect"},{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"9c3d7650-e331-5926-9be2-5faaa0467217","url":"https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all","prospect_source":"SYNDICATED_NEW","save_count":0,"predicted_topic":"ENTERTAINMENT","rank":2,"data_source":"prospect"}]}}`,
+          body: `{"version":"0","id":"ab02d85b-4cb6-9de9-b549-b572166b278f","detail-type":"prospect-generation","source":"prospect-events","account":"996905175585","time":"2024-04-16T00:05:59Z","region":"us-east-1","resources":[],"detail":{"id":"c71504d1-f14f-4181-a654-730d5855ec48","version":3,"candidates":[{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"f920104e-bd7e-5a19-94e3-767c5f30e073","url":"https://getpocket.com/explore/item/my-discomfort-with-comfort-food","prospect_source":"RECOMMENDED","save_count":0,"predicted_topic":"FOOD","rank":1,"data_source":"prospect"},{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"9c3d7650-e331-5926-9be2-5faaa0467217","url":"https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all","prospect_source":"RECOMMENDED","save_count":0,"predicted_topic":"ENTERTAINMENT","rank":2,"data_source":"prospect"}]}}`,
         },
       ],
     };
@@ -71,15 +71,20 @@ describe('prospect api translation lambda entry function', () => {
 
     // Check that the right Snowplow entity was included with the event.
     const goodEvents = await getGoodSnowplowEvents();
-    for(let i=0; i < 2; i++) {
+    for (let i = 0; i < 2; i++) {
       const snowplowContext = parseSnowplowData(
-          goodEvents[i].rawEvent.parameters.cx,
+        goodEvents[i].rawEvent.parameters.cx,
       );
-      const snowplowProspectEntity = snowplowContext.data[0].data as SnowplowProspect;
+      const snowplowProspectEntity = snowplowContext.data[0]
+        .data as SnowplowProspect;
       expect(expectedUrls.includes(snowplowProspectEntity.url)).toBeTruthy();
-      expect(expectedPredictedTopics.includes(snowplowProspectEntity.features.predicted_topic)).toBeTruthy();
+      expect(
+        expectedPredictedTopics.includes(
+          snowplowProspectEntity.features.predicted_topic,
+        ),
+      ).toBeTruthy();
     }
-  })
+  });
   it('gets correct counts when processing valid JSON', async () => {
     const fakePayload = {
       Records: [
@@ -99,7 +104,7 @@ describe('prospect api translation lambda entry function', () => {
           eventSourceARN:
             'arn:aws:sqs:us-east-1:996905175585:ProspectAPI-Prod-Sqs-Translation-Queue',
           awsRegion: 'us-east-1',
-          body: '{"version":"0","id":"ab02d85b-4cb6-9de9-b549-b572166b278f","detail-type":"prospect-generation","source":"prospect-events","account":"996905175585","time":"2024-04-16T00:05:59Z","region":"us-east-1","resources":[],"detail":{"id":"c71504d1-f14f-4181-a654-730d5855ec48","version":3,"candidates":[{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"f920104e-bd7e-5a19-94e3-767c5f30e073","url":"https://getpocket.com/explore/item/my-discomfort-with-comfort-food","prospect_source":"SYNDICATED_NEW","save_count":0,"predicted_topic":"FOOD","rank":1,"data_source":"prospect"},{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"9c3d7650-e331-5926-9be2-5faaa0467217","url":"https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all","prospect_source":"SYNDICATED_NEW","save_count":0,"predicted_topic":"ENTERTAINMENT","rank":2,"data_source":"prospect"}]}}',
+          body: '{"version":"0","id":"ab02d85b-4cb6-9de9-b549-b572166b278f","detail-type":"prospect-generation","source":"prospect-events","account":"996905175585","time":"2024-04-16T00:05:59Z","region":"us-east-1","resources":[],"detail":{"id":"c71504d1-f14f-4181-a654-730d5855ec48","version":3,"candidates":[{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"f920104e-bd7e-5a19-94e3-767c5f30e073","url":"https://getpocket.com/explore/item/my-discomfort-with-comfort-food","prospect_source":"RECOMMENDED","save_count":0,"predicted_topic":"FOOD","rank":1,"data_source":"prospect"},{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"9c3d7650-e331-5926-9be2-5faaa0467217","url":"https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all","prospect_source":"RECOMMENDED","save_count":0,"predicted_topic":"ENTERTAINMENT","rank":2,"data_source":"prospect"}]}}',
         },
       ],
     };
@@ -132,7 +137,7 @@ describe('prospect api translation lambda entry function', () => {
           eventSourceARN:
             'arn:aws:sqs:us-east-1:996905175585:ProspectAPI-Prod-Sqs-Translation-Queue',
           awsRegion: 'us-east-1',
-          body: '{"version":"0","id":"ab02d85b-4cb6-9de9-b549-b572166b278f","detail-type":"prospect-generation","source":"prospect-events","account":"996905175585","time":"2024-04-16T00:05:59Z","region":"us-east-1","resources":[],"detail":{"id":"c71504d1-f14f-4181-a654-730d5855ec48","version":3,"candidates":[{"scheduled_surface_typo":"NEW_TAB_EN_US","prospect_id":"f920104e-bd7e-5a19-94e3-767c5f30e073","url":"https://getpocket.com/explore/item/my-discomfort-with-comfort-food","prospect_source":"SYNDICATED_NEW","save_count":0,"predicted_topic":"FOOD","rank":1,"data_source":"prospect"},{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"9c3d7650-e331-5926-9be2-5faaa0467217","url":"https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all","prospect_source":"SYNDICATED_NEW","save_count":0,"predicted_topic":"ENTERTAINMENT","rank":2,"data_source":"prospect"}]}}',
+          body: '{"version":"0","id":"ab02d85b-4cb6-9de9-b549-b572166b278f","detail-type":"prospect-generation","source":"prospect-events","account":"996905175585","time":"2024-04-16T00:05:59Z","region":"us-east-1","resources":[],"detail":{"id":"c71504d1-f14f-4181-a654-730d5855ec48","version":3,"candidates":[{"scheduled_surface_typo":"NEW_TAB_EN_US","prospect_id":"f920104e-bd7e-5a19-94e3-767c5f30e073","url":"https://getpocket.com/explore/item/my-discomfort-with-comfort-food","prospect_source":"RECOMMENDED","save_count":0,"predicted_topic":"FOOD","rank":1,"data_source":"prospect"},{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"9c3d7650-e331-5926-9be2-5faaa0467217","url":"https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all","prospect_source":"RECOMMENDED","save_count":0,"predicted_topic":"ENTERTAINMENT","rank":2,"data_source":"prospect"}]}}',
         },
       ],
     };

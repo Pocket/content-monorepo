@@ -382,7 +382,7 @@ describe('queries integration tests', () => {
           variables: {
             filters: {
               scheduledSurfaceGuid: 'NEW_TAB_DE_DE',
-              prospectType: ProspectType.SYNDICATED_NEW,
+              prospectType: ProspectType.RECOMMENDED,
             },
           },
         });
@@ -394,7 +394,7 @@ describe('queries integration tests', () => {
       // a specific index of a possibly undefined array
 
       expect(result?.body.errors?.[0].message).toEqual(
-        'SYNDICATED_NEW is not a valid prospect type for scheduled surface New Tab (de-DE)',
+        'RECOMMENDED is not a valid prospect type for scheduled surface New Tab (de-DE)',
       );
     });
     it('should throw an error if the user does not have the required auth group for a given scheduled surface', async () => {
@@ -413,7 +413,7 @@ describe('queries integration tests', () => {
           variables: {
             filters: {
               scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-              prospectType: ProspectType.SYNDICATED_NEW,
+              prospectType: ProspectType.RECOMMENDED,
             },
           },
         });
@@ -493,7 +493,7 @@ describe('mutations integration tests', () => {
     it('should updated a prospect as curated', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
+        ProspectType.RECOMMENDED,
         false,
       );
 
@@ -523,7 +523,7 @@ describe('mutations integration tests', () => {
     it('should return all properties of an updated prospect', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
+        ProspectType.RECOMMENDED,
         false,
       );
 
@@ -559,7 +559,7 @@ describe('mutations integration tests', () => {
     it('should update prospect if the user has the required auth group for a given scheduled surface', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
+        ProspectType.RECOMMENDED,
         false,
       );
 
@@ -588,7 +588,7 @@ describe('mutations integration tests', () => {
     it('should throw an error if the user does not have the required auth group for a given scheduled surface', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
+        ProspectType.RECOMMENDED,
         false,
       );
 
@@ -628,7 +628,7 @@ describe('mutations integration tests', () => {
     it('should update a prospect as curated without any reason', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
+        ProspectType.RECOMMENDED,
         false,
       );
 
@@ -660,7 +660,7 @@ describe('mutations integration tests', () => {
     it('should update a prospect as curated with a single status reason and no comment', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
+        ProspectType.RECOMMENDED,
         false,
       );
 
@@ -693,7 +693,7 @@ describe('mutations integration tests', () => {
     it('should update a prospect as curated with multiple status reasons and comment', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
+        ProspectType.RECOMMENDED,
         false,
       );
 
@@ -727,7 +727,7 @@ describe('mutations integration tests', () => {
     it('should return all properties of a removed prospect', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
+        ProspectType.RECOMMENDED,
         false,
       );
 
@@ -766,7 +766,7 @@ describe('mutations integration tests', () => {
     it('should update prospect if the user has the required auth group for a given scheduled surface', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
+        ProspectType.RECOMMENDED,
         false,
       );
 
@@ -799,7 +799,7 @@ describe('mutations integration tests', () => {
     it('should throw an error if the user does not have the required auth group for a given scheduled surface', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',
-        ProspectType.SYNDICATED_NEW,
+        ProspectType.RECOMMENDED,
         false,
       );
 

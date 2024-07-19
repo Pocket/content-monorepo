@@ -58,7 +58,7 @@ describe('lib', () => {
   describe('isValidProspectType', () => {
     it('should return true for a valid prospect type', () => {
       expect(
-        isValidProspectType('NEW_TAB_EN_US', ProspectType.SYNDICATED_NEW),
+        isValidProspectType('NEW_TAB_EN_US', ProspectType.RECOMMENDED),
       ).toBeTruthy();
 
       expect(
@@ -68,7 +68,7 @@ describe('lib', () => {
 
     it('should return false for an invalid prospect type', () => {
       expect(
-        isValidProspectType('NEW_TAB_DE_DE', ProspectType.SYNDICATED_NEW),
+        isValidProspectType('NEW_TAB_DE_DE', ProspectType.RECOMMENDED),
       ).toBeFalsy();
     });
   });
@@ -146,7 +146,7 @@ describe('lib', () => {
         id: faker.string.uuid(),
         prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-        prospectType: ProspectType.SYNDICATED_NEW,
+        prospectType: ProspectType.RECOMMENDED,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
@@ -158,7 +158,7 @@ describe('lib', () => {
         id: faker.string.uuid(),
         prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-        prospectType: ProspectType.SYNDICATED_NEW,
+        prospectType: ProspectType.RECOMMENDED,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
@@ -178,9 +178,9 @@ describe('lib', () => {
       expect(result.COUNTS[1].rank).toEqual(20);
       expect(result.COUNTS[2].rank).toEqual(10);
 
-      expect(result.SYNDICATED_NEW.length).toEqual(2);
-      expect(result.SYNDICATED_NEW[0].rank).toEqual(20);
-      expect(result.SYNDICATED_NEW[1].rank).toEqual(10);
+      expect(result.RECOMMENDED.length).toEqual(2);
+      expect(result.RECOMMENDED[0].rank).toEqual(20);
+      expect(result.RECOMMENDED[1].rank).toEqual(10);
     });
   });
 
@@ -241,7 +241,7 @@ describe('lib', () => {
         id: faker.string.uuid(),
         prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-        prospectType: ProspectType.SYNDICATED_NEW,
+        prospectType: ProspectType.RECOMMENDED,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
@@ -253,7 +253,7 @@ describe('lib', () => {
         id: faker.string.uuid(),
         prospectId: faker.string.uuid(),
         scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-        prospectType: ProspectType.SYNDICATED_NEW,
+        prospectType: ProspectType.RECOMMENDED,
         topic: faker.helpers.arrayElement(topicsArray),
         url: faker.internet.url(),
         createdAt: Math.floor(faker.date.recent().valueOf() / 1000),
@@ -268,9 +268,9 @@ describe('lib', () => {
       const countsProspects = result.filter((item) => {
         return item.prospectType === ProspectType.COUNTS;
       });
-      // pull out the SYNDICATED_NEW prospect type prospects
+      // pull out the RECOMMENDED prospect type prospects
       const syndicatedProspects = result.filter((item) => {
-        return item.prospectType === ProspectType.SYNDICATED_NEW;
+        return item.prospectType === ProspectType.RECOMMENDED;
       });
 
       // pull out the TIMESPENT prospect type prospects
@@ -284,7 +284,7 @@ describe('lib', () => {
       // the two COUNTS prospects should be in ascending order based on their rank
       expect(countsProspects[0].rank).toBeLessThan(countsProspects[1].rank);
 
-      // the two SYNDICATED_NEW prospects should be in ascending order based on their rank
+      // the two RECOMMENDED prospects should be in ascending order based on their rank
       expect(syndicatedProspects[0].rank).toBeLessThan(
         syndicatedProspects[1].rank,
       );
@@ -324,7 +324,7 @@ describe('lib', () => {
         prospects.push({
           ...baseProspect,
           prospectType:
-            i % 2 === 0 ? ProspectType.COUNTS : ProspectType.SYNDICATED_NEW,
+            i % 2 === 0 ? ProspectType.COUNTS : ProspectType.RECOMMENDED,
           rank: Math.floor(Math.random() * 100),
         });
       }
