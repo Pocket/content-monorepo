@@ -122,8 +122,6 @@ by the Curation Admin Tools frontend to filter prospects.
 enum ProspectType {
   TIMESPENT
   COUNTS
-  SYNDICATED_NEW
-  SYNDICATED_RERUN
   DOMAIN_ALLOWLIST
   TOP_SAVED
   RECOMMENDED

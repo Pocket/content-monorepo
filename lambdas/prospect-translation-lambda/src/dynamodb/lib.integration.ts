@@ -139,8 +139,8 @@ describe('dynamodb', () => {
         await insertProspect(dbClient, prospect);
       }
 
-      // insert some EN_US/SYNDICATED_NEW
-      prospect.prospectType = ProspectType.SYNDICATED_NEW;
+      // insert some EN_US/RECOMMENDED
+      prospect.prospectType = ProspectType.RECOMMENDED;
 
       for (let i = 0; i < 5; i++) {
         prospect.id += 1;
@@ -160,7 +160,7 @@ describe('dynamodb', () => {
       );
 
       // only half of the EN_US/TIMESPENT prospects should be returned, as the
-      // other half are too new. none of the 5 EN_US/SYNDICATED_NEW prospects
+      // other half are too new. none of the 5 EN_US/RECOMMENDED prospects
       // should be returned
       expect(res.length).toEqual(6);
 
@@ -225,7 +225,7 @@ describe('dynamodb', () => {
       // ids need to be unique! set this before the for loop
       prospect.id = 'shouldBeRetained';
 
-      // these should all be EN_US/SYNDICATED_NEW
+      // these should all be EN_US/RECOMMENDED
       for (let i = 0; i < 12; i++) {
         // half the prospects should have been just added, the other half
         // from a previous metaflow run / SQS batch
@@ -242,7 +242,7 @@ describe('dynamodb', () => {
             id: prospect.id + i,
             // change the prospectType - this should mean they won't be
             // deleted
-            prospectType: ProspectType.SYNDICATED_NEW,
+            prospectType: ProspectType.RECOMMENDED,
             createdAt: prospectCreatedAt,
           }),
         );

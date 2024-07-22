@@ -6,11 +6,12 @@ import {
   ProspectType,
   ProspectRunDetails,
   Topics,
-  UrlMetadata
+  UrlMetadata,
 } from 'content-common';
 
 import {
-  convertSqsProspectToProspect, getProspectRunDetailsFromMessageJson,
+  convertSqsProspectToProspect,
+  getProspectRunDetailsFromMessageJson,
   getProspectsFromMessageJson,
   hasValidPredictedTopic,
   hasValidProspectId,
@@ -38,7 +39,7 @@ describe('lib', () => {
       prospect_id: '123abc',
       scheduled_surface_guid: 'NEW_TAB_EN_US',
       predicted_topic: Topics.ENTERTAINMENT,
-      prospect_source: ProspectType.SYNDICATED_NEW,
+      prospect_source: ProspectType.RECOMMENDED,
       url: 'https://getpocket.com',
       save_count: 1680,
       rank: 1680,
@@ -226,7 +227,7 @@ describe('lib', () => {
     });
 
     it('should return false if the prospect_source is not valid for the given scheduled surface', () => {
-      // de-DE does not have a SYNDICATED_NEW prospectType
+      // de-DE does not have a RECOMMENDED prospectType
       validSqsProspect.scheduled_surface_guid = 'NEW_TAB_DE_DE';
 
       expect(hasValidProspectSource(validSqsProspect)).toBeFalsy();
@@ -336,7 +337,7 @@ describe('lib', () => {
       urlMetadata.language = 'de';
 
       expect(expected).toEqual(
-          hydrateProspectMetadata(prospectToHydrate, urlMetadata),
+        hydrateProspectMetadata(prospectToHydrate, urlMetadata),
       );
     });
 
@@ -364,16 +365,18 @@ describe('lib', () => {
 
     it('should hydrate the prospect with the url meta data fields & apply excerpt German quotes/dash formatting if candidate is DE', () => {
       // German quotes / dash formatting expected
-      expected.excerpt = '„Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus „Tote Mädchen lügen nicht” und „Élite” – das musst du darüber wissen';
+      expected.excerpt =
+        '„Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus „Tote Mädchen lügen nicht” und „Élite” – das musst du darüber wissen';
       expected.language = 'de';
       expected.title = 'test-title';
 
-      urlMetadata.excerpt = '«Nicht eine mehr»: Diese spanische Netflix-Serie ist ein Mix aus “Tote Mädchen lügen nicht” und »Élite« – das musst du darüber wissen';
+      urlMetadata.excerpt =
+        '«Nicht eine mehr»: Diese spanische Netflix-Serie ist ein Mix aus “Tote Mädchen lügen nicht” und »Élite« – das musst du darüber wissen';
       urlMetadata.language = 'de';
       urlMetadata.title = 'test-title';
 
       expect(expected).toEqual(
-          hydrateProspectMetadata(prospectToHydrate, urlMetadata),
+        hydrateProspectMetadata(prospectToHydrate, urlMetadata),
       );
     });
 
@@ -421,7 +424,9 @@ describe('lib', () => {
         expires_at: 1716488367,
       };
 
-      expect(getProspectRunDetailsFromMessageJson(json)).toEqual(expectedRunDetails);
+      expect(getProspectRunDetailsFromMessageJson(json)).toEqual(
+        expectedRunDetails,
+      );
     });
 
     it('should return an empty obj and call Sentry if no detail obj found in JSON', () => {
@@ -432,7 +437,7 @@ describe('lib', () => {
       expect(getProspectRunDetailsFromMessageJson(json)).toEqual({});
 
       expect(captureExceptionSpy).toHaveBeenCalledWith(
-          'no `detail` property exists on the SQS JSON.',
+        'no `detail` property exists on the SQS JSON.',
       );
     });
 
