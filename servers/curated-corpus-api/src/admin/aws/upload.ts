@@ -6,7 +6,6 @@ import { Upload as AWSUpload } from '@aws-sdk/lib-storage';
 import config from '../../config';
 import Upload from 'graphql-upload/Upload.js';
 import { ApprovedItemS3ImageUrl } from '../../shared/types';
-import { getFileUploadFromUrl } from './utils';
 
 /**
  * @param s3
