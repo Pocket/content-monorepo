@@ -6,7 +6,6 @@ import { Upload as AWSUpload } from '@aws-sdk/lib-storage';
 import config from '../../config';
 import Upload from 'graphql-upload/Upload.js';
 import { ApprovedItemS3ImageUrl } from '../../shared/types';
-import { getFileUploadFromUrl } from './utils';
 
 /**
  * @param s3
@@ -14,7 +13,7 @@ import { getFileUploadFromUrl } from './utils';
  */
 export async function uploadImageToS3(
   s3: S3Client,
-  image: Upload
+  image: Upload,
 ): Promise<ApprovedItemS3ImageUrl> {
   const { mimetype, createReadStream } = image;
   const stream = createReadStream();
@@ -42,17 +41,4 @@ export async function uploadImageToS3(
         ? response.Location
         : `${config.aws.s3.path}${key}`,
   };
-}
-
-/**
- * Get image content from URL and upload to s3
- * @param s3
- * @param url
- */
-export async function uploadImageToS3FromUrl(
-  s3: S3Client,
-  url: string
-): Promise<ApprovedItemS3ImageUrl> {
-  const image = await getFileUploadFromUrl(url);
-  return uploadImageToS3(s3, image);
 }
