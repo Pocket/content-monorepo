@@ -15,8 +15,8 @@ const snowplowEndpoint = isDev
   : 'd.getpocket.com';
 
 const rds = {
-  minCapacity: isDev ? 1 : 8,
-  maxCapacity: isDev ? 1 : undefined,
+  minCapacity: isDev ? 1 : 64,
+  maxCapacity: isDev ? 1 : 256, // max allowed by AWS for Aurora Serverless V1
 };
 
 export const config = {
