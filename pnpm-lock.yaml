@@ -501,9 +501,6 @@ importers:
       '@pocket-tools/apollo-utils':
         specifier: 3.5.0
         version: 3.5.0
-      '@pocket-tools/tracing':
-        specifier: 1.3.15
-        version: 1.3.15
       '@pocket-tools/ts-logger':
         specifier: ^1.6.0
         version: 1.8.0
@@ -7105,7 +7102,7 @@ packages:
     dependencies:
       semver: 7.6.2
       shelljs: 0.8.5
-      typescript: 5.6.0-dev.20240723
+      typescript: 5.6.0-dev.20240726
     dev: false
 
   /drange@1.1.1:
@@ -12665,8 +12662,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /typescript@5.6.0-dev.20240723:
-    resolution: {integrity: sha512-IciIh6EUuMxUQ9OvnmBtrkJwuVD9zWhl9smsA+5yYz9Zpodi5qs4qhp4KldiUj86dRGREtT3+10PpUX7RMm02Q==}
+  /typescript@5.6.0-dev.20240726:
+    resolution: {integrity: sha512-/KHI7WR6NxpuU91TJcSU18tTIIzpDzu5SWQBCt2yS09dGF6Hoys85rdggtSXlHybfTZ5ZT9B2sU7DwNaoW04Pw==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: false
