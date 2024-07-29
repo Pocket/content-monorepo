@@ -270,7 +270,8 @@ class CuratedCorpusAPI extends TerraformStack {
             },
             {
               name: 'LOG_LEVEL',
-              value: 'debug',
+              // do not log http, graphql, or debug events in production
+              value: config.environment === 'Prod' ? 'info' : 'debug',
             },
           ],
           logGroup: this.createCustomLogGroup('app'),
