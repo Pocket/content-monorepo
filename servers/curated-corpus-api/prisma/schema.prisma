@@ -84,6 +84,18 @@ model ScheduledItem {
   @@index([scheduledSurfaceGuid])
 }
 
+model ScheduleReview {
+  id                   Int        @id @default(autoincrement())
+  scheduledSurfaceGuid String     @db.VarChar(50)
+  scheduledDate        DateTime   @db.Date
+  reviewedAt           DateTime   @db.Date
+  reviewedBy           String     @db.VarChar(255)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  @@unique([scheduledSurfaceGuid, scheduledDate], name: "ScheduledSurfaceDate")
+}
+
 enum CuratedStatus {
   RECOMMENDATION
   CORPUS
