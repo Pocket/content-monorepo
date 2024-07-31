@@ -61,6 +61,12 @@ export const GET_SCHEDULED_ITEMS = gql`
       collectionCount
       syndicatedCount
       scheduledDate
+      scheduleReview {
+        scheduledDate
+        scheduledSurfaceGuid
+        reviewedBy
+        reviewedAt
+      }
       items {
         ...AdminScheduledItemData
       }

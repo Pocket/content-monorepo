@@ -496,9 +496,35 @@ type ScheduledCorpusItemsResult {
   """
   totalCount: Int!
   """
+  The human review status of the schedule for the given scheduledSurfaceGuid & scheduledDate.
+  """
+  scheduleReview: ScheduleReview
+  """
   An array of items for a given Scheduled Surface
   """
   items: [ScheduledCorpusItem!]!
+}
+
+"""
+Contains information about the human curator who reviewed the schedule for a given date and scheduled surface.
+"""
+type ScheduleReview {
+  """
+  The GUID of the scheduledSurface that was reviewed.
+  """
+  scheduledSurfaceGuid: ID!
+  """
+  The date of the schedule that was reviewed, in YYYY-MM-DD format.
+  """
+  scheduledDate: Date!
+  """
+  A single sign-on user identifier of the user who reviewed the schedule.
+  """
+  reviewedBy: String!
+  """
+  A Unix timestamp of when the scheduled was last reviewed.
+  """
+  reviewedAt: Date!
 }
 
 """

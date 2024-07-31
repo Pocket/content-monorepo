@@ -49,6 +49,16 @@ describe('queries: ScheduledCorpusItem (getScheduledCorpusItems)', () => {
       });
     }
 
+    // Create a schedule review for the first date only (2050-01-01)
+    await db.scheduleReview.create({
+      data: {
+        scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+        scheduledDate: new Date('2050-01-01').toISOString(),
+        reviewedAt: new Date(2050, 0, 1, 10, 15, 30, 0).toISOString(),
+        reviewedBy: 'TrinityRodman',
+      },
+    });
+
     // Create more approved items for a different scheduled date
     for (let i = 0; i < 10; i++) {
       const approvedItem = await createApprovedItemHelper(db, {
@@ -114,13 +124,20 @@ describe('queries: ScheduledCorpusItem (getScheduledCorpusItems)', () => {
 
     const resultArray = result.body.data?.getScheduledCorpusItems;
 
+    // We should have two groups of items (one for each date in the range)
+    expect(resultArray.length).toEqual(2);
+
     // Check the first group of scheduled items
     expect(resultArray[0].collectionCount).toBeDefined();
     expect(resultArray[0].syndicatedCount).toBeDefined();
     expect(resultArray[0].totalCount).toBeDefined();
     expect(resultArray[0].scheduledDate).toBeDefined();
+
     // we don't have the source property on the first batch of test items
     expect(resultArray[0].source).not.toBeDefined();
+
+    // we should not have a schedule review for the first set of items (which is 2050-12-31)
+    expect(resultArray[0].scheduleReview).toBeFalsy();
 
     // Check the first item in the first group
     const firstItem = resultArray[0].items[0];
@@ -141,6 +158,16 @@ describe('queries: ScheduledCorpusItem (getScheduledCorpusItems)', () => {
     expect(firstItem.approvedItem.excerpt).toBeDefined();
     expect(firstItem.approvedItem.imageUrl).toBeDefined();
     expect(firstItem.approvedItem.createdBy).toBeDefined();
+
+    // we should have a schedule review for the second set of items (2050-01-01)
+    const scheduleReview = resultArray[1].scheduleReview;
+
+    expect(scheduleReview).not.toBeFalsy();
+
+    expect(scheduleReview.scheduledSurfaceGuid).toBeDefined();
+    expect(scheduleReview.scheduledDate).toBeDefined();
+    expect(scheduleReview.reviewedAt).toBeDefined();
+    expect(scheduleReview.reviewedBy).toBeDefined();
   });
 
   it('should return all scheduled items with half being MANUAL and half being ML', async () => {

@@ -3,6 +3,7 @@ import {
   ApprovedItemGrade,
   CuratedStatus,
   ScheduledItem as ScheduledItemModel,
+  ScheduleReview,
 } from '.prisma/client';
 import {
   ApprovedItemAuthor,
@@ -85,6 +86,7 @@ export type ScheduledItemsResult = {
   collectionCount: number;
   syndicatedCount: number;
   totalCount: number;
+  scheduleReview?: ScheduleReview;
   items: ScheduledItem[];
 };
 
