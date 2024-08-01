@@ -19,14 +19,14 @@ import { UserInputError } from '@pocket-tools/apollo-utils';
  */
 export async function getScheduledItems(
   db: PrismaClient,
-  filters: ScheduledItemFilterInput
+  filters: ScheduledItemFilterInput,
 ): Promise<ScheduledItemsResult[]> {
   const { scheduledSurfaceGuid, startDate, endDate } = filters;
 
   // validate scheduledSurfaceGuid
   if (!scheduledSurfaceAllowedValues.includes(scheduledSurfaceGuid)) {
     throw new UserInputError(
-      `${scheduledSurfaceGuid} is not a valid Scheduled Surface GUID`
+      `${scheduledSurfaceGuid} is not a valid Scheduled Surface GUID`,
     );
   }
 
@@ -53,6 +53,19 @@ export async function getScheduledItems(
     },
   });
 
+  // Get all schedule reviews for the date range provided
+  // note - a schedule review is not guaranteed
+  const scheduleReviews = await db.scheduleReview.findMany({
+    orderBy: [{ scheduledDate: 'asc' }],
+    where: {
+      scheduledSurfaceGuid: { equals: scheduledSurfaceGuid },
+      scheduledDate: {
+        gte: new Date(startDate),
+        lte: new Date(endDate),
+      },
+    },
+  });
+
   // Group scheduled items into an array of arrays.
   const groupedItems = groupBy(items, 'scheduledDate');
 
@@ -66,18 +79,26 @@ export async function getScheduledItems(
         zone: 'utc',
       }).toFormat('yyyy-MM-dd');
 
+      // Get the schedule review for the current schedule of items
+      // (May be null)
+      const scheduleReview = scheduleReviews.filter((sr) => {
+        return sr.scheduledDate.getTime() === items[0].scheduledDate.getTime();
+      });
+
       return {
         scheduledDate,
         collectionCount: items.filter(
-          (item) => item.approvedItem.isCollection === true
+          (item) => item.approvedItem.isCollection === true,
         ).length,
         syndicatedCount: items.filter(
-          (item) => item.approvedItem.isSyndicated === true
+          (item) => item.approvedItem.isSyndicated === true,
         ).length,
         totalCount: items.length,
+        // the schedule review may not exist - if not, return undefined
+        scheduleReview: scheduleReview.length ? scheduleReview[0] : undefined,
         items: items,
       };
-    }
+    },
   );
 
   return results;
@@ -94,7 +115,7 @@ export async function getScheduledItems(
 export async function getItemsForScheduledSurface(
   db: PrismaClient,
   id: string,
-  date: string
+  date: string,
 ): Promise<ScheduledSurfaceItem[]> {
   // Get a flat array of scheduled items from Prisma
   const items = await db.scheduledItem.findMany({
@@ -136,7 +157,7 @@ export async function getItemsForScheduledSurface(
  */
 export async function getScheduledItemByUniqueAttributes(
   db: PrismaClient,
-  data
+  data,
 ): Promise<ScheduledItem | null> {
   return db.scheduledItem.findUnique({
     where: {
@@ -157,4 +178,3 @@ export async function getScheduledItemByUniqueAttributes(
     },
   });
 }
-
