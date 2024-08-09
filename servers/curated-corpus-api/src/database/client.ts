@@ -54,6 +54,9 @@ export function client(): PrismaClient {
     prisma.$on('query', (e) => {
       e.source = 'prisma';
       serverLogger.debug(e);
+      // local development - for easy viewing of the actual SQL being
+      // generated/sent by prisma, uncomment the console.log statement below.
+      //console.log(e);
     });
   }
 
