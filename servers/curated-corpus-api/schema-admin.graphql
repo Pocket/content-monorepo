@@ -529,6 +529,21 @@ type ScheduleReview {
 }
 
 """
+Input data for marking the given scheduled surface as reviewed
+by human curators for a given date.
+"""
+input CreateScheduleReviewInput {
+  """
+  The GUID of the scheduledSurface that was reviewed.
+  """
+  scheduledSurfaceGuid: ID!
+  """
+  The date of the schedule that was reviewed, in YYYY-MM-DD format.
+  """
+  scheduledDate: Date!
+}
+
+"""
 Available fields for filtering Approved Items.
 """
 input ApprovedCorpusItemFilter {
@@ -1174,6 +1189,11 @@ type Mutation {
   updateApprovedCorpusItemGrade(
     data: UpdateApprovedCorpusItemGradeInput!
   ): ApprovedCorpusItem!
+
+  """
+  Marks the given scheduled surface as reviewed by human curators for a given date.
+  """
+  createScheduleReview(data: CreateScheduleReviewInput!): ScheduleReview!
 }
 
 """

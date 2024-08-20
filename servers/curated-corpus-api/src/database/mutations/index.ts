@@ -9,3 +9,4 @@ export {
   deleteScheduledItem,
   moveScheduledItemToBottom,
 } from './ScheduledItem';
+export { createScheduleReview } from './ScheduleReview';
