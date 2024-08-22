@@ -19,3 +19,12 @@ export const AdminScheduledItemData = gql`
   ${ScheduledItemData}
   ${AdminCuratedItemData}
 `;
+
+export const AdminScheduleReviewData = gql`
+  fragment AdminScheduleReviewData on ScheduleReview {
+    scheduledSurfaceGuid
+    scheduledDate
+    reviewedBy
+    reviewedAt
+  }
+`;

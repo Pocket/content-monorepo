@@ -31,11 +31,11 @@ describe('ScheduleReview', () => {
         'curator|ldap',
       );
 
-      expect(result.scheduledSurfaceGuid).toStrictEqual('NEW_TAB_EN_US');
-      expect(result.scheduledDate).toStrictEqual('2025-01-01');
-      expect(result.reviewedBy).toStrictEqual('curator|ldap');
-      // Let's not get into precise date comparisons here:
-      // it is enough to know that this field is not empty
+      expect(result.scheduledSurfaceGuid).toEqual('NEW_TAB_EN_US');
+      expect(result.scheduledDate.toISOString()).toEqual(
+        new Date('2025-01-01').toISOString(),
+      );
+      expect(result.reviewedBy).toEqual('curator|ldap');
       expect(result.reviewedAt).not.toBeNull();
     });
   });

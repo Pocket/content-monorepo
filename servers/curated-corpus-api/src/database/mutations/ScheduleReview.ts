@@ -19,7 +19,7 @@ export async function createScheduleReview(
   return db.scheduleReview.create({
     data: {
       scheduledSurfaceGuid,
-      scheduledDate,
+      scheduledDate: new Date(scheduledDate),
       reviewedBy: username,
       reviewedAt: new Date(),
     },
