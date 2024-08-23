@@ -67,6 +67,7 @@ export type ClientApiSyndicatedArticle = {
   };
   publishedAt: string;
   title: string;
+  localeLanguage?: string;
 };
 
 export type ClientApiCollection = {

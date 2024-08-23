@@ -155,6 +155,17 @@ export const deriveImageUrl = (item: ClientApiItem): string | undefined => {
 };
 
 /**
+ * returns the syndicated language if it exists, otherwise the item's language
+ * (result could be undefined - ty parser!). Syndicated data is also not guaranteed.
+ *
+ * @param item ClientApiItem - raw item from client API
+ * @returns string | undefined
+ */
+export const deriveLanguage = (item: ClientApiItem): string | undefined => {
+  return item.syndicatedArticle?.localeLanguage || item.language;
+};
+
+/**
  * attempts to retrieve metadata from the parser and, if successful, formats
  * the resulting data to conform to the graph spec.
  *
@@ -196,7 +207,7 @@ export const deriveUrlMetadata = async (
       datePublished: deriveDatePublished(item),
       title: deriveTitle(item),
       excerpt: deriveExcerpt(item),
-      language: item.language,
+      language: deriveLanguage(item),
       isSyndicated: !!item.syndicatedArticle?.publisher,
       isCollection: !!item.collection?.slug,
       authors: deriveAuthors(item),
