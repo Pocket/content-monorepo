@@ -32,8 +32,8 @@ export default {
     // https://github.com/Pocket/dbt-snowflake/blob/main/macros/validate_snowplow_app_id.sql
     appId:
       process.env.NODE_ENV === 'production'
-        ? 'pocket-backend-prospect-api'
-        : 'pocket-backend-prospect-api-dev',
+        ? 'prospect-api'
+        : 'prospect-api-dev',
     schemas: {
       // published 2024-01-26
       prospect: 'iglu:com.pocket/prospect/jsonschema/1-0-3',

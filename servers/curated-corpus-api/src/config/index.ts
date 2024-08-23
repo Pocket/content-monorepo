@@ -70,8 +70,8 @@ export default {
     // https://github.com/Pocket/dbt-snowflake/blob/main/macros/validate_snowplow_app_id.sql
     appId:
       process.env.NODE_ENV === 'production'
-        ? 'pocket-backend-curated-corpus-api'
-        : 'pocket-backend-curated-corpus-api-dev',
+        ? 'curated-corpus-api'
+        : 'curated-corpus-api-dev',
     corpusItemEvents: ReviewedCorpusItemEventType,
     corpusScheduleEvents: ScheduledCorpusItemEventType,
     schemas: {
