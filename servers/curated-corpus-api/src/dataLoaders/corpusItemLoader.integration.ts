@@ -211,7 +211,7 @@ describe('queries: CorpusItem dataloader', () => {
     });
 
     describe('corpusItemsByUrlLoader', () => {
-      it('loads a corpus item by id', async () => {
+      it('loads a corpus item by url', async () => {
         const item = await dataLoaders.corpusItemsByUrl.load(approvedItem1.url);
 
         expect(item).not.toBeNull();
