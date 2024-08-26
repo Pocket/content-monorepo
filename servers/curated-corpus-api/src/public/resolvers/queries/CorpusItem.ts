@@ -37,3 +37,18 @@ export async function getSavedCorpusItem(
 
   return getCorpusItemFromApprovedItem(approvedItem);
 }
+
+export async function getItemCorpusItem(
+  item,
+  args,
+  { db },
+): Promise<CorpusItem> {
+  const { givenUrl } = item;
+
+  const approvedItem = await getApprovedItemByUrl(db, givenUrl);
+  if (!approvedItem) {
+    return null;
+  }
+
+  return getCorpusItemFromApprovedItem(approvedItem);
+}

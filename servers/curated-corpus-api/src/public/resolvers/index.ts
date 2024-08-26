@@ -1,7 +1,11 @@
 import { DateResolver } from 'graphql-scalars';
 import { getScheduledSurface } from './queries/ScheduledSurface';
 import { getItemsForScheduledSurface } from './queries/ScheduledSurfaceItem';
-import { getCorpusItem, getSavedCorpusItem } from './queries/CorpusItem';
+import {
+  getCorpusItem,
+  getSavedCorpusItem,
+  getItemCorpusItem,
+} from './queries/CorpusItem';
 
 export const resolvers = {
   // The Date resolver enforces the date to be in the YYYY-MM-DD format.
@@ -17,6 +21,10 @@ export const resolvers = {
   // Allow the `SavedItem` to resolve the corpus item
   SavedItem: {
     corpusItem: getSavedCorpusItem,
+  },
+  // Allow the `Item` to resolve the corpus item
+  Item: {
+    corpusItem: getItemCorpusItem,
   },
   Query: {
     // Gets the metadata for a Scheduled Surface (for example, New Tab).

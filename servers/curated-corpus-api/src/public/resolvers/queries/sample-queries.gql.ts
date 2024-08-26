@@ -61,6 +61,15 @@ export const CORPUS_ITEM_REFERENCE_RESOLVER = gql`
           }
         }
       }
+      ... on Item {
+        corpusItem {
+          id
+          title
+          authors {
+            name
+          }
+        }
+      }
     }
   }
 `;
