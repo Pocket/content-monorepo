@@ -138,7 +138,7 @@ describe('CorpusItem reference resolver', () => {
     expect(result.body.data?._entities[0]).toBeNull();
   });
 
-  it('returns the corpus item if it exists', async () => {
+  it('returns the corpus item if it exists on savedItem', async () => {
     // Create an approved item.
     const approvedItem = await createApprovedItemHelper(db, {
       title: 'Story one',
@@ -163,10 +163,42 @@ describe('CorpusItem reference resolver', () => {
     expect(result.body.data).not.toBeNull();
     expect(result.body.data?._entities).toHaveLength(1);
     expect(result.body.data?._entities[0].corpusItem.title).toEqual(
-      approvedItem.title
+      approvedItem.title,
     );
     expect(result.body.data?._entities[0].corpusItem.authors).toHaveLength(
-      <number>approvedItem.authors?.length
+      <number>approvedItem.authors?.length,
+    );
+  });
+
+  it('returns the corpus item if it exists on Item', async () => {
+    // Create an approved item.
+    const approvedItem = await createApprovedItemHelper(db, {
+      title: 'Story one',
+    });
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .send({
+        query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
+        variables: {
+          representations: [
+            {
+              __typename: 'Item',
+              givenUrl: approvedItem.url,
+            },
+          ],
+        },
+      });
+
+    expect(result.body.errors).toBeUndefined();
+
+    expect(result.body.data).not.toBeNull();
+    expect(result.body.data?._entities).toHaveLength(1);
+    expect(result.body.data?._entities[0].corpusItem.title).toEqual(
+      approvedItem.title,
+    );
+    expect(result.body.data?._entities[0].corpusItem.authors).toHaveLength(
+      <number>approvedItem.authors?.length,
     );
   });
 
