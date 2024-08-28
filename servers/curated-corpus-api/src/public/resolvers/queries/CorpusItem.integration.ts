@@ -446,7 +446,7 @@ describe('CorpusItem reference resolver', () => {
   });
 
   describe('reference resolver for SavedItem', () => {
-    it('returns the corpus item if it exists', async () => {
+    it('returns the corpus item if it exists on SavedItem', async () => {
       const result = await request(app)
         .post(graphQLUrl)
         .send({
@@ -472,7 +472,7 @@ describe('CorpusItem reference resolver', () => {
       );
     });
 
-    it('should return null if the url provided is not known', async () => {
+    it('should return null on SavedItem if the url provided is not known', async () => {
       const result = await request(app)
         .post(graphQLUrl)
         .send({
@@ -482,6 +482,54 @@ describe('CorpusItem reference resolver', () => {
               {
                 __typename: 'SavedItem',
                 url: 'ABRACADABRA',
+              },
+            ],
+          },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data?._entities).toHaveLength(1);
+      expect(result.body.data?._entities[0].corpusItem).toBeNull();
+    });
+  });
+
+  describe('reference resolver for Item', () => {
+    it('returns the corpus item if it exists on Item', async () => {
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
+          variables: {
+            representations: [
+              {
+                __typename: 'Item',
+                givenUrl: approvedItem.url,
+              },
+            ],
+          },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?._entities).toHaveLength(1);
+
+      verifyCorpusItemMetadata(
+        result.body.data?._entities[0].corpusItem,
+        approvedItem,
+      );
+    });
+
+    it('should return null on Item if the url provided is not known', async () => {
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
+          variables: {
+            representations: [
+              {
+                __typename: 'Item',
+                givenUrl: 'ABRACADABRA',
               },
             ],
           },
