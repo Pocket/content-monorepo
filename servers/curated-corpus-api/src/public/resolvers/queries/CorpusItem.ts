@@ -1,32 +1,11 @@
 import { CorpusItem } from '../../../database/types';
-import {
-  getApprovedItemByExternalId,
-  getApprovedItemByUrl,
-} from '../../../database/queries/ApprovedItem';
+import { getApprovedItemByUrl } from '../../../database/queries/ApprovedItem';
 import { getCorpusItemFromApprovedItem } from '../../../shared/utils';
-
-/**
- * Pulls in approved corpus items for a given id or url.
- *
- * @param item { id, url }
- * @param db
- */
-export async function getCorpusItem({ id, url }, { db }): Promise<CorpusItem> {
-  const approvedItem = id
-    ? await getApprovedItemByExternalId(db, id)
-    : await getApprovedItemByUrl(db, url);
-
-  if (!approvedItem) {
-    return null;
-  }
-
-  return getCorpusItemFromApprovedItem(approvedItem);
-}
 
 export async function getSavedCorpusItem(
   item,
   args,
-  { db }
+  { db },
 ): Promise<CorpusItem> {
   const { url } = item;
 

@@ -1,20 +1,24 @@
 // need this to be able to use Prisma-native types for orderBy and filter clauses
 import * as prisma from '.prisma/client';
+
 import {
   ApprovedItem as PrismaApprovedItem,
   PrismaClient,
 } from '.prisma/client';
+
 import {
   Connection,
   findManyCursorConnection,
 } from '@devoxa/prisma-relay-cursor-connection';
+
+import { DateTime } from 'luxon';
+
 import {
   ApprovedItem,
   ApprovedItemFilter,
   ApprovedItemScheduledSurfaceHistory,
   PaginationInput,
 } from '../types';
-import { DateTime } from 'luxon';
 
 /**
  * A dedicated type for the unique cursor value used in the getCuratedItems query.
@@ -34,7 +38,7 @@ type ApprovedItemCursor = {
 export async function getApprovedItems(
   db: PrismaClient,
   pagination: PaginationInput,
-  filters: ApprovedItemFilter
+  filters: ApprovedItemFilter,
 ): Promise<Connection<ApprovedItem>> {
   // Set up the SQL clauses with our defaults (orderBy) and any filters supplied
   // by the client.
@@ -111,7 +115,7 @@ export async function getApprovedItems(
           node: record as ApprovedItem,
         };
       },
-    }
+    },
   );
 }
 
@@ -124,7 +128,7 @@ export async function getApprovedItems(
  */
 export async function getApprovedItemByUrl(
   db: PrismaClient,
-  url: string
+  url: string,
 ): Promise<ApprovedItem | null> {
   return db.approvedItem.findUnique({
     where: { url },
@@ -145,10 +149,60 @@ export async function getApprovedItemByUrl(
  */
 export async function getApprovedItemByExternalId(
   db: PrismaClient,
-  externalId: string
+  externalId: string,
 ): Promise<ApprovedItem | null> {
   return db.approvedItem.findUnique({
     where: { externalId },
+    include: {
+      authors: {
+        orderBy: [{ sortOrder: 'asc' }],
+      },
+    },
+  });
+}
+
+/**
+ * Return approved items with the given external IDs if found in the Curated Corpus
+ * or null otherwise.
+ *
+ * @param db PrismaClient
+ * @param externalIds an array of string GUIDs
+ */
+export async function getApprovedItemsByExternalIds(
+  db: PrismaClient,
+  externalIds: string[],
+): Promise<ApprovedItem[]> {
+  return await db.approvedItem.findMany({
+    where: {
+      externalId: {
+        in: externalIds,
+      },
+    },
+    include: {
+      authors: {
+        orderBy: [{ sortOrder: 'asc' }],
+      },
+    },
+  });
+}
+
+/**
+ * Return approved items with the given urls if found in the Curated Corpus
+ * or null otherwise.
+ *
+ * @param db PrismaClient
+ * @param urls an array of string urls
+ */
+export async function getApprovedItemsByUrls(
+  db: PrismaClient,
+  urls: string[],
+): Promise<ApprovedItem[]> {
+  return db.approvedItem.findMany({
+    where: {
+      url: {
+        in: urls,
+      },
+    },
     include: {
       authors: {
         orderBy: [{ sortOrder: 'asc' }],
@@ -169,7 +223,7 @@ export async function getScheduledSurfaceHistory(
   db: PrismaClient,
   externalId: string,
   scheduledSurfaceGuid?: string,
-  limit?: number
+  limit?: number,
 ): Promise<ApprovedItemScheduledSurfaceHistory[]> {
   const approvedItem = await db.approvedItem.findUnique({
     where: { externalId },
@@ -220,7 +274,7 @@ export async function getScheduledSurfaceHistory(
  * @param filters
  */
 const constructWhereClauseFromFilters = (
-  filters: ApprovedItemFilter
+  filters: ApprovedItemFilter,
 ): prisma.Prisma.ApprovedItemWhereInput => {
   // Get out quickly if no filters have been provided.
   if (!filters) return {};

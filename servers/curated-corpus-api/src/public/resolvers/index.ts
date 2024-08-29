@@ -1,8 +1,8 @@
 import { DateResolver } from 'graphql-scalars';
 import { getScheduledSurface } from './queries/ScheduledSurface';
 import { getItemsForScheduledSurface } from './queries/ScheduledSurfaceItem';
+import { IPublicContext } from '../context';
 import {
-  getCorpusItem,
   getSavedCorpusItem,
   getItemCorpusItem,
 } from './queries/CorpusItem';
@@ -16,7 +16,13 @@ export const resolvers = {
   },
   // The `CorpusItem` resolver resolves approved corpus items based on id.
   CorpusItem: {
-    __resolveReference: getCorpusItem,
+    __resolveReference: async (corpusItem, context: IPublicContext) => {
+      if (corpusItem.id) {
+        return await context.dataLoaders.corpusItemsById.load(corpusItem.id);
+      } else {
+        return await context.dataLoaders.corpusItemsByUrl.load(corpusItem.url);
+      }
+    },
   },
   // Allow the `SavedItem` to resolve the corpus item
   SavedItem: {
