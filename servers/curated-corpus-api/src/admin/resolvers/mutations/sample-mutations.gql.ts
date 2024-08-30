@@ -1,6 +1,10 @@
 import { gql } from 'graphql-tag';
 import { RejectedItemData } from '../../../shared/fragments.gql';
-import { AdminCuratedItemData, AdminScheduledItemData } from '../fragments.gql';
+import {
+  AdminCuratedItemData,
+  AdminScheduledItemData,
+  AdminScheduleReviewData,
+} from '../fragments.gql';
 
 /**
  * Sample mutations for Apollo Server integration tests as used in
@@ -86,4 +90,13 @@ export const UPLOAD_APPROVED_ITEM_IMAGE = gql`
       url
     }
   }
+`;
+
+export const CREATE_SCHEDULE_REVIEW = gql`
+  mutation createScheduleReview($data: CreateScheduleReviewInput!) {
+    createScheduleReview(data: $data) {
+      ...AdminScheduleReviewData
+    }
+  }
+  ${AdminScheduleReviewData}
 `;

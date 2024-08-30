@@ -36,7 +36,7 @@ export async function createScheduledItemHelper(
   data: CreateScheduledItemHelperInput,
 ): Promise<ScheduledItem> {
   // defaults for optional properties
-  const creatScheduledItemDefaults = {
+  const createScheduledItemDefaults = {
     createdAt: faker.date.recent({ days: 14 }),
     createdBy: faker.helpers.fake('{{hacker.noun}}|{{internet.email}}'), // imitation auth0 user id
     scheduledDate: faker.helpers.arrayElement([
@@ -48,7 +48,7 @@ export async function createScheduledItemHelper(
   };
 
   const inputs: Prisma.ScheduledItemCreateInput = {
-    ...creatScheduledItemDefaults,
+    ...createScheduledItemDefaults,
     ...data,
     approvedItem: { connect: { id: data.approvedItem.id } },
   };

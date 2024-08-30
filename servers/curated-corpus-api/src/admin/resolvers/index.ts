@@ -22,6 +22,7 @@ import {
   deleteScheduledItem,
   rescheduleScheduledItem,
 } from './mutations/ScheduledItem';
+import { createScheduleReview } from './mutations/ScheduleReview';
 import {
   getApprovedItemByUrl as dbGetApprovedItemByUrl,
   getRejectedItemByUrl as dbGetRejectedItemByUrl,
@@ -104,5 +105,6 @@ export const resolvers = {
     rescheduleScheduledCorpusItem: rescheduleScheduledItem,
     uploadApprovedCorpusItemImage: uploadApprovedItemImage,
     updateApprovedCorpusItemGrade: updateApprovedItemGrade,
+    createScheduleReview: createScheduleReview,
   },
 };

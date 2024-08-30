@@ -105,6 +105,11 @@ export type MoveScheduledItemToBottomInput = {
   source: ScheduledItemSource;
 };
 
+export type CreateScheduleReviewInput = {
+  scheduledSurfaceGuid: string;
+  scheduledDate: string;
+};
+
 export type ApprovedItem = ApprovedItemModel & {
   authors: ApprovedItemAuthor[];
 };
