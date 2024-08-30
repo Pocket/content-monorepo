@@ -87,6 +87,7 @@ export const getUrlMetadata = async (
             }
             publishedAt
             title
+            localeLanguage
           }
           collection {
             slug

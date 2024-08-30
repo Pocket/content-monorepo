@@ -11,6 +11,7 @@ import {
   deriveDomainName,
   deriveExcerpt,
   deriveImageUrl,
+  deriveLanguage,
   derivePublisher,
   deriveTitle,
   deriveUrlMetadata,
@@ -336,6 +337,42 @@ describe('lib', () => {
       };
 
       expect(deriveImageUrl(item)).toEqual(undefined);
+    });
+  });
+
+  describe('deriveLanguage', () => {
+    it('should use the syndicated article language if it exists', () => {
+      const item: ClientApiItem = {
+        title: 'What to do in Dublin',
+        resolvedUrl: 'https://getpocket.com/drink-guinness',
+        language: 'fr',
+        syndicatedArticle: {
+          authorNames: [],
+          title: 'What to do in Dublin',
+          publishedAt: '2025-01-01',
+          localeLanguage: 'en',
+        },
+      };
+
+      expect(deriveLanguage(item)).toEqual('en');
+    });
+
+    it('should use the item title if no syndicated title exists', () => {
+      const item: ClientApiItem = {
+        title: 'What to do in Paris',
+        resolvedUrl: 'https://getpocket.com/eat-croissants',
+        language: 'en',
+      };
+
+      expect(deriveLanguage(item)).toEqual('en');
+    });
+
+    it('should return undefined if no language exists', () => {
+      const item: ClientApiItem = {
+        resolvedUrl: 'https://getpocket.com/and-crepes',
+      };
+
+      expect(deriveLanguage(item)).toEqual(undefined);
     });
   });
 
