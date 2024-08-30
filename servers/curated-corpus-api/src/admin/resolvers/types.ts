@@ -64,3 +64,8 @@ export type RescheduleScheduledItemApiInput = {
   source: ScheduledItemSource;
   actionScreen?: ActionScreen;
 };
+
+export type CreateScheduleReviewInput = {
+  scheduledSurfaceGuid: string;
+  scheduledDate: string;
+};

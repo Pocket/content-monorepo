@@ -352,6 +352,7 @@ export interface UrlMetadata {
 
 export enum CuratedCorpusApiErrorCodes {
   ALREADY_SCHEDULED = 'ALREADY_SCHEDULED',
+  ALREADY_REVIEWED = 'ALREADY_REVIEWED',
 }
 
 /* AP style formatting for title */
