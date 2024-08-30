@@ -150,15 +150,14 @@ type SavedItem @key(fields: "url") {
   corpusItem: CorpusItem
 }
 
-# Commented out until RecsAPI implements the fields that lets us extend Recommendation
-#extend type Recommendation  @key(fields: "corpusItemId") {
-#    """
-#    key field to identify the CorpusItem entity in the RecsAPI service
-#    """
-#    corpusItemId: ID! @external
-#
-#    """
-#    If the item is in our corpus with metadata lets define it, this would replace the older curatedInfo object.
-#    """
-#    corpusItem: CorpusItem @requires(fields: "corpusItemId")
-#}
+type Item @key(fields: "givenUrl") {
+  """
+  key field to identify the CorpusItem entity in the RecsAPI service
+  """
+  givenUrl: Url! @external
+
+  """
+  If the item is in corpus allow the item to reference it.  Exposing curated info for consistent UX
+  """
+  corpusItem: CorpusItem
+}
