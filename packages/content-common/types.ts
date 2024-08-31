@@ -110,6 +110,7 @@ export enum ProspectType {
   COUNTS_MODELED = 'COUNTS_MODELED',
   DISMISSED = 'DISMISSED',
   DOMAIN_ALLOWLIST = 'DOMAIN_ALLOWLIST',
+  EXTERNAL_EDITORIAL = 'EXTERNAL_EDITORIAL',
   RECOMMENDED = 'RECOMMENDED',
   RSS_LOGISTIC = 'RSS_LOGISTIC',
   RSS_LOGISTIC_RECENT = 'RSS_LOGISTIC_RECENT',
@@ -231,6 +232,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.RSS_LOGISTIC,
       ProspectType.RSS_LOGISTIC_RECENT,
       ProspectType.SLATE_SCHEDULER_V2,
+      ProspectType.EXTERNAL_EDITORIAL,
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENUS,
   },
@@ -246,6 +248,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.TITLE_URL_MODELED,
       ProspectType.RSS_LOGISTIC,
       ProspectType.SLATE_SCHEDULER_V2,
+      ProspectType.EXTERNAL_EDITORIAL
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_DEDE,
   },
