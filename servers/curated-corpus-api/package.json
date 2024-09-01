@@ -4,7 +4,9 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "build": "npm run db:generate-prisma-client && rm -rf dist && tsc",
+    "build": "rm -rf dist && tsc",
+    "build-schema-admin": "node dist/admin/buildSchema.js",
+    "build-schema-public": "node dist/public/buildSchema.js",
     "watch": "tsc -w & nodemon",
     "start": "npm run db:generate-prisma-client && npm run migrate:prisma-deploy && node dist/main.js",
     "dev": "npm run migrate:prisma-deploy && npm run build && npm run watch",
@@ -19,7 +21,10 @@
     "db:prisma-seed": "npx prisma migrate reset --force && ts-node --emit=false prisma/seed.ts",
     "migrate:prisma-dev": "prisma migrate dev",
     "migrate:prisma-deploy": "prisma migrate deploy",
-    "migrate:prisma-reset": "prisma migrate reset --skip-seed --force"
+    "migrate:prisma-reset": "prisma migrate reset --skip-seed --force",
+    "prebuild": "dotenv -e .env.ci -- prisma generate",
+    "pretest": "dotenv -e .env.ci -- prisma generate",
+    "pretest-integrations": "dotenv -e .env.ci -- prisma migrate reset --skip-seed --force"
   },
   "prisma": {
     "seed": "ts-node --emit=false prisma/seed.ts"
