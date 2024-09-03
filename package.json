@@ -30,7 +30,7 @@
     "dotenv-cli": "latest"
   },
   "devDependencies": {
-    "syncpack": "^12.3.0",
+    "syncpack": "^12.4.0",
     "turbo": "latest"
   }
 }
