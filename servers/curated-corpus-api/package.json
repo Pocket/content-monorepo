@@ -57,7 +57,7 @@
     "@faker-js/faker": "8.4.1",
     "@types/graphql-upload": "8.0.12",
     "@types/jest": "29.5.12",
-    "@types/node": "^20.12.7",
+    "@types/node": "^20.16",
     "dotenv": "16.4.5",
     "eslint-config-custom": "workspace:*",
     "form-data": "4.0.0",
