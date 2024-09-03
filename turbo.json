@@ -11,7 +11,8 @@
       "dependsOn": ["^build"]
     },
     "test-integrations": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "cache": false
     },
     "synth": {
       "dependsOn": ["^build"],
