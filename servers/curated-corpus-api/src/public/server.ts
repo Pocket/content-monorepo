@@ -13,6 +13,7 @@ import { errorHandler, sentryPlugin } from '@pocket-tools/apollo-utils';
 import { typeDefsPublic } from '../typeDefs';
 import { resolvers } from './resolvers';
 import { IPublicContext } from './context';
+import { schema } from './schema';
 
 export function getPublicServer(
   httpServer: Server,
@@ -39,7 +40,7 @@ export function getPublicServer(
   ];
 
   return new ApolloServer<IPublicContext>({
-    schema: buildSubgraphSchema({ typeDefs: typeDefsPublic, resolvers }),
+    schema,
     plugins,
     formatError: errorHandler,
   });

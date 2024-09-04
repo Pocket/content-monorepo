@@ -4,8 +4,9 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "build": "rm -rf dist && tsc && npm run build-schema-admin",
+    "build": "rm -rf dist && tsc && npm run build-schema-admin && npm run build-schema-public",
     "build-schema-admin": "node dist/admin/buildSchema.js",
+    "build-schema-public": "node dist/public/buildSchema.js",
     "watch": "tsc -w & nodemon",
     "start": "npm run migrate:prisma-deploy && node dist/main.js",
     "dev": "npm run migrate:prisma-deploy && npm run build && npm run watch",

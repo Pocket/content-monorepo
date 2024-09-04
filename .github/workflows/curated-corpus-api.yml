@@ -34,7 +34,7 @@ jobs:
     with:
       federated-graph-name: pocket-client-api
       graph-name: curated-corpus
-      schema-file-path: servers/curated-corpus-api/schema-public.graphql
+      schema-file-path: servers/curated-corpus-api/schema-client-api.graphql
       prod-graph-url: https://curated-corpus-api.readitlater.com
       dev-graph-url: https://curated-corpus-api.getpocket.dev
       scope: curated-corpus-api
