@@ -4,22 +4,27 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "build": "npm run db:generate-prisma-client && rm -rf dist && tsc",
+    "build": "rm -rf dist && tsc && npm run build-schema-admin && npm run build-schema-public",
+    "build-schema-admin": "node dist/admin/buildSchema.js",
+    "build-schema-public": "node dist/public/buildSchema.js",
     "watch": "tsc -w & nodemon",
-    "start": "npm run db:generate-prisma-client && npm run migrate:prisma-deploy && node dist/main.js",
+    "start": "npm run migrate:prisma-deploy && node dist/main.js",
     "dev": "npm run migrate:prisma-deploy && npm run build && npm run watch",
     "test": "jest \"\\.spec\\.ts\"",
     "test-ci": "npm test",
     "test:watch": "npm test -- --watchAll",
     "test-setup": "export $(egrep -v '^#' .docker/local.env | xargs -0) && ./.circleci/scripts/setup.sh --hosts",
-    "test-integrations": "jest \"\\.integration\\.ts\" --runInBand",
-    "test-integrations:watch": "npm run test-integrations -- --watchAll",
+    "test-integrations": "dotenv -e .env.ci -- jest \"\\.integration\\.ts\" --runInBand",
+    "test-integrations:watch": "dotenv -e .env.ci -- npm run test-integrations -- --watchAll",
     "lint": "eslint --fix-dry-run \"src/**/*.ts\"",
-    "db:generate-prisma-client": "prisma generate",
     "db:prisma-seed": "npx prisma migrate reset --force && ts-node --emit=false prisma/seed.ts",
     "migrate:prisma-dev": "prisma migrate dev",
     "migrate:prisma-deploy": "prisma migrate deploy",
-    "migrate:prisma-reset": "prisma migrate reset --skip-seed --force"
+    "migrate:prisma-reset": "prisma migrate reset --skip-seed --force",
+    "prebuild": "dotenv -e .env.ci -- prisma generate",
+    "prestart": "prisma generate",
+    "pretest": "dotenv -e .env.ci -- prisma generate",
+    "pretest-integrations": "dotenv -e .env.ci -- prisma migrate reset --skip-seed --force"
   },
   "prisma": {
     "seed": "ts-node --emit=false prisma/seed.ts"

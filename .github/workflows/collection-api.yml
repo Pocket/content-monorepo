@@ -1,31 +1,31 @@
-name: Curated Corpus API
+name: Collection API
 on:
   pull_request:
     paths:
-      - 'infrastructure/curated-corpus-api/**'
+      - 'infrastructure/collection-api/**'
       - 'packages/**'
-      - 'servers/curated-corpus-api/**'
+      - 'servers/collection-api/**'
       - 'pnpm-lock.yaml'
       - 'Dockerfile'
-      - '.github/workflows/curated-corpus-api.yml'
+      - '.github/workflows/collection-api.yml'
   push:
     branches:
       - main
       - dev
     paths:
-      - 'infrastructure/curated-corpus-api/**'
+      - 'infrastructure/collection-api/**'
       - 'packages/**'
-      - 'servers/curated-corpus-api/**'
+      - 'servers/collection-api/**'
       - 'pnpm-lock.yaml'
       - 'Dockerfile'
-      - '.github/workflows/curated-corpus-api.yml'
+      - '.github/workflows/collection-api.yml'
 jobs:
   test-integrations:
     if: github.event_name == 'pull_request'
     # this will reference the file below on the main branch
     uses: pocket/pocket-monorepo/.github/workflows/reuse-test-integrations.yml@main
     with:
-      scope: curated-corpus-api
+      scope: collection-api
     secrets: inherit
 
   apollo:
@@ -33,11 +33,11 @@ jobs:
     uses: pocket/pocket-monorepo/.github/workflows/reuse-apollo-federation.yml@main
     with:
       federated-graph-name: pocket-client-api
-      graph-name: curated-corpus
-      schema-file-path: servers/curated-corpus-api/schema-client-api.graphql
-      prod-graph-url: https://curated-corpus-api.readitlater.com
-      dev-graph-url: https://curated-corpus-api.getpocket.dev
-      scope: curated-corpus-api
+      graph-name: collection
+      schema-file-path: servers/collection-api/schema-client-api.graphql
+      prod-graph-url: https://collection-api.readitlater.com
+      dev-graph-url: https://collection-api.getpocket.dev
+      scope: collection-api
     secrets:
       apollo-key: ${{ secrets.APOLLO_CLIENT_API_KEY }}
 
@@ -46,11 +46,11 @@ jobs:
     uses: pocket/pocket-monorepo/.github/workflows/reuse-apollo-federation.yml@main
     with:
       federated-graph-name: pocket-admin-api
-      graph-name: curated-corpus
-      schema-file-path: servers/curated-corpus-api/schema-admin-api.graphql
-      prod-graph-url: https://curated-corpus-api.readitlater.com
-      dev-graph-url: https://curated-corpus-api.getpocket.dev
-      scope: curated-corpus-api
+      graph-name: collection
+      schema-file-path: servers/collection-api/schema-admin-api.graphql
+      prod-graph-url: https://collection-api.readitlater.com
+      dev-graph-url: https://collection-api.getpocket.dev
+      scope: collection-api
     secrets:
       apollo-key: ${{ secrets.APOLLO_ADMIN_API_KEY }}
 
@@ -58,8 +58,8 @@ jobs:
     # this will reference the file below on the main branch
     uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main
     with:
-      scope: curated-corpus-api-cdk
-      stack-output-path: infrastructure/curated-corpus-api/cdktf.out/stacks/curated-corpus-api
+      scope: collection-api-cdk
+      stack-output-path: infrastructure/collection-api/cdktf.out/stacks/collection-api
     secrets: inherit
 
   api:
@@ -67,11 +67,11 @@ jobs:
     uses: pocket/pocket-monorepo/.github/workflows/reuse-build-and-push-image.yml@main
     needs: [infrastructure]
     with:
-      scope: curated-corpus-api
-      app-path: servers/curated-corpus-api
+      scope: collection-api
+      app-path: servers/collection-api
       app-port: 4025
-      sentry-project: curated-corpus-api
-      docker-repo-name-pattern: curatedcorpusapi-{0}-app
+      sentry-project: collection-api
+      docker-repo-name-pattern: collectionapi-{0}-app
       terraform-output: ${{needs.infrastructure.outputs.terraform-output}}
     secrets: inherit
 
@@ -81,6 +81,6 @@ jobs:
     uses: pocket/pocket-monorepo/.github/workflows/reuse-sentry-release.yml@main
     needs: [api]
     with:
-      sentry-project: curated-corpus-api
+      sentry-project: collection-api
       sentry-environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
     secrets: inherit

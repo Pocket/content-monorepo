@@ -15,7 +15,7 @@
     "test:watch": "npm test -- --watchAll",
     "test-setup": "export $(egrep -v '^#' .docker/local.env | xargs -0) && ./.circleci/scripts/setup.sh --hosts",
     "test-integrations": "dotenv -e .env.ci -- jest \"\\.integration\\.ts\" --runInBand",
-    "test-integrations:watch": "npm run test-integrations -- --watchAll",
+    "test-integrations:watch": "dotenv -e .env.ci -- npm run test-integrations -- --watchAll",
     "lint": "eslint --fix-dry-run \"src/**/*.ts\"",
     "db:prisma-seed": "npx prisma migrate reset --force && ts-node --emit=false prisma/seed.ts",
     "migrate:prisma-dev": "prisma migrate dev",
