@@ -34,7 +34,7 @@
     "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
     "msw": "2.1.2",
-    "ts-jest": "29.1.2",
+    "ts-jest": "29.2.4",
     "ts-patch": "^3.1.2",
     "tsconfig": "workspace:*"
   },
