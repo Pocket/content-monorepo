@@ -1,0 +1,73 @@
+name: Prospect API
+on:
+  pull_request:
+    paths:
+      - 'infrastructure/prospect-api/**'
+      - 'packages/**'
+      - 'servers/prospect-api/**'
+      - 'pnpm-lock.yaml'
+      - 'Dockerfile'
+      - '.github/workflows/prospect-api.yml'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'infrastructure/prospect-api/**'
+      - 'packages/**'
+      - 'servers/prospect-api/**'
+      - 'pnpm-lock.yaml'
+      - 'Dockerfile'
+      - '.github/workflows/prospect-api.yml'
+jobs:
+  test-integrations:
+    if: github.event_name == 'pull_request'
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-test-integrations.yml@main
+    with:
+      scope: prospect-api
+    secrets: inherit
+
+  apollo-admin:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-apollo-federation.yml@main
+    with:
+      federated-graph-name: pocket-admin-api
+      graph-name: prospect-api
+      schema-file-path: servers/prospect-api/schema.graphql
+      prod-graph-url: https://prospect-api.readitlater.com
+      dev-graph-url: https://prospect-api.getpocket.dev
+      scope: prospect-api
+    secrets:
+      apollo-key: ${{ secrets.APOLLO_ADMIN_API_KEY }}
+
+  infrastructure:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main
+    with:
+      scope: prospect-api-cdk
+      stack-output-path: infrastructure/prospect-api/cdktf.out/stacks/prospect-api
+    secrets: inherit
+
+  api:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-build-and-push-image.yml@main
+    needs: [infrastructure]
+    with:
+      scope: prospect-api
+      app-path: servers/prospect-api
+      app-port: 4025
+      sentry-project: prospect-api
+      docker-repo-name-pattern: prospectapi-{0}-app
+      terraform-output: ${{needs.infrastructure.outputs.terraform-output}}
+    secrets: inherit
+
+  sentry:
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-sentry-release.yml@main
+    needs: [api]
+    with:
+      sentry-project: prospect-api
+      sentry-environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    secrets: inherit
