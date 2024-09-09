@@ -1,0 +1,51 @@
+name: Corpus Scheduler Lambda
+on:
+  pull_request:
+    paths:
+      - 'infrastructure/corpus-scheduler-lambda/**'
+      - 'packages/**'
+      - 'docker-compose.yml'
+      - 'lambdas/corpus-scheduler-lambda/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/corpus-scheduler-lambda.yml'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'infrastructure/corpus-scheduler-lambda/**'
+      - 'packages/**'
+      - 'lambdas/corpus-scheduler-lambda/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/corpus-scheduler-lambda.yml'
+jobs:
+  infrastructure:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main
+    with:
+      scope: corpus-scheduler-lambda-cdk
+      stack-output-path: infrastructure/corpus-scheduler-lambda/cdktf.out/stacks/corpus-scheduler-lambda-wrapper
+    secrets: inherit
+
+  sqs-lambda:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-build-and-push-lambda.yml@main
+    needs: [infrastructure]
+    with:
+      scope: corpus-scheduler-aws_lambda
+      sentry-project: corpus-scheduler-lambda
+      s3-bucket-pattern: pocket-corpusschedulerlambda-{0}-sqs
+      codedeploy-app-name-pattern: CorpusSchedulerLambda-{0}-SQS-Lambda
+      codedeploy-group-name-pattern: CorpusSchedulerLambda-{0}-SQS-Lambda
+      function-name-pattern: CorpusSchedulerLambda-{0}-SQS-Function
+    secrets: inherit
+
+  sentry:
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-sentry-release.yml@main
+    needs: [sqs-lambda]
+    with:
+      sentry-project: corpus-scheduler-lambda
+      sentry-environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    secrets: inherit
