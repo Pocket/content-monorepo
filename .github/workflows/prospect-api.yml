@@ -4,6 +4,7 @@ on:
     paths:
       - 'infrastructure/prospect-api/**'
       - 'packages/**'
+      - 'docker-compose.yml'
       - 'servers/prospect-api/**'
       - 'pnpm-lock.yaml'
       - 'Dockerfile'

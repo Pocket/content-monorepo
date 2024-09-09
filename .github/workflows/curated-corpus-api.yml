@@ -4,6 +4,7 @@ on:
     paths:
       - 'infrastructure/curated-corpus-api/**'
       - 'packages/**'
+      - 'docker-compose.yml'
       - 'servers/curated-corpus-api/**'
       - 'pnpm-lock.yaml'
       - 'Dockerfile'

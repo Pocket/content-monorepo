@@ -1,0 +1,51 @@
+name: Prospect Translation Lambda
+on:
+  pull_request:
+    paths:
+      - 'infrastructure/prospect-translation-lambda/**'
+      - 'packages/**'
+      - 'docker-compose.yml'
+      - 'lambdas/prospect-translation-lambda/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/prospect-translation-lambda.yml'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'infrastructure/prospect-translation-lambda/**'
+      - 'packages/**'
+      - 'lambdas/prospect-translation-lambda/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/prospect-translation-lambda.yml'
+jobs:
+  infrastructure:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main
+    with:
+      scope: prospect-translation-lambda-cdk
+      stack-output-path: infrastructure/prospect-translation-lambda/cdktf.out/stacks/prospect-translation-lambda-wrapper
+    secrets: inherit
+
+  sqs-lambda:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-build-and-push-lambda.yml@main
+    needs: [infrastructure]
+    with:
+      scope: prospect-translation-aws_lambda
+      sentry-project: prospect-translation-lambda
+      s3-bucket-pattern: pocket-prospectapi-{0}-sqs-translation
+      codedeploy-app-name-pattern: ProspectAPI-{0}-Sqs-Translation-Lambda
+      codedeploy-group-name-pattern: ProspectAPI-{0}-Sqs-Translation-Lambda
+      function-name-pattern: ProspectAPI-{0}-Sqs-Translation-Function
+    secrets: inherit
+
+  sentry:
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-sentry-release.yml@main
+    needs: [sqs-lambda]
+    with:
+      sentry-project: prospect-translation-lambda
+      sentry-environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    secrets: inherit
