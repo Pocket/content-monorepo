@@ -12,7 +12,7 @@ const graphqlVariant = isDev ? 'development' : 'current';
 // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster#max_capacity
 const rds = {
   minCapacity: isDev ? 1 : 4,
-  maxCapacity: isDev ? 1 : undefined,
+  maxCapacity: isDev ? 1 : 128,
 };
 const githubConnectionArn = isDev
   ? 'arn:aws:codestar-connections:us-east-1:410318598490:connection/7426c139-1aa0-49e2-aabc-5aef11092032'

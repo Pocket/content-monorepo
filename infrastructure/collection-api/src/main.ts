@@ -138,14 +138,14 @@ class CollectionAPI extends TerraformStack {
         databaseName: 'collections',
         masterUsername: 'pkt_collections',
         engine: 'aurora-mysql',
-        engineMode: 'serverless',
-        scalingConfiguration: {
+        engineMode: 'provisioned',
+        engineVersion: '8.0.mysql_aurora.3.06.0',
+        serverlessv2ScalingConfiguration: {
           minCapacity: config.rds.minCapacity,
           maxCapacity: config.rds.maxCapacity,
-          autoPause: false,
         },
+        createServerlessV2Instance: true,
       },
-
       tags: config.tags,
     });
   }
