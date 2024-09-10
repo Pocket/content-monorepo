@@ -71,7 +71,7 @@ jobs:
     needs: [infrastructure]
     with:
       scope: prospect-api-bridge-aws_lambda
-      sentry-project: prospect-api-bridge-lambda
+      sentry-project: prospect-api
       s3-bucket-pattern: pocket-prospectapi-{0}-sqs-bridge
       codedeploy-app-name-pattern: ProspectAPI-{0}-Sqs-Bridge-Lambda
       codedeploy-group-name-pattern: ProspectAPI-{0}-Sqs-Bridge-Lambda
