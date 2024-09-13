@@ -8,7 +8,7 @@
     "dev": "dotenv -- turbo dev",
     "synth": "dotenv -- turbo run synth",
     "test": "dotenv -- turbo run test",
-    "test-integrations": "dotenv -- turbo run test-integrations --no-cache",
+    "test-integrations": "dotenv -- turbo run test-integrations --no-cache --concurrency 1",
     "db:dynamo-seed": "dotenv -- turbo run db:dynamo-seed",
     "db:generate-prisma-client": "dotenv -- turbo run db:generate-prisma-client",
     "migrate:prisma-reset": "dotenv -- turbo run migrate:prisma-reset",
