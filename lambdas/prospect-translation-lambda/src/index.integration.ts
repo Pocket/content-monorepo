@@ -68,7 +68,7 @@ describe('prospect api translation lambda entry function', () => {
 
     await processor(fakePayload, sqsContext, sqsCallback);
 
-    const allEvents = await waitForSnowplowEvents();
+    const allEvents = await waitForSnowplowEvents(2);
 
     // 2 prospects created
     expect(allEvents.total).toEqual(2);

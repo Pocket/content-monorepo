@@ -52,7 +52,9 @@ describe('snowplow', () => {
   it('should accept an event with a created prospect', async () => {
     queueSnowplowEvent(tracker, mockCandidate);
 
-    const allEvents = await waitForSnowplowEvents();
+    emitter.flush();
+
+    const allEvents = await waitForSnowplowEvents(1);
 
     expect(allEvents.total).toEqual(1);
     expect(allEvents.bad).toEqual(0);
@@ -64,7 +66,9 @@ describe('snowplow', () => {
     };
     queueSnowplowEvent(tracker, candidate);
 
-    const allEvents = await waitForSnowplowEvents();
+    emitter.flush();
+
+    const allEvents = await waitForSnowplowEvents(1);
 
     expect(allEvents.total).toEqual(1);
     expect(allEvents.bad).toEqual(0);
