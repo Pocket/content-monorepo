@@ -23,7 +23,7 @@
     "seed": "dotenv -- turbo run db:prisma-seed"
   },
   "engines": {
-    "node": "^20.16"
+    "node": "^20.12"
   },
   "packageManager": "pnpm@9.9.0",
   "dependencies": {

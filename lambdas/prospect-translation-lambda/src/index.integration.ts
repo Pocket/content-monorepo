@@ -4,6 +4,7 @@ import { processor } from './';
 import {
   getGoodSnowplowEvents,
   parseSnowplowData,
+  resetSnowplowEvents,
   waitForSnowplowEvents,
 } from 'content-common/snowplow/test-helpers';
 import { SnowplowProspect } from 'content-common';
@@ -17,6 +18,10 @@ describe('prospect api translation lambda entry function', () => {
   const server = setupServer();
 
   beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
+
+  beforeEach(async () => {
+    await resetSnowplowEvents();
+  });
 
   afterEach(() => {
     // restoreAllMocks restores all mocks and replaced properties. clearAllMocks only clears mocks.

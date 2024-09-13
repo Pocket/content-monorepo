@@ -27,8 +27,16 @@ import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 
 describe('corpus scheduler lambda', () => {
   const server = setupServer();
-  let captureExceptionSpy: jest.SpyInstance<string, [exception: any, hint?: any], any>;
-  let consoleLogSpy: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]], any>;
+  let captureExceptionSpy: jest.SpyInstance<
+    string,
+    [exception: any, hint?: any],
+    any
+  >;
+  let consoleLogSpy: jest.SpyInstance<
+    void,
+    [message?: any, ...optionalParams: any[]],
+    any
+  >;
   beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
   afterEach(() => {
     // restoreAllMocks restores all mocks and replaced properties. clearAllMocks only clears mocks.
@@ -54,8 +62,8 @@ describe('corpus scheduler lambda', () => {
       .mockReturnValue(Promise.resolve('my_secret_value'));
     // spy on Sentry captureException
     captureExceptionSpy = jest
-        .spyOn(Sentry, 'captureException')
-        .mockImplementation();
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation();
     // spy on console.log
     consoleLogSpy = jest.spyOn(global.console, 'log');
   });
@@ -346,7 +354,7 @@ describe('corpus scheduler lambda', () => {
     expect(captureExceptionSpy).not.toHaveBeenCalled();
     // expect console.log to log that item has been created & scheduled
     expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('CreateApprovedCorpusItem MUTATION OUTPUT')
+      expect.stringContaining('CreateApprovedCorpusItem MUTATION OUTPUT'),
     );
   }, 7000);
 
@@ -377,24 +385,23 @@ describe('corpus scheduler lambda', () => {
 
     // overwrite with NEW_TAB_DE_DE scheduled surface
     record.candidates[0].scheduled_corpus_item.scheduled_surface_guid =
-        ScheduledSurfacesEnum.NEW_TAB_DE_DE;
+      ScheduledSurfacesEnum.NEW_TAB_DE_DE;
     const fakeEvent = {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
     } as unknown as SQSEvent;
 
     await processor(
-        fakeEvent,
-        null as unknown as Context,
-        null as unknown as Callback,
+      fakeEvent,
+      null as unknown as Context,
+      null as unknown as Callback,
     );
 
     expect(captureExceptionSpy).not.toHaveBeenCalled();
     // expect console.log to log that item has been created & scheduled
     expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('CreateApprovedCorpusItem MUTATION OUTPUT')
+      expect.stringContaining('CreateApprovedCorpusItem MUTATION OUTPUT'),
     );
   }, 7000);
-
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful & valid scheduled surface but not allowed for scheduling (approve & schedule candidate) (dev)', async () => {
     mockPocketImageCache(200);
