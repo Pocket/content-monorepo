@@ -25,6 +25,9 @@ describe('snowplow', () => {
   });
 
   it('should accept an event with a scheduled corpus candidate', async () => {
+    emitter.flush();
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     queueSnowplowEvent(tracker, mockCandidate);
 
     const allEvents = await waitForSnowplowEvents();
@@ -44,6 +47,9 @@ describe('snowplow', () => {
             error_name: errorName,
             error_description: `Oh no! A ${errorName} error occurred.`,
           });
+
+          emitter.flush();
+          await new Promise((resolve) => setTimeout(resolve, 1000));
 
           const allEvents = await waitForSnowplowEvents();
 

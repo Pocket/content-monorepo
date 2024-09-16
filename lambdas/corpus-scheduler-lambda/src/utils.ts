@@ -216,13 +216,21 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
           ? candidate.scheduled_corpus_item.title
           : itemMetadata.title
       ) as string;
-      title = isCandidateEnglish ? (formatQuotesEN(applyApTitleCase(title) as string) as string) : isCandidateGerman ? (formatQuotesDashesDE(title) as string) : title;
+      title = isCandidateEnglish
+        ? (formatQuotesEN(applyApTitleCase(title) as string) as string)
+        : isCandidateGerman
+        ? (formatQuotesDashesDE(title) as string)
+        : title;
       let excerpt = (
         candidate.scheduled_corpus_item.excerpt
           ? candidate.scheduled_corpus_item.excerpt
           : itemMetadata.excerpt
       ) as string;
-      excerpt = isCandidateEnglish ? formatQuotesEN(excerpt) as string : isCandidateGerman ? formatQuotesDashesDE(excerpt) as string : excerpt;
+      excerpt = isCandidateEnglish
+        ? (formatQuotesEN(excerpt) as string)
+        : isCandidateGerman
+        ? (formatQuotesDashesDE(excerpt) as string)
+        : excerpt;
       // validate image_url (Metaflow or Parser input, whichever is provided)
       const imageUrl =
         (await validateImageUrl(
@@ -431,6 +439,7 @@ export const processAndScheduleCandidate = async (
     try {
       // 1. validate scheduled candidate from Metaflow
       await validateCandidate(candidate);
+
       // 2. if dev & scheduled surface exists in allowed scheduled surfaces, continue processing
       // TODO: schedule to production
       if (
@@ -456,8 +465,12 @@ export const processAndScheduleCandidate = async (
       Sentry.captureException(error);
     }
   }
+
   // Ensure all Snowplow events are emitted before the Lambda exits.
   emitter.flush();
+
   // Flush processes the HTTP request in the background, so we need to wait here.
-  await new Promise((resolve) => setTimeout(resolve, 10000));
+  await new Promise((resolve) =>
+    setTimeout(resolve, config.snowplow.emitterDelay),
+  );
 };

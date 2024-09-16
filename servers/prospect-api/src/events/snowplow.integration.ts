@@ -39,6 +39,10 @@ describe('snowplow', () => {
   const tracker = getTracker(emitter, config.snowplow.appId);
 
   beforeEach(async () => {
+    emitter.flush();
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     await resetSnowplowEvents();
   });
 

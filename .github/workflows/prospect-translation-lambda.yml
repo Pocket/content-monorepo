@@ -31,7 +31,7 @@ jobs:
     # this will reference the file below on the main branch
     uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main
     with:
-      scope: prospect-translation-aws_lambda
+      scope: prospect-translation-lambda-cdk
       stack-output-path: infrastructure/prospect-translation-lambda/cdktf.out/stacks/prospect-translation-lambda-wrapper
     secrets: inherit
 
