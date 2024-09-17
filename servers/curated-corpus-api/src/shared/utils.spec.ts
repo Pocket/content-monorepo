@@ -115,6 +115,7 @@ describe('shared/utils', () => {
       expect(result.publisher).toEqual(approvedItem.publisher);
       expect(result.imageUrl).toEqual(approvedItem.imageUrl);
       expect(result.topic).toEqual(approvedItem.topic);
+      expect(result.isTimeSensitive).toEqual(approvedItem.isTimeSensitive);
     });
   });
 

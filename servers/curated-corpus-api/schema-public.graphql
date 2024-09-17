@@ -97,11 +97,14 @@ type CorpusItem @key(fields: "id") @key(fields: "url") {
   The quality grade associated with this CorpusItem.
   """
   grade: ApprovedItemGrade
-
   """
   If the Corpus Item is pocket owned with a specific type, this is the associated object (Collection or SyndicatedArticle).
   """
   target: CorpusTarget
+  """
+  A story tagged 'time-sensitive' has a natural expiry date.
+  """
+  isTimeSensitive: Boolean!
 }
 
 """

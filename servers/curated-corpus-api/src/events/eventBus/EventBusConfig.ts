@@ -74,6 +74,7 @@ const payloadBuilders = {
       topic: data.scheduledCorpusItem.approvedItem.topic,
       grade: data.scheduledCorpusItem.approvedItem.grade,
       isSyndicated: data.scheduledCorpusItem.approvedItem.isSyndicated,
+      isTimeSensitive: data.scheduledCorpusItem.approvedItem.isTimeSensitive,
       createdAt: data.scheduledCorpusItem.createdAt.toUTCString(),
       createdBy: data.scheduledCorpusItem.createdBy,
       updatedAt: data.scheduledCorpusItem.updatedAt.toUTCString(),

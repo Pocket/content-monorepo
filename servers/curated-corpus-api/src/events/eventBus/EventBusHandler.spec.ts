@@ -215,6 +215,7 @@ describe('EventBusHandler', () => {
       topic: 'EDUCATION',
       grade: 'A',
       isSyndicated: false,
+      isTimeSensitive: false,
       createdAt: new Date(1648225373000).toUTCString(),
       createdBy: 'Amy',
       updatedAt: new Date(1648225373000).toUTCString(),
