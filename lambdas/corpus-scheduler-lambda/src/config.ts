@@ -55,7 +55,7 @@ const config = {
     appId: isDev ? 'corpus-scheduler-lambda-dev' : 'corpus-scheduler-lambda',
     // the amount of time the lambda will wait before shutting down. this gives the snowplow
     // emitter, which is not async, a chance to flush its internal cache.
-    emitterDelay: 3000,
+    emitterDelay: 10000,
     schemas: {
       // published 2024-04-23
       scheduled_corpus_candidate:

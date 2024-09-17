@@ -1,3 +1,4 @@
+# ADOPTED FROM: https://github.com/Pocket/pocket-monorepo/tree/main
 # Adapted from https://turbo.build/repo/docs/handbook/deploying-with-docker
 # and https://github.com/vercel/turbo/issues/5462#issuecomment-1624792583
 
