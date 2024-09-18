@@ -1,4 +1,5 @@
 import {
+  getAllSnowplowEvents,
   waitForSnowplowEvents,
   resetSnowplowEvents,
 } from 'content-common/snowplow/test-helpers';
@@ -37,18 +38,22 @@ export const prospect: SnowplowProspect = {
 describe('snowplow', () => {
   const emitter = getEmitter();
   const tracker = getTracker(emitter, config.snowplow.appId);
+  const emitterDelay = 500;
 
   beforeEach(async () => {
-    emitter.flush();
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     await resetSnowplowEvents();
+    const totalEvents = await getAllSnowplowEvents();
+    console.log(
+      `BEFORE TEST: ${totalEvents.total} total events are in snowplow. (it should be 0.)`,
+    );
   });
 
   it('should accept an event with a prospect', async () => {
     queueSnowplowEvent(tracker, 'prospect_reviewed', prospect);
 
+    // tell snowplow to send its internal cache of tracked events to the endpoint
+    emitter.flush();
+    await new Promise((resolve) => setTimeout(resolve, emitterDelay));
     const allEvents = await waitForSnowplowEvents();
 
     expect(allEvents.total).toEqual(1);
@@ -67,6 +72,9 @@ describe('snowplow', () => {
       prospectWithRemovalReasons,
     );
 
+    // tell snowplow to send its internal cache of tracked events to the endpoint
+    emitter.flush();
+    await new Promise((resolve) => setTimeout(resolve, emitterDelay));
     const allEvents = await waitForSnowplowEvents();
 
     expect(allEvents.total).toEqual(1);
@@ -85,6 +93,9 @@ describe('snowplow', () => {
       prospectWithRemovalReasons,
     );
 
+    // tell snowplow to send its internal cache of tracked events to the endpoint
+    emitter.flush();
+    await new Promise((resolve) => setTimeout(resolve, emitterDelay));
     const allEvents = await waitForSnowplowEvents();
 
     expect(allEvents.total).toEqual(1);
@@ -104,6 +115,9 @@ describe('snowplow', () => {
       prospectWithRemovalReasons,
     );
 
+    // tell snowplow to send its internal cache of tracked events to the endpoint
+    emitter.flush();
+    await new Promise((resolve) => setTimeout(resolve, emitterDelay));
     const allEvents = await waitForSnowplowEvents();
 
     expect(allEvents.total).toEqual(1);
