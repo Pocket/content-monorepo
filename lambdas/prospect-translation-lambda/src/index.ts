@@ -117,8 +117,11 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
 
   // Ensure all Snowplow events are emitted before the Lambda exits.
   emitter.flush();
+
   // Flush processes the HTTP request in the background, so we need to wait here.
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await new Promise((resolve) =>
+    setTimeout(resolve, config.snowplow.emitterDelay),
+  );
 
   console.log(`${prospectIdsProcessed.length} prospects inserted into dynamo.`);
   console.log(

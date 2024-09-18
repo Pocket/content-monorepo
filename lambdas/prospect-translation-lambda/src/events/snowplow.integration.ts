@@ -52,8 +52,6 @@ describe('snowplow', () => {
   it('should accept an event with a created prospect', async () => {
     queueSnowplowEvent(tracker, mockCandidate);
 
-    emitter.flush();
-
     const allEvents = await waitForSnowplowEvents(1);
 
     expect(allEvents.total).toEqual(1);
@@ -64,9 +62,8 @@ describe('snowplow', () => {
       ...mockCandidate,
       run_details: undefined,
     };
-    queueSnowplowEvent(tracker, candidate);
 
-    emitter.flush();
+    queueSnowplowEvent(tracker, candidate);
 
     const allEvents = await waitForSnowplowEvents(1);
 

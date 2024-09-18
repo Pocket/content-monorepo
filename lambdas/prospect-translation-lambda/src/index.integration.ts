@@ -1,5 +1,8 @@
 import { setupServer } from 'msw/node';
 import { Callback, Context } from 'aws-lambda';
+
+import config from './config';
+
 import { processor } from './';
 import {
   getGoodSnowplowEvents,
@@ -19,8 +22,9 @@ describe('prospect api translation lambda entry function', () => {
 
   beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
 
-  beforeEach(async () => {
-    await resetSnowplowEvents();
+  beforeEach(() => {
+    // The Lambda waits for 10 seconds to flush Snowplow events. During tests we don't want to wait that long.
+    jest.replaceProperty(config.snowplow, 'emitterDelay', 500);
   });
 
   afterEach(() => {
@@ -30,7 +34,6 @@ describe('prospect api translation lambda entry function', () => {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
     server.close();
   });
 
@@ -38,6 +41,8 @@ describe('prospect api translation lambda entry function', () => {
   const sqsCallback = null as unknown as Callback;
 
   it('emits a Snowplow event if prospect is successfully inserted into dynamo', async () => {
+    await resetSnowplowEvents();
+
     const expectedUrls = [
       'https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all',
       'https://getpocket.com/explore/item/my-discomfort-with-comfort-food',
