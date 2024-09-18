@@ -103,6 +103,7 @@ export const getCorpusItemFromApprovedItem = (
     // JS reason? or is it just better practice?
     topic: approvedItem.topic ?? undefined,
     grade: approvedItem.grade ?? undefined,
+    isTimeSensitive: approvedItem.isTimeSensitive,
     target: target?.key && {
       slug: target.key,
       __typename: target.type,

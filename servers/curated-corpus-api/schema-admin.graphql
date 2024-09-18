@@ -284,8 +284,8 @@ type ApprovedCorpusItem @key(fields: "url") {
   """
   isCollection: Boolean!
   """
-  A flag to ML to not recommend this item long term after it is added to the corpus.
-  Example: a story covering an election, or "The best of 202x" collection.
+  Experimental data point that could imply either an expiry date or an urgency to be shown.
+  May be used for ML modeling.
   """
   isTimeSensitive: Boolean!
   """
