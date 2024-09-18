@@ -102,7 +102,7 @@ type CorpusItem @key(fields: "id") @key(fields: "url") {
   """
   target: CorpusTarget
   """
-  A story tagged 'time-sensitive' has a natural expiry date.
+  Experimental data point that could imply either an expiry date or an urgency to be shown.
   """
   isTimeSensitive: Boolean!
 }
