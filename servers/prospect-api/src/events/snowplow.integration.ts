@@ -40,7 +40,6 @@ const generateProspect = (title: string): SnowplowProspect => {
 describe('snowplow', () => {
   const emitter = getEmitter();
   const tracker = getTracker(emitter, config.snowplow.appId);
-  const emitterDelay = 500;
 
   beforeEach(async () => {
     await resetSnowplowEvents();
