@@ -9,11 +9,7 @@ import {
   getProspectById,
 } from 'prospectapi-common';
 
-import {
-  UrlMetadata,
-  parseReasonsCsv,
-  sanitizeText
-} from 'content-common';
+import { UrlMetadata, parseReasonsCsv, sanitizeText } from 'content-common';
 
 import {
   getProspects,
