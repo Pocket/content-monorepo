@@ -1,10 +1,7 @@
 import {
   getAllSnowplowEvents,
-  getGoodSnowplowEvents,
   waitForSnowplowEvents,
   resetSnowplowEvents,
-  parseSnowplowData,
-  getBadSnowplowEvents,
 } from 'content-common/snowplow/test-helpers';
 import { getEmitter, getTracker } from 'content-common/snowplow';
 import { queueSnowplowEvent } from './snowplow';
@@ -60,35 +57,7 @@ describe('snowplow', () => {
       generateProspect('should accept an event with a prospect'),
     );
 
-    // tell snowplow to send its internal cache of tracked events to the endpoint
-    //emitter.flush();
-    //await new Promise((resolve) => setTimeout(resolve, emitterDelay));
-
     const allEvents = await waitForSnowplowEvents();
-    console.log('ALL EVENTS');
-    console.log(allEvents);
-
-    const goodEvents = await getGoodSnowplowEvents();
-    const badEvents = await getBadSnowplowEvents();
-
-    console.log(`GOOD EVENTS: ${goodEvents.length}`);
-
-    goodEvents.forEach((ev) => {
-      console.log(parseSnowplowData(ev.rawEvent.parameters.cx).data[0].schema);
-      console.log(parseSnowplowData(ev.rawEvent.parameters.cx).data[0].data);
-    });
-
-    console.log(`BAD EVENTS: ${badEvents.length}`);
-
-    badEvents.forEach((ev) => {
-      console.log(parseSnowplowData(ev.rawEvent.parameters.cx).data[0].schema);
-      console.log(parseSnowplowData(ev.rawEvent.parameters.cx).data[0].data);
-    });
-
-    //const eventContext = parseSnowplowData(allEvents[0].rawEvent.parameters.cx);
-
-    //console.log(eventContext);
-    // TODO: dump the contents of all the events!
 
     expect(allEvents.total).toEqual(1);
     expect(allEvents.bad).toEqual(0);
@@ -110,9 +79,6 @@ describe('snowplow', () => {
       prospectWithRemovalReasons,
     );
 
-    // tell snowplow to send its internal cache of tracked events to the endpoint
-    //emitter.flush();
-    //await new Promise((resolve) => setTimeout(resolve, emitterDelay));
     const allEvents = await waitForSnowplowEvents();
 
     expect(allEvents.total).toEqual(1);
@@ -135,9 +101,6 @@ describe('snowplow', () => {
       prospectWithRemovalReasons,
     );
 
-    // tell snowplow to send its internal cache of tracked events to the endpoint
-    //emitter.flush();
-    //await new Promise((resolve) => setTimeout(resolve, emitterDelay));
     const allEvents = await waitForSnowplowEvents();
 
     expect(allEvents.total).toEqual(1);
@@ -161,9 +124,6 @@ describe('snowplow', () => {
       prospectWithRemovalReasons,
     );
 
-    // tell snowplow to send its internal cache of tracked events to the endpoint
-    //emitter.flush();
-    //await new Promise((resolve) => setTimeout(resolve, emitterDelay));
     const allEvents = await waitForSnowplowEvents();
 
     expect(allEvents.total).toEqual(1);
