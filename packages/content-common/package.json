@@ -11,6 +11,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc",
     "test": "jest \"\\.spec\\.ts\"",
+    "test-integrations": "jest \"\\.integration\\.ts\" --runInBand",
     "lint": "eslint --fix-dry-run \"*.ts\"",
     "format": "eslint --fix \"**/*.ts\""
   },
