@@ -557,6 +557,7 @@ describe('CorpusItem reference resolver', () => {
               {
                 __typename: 'Item',
                 givenUrl: 'ABRACADABRA',
+                resolvedUrl: 'ABRACADABRA',
               },
             ],
           },
