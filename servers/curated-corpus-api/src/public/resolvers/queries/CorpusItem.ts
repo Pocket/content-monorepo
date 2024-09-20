@@ -22,12 +22,15 @@ export async function getItemCorpusItem(
   args,
   { db },
 ): Promise<CorpusItem> {
-  const { givenUrl } = item;
+  const { givenUrl, resolvedUrl } = item;
 
-  const approvedItem = await getApprovedItemByUrl(db, givenUrl);
+  const approvedItem =
+    (await getApprovedItemByUrl(db, givenUrl)) ??
+    // If a record is not found for a givenUrl, it could be that
+    // the URL changed -- try the resolvedUrl
+    (await getApprovedItemByUrl(db, resolvedUrl));
   if (!approvedItem) {
     return null;
   }
-
   return getCorpusItemFromApprovedItem(approvedItem);
 }

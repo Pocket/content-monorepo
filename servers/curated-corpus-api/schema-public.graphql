@@ -160,7 +160,13 @@ type Item @key(fields: "givenUrl") {
   givenUrl: Url! @external
 
   """
+  Resolved URL field from the Parser in order to identify a given URL
+  in the Corpus (fallback if givenUrl is insufficient)
+  """
+  resolvedUrl: Url @external
+
+  """
   If the item is in corpus allow the item to reference it.  Exposing curated info for consistent UX
   """
-  corpusItem: CorpusItem
+  corpusItem: CorpusItem @requires(fields: "resolvedUrl")
 }

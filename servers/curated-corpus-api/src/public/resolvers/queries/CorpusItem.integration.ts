@@ -504,6 +504,33 @@ describe('CorpusItem reference resolver', () => {
               {
                 __typename: 'Item',
                 givenUrl: approvedItem.url,
+                resolvedUrl: approvedItem.url,
+              },
+            ],
+          },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.data?._entities).toHaveLength(1);
+
+      verifyCorpusItemMetadata(
+        result.body.data?._entities[0].corpusItem,
+        approvedItem,
+      );
+    });
+    it('resolves the Item from resolvedUrl if givenUrl returns no record', async () => {
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
+          variables: {
+            representations: [
+              {
+                __typename: 'Item',
+                givenUrl: 'https://www.youtube.com/watch?v=kfVsfOSbJY0',
+                resolvedUrl: approvedItem.url,
               },
             ],
           },
