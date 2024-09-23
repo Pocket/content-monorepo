@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [".env", "**/.env.*local", "packages/tsconfig/**"],
+  "envMode": "loose",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
