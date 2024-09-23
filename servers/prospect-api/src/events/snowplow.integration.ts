@@ -38,7 +38,7 @@ const generateProspect = (title: string): SnowplowProspect => {
 };
 
 describe('snowplow', () => {
-  const emitter = getEmitter();
+  const emitter = getEmitter(() => {});
   const tracker = getTracker(emitter, config.snowplow.appId);
 
   beforeEach(async () => {

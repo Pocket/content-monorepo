@@ -36,7 +36,7 @@ import {
 } from './events/snowplow';
 import { getEmitter, getTracker } from 'content-common/snowplow';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
-import * as Sentry from '@sentry/node';
+import * as Sentry from '@sentry/serverless';
 import { Tracker } from '@snowplow/node-tracker';
 import { DateTime } from 'luxon';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -174,7 +174,10 @@ function handleApprovedItemInputTypiaError(
 ) {
   const snowplowError = mapApprovedItemInputTypiaErrorToSnowplowError(e);
   if (snowplowError) {
-    const emitter = getEmitter();
+    const emitter = getEmitter((error: object) => {
+      Sentry.addBreadcrumb({ message: 'Emitter Data', data: error });
+      Sentry.captureMessage(`Emitter Error`);
+    });
     const tracker = getTracker(emitter, config.snowplow.appId);
     queueSnowplowEvent(
       tracker,
@@ -431,7 +434,10 @@ export const processAndScheduleCandidate = async (
   console.log(record.body);
   const parsedMessage: ScheduledCandidates = JSON.parse(record.body);
 
-  const emitter = getEmitter();
+  const emitter = getEmitter((error: object) => {
+    Sentry.addBreadcrumb({ message: 'Emitter Data', data: error });
+    Sentry.captureMessage(`Emitter Error`);
+  });
   const tracker = getTracker(emitter, config.snowplow.appId);
 
   // traverse through the parsed candidates array

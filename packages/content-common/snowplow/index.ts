@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/node';
 import {
   gotEmitter,
   HttpMethod,
@@ -18,7 +17,7 @@ let tracker: Tracker;
  *
  * @returns Emitter
  */
-export function getEmitter(): Emitter {
+export function getEmitter(errorHandler?: (error: object) => void): Emitter {
   if (!emitter) {
     emitter = gotEmitter(
       config.snowplow.endpoint,
@@ -31,9 +30,8 @@ export function getEmitter(): Emitter {
       // this is the callback function invoked after snowplow flushes their
       // internal cache.
       (error?: RequestError, response?: Response<string>) => {
-        if (error) {
-          Sentry.addBreadcrumb({ message: 'Emitter Data', data: error });
-          Sentry.captureMessage(`Emitter Error`);
+        if (error && errorHandler) {
+          errorHandler(error);
         }
       },
     );

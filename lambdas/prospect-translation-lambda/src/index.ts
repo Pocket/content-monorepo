@@ -36,7 +36,10 @@ Sentry.AWSLambda.init({
  * objects
  */
 export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
-  const emitter = getEmitter();
+  const emitter = getEmitter((error: object) => {
+    Sentry.addBreadcrumb({ message: 'Emitter Data', data: error });
+    Sentry.captureMessage(`Emitter Error`);
+  });
   const tracker = getTracker(emitter, config.snowplow.appId);
 
   // this is nice to have for easy viewing of the full event in lambda logs

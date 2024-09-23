@@ -42,7 +42,7 @@ describe('snowplow', () => {
       run_id: 'sfn-05612f',
     },
   };
-  const emitter = getEmitter();
+  const emitter = getEmitter(() => {});
   const tracker = getTracker(emitter, config.snowplow.appId);
 
   beforeEach(async () => {

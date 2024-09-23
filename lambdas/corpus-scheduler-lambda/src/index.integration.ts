@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/node';
+import * as Sentry from '@sentry/serverless';
 import { setupServer } from 'msw/node';
 import { processor } from './';
 import * as Utils from './utils';
