@@ -59,7 +59,7 @@ jobs:
     with:
       scope: prospect-api
       app-path: servers/prospect-api
-      app-port: 4025
+      app-port: 4026
       sentry-project: prospect-api
       docker-repo-name-pattern: prospectapi-{0}-app
       terraform-output: ${{needs.infrastructure.outputs.terraform-output}}

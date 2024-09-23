@@ -70,7 +70,7 @@ jobs:
     with:
       scope: collection-api
       app-path: servers/collection-api
-      app-port: 4025
+      app-port: 4004
       sentry-project: collection-api
       docker-repo-name-pattern: collectionapi-{0}-app
       terraform-output: ${{needs.infrastructure.outputs.terraform-output}}
