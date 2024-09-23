@@ -6,20 +6,17 @@ import config from './config';
 import { generateObjectUpdateEvent } from './test-helpers';
 
 describe('Snowplow Tracker', () => {
+  const mockErrorHandler = jest.fn();
   const server = setupServer();
-  const emitter = getEmitter();
+  const emitter = getEmitter(mockErrorHandler);
   const tracker = getTracker(emitter, 'test-app-id');
 
   beforeAll(() => server.listen());
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
-  it('retries and sends a message to Sentry when emitter fails', async () => {
+  it('retries and calls the provided error handler when emitter fails', async () => {
     let snowplowRequestCount = 0;
-
-    const captureMessageSpy = jest
-      .spyOn(Sentry, 'captureMessage')
-      .mockImplementation();
 
     // Intercept HTTP requests to Snowplow's endpoint and return an error
     server.use(
@@ -45,10 +42,7 @@ describe('Snowplow Tracker', () => {
     // It should be 1 higher than retries.limit, because the first request is not a retry.
     expect(snowplowRequestCount).toEqual(config.snowplow.retries.limit + 1);
 
-    // Assert that Sentry's captureMessage was called.
-    expect(captureMessageSpy).toHaveBeenCalled();
-
-    // Clean up mocks
-    captureMessageSpy.mockRestore();
+    // Assert that the provided error handler was called
+    expect(mockErrorHandler).toHaveBeenCalled();
   }, 10000);
 });
