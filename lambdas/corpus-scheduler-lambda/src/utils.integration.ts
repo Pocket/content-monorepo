@@ -1,5 +1,5 @@
 import { mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput } from './utils';
-import { UrlMetadata } from 'content-common/types';
+import { UrlMetadata } from 'content-common';
 import { createScheduledCandidate, getParserItem } from './testHelpers';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 import { resetSnowplowEvents, waitForSnowplowEvents } from 'content-common';
