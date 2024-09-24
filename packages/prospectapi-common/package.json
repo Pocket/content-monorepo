@@ -13,6 +13,10 @@
     "lint": "eslint --fix-dry-run \"**/*.ts\" \"test/**/*.ts\"",
     "format": "eslint --fix \"**/*.ts\" \"test/**/*.ts\""
   },
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "author": "pocket",
   "license": "ISC",
   "private": true,
