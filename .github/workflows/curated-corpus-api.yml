@@ -1,0 +1,87 @@
+name: Curated Corpus API
+on:
+  pull_request:
+    paths:
+      - 'infrastructure/curated-corpus-api/**'
+      - 'packages/**'
+      - 'docker-compose.yml'
+      - 'servers/curated-corpus-api/**'
+      - 'pnpm-lock.yaml'
+      - 'Dockerfile'
+      - '.github/workflows/curated-corpus-api.yml'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'infrastructure/curated-corpus-api/**'
+      - 'packages/**'
+      - 'servers/curated-corpus-api/**'
+      - 'pnpm-lock.yaml'
+      - 'Dockerfile'
+      - '.github/workflows/curated-corpus-api.yml'
+jobs:
+  test-integrations:
+    if: github.event_name == 'pull_request'
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-test-integrations.yml@main
+    with:
+      scope: curated-corpus-api
+    secrets: inherit
+
+  apollo:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-apollo-federation.yml@main
+    with:
+      federated-graph-name: pocket-client-api
+      graph-name: curated-corpus
+      schema-file-path: servers/curated-corpus-api/schema-client-api.graphql
+      prod-graph-url: https://curated-corpus-api.readitlater.com
+      dev-graph-url: https://curated-corpus-api.getpocket.dev
+      scope: curated-corpus-api
+    secrets:
+      apollo-key: ${{ secrets.APOLLO_CLIENT_API_KEY }}
+
+  apollo-admin:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-apollo-federation.yml@main
+    with:
+      federated-graph-name: pocket-admin-api
+      graph-name: curated-corpus
+      schema-file-path: servers/curated-corpus-api/schema-admin-api.graphql
+      prod-graph-url: https://curated-corpus-api.readitlater.com
+      dev-graph-url: https://curated-corpus-api.getpocket.dev
+      scope: curated-corpus-api
+    secrets:
+      apollo-key: ${{ secrets.APOLLO_ADMIN_API_KEY }}
+
+  infrastructure:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main
+    with:
+      scope: curated-corpus-api-cdk
+      stack-output-path: infrastructure/curated-corpus-api/cdktf.out/stacks/curated-corpus-api
+    secrets: inherit
+
+  api:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-build-and-push-image.yml@main
+    needs: [infrastructure]
+    with:
+      scope: curated-corpus-api
+      app-path: servers/curated-corpus-api
+      app-port: 4025
+      sentry-project: curated-corpus-api
+      docker-repo-name-pattern: curatedcorpusapi-{0}-app
+      terraform-output: ${{needs.infrastructure.outputs.terraform-output}}
+    secrets: inherit
+
+  sentry:
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-sentry-release.yml@main
+    needs: [api]
+    with:
+      sentry-project: curated-corpus-api
+      sentry-environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    secrets: inherit

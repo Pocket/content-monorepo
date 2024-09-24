@@ -9,20 +9,23 @@
 FROM node:20.12-alpine AS base
 
 ARG SCOPE
+ARG APP_PATH
 ARG PORT
 ARG GIT_SHA
+ARG SENTRY_ORG
+ARG SENTRY_PROJECT
 
 ## Add curl for health checks
 RUN apk add --no-cache curl
 
 ## Add turbo and pnpm to all followup builder images
 # Dockerfile
-RUN corepack enable && corepack prepare pnpm@8.15.3 --activate
+RUN corepack enable && corepack prepare pnpm@9.9.0 --activate
 # Enable `pnpm add --global` on Alpine Linux by setting
 # home location environment variable to a location already in $PATH
 # https://github.com/pnpm/pnpm/issues/784#issuecomment-1518582235
 ENV PNPM_HOME=/usr/local/bin
-RUN pnpm add -g turbo pnpm@8.15.3
+RUN pnpm add -g turbo@2.1.0
 
 #----------------------------------------
 # Docker build step that prunes down to 
@@ -30,8 +33,11 @@ RUN pnpm add -g turbo pnpm@8.15.3
 #----------------------------------------
 FROM base AS setup
 ARG SCOPE
+ARG APP_PATH
 ARG PORT
 ARG GIT_SHA
+ARG SENTRY_ORG
+ARG SENTRY_PROJECT
 
 RUN apk add --no-cache curl
 RUN apk update
@@ -40,7 +46,7 @@ WORKDIR /app
 COPY . .
 # Prune the structure to an optimized folder structure with just the `scopes` app dependencies. 
 RUN turbo prune --scope=$SCOPE --docker
-
+    
 #----------------------------------------
 # Docker build step that:
 # 1. Installs all the dependencies
@@ -50,14 +56,17 @@ RUN turbo prune --scope=$SCOPE --docker
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS builder
 ARG SCOPE
+ARG APP_PATH
 ARG PORT
 ARG GIT_SHA
+ARG SENTRY_ORG
+ARG SENTRY_PROJECT
 
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 RUN apk update
 WORKDIR /app
-
+    
 # First install the dependencies (as they change less often)
 COPY .gitignore .gitignore
 COPY --from=setup /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
@@ -65,16 +74,27 @@ COPY --from=setup /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 
 # First install dependencies (as they change less often)
 COPY --from=setup /app/out/json/ ./
-RUN pnpm install --filter=${SCOPE} --frozen-lockfile
+RUN pnpm install --filter=${SCOPE}... --frozen-lockfile
 
 # Build the project and its dependencies
 COPY --from=setup /app/out/full/ ./
 COPY turbo.json turbo.json
 RUN pnpm run build --filter=${SCOPE}...
 
+# Special handling for prisma node_modules
+# This is a temporary hack, hopefully
+RUN cp -r ${APP_PATH}/node_modules/.prisma ./.prisma.tmp | true
 ## Installing only the dev dependencies after we used them to build
-RUN rm -rf node_modules/ && pnpm install --prod --filter=${SCOPE} --frozen-lockfile
+RUN rm -rf node_modules/ && pnpm install --prod --filter=${SCOPE}... --frozen-lockfile
+
+# Inject sentry source maps
 RUN pnpm --filter=$SCOPE --prod deploy pruned
+RUN pnpx @sentry/cli sourcemaps inject pruned/dist
+RUN mv ./.prisma.tmp pruned/node_modules/.prisma | true
+
+# If sentry project was passed, upload the source maps
+RUN --mount=type=secret,id=sentry_token \
+        if [ -n "$SENTRY_PROJECT" ] ; then pnpx @sentry/cli sourcemaps upload pruned/dist --release ${GIT_SHA} --auth-token $(cat /run/secrets/sentry_token) --org ${SENTRY_ORG} --project ${SENTRY_PROJECT} ; fi
 
 #----------------------------------------
 # Docker build step that:
@@ -97,10 +117,9 @@ RUN chown -R nodejs:nodejs /app
 USER nodejs
 
 ENV NODE_ENV=production
-ENV PORT $PORT
+ENV PORT=${PORT}
 ENV GIT_SHA=${GIT_SHA}
-ENV AWS_XRAY_CONTEXT_MISSING=LOG_ERROR
-ENV AWS_XRAY_LOG_LEVEL=silent
+ENV RELEASE_SHA=${GIT_SHA}
 
 EXPOSE $PORT
-CMD npm run start
+CMD [ "npm", "run", "start" ]

@@ -5,14 +5,12 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { ApolloServerPluginUsageReportingDisabled } from '@apollo/server/plugin/disabled';
-import { buildSubgraphSchema } from '@apollo/subgraph';
 import responseCachePlugin from '@apollo/server-plugin-response-cache';
 
 import { errorHandler, sentryPlugin } from '@pocket-tools/apollo-utils';
 
-import { typeDefsPublic } from '../typeDefs';
-import { resolvers as publicResolvers } from './resolvers';
 import { IPublicContext } from './context';
+import { schema } from './schema';
 
 // export const server = new ApolloServer({
 export function getPublicServer(
@@ -40,9 +38,7 @@ export function getPublicServer(
   ];
 
   return new ApolloServer<IPublicContext>({
-    schema: buildSubgraphSchema([
-      { typeDefs: typeDefsPublic, resolvers: publicResolvers },
-    ]),
+    schema,
     plugins,
     formatError: errorHandler,
   });

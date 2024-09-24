@@ -1,0 +1,23 @@
+name: Prospect API Common Package
+on:
+  pull_request:
+    paths:
+      - 'packages/prospectapi-common/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/prospectapi-common-package.yml'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'packages/prospectapi-common/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/prospectapi-common-package.yml'
+jobs:
+  test-integrations:
+    if: github.event_name == 'pull_request'
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-test-integrations.yml@main
+    with:
+      scope: prospectapi-common
+    secrets: inherit

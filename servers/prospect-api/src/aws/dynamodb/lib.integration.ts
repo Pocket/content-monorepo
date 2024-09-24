@@ -2,6 +2,7 @@ import request from 'supertest';
 import { print } from 'graphql';
 
 import { ProspectType } from 'content-common';
+import { resetSnowplowEvents } from 'content-common/snowplow/test-helpers';
 import {
   dbClient,
   Prospect,
@@ -625,6 +626,12 @@ describe('mutations integration tests', () => {
   Update: 01.30.2024 - dismissProspect mutation has been removed
   */
   describe('removeProspect', () => {
+    afterEach(async () => {
+      // we need to clear the snowplow events here otherwise the
+      // snowplow integration tests may fail
+      await resetSnowplowEvents();
+    });
+
     it('should update a prospect as curated without any reason', async () => {
       const prospect = createProspect(
         'NEW_TAB_EN_US',

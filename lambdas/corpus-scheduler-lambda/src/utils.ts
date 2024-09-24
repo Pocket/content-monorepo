@@ -36,7 +36,7 @@ import {
 } from './events/snowplow';
 import { getEmitter, getTracker } from 'content-common/snowplow';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
-import * as Sentry from '@sentry/node';
+import * as Sentry from '@sentry/serverless';
 import { Tracker } from '@snowplow/node-tracker';
 import { DateTime } from 'luxon';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -174,7 +174,10 @@ function handleApprovedItemInputTypiaError(
 ) {
   const snowplowError = mapApprovedItemInputTypiaErrorToSnowplowError(e);
   if (snowplowError) {
-    const emitter = getEmitter();
+    const emitter = getEmitter((error: object) => {
+      Sentry.addBreadcrumb({ message: 'Emitter Data', data: error });
+      Sentry.captureMessage(`Emitter Error`);
+    });
     const tracker = getTracker(emitter, config.snowplow.appId);
     queueSnowplowEvent(
       tracker,
@@ -216,13 +219,21 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
           ? candidate.scheduled_corpus_item.title
           : itemMetadata.title
       ) as string;
-      title = isCandidateEnglish ? (formatQuotesEN(applyApTitleCase(title) as string) as string) : isCandidateGerman ? (formatQuotesDashesDE(title) as string) : title;
+      title = isCandidateEnglish
+        ? (formatQuotesEN(applyApTitleCase(title) as string) as string)
+        : isCandidateGerman
+        ? (formatQuotesDashesDE(title) as string)
+        : title;
       let excerpt = (
         candidate.scheduled_corpus_item.excerpt
           ? candidate.scheduled_corpus_item.excerpt
           : itemMetadata.excerpt
       ) as string;
-      excerpt = isCandidateEnglish ? formatQuotesEN(excerpt) as string : isCandidateGerman ? formatQuotesDashesDE(excerpt) as string : excerpt;
+      excerpt = isCandidateEnglish
+        ? (formatQuotesEN(excerpt) as string)
+        : isCandidateGerman
+        ? (formatQuotesDashesDE(excerpt) as string)
+        : excerpt;
       // validate image_url (Metaflow or Parser input, whichever is provided)
       const imageUrl =
         (await validateImageUrl(
@@ -423,7 +434,10 @@ export const processAndScheduleCandidate = async (
   console.log(record.body);
   const parsedMessage: ScheduledCandidates = JSON.parse(record.body);
 
-  const emitter = getEmitter();
+  const emitter = getEmitter((error: object) => {
+    Sentry.addBreadcrumb({ message: 'Emitter Data', data: error });
+    Sentry.captureMessage(`Emitter Error`);
+  });
   const tracker = getTracker(emitter, config.snowplow.appId);
 
   // traverse through the parsed candidates array
@@ -431,6 +445,7 @@ export const processAndScheduleCandidate = async (
     try {
       // 1. validate scheduled candidate from Metaflow
       await validateCandidate(candidate);
+
       // 2. if dev & scheduled surface exists in allowed scheduled surfaces, continue processing
       // TODO: schedule to production
       if (
@@ -456,8 +471,12 @@ export const processAndScheduleCandidate = async (
       Sentry.captureException(error);
     }
   }
+
   // Ensure all Snowplow events are emitted before the Lambda exits.
   emitter.flush();
+
   // Flush processes the HTTP request in the background, so we need to wait here.
-  await new Promise((resolve) => setTimeout(resolve, 10000));
+  await new Promise((resolve) =>
+    setTimeout(resolve, config.snowplow.emitterDelay),
+  );
 };
