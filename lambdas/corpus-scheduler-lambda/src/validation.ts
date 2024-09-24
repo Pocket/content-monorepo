@@ -1,8 +1,8 @@
-import {pocketImageCache, ScheduledCandidate} from './types';
-import {assert} from 'typia';
-import {DateTime, Interval} from 'luxon';
+import { pocketImageCache, ScheduledCandidate } from './types';
+import { assert } from 'typia';
+import { DateTime, Interval } from 'luxon';
 import config from './config';
-import {ScheduledSurfacesEnum} from "content-common";
+import { ScheduledSurfacesEnum } from 'content-common';
 
 /**
  * Validates the scheduled date for a candidate in a specified time zone
@@ -14,9 +14,9 @@ import {ScheduledSurfacesEnum} from "content-common";
  * @param publishHour the time when content gets published in specific time zone. Used in the base DateTime to calculate time diff.
  */
 export const validateScheduledDate = async (
-    scheduledDate: string,
-    timeZone: string,
-    publishHour: number
+  scheduledDate: string,
+  timeZone: string,
+  publishHour: number,
 ): Promise<void> => {
   // get the DateTime from an ISO scheduled date string in 12 AM of specified timezone.
   // Convert to appropriate hour:
@@ -25,14 +25,14 @@ export const validateScheduledDate = async (
   // Europe/Berlin = 9 AM
   const isoScheduledDateTime = DateTime.fromISO(scheduledDate, {
     zone: timeZone,
-  }).plus({hours: publishHour});
+  }).plus({ hours: publishHour });
 
   // 1. get the current date time for specified time zone
   const currentTime = DateTime.fromObject(
-      {},
-      {
-        zone: timeZone,
-      },
+    {},
+    {
+      zone: timeZone,
+    },
   ).toISO();
 
   // 2. get the day # of the week for the scheduled date using weekday func from DateTime
@@ -40,23 +40,23 @@ export const validateScheduledDate = async (
 
   // 3. Calculate the time difference between current date & scheduled date in hours
   const timeDifference = Interval.fromDateTimes(
-      DateTime.fromISO(currentTime!),
-      isoScheduledDateTime,
+    DateTime.fromISO(currentTime!),
+    isoScheduledDateTime,
   ).length('hours');
 
   if (!timeDifference) {
     throw new Error(
-        `validateScheduledDate (${timeZone}): cannot compute the time difference`,
+      `validateScheduledDate (${timeZone}): cannot compute the time difference`,
     );
   }
 
   // IF EN_US
-  if(timeZone === config.validation.EN_US.timeZone) {
+  if (timeZone === config.validation.EN_US.timeZone) {
     // 4. If scheduled date is Sunday, min time diff is 32 hrs
     if (scheduledDay === config.validation.ISO_SUNDAY) {
       if (timeDifference < config.validation.EN_US.SUNDAY_MIN_DIFF) {
         throw new Error(
-            `validateScheduledDate (${timeZone}): candidate scheduled for Sunday needs to arrive minimum ${config.validation.EN_US.SUNDAY_MIN_DIFF} hours in advance`,
+          `validateScheduledDate (${timeZone}): candidate scheduled for Sunday needs to arrive minimum ${config.validation.EN_US.SUNDAY_MIN_DIFF} hours in advance`,
         );
       }
     }
@@ -64,17 +64,17 @@ export const validateScheduledDate = async (
     else {
       if (timeDifference < config.validation.EN_US.MON_SAT_MIN_DIFF) {
         throw new Error(
-            `validateScheduledDate (${timeZone}): candidate scheduled for Monday - Saturday needs to arrive minimum ${config.validation.EN_US.MON_SAT_MIN_DIFF} hours in advance`,
+          `validateScheduledDate (${timeZone}): candidate scheduled for Monday - Saturday needs to arrive minimum ${config.validation.EN_US.MON_SAT_MIN_DIFF} hours in advance`,
         );
       }
     }
   }
 
   // IF DE_DE
-  else if(timeZone === config.validation.DE_DE.timeZone) {
+  else if (timeZone === config.validation.DE_DE.timeZone) {
     if (timeDifference < config.validation.DE_DE.MONDAY_SUNDAY_MIN_DIFF) {
       throw new Error(
-          `validateScheduledDate (${timeZone}): candidate scheduled for Monday - Sunday needs to arrive minimum ${config.validation.DE_DE.MONDAY_SUNDAY_MIN_DIFF} hours in advance`,
+        `validateScheduledDate (${timeZone}): candidate scheduled for Monday - Sunday needs to arrive minimum ${config.validation.DE_DE.MONDAY_SUNDAY_MIN_DIFF} hours in advance`,
       );
     }
   }
@@ -85,7 +85,7 @@ export const validateScheduledDate = async (
  * @returs string or null
  */
 export async function validateImageUrl(
-    imageUrl: string,
+  imageUrl: string,
 ): Promise<string | null> {
   if (!imageUrl) {
     return null;
@@ -110,7 +110,7 @@ export async function validateImageUrl(
  * @param candidate ScheduledCandidate received from Metaflow
  */
 export async function validateCandidate(
-    candidate: ScheduledCandidate,
+  candidate: ScheduledCandidate,
 ): Promise<void> {
   // validate candidate input against ScheduledCandidate
   // this also validates if values are in enums
@@ -119,13 +119,20 @@ export async function validateCandidate(
   // if ENABLE_SCHEDULED_DATE_VALIDATION env var is true, validate the scheduled date
   if (config.app.enableScheduledDateValidation === 'true') {
     // default to EST timezone
-    let timeZone  = config.validation.EN_US.timeZone;
+    let timeZone = config.validation.EN_US.timeZone;
     let publishHour = config.validation.EN_US.publishHour;
     //  if candidate is for NEW_TAB_DE_DE, use Berlin time (CET) scheduled date validation
-    if(candidate.scheduled_corpus_item.scheduled_surface_guid === ScheduledSurfacesEnum.NEW_TAB_DE_DE) {
+    if (
+      candidate.scheduled_corpus_item.scheduled_surface_guid ===
+      ScheduledSurfacesEnum.NEW_TAB_DE_DE
+    ) {
       timeZone = config.validation.DE_DE.timeZone;
       publishHour = config.validation.DE_DE.publishHour;
     }
-    await validateScheduledDate(candidate.scheduled_corpus_item.scheduled_date, timeZone, publishHour);
+    await validateScheduledDate(
+      candidate.scheduled_corpus_item.scheduled_date,
+      timeZone,
+      publishHour,
+    );
   }
 }

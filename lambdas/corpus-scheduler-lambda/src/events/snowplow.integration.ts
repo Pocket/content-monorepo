@@ -17,7 +17,7 @@ describe('snowplow', () => {
     scheduled_corpus_item_external_id: '05706565-5a9c-4b57-83e5-a426485a4714',
     approved_corpus_item_external_id: 'c43a2aa5-28de-4828-a20e-1fdf60cc4a80',
   };
-  const emitter = getEmitter();
+  const emitter = getEmitter(() => {});
   const tracker = getTracker(emitter, config.snowplow.appId);
 
   beforeEach(async () => {

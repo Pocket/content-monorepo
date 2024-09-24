@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/node';
+import * as Sentry from '@sentry/serverless';
 import { setupServer } from 'msw/node';
 import { processor } from './';
 import * as Utils from './utils';
@@ -14,7 +14,6 @@ import {
   mockGetApprovedCorpusItemByUrl,
   mockGetUrlMetadata,
   mockPocketImageCache,
-  mockSetTimeoutToReturnImmediately,
 } from './testHelpers';
 import { CorpusLanguage, ScheduledSurfacesEnum } from 'content-common';
 import {
@@ -27,35 +26,45 @@ import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 
 describe('corpus scheduler lambda', () => {
   const server = setupServer();
-  let captureExceptionSpy: jest.SpyInstance<string, [exception: any, hint?: any], any>;
-  let consoleLogSpy: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]], any>;
+
+  let captureExceptionSpy: jest.SpyInstance<
+    string,
+    [exception: any, hint?: any],
+    any
+  >;
+  let consoleLogSpy: jest.SpyInstance<
+    void,
+    [message?: any, ...optionalParams: any[]],
+    any
+  >;
+
   beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
+
   afterEach(() => {
     // restoreAllMocks restores all mocks and replaced properties. clearAllMocks only clears mocks.
     jest.restoreAllMocks();
     server.resetHandlers();
   });
+
   afterAll(() => {
-    jest.restoreAllMocks();
     server.close();
   });
 
   beforeEach(async () => {
-    // Need to restoreAllMocks after each test, such that resetSnowplowEvents can call setTimeout to
-    // wait for Snowplow events to arrive from the last test. Alternatively, we could call
-    // waitForSnowplowEvents() in each test where a Snowplow event is emitted.
-    jest.restoreAllMocks();
-    await resetSnowplowEvents();
     // The Lambda waits for 10 seconds to flush Snowplow events. During tests we don't want to wait that long.
-    mockSetTimeoutToReturnImmediately();
+    jest.replaceProperty(config.snowplow, 'emitterDelay', 500);
+
     jest.spyOn(Utils, 'generateJwt').mockReturnValue('test-jwt');
+
     jest
       .spyOn(Utils, 'getCorpusSchedulerLambdaPrivateKey')
       .mockReturnValue(Promise.resolve('my_secret_value'));
+
     // spy on Sentry captureException
     captureExceptionSpy = jest
-        .spyOn(Sentry, 'captureException')
-        .mockImplementation();
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation();
+
     // spy on console.log
     consoleLogSpy = jest.spyOn(global.console, 'log');
   });
@@ -77,13 +86,16 @@ describe('corpus scheduler lambda', () => {
   const sqsCallback = null as unknown as Callback;
 
   it('emits a Snowplow event if candidate is successfully processed', async () => {
+    await resetSnowplowEvents();
     mockPocketImageCache(200);
+
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {
         getApprovedCorpusItemByUrl: null,
       },
     });
+
     mockGetUrlMetadata(server);
     mockCreateApprovedCorpusItemOnce(server);
 
@@ -91,6 +103,7 @@ describe('corpus scheduler lambda', () => {
 
     // Exactly one Snowplow event should be emitted.
     const allEvents = await waitForSnowplowEvents(record.candidates.length);
+
     expect(allEvents.bad).toEqual(0);
     expect(allEvents.good).toEqual(record.candidates.length);
 
@@ -117,6 +130,7 @@ describe('corpus scheduler lambda', () => {
   });
 
   it('emits a Snowplow event if a previously approved candidate is successfully processed', async () => {
+    await resetSnowplowEvents();
     mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server);
@@ -154,6 +168,7 @@ describe('corpus scheduler lambda', () => {
   });
 
   it('emits a Snowplow event if the same item was already scheduled', async () => {
+    await resetSnowplowEvents();
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server);
     mockGetUrlMetadata(server);
@@ -346,7 +361,7 @@ describe('corpus scheduler lambda', () => {
     expect(captureExceptionSpy).not.toHaveBeenCalled();
     // expect console.log to log that item has been created & scheduled
     expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('CreateApprovedCorpusItem MUTATION OUTPUT')
+      expect.stringContaining('CreateApprovedCorpusItem MUTATION OUTPUT'),
     );
   }, 7000);
 
@@ -377,24 +392,23 @@ describe('corpus scheduler lambda', () => {
 
     // overwrite with NEW_TAB_DE_DE scheduled surface
     record.candidates[0].scheduled_corpus_item.scheduled_surface_guid =
-        ScheduledSurfacesEnum.NEW_TAB_DE_DE;
+      ScheduledSurfacesEnum.NEW_TAB_DE_DE;
     const fakeEvent = {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
     } as unknown as SQSEvent;
 
     await processor(
-        fakeEvent,
-        null as unknown as Context,
-        null as unknown as Callback,
+      fakeEvent,
+      null as unknown as Context,
+      null as unknown as Callback,
     );
 
     expect(captureExceptionSpy).not.toHaveBeenCalled();
     // expect console.log to log that item has been created & scheduled
     expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('CreateApprovedCorpusItem MUTATION OUTPUT')
+      expect.stringContaining('CreateApprovedCorpusItem MUTATION OUTPUT'),
     );
   }, 7000);
-
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful & valid scheduled surface but not allowed for scheduling (approve & schedule candidate) (dev)', async () => {
     mockPocketImageCache(200);

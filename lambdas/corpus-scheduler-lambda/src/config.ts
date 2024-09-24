@@ -32,7 +32,7 @@ const config = {
       timeZone: 'Europe/Berlin',
       publishHour: 9,
       MONDAY_SUNDAY_MIN_DIFF: 14, // Latest cutoff is 10 am. Shown Monday-Sunday mornings. 24:00 - 10:00 = 14 hours
-    }
+    },
   },
   aws: {
     localEndpoint: process.env.AWS_ENDPOINT,
@@ -53,6 +53,9 @@ const config = {
     // appId should end in '-dev' outside of production such that Dbt can filter events:
     // https://github.com/Pocket/dbt-snowflake/blob/main/macros/validate_snowplow_app_id.sql
     appId: isDev ? 'corpus-scheduler-lambda-dev' : 'corpus-scheduler-lambda',
+    // the amount of time the lambda will wait before shutting down. this gives the snowplow
+    // emitter, which is not async, a chance to flush its internal cache.
+    emitterDelay: 10000,
     schemas: {
       // published 2024-04-23
       scheduled_corpus_candidate:

@@ -1,0 +1,87 @@
+name: Collection API
+on:
+  pull_request:
+    paths:
+      - 'infrastructure/collection-api/**'
+      - 'packages/**'
+      - 'docker-compose.yml'
+      - 'servers/collection-api/**'
+      - 'pnpm-lock.yaml'
+      - 'Dockerfile'
+      - '.github/workflows/collection-api.yml'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'infrastructure/collection-api/**'
+      - 'packages/**'
+      - 'servers/collection-api/**'
+      - 'pnpm-lock.yaml'
+      - 'Dockerfile'
+      - '.github/workflows/collection-api.yml'
+jobs:
+  test-integrations:
+    if: github.event_name == 'pull_request'
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-test-integrations.yml@main
+    with:
+      scope: collection-api
+    secrets: inherit
+
+  apollo:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-apollo-federation.yml@main
+    with:
+      federated-graph-name: pocket-client-api
+      graph-name: collection
+      schema-file-path: servers/collection-api/schema-client-api.graphql
+      prod-graph-url: https://collection-api.readitlater.com
+      dev-graph-url: https://collection-api.getpocket.dev
+      scope: collection-api
+    secrets:
+      apollo-key: ${{ secrets.APOLLO_CLIENT_API_KEY }}
+
+  apollo-admin:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-apollo-federation.yml@main
+    with:
+      federated-graph-name: pocket-admin-api
+      graph-name: collection
+      schema-file-path: servers/collection-api/schema-admin-api.graphql
+      prod-graph-url: https://collection-api.readitlater.com
+      dev-graph-url: https://collection-api.getpocket.dev
+      scope: collection-api
+    secrets:
+      apollo-key: ${{ secrets.APOLLO_ADMIN_API_KEY }}
+
+  infrastructure:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main
+    with:
+      scope: collection-api-cdk
+      stack-output-path: infrastructure/collection-api/cdktf.out/stacks/collection-api
+    secrets: inherit
+
+  api:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-build-and-push-image.yml@main
+    needs: [infrastructure]
+    with:
+      scope: collection-api
+      app-path: servers/collection-api
+      app-port: 4004
+      sentry-project: collection-api
+      docker-repo-name-pattern: collectionapi-{0}-app
+      terraform-output: ${{needs.infrastructure.outputs.terraform-output}}
+    secrets: inherit
+
+  sentry:
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-sentry-release.yml@main
+    needs: [api]
+    with:
+      sentry-project: collection-api
+      sentry-environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    secrets: inherit
