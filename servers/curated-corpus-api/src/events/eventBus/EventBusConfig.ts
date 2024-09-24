@@ -44,6 +44,12 @@ export const eventBusConfig: EventHandlerCallbackMap = {
       data,
     );
   },
+  [ReviewedCorpusItemEventType.REMOVE_ITEM]: (data: any) => {
+    return payloadBuilders.approvedItemEvent(
+      config.eventBridge.removeApprovedItemEventType,
+      data,
+    );
+  },
 };
 
 // To add a new event handler, create a function that generates the

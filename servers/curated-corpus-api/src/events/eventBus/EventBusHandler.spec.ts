@@ -198,6 +198,55 @@ describe('EventBusHandler', () => {
         expectedEvent,
       );
     });
+    it('remove-approved-item should send event with proper data', async () => {
+      const expectedEvent: ApprovedItemEventBusPayload = {
+        approvedItemExternalId: '123-abc',
+        url: 'https://test.com/a-story',
+        title: 'Everything you need to know about React',
+        excerpt: 'Something here',
+        publisher: 'Octopus Publishing House',
+        imageUrl: 'https://test.com/image.png',
+        language: 'EN',
+        topic: 'EDUCATION',
+        isSyndicated: false,
+        createdAt: new Date(1648225373000).toUTCString(),
+        createdBy: 'Amy',
+        updatedAt: new Date(1648225373000).toUTCString(),
+        eventType: config.eventBridge.removeApprovedItemEventType,
+        authors: scheduledCorpusItem.approvedItem.authors,
+        isCollection: false,
+        isTimeSensitive: false,
+        datePublished: undefined,
+        domainName: 'test.com',
+        source: CorpusItemSource.PROSPECT,
+      };
+      emitter.emit(ReviewedCorpusItemEventType.REMOVE_ITEM, {
+        reviewedCorpusItem: scheduledCorpusItem.approvedItem,
+        eventType: ReviewedCorpusItemEventType.REMOVE_ITEM,
+      });
+      // Wait just a tad in case promise needs time to resolve
+      await setTimeout(100);
+      expect(sentryStub).toHaveBeenCalledTimes(0);
+      expect(serverLoggerErrorStub).toHaveBeenCalledTimes(0);
+      // Listener was registered on event
+      expect(
+        emitter.listeners(ReviewedCorpusItemEventType.REMOVE_ITEM).length,
+      ).toBe(1);
+      // Event was sent to Event Bus
+      expect(clientStub).toHaveBeenCalledTimes(1);
+      // Check that the payload is correct; since it's JSON, we need to decode the data
+      // otherwise it also does ordering check
+      const sendCommand = clientStub.mock.calls[0][0].input as any;
+      expect(sendCommand).toHaveProperty('Entries');
+      expect(sendCommand.Entries[0]).toMatchObject({
+        Source: config.eventBridge.source,
+        EventBusName: config.aws.eventBus.name,
+        DetailType: config.eventBridge.removeApprovedItemEventType,
+      });
+      expect(JSON.parse(sendCommand.Entries[0]['Detail'])).toEqual(
+        expectedEvent,
+      );
+    });
   });
   describe('scheduled item events', () => {
     const partialExpectedEvent: Omit<
