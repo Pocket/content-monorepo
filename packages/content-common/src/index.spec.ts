@@ -4,7 +4,7 @@ import {
   formatQuotesEN,
   capitalize,
   parseReasonsCsv,
-  sanitizeText
+  sanitizeText,
 } from './index';
 
 // refactor/move if/when needed
@@ -108,7 +108,9 @@ describe('content-common', () => {
     it('should format string correctly using AP style', () => {
       const stringToFormat = 'a random String to format! random-string:Random!';
       const output = applyApTitleCase(stringToFormat);
-      expect(output).toEqual('A Random String to Format! Random-String:Random!');
+      expect(output).toEqual(
+        'A Random String to Format! Random-String:Random!',
+      );
     });
   });
   // taken from curation admin tools
@@ -149,10 +151,10 @@ describe('content-common', () => {
 
     it('adds double curly apostrophes at the end of quotes', () => {
       const result = formatQuotesEN(
-          'I tried the workout, and it did more than expected. "Fitness is for Everyone."'
+        'I tried the workout, and it did more than expected. "Fitness is for Everyone."',
       );
       expect(result).toEqual(
-          'I tried the workout, and it did more than expected. “Fitness is for Everyone.”'
+        'I tried the workout, and it did more than expected. “Fitness is for Everyone.”',
       );
     });
   });
@@ -173,10 +175,10 @@ describe('content-common', () => {
     });
     it('Successfully does all replacements', () => {
       const result = formatQuotesDashesDE(
-          `“Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus “Tote Mädchen lügen nicht” und “Élite” – das musst du darüber wissen`,
+        `“Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus “Tote Mädchen lügen nicht” und “Élite” – das musst du darüber wissen`,
       );
       expect(result).toEqual(
-          '„Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus „Tote Mädchen lügen nicht” und „Élite” – das musst du darüber wissen',
+        '„Nicht eine mehr”: Diese spanische Netflix-Serie ist ein Mix aus „Tote Mädchen lügen nicht” und „Élite” – das musst du darüber wissen',
       );
     });
     it('Replaces opening « with „', () => {
@@ -187,13 +189,13 @@ describe('content-common', () => {
       const result = formatQuotesDashesDE("Here's to the great ones!»");
       expect(result).toEqual("Here's to the great ones!”");
     });
-    it('Replaces «Here\'s to the great ones!» with „Here\'s to the great ones!”', () => {
+    it("Replaces «Here's to the great ones!» with „Here's to the great ones!”", () => {
       const result = formatQuotesDashesDE("«Here's to the great ones!»");
       expect(result).toEqual("„Here's to the great ones!”");
     });
     it('Replaces »example« with „example”', () => {
-      const result = formatQuotesDashesDE("»example«");
-      expect(result).toEqual("„example”");
+      const result = formatQuotesDashesDE('»example«');
+      expect(result).toEqual('„example”');
     });
     it('Replaces opening " with „', () => {
       const result = formatQuotesDashesDE('"Here\'s to the great ones!');
@@ -217,10 +219,10 @@ describe('content-common', () => {
     });
     it('Replaces long em dash (–) (with whitespaces) with long en dash', () => {
       const result = formatQuotesDashesDE(
-          '"Meeresregionen — in die pelagischen Zonen — verlegt"',
+        '"Meeresregionen — in die pelagischen Zonen — verlegt"',
       );
       expect(result).toEqual(
-          '„Meeresregionen – in die pelagischen Zonen – verlegt”',
+        '„Meeresregionen – in die pelagischen Zonen – verlegt”',
       );
     });
     it('Should not replace short dash (-) with long en dash (–) if no whitespaces in short dash', () => {

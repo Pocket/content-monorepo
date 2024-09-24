@@ -19,7 +19,8 @@
     "content-common": "workspace:*",
     "prospectapi-common": "workspace:*",
     "uuid": "9.0.1",
-    "tslib": "2.7.0"
+    "tslib": "2.7.0",
+    "@snowplow/node-tracker": "3.5.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.134",

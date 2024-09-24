@@ -23,7 +23,8 @@
     "luxon": "3.4.4",
     "node-fetch": "^2.6.7",
     "typia": "^6.0.3",
-    "tslib": "2.7.0"
+    "tslib": "2.7.0",
+    "@snowplow/node-tracker": "3.5.0"
   },
   "devDependencies": {
     "@aws-sdk/client-secrets-manager": "3.529.1",
