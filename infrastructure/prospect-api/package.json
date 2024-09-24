@@ -15,15 +15,16 @@
     "format": "eslint --fix \"src/**/*.ts\""
   },
   "dependencies": {
-    "infrastructure-common": "workspace:*",
+    "@cdktf/provider-archive": "10.2.0",
     "@cdktf/provider-aws": "19.33.0",
     "@cdktf/provider-local": "10.1.0",
     "@cdktf/provider-null": "10.0.0",
     "@cdktf/provider-pagerduty": "13.11.6",
-    "@cdktf/provider-archive": "10.2.0",
-    "cdktf": "0.20.8",
+    "@pocket-tools/terraform-modules": "5.14.2",
     "cdktf-cli": "0.20.8",
-    "constructs": "10.3.0"
+    "cdktf": "0.20.8",
+    "constructs": "10.3.0",
+    "infrastructure-common": "workspace:*"
   },
   "devDependencies": {
     "eslint-config-custom": "workspace:*",
