@@ -20,7 +20,9 @@
   "license": "ISC",
   "private": true,
   "dependencies": {
-    "@snowplow/node-tracker": "3.5.0"
+    "@snowplow/node-tracker": "3.5.0",
+    "got": "11.8.6",
+    "tslib": "2.7.0"
   },
   "devDependencies": {
     "@types/jest": "29.5.12",

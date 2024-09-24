@@ -40,19 +40,26 @@
     "@pocket-tools/apollo-utils": "3.5.0",
     "@pocket-tools/ts-logger": "^1.6.0",
     "@prisma/client": "5.13.0",
-    "@sentry/node": "7.112.2",
     "@sentry/tracing": "7.112.2",
-    "@snowplow/node-tracker": "3.5.0",
     "content-common": "workspace:*",
-    "cors": "2.8.5",
     "dataloader": "^2.2.2",
     "date-fns": "2.29.3",
-    "express": "4.19.2",
     "graphql-scalars": "1.22.4",
     "graphql-upload": "15.0.2",
     "luxon": "3.4.4",
     "metadata-scraper": "^0.2.61",
-    "uuid": "9.0.1"
+    "uuid": "9.0.1",
+    "tslib": "2.7.0",
+    "@apollo/server": "4.11.0",
+    "@apollo/subgraph": "2.9.0",
+    "express": "4.19.2",
+    "cors": "2.8.5",
+    "graphql": "16.9.0",
+    "graphql-tag": "2.12.6",
+    "@sentry/node": "7.112.2",
+    "@snowplow/node-tracker": "3.5.0",
+    "@snowplow/tracker-core": "3.5.0",
+    "mime-types": "2.1.35"
   },
   "devDependencies": {
     "@aws-sdk/types": "^3.523.0",
@@ -69,7 +76,8 @@
     "prisma": "5.13.0",
     "supertest": "6.3.4",
     "ts-jest": "29.1.2",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "typescript": "5.3.3"
   },
   "files": [
     "dist",

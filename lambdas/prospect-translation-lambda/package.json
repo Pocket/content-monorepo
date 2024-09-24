@@ -18,7 +18,8 @@
     "@sentry/serverless": "7.112.2",
     "content-common": "workspace:*",
     "prospectapi-common": "workspace:*",
-    "uuid": "9.0.1"
+    "uuid": "9.0.1",
+    "tslib": "2.7.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.134",
