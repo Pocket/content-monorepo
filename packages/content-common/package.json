@@ -9,7 +9,7 @@
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "test": "jest \"\\.spec\\.ts\"",
     "test-integrations": "jest \"\\.integration\\.ts\" --runInBand",
-    "lint": "eslint --fix-dry-run \"*.ts\"",
+    "lint": "eslint --fix-dry-run \"**/*.ts\"",
     "format": "eslint --fix \"**/*.ts\""
   },
   "files": [
@@ -22,7 +22,8 @@
   "dependencies": {
     "@snowplow/node-tracker": "3.5.0",
     "got": "11.8.6",
-    "tslib": "2.7.0"
+    "tslib": "2.7.0",
+    "@sentry/node": "7.112.2"
   },
   "devDependencies": {
     "@types/jest": "29.5.12",

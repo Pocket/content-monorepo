@@ -353,6 +353,9 @@ importers:
 
   packages/content-common:
     dependencies:
+      '@sentry/node':
+        specifier: 7.112.2
+        version: 7.112.2
       '@snowplow/node-tracker':
         specifier: 3.5.0
         version: 3.5.0
