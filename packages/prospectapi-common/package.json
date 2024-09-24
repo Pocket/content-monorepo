@@ -2,9 +2,12 @@
   "name": "prospectapi-common",
   "version": "1.0.0",
   "description": "common code shared between api and lambda",
-  "main": "./dist/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist && tsc",
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "pnpm run build --watch",
     "test": "jest \"\\.spec\\.ts\"",
     "test-integrations": "jest \"\\.integration\\.ts\" --runInBand",
     "lint": "eslint --fix-dry-run \"**/*.ts\" \"test/**/*.ts\"",
@@ -31,6 +34,7 @@
     "jest": "29.7.0",
     "msw": "2.4.7",
     "ts-jest": "29.1.2",
+    "tsup": "8.2.4",
     "tsconfig": "workspace:*"
   }
 }

@@ -13,7 +13,7 @@ import gql from 'graphql-tag';
 import fetchRetry from 'fetch-retry';
 
 import config from './config';
-import { ClientApiItem } from './types';
+import { ClientApiItem } from '../types';
 
 let client;
 let clientRetryDelay;

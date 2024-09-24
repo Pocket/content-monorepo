@@ -5,7 +5,12 @@ import { dbClient, Prospect } from 'prospectapi-common';
 
 import config from './config';
 import { SqsProspect } from './types';
-import { ProspectFeatures, ProspectRunDetails } from 'content-common';
+import {
+  ProspectFeatures,
+  ProspectRunDetails,
+  getEmitter,
+  getTracker,
+} from 'content-common';
 
 import {
   getProspectsFromMessageJson,
@@ -18,7 +23,6 @@ import {
 } from './lib';
 
 import { deleteOldProspects } from './dynamodb/lib';
-import { getEmitter, getTracker } from 'content-common/snowplow';
 
 // little sentry initialization. no big deal.
 Sentry.AWSLambda.init({

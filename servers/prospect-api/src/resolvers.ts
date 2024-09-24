@@ -33,7 +33,7 @@ import {
 
 import { GetProspectsFilters, Context } from './types';
 //import { sendEventBridgeEvent } from './events/events';
-import { getEmitter, getTracker } from 'content-common/snowplow';
+import { getEmitter, getTracker } from 'content-common';
 import { queueSnowplowEvent } from './events/snowplow';
 
 /**

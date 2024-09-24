@@ -10,7 +10,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 
 import config from './config';
-import { DynamoItem, Prospect } from './types';
+import { DynamoItem, Prospect } from '../types';
 import { toUnixTimestamp } from './lib';
 
 /**

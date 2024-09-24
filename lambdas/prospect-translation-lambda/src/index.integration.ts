@@ -5,12 +5,12 @@ import config from './config';
 
 import { processor } from './';
 import {
+  SnowplowProspect,
   getGoodSnowplowEvents,
   parseSnowplowData,
   resetSnowplowEvents,
   waitForSnowplowEvents,
-} from 'content-common/snowplow/test-helpers';
-import { SnowplowProspect } from 'content-common';
+} from 'content-common';
 
 /**
  * these tests are primarily to verify the entry function can run end to end.

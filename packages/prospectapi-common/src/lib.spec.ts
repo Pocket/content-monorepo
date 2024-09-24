@@ -17,7 +17,7 @@ import {
   deriveUrlMetadata,
   toUnixTimestamp,
 } from './lib';
-import { ClientApiItem } from './types';
+import { ClientApiItem } from '../types';
 
 describe('lib', () => {
   describe('toUnixTimestamp', () => {

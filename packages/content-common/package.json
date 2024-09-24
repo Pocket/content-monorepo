@@ -2,14 +2,11 @@
   "name": "content-common",
   "version": "1.0.1",
   "description": "common code shared between multiple content services",
-  "main": "./dist/index.js",
-  "exports": {
-    ".": "./dist/index.js",
-    "./snowplow": "./dist/snowplow/index.js",
-    "./snowplow/test-helpers": "./dist/snowplow/test-helpers.js"
-  },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist && tsc",
+    "build": "tsup src/index.ts --format cjs,esm --dts",
     "test": "jest \"\\.spec\\.ts\"",
     "test-integrations": "jest \"\\.integration\\.ts\" --runInBand",
     "lint": "eslint --fix-dry-run \"*.ts\"",
@@ -28,6 +25,7 @@
     "msw": "2.4.7",
     "node-fetch": "^2.6.7",
     "ts-jest": "29.1.2",
+    "tsup": "8.2.4",
     "tsconfig": "workspace:*"
   }
 }

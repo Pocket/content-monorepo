@@ -2,10 +2,12 @@ import {
   getAllSnowplowEvents,
   waitForSnowplowEvents,
   resetSnowplowEvents,
-} from 'content-common/snowplow/test-helpers';
-import { getEmitter, getTracker } from 'content-common/snowplow';
+  getEmitter,
+  getTracker,
+  SnowplowProspect,
+  ProspectReviewStatus,
+} from 'content-common';
 import { queueSnowplowEvent } from './snowplow';
-import { SnowplowProspect, ProspectReviewStatus } from 'content-common';
 import config from '../config';
 
 const generateProspect = (title: string): SnowplowProspect => {
