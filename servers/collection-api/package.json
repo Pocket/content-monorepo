@@ -61,7 +61,7 @@
     "@types/chai": "4.3.5",
     "@types/jest": "29.5.12",
     "@types/graphql-upload": "8.0.12",
-    "@types/node": "^20.12",
+    "@types/node": "22.6.1",
     "@types/sinon": "^10.0.13",
     "@types/supertest": "^2.0.12",
     "chai": "4.3.7",
