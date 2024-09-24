@@ -49,8 +49,8 @@ jobs:
       federated-graph-name: pocket-admin-api
       graph-name: collection
       schema-file-path: servers/collection-api/schema-admin-api.graphql
-      prod-graph-url: https://collection-api.readitlater.com
-      dev-graph-url: https://collection-api.getpocket.dev
+      prod-graph-url: https://collection-api.readitlater.com/admin
+      dev-graph-url: https://collection-api.getpocket.dev/admin
       scope: collection-api
     secrets:
       apollo-key: ${{ secrets.APOLLO_ADMIN_API_KEY }}

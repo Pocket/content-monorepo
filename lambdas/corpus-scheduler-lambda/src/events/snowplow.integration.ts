@@ -1,8 +1,9 @@
 import {
   resetSnowplowEvents,
   waitForSnowplowEvents,
-} from 'content-common/snowplow/test-helpers';
-import { getEmitter, getTracker } from 'content-common/snowplow';
+  getEmitter,
+  getTracker,
+} from 'content-common';
 import { queueSnowplowEvent } from './snowplow';
 import {
   SnowplowScheduledCorpusCandidateErrorName,

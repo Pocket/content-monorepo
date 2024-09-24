@@ -23,7 +23,7 @@ import {
 } from 'content-common';
 
 import { SqsProspect } from './types';
-import {generateSnowplowEntity, queueSnowplowEvent} from './events/snowplow';
+import { generateSnowplowEntity, queueSnowplowEvent } from './events/snowplow';
 import { Tracker } from '@snowplow/node-tracker';
 
 /**
@@ -99,20 +99,20 @@ export const getProspectsFromMessageJson = (
  * @returns either SqsProspectRunDetails obj in the JSON or an empty SqsProspectRunDetails
  */
 export const getProspectRunDetailsFromMessageJson = (
-    messageBodyJson: any,
+  messageBodyJson: any,
 ): ProspectRunDetails => {
-  let runDetails = {};
-  if ( messageBodyJson.detail ) {
-    if(messageBodyJson.detail.id){
+  const runDetails = {};
+  if (messageBodyJson.detail) {
+    if (messageBodyJson.detail.id) {
       runDetails['candidate_set_id'] = messageBodyJson.detail.id;
     }
-    if(messageBodyJson.detail.flow) {
+    if (messageBodyJson.detail.flow) {
       runDetails['flow'] = messageBodyJson.detail.flow;
     }
-    if(messageBodyJson.detail.run) {
+    if (messageBodyJson.detail.run) {
       runDetails['run_id'] = messageBodyJson.detail.run;
     }
-    if(messageBodyJson.detail.expires_at) {
+    if (messageBodyJson.detail.expires_at) {
       runDetails['expires_at'] = messageBodyJson.detail.expires_at;
     }
     return runDetails as ProspectRunDetails;
@@ -122,9 +122,7 @@ export const getProspectRunDetailsFromMessageJson = (
       data: messageBodyJson,
     });
 
-    Sentry.captureException(
-        'no `detail` property exists on the SQS JSON.',
-    );
+    Sentry.captureException('no `detail` property exists on the SQS JSON.');
 
     return runDetails as ProspectRunDetails;
   }
@@ -136,7 +134,7 @@ export const processProspect = async (
   prospectSource: string,
   runDetails: ProspectRunDetails,
   features: ProspectFeatures,
-  tracker: Tracker
+  tracker: Tracker,
 ): Promise<string[]> => {
   const urlMetadata = await deriveUrlMetadata(prospect.url);
 
@@ -157,13 +155,8 @@ export const processProspect = async (
 
   // Finally, Send a Snowplow event after the prospect got successfully created in dynamo.
   queueSnowplowEvent(
-      tracker,
-      generateSnowplowEntity(
-          prospect,
-          prospectSource,
-          runDetails,
-          features
-      ),
+    tracker,
+    generateSnowplowEntity(prospect, prospectSource, runDetails, features),
   );
 
   return idsProcessed;
@@ -402,12 +395,17 @@ export const hydrateProspectMetadata = (
     urlMetadata.language?.toUpperCase() === CorpusLanguage.EN;
   // check if candidate is German language to apply German formatting for quotes / dashes
   const isCandidateGerman =
-      urlMetadata.language?.toUpperCase() === CorpusLanguage.DE;
+    urlMetadata.language?.toUpperCase() === CorpusLanguage.DE;
   const title = isCandidateEnglish
     ? (formatQuotesEN(applyApTitleCase(urlMetadata.title)) as string)
-    : isCandidateGerman ? (formatQuotesDashesDE(urlMetadata.title) as string) : urlMetadata.title;
-  const excerpt = isCandidateEnglish ? (formatQuotesEN(urlMetadata.excerpt) as string)
-      : isCandidateGerman ? (formatQuotesDashesDE(urlMetadata.excerpt) as string) : urlMetadata.excerpt;
+    : isCandidateGerman
+    ? (formatQuotesDashesDE(urlMetadata.title) as string)
+    : urlMetadata.title;
+  const excerpt = isCandidateEnglish
+    ? (formatQuotesEN(urlMetadata.excerpt) as string)
+    : isCandidateGerman
+    ? (formatQuotesDashesDE(urlMetadata.excerpt) as string)
+    : urlMetadata.excerpt;
   // Mutating the function argument here to avoid creating
   // more objects and be memory efficient
 

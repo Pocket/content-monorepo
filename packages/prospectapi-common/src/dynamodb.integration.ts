@@ -1,7 +1,7 @@
 import { ProspectType } from 'content-common';
 import { dbClient } from './dynamodb-client';
 import { getProspectById, insertProspect, truncateDb } from './dynamodb';
-import { createProspect } from './test/helpers';
+import { createProspect } from '../test/helpers';
 describe('dynamodb.common', () => {
   beforeAll(async () => {
     dbClient.destroy();

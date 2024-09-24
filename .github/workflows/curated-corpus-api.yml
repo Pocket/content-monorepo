@@ -49,8 +49,8 @@ jobs:
       federated-graph-name: pocket-admin-api
       graph-name: curated-corpus
       schema-file-path: servers/curated-corpus-api/schema-admin-api.graphql
-      prod-graph-url: https://curated-corpus-api.readitlater.com
-      dev-graph-url: https://curated-corpus-api.getpocket.dev
+      prod-graph-url: https://curated-corpus-api.readitlater.com/admin
+      dev-graph-url: https://curated-corpus-api.getpocket.dev/admin
       scope: curated-corpus-api
     secrets:
       apollo-key: ${{ secrets.APOLLO_ADMIN_API_KEY }}

@@ -16,7 +16,8 @@
     "@aws-sdk/client-eventbridge": "3.529.1",
     "@aws-sdk/client-firehose": "3.529.1",
     "@sentry/serverless": "7.112.2",
-    "typia": "^6.0.3"
+    "typia": "^6.0.3",
+    "tslib": "2.7.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.134",

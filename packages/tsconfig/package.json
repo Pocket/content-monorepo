@@ -8,9 +8,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@types/node": "^20.12",
+    "@types/node": "~20.12",
     "ts-node": "^10.9.2",
-    "tslib": "2.6.3",
+    "tslib": "2.7.0",
     "tsup": "8.2.4",
     "typescript": "5.3.3"
   },

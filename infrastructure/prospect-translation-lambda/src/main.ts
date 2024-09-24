@@ -1,15 +1,7 @@
 import { Construct } from 'constructs';
-import {
-  App,
-  TerraformStack,
-  MigrateIds,
-  Aspects,
-  S3Backend,
-} from 'cdktf';
+import { App, TerraformStack, MigrateIds, Aspects, S3Backend } from 'cdktf';
 
-import {
-  PocketVPC,
-} from '@pocket-tools/terraform-modules';
+import { PocketVPC } from '@pocket-tools/terraform-modules';
 
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { NullProvider } from '@cdktf/provider-null/lib/provider';
@@ -18,8 +10,8 @@ import { ArchiveProvider } from '@cdktf/provider-archive/lib/provider';
 
 import { config } from './config';
 import { TranslationSqsLambda } from './translationSqsLambda';
-import {DataAwsCallerIdentity} from "@cdktf/provider-aws/lib/data-aws-caller-identity";
-import {DataAwsRegion} from "@cdktf/provider-aws/lib/data-aws-region";
+import { DataAwsCallerIdentity } from '@cdktf/provider-aws/lib/data-aws-caller-identity';
+import { DataAwsRegion } from '@cdktf/provider-aws/lib/data-aws-region';
 import { MlIamUserPolicy } from './iam';
 
 class ProspectTranslationLambdaWrapper extends TerraformStack {
@@ -49,14 +41,14 @@ class ProspectTranslationLambdaWrapper extends TerraformStack {
     const sqsLambda = new TranslationSqsLambda(
       this,
       'translation-lambda',
-        caller,
-        region
+      caller,
+      region,
     );
 
     new MlIamUserPolicy(
-        this,
-        'corpus-scheduler-ml-user-policy',
-        sqsLambda.sqsQueue,
+      this,
+      'corpus-scheduler-ml-user-policy',
+      sqsLambda.sqsQueue,
     );
 
     // Pre cdktf 0.17 ids were generated differently so we need to apply a migration aspect
@@ -66,5 +58,8 @@ class ProspectTranslationLambdaWrapper extends TerraformStack {
 }
 
 const app = new App();
-new ProspectTranslationLambdaWrapper(app, 'prospect-translation-lambda-wrapper');
+new ProspectTranslationLambdaWrapper(
+  app,
+  'prospect-translation-lambda-wrapper',
+);
 app.synth();

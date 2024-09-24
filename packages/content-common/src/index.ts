@@ -1,7 +1,4 @@
-import {
-  SEPARATORS,
-  stop
-} from './types';
+import { SEPARATORS, stop } from './types';
 
 /**
  * takes a comma separated string and returns an array of strings
@@ -79,18 +76,18 @@ export const applyApTitleCase = (value: string): string | undefined => {
   // split by separators, check if word is first or last
   // or not blacklisted, then capitalize
   return value
-      .split(SEPARATORS)
-      .map((word, index, all) => {
-        if (
-            index === 0 ||
-            index === all.length - 1 ||
-            !stop.includes(word.toLowerCase())
-        ) {
-          return capitalize(word);
-        }
-        return word.toLowerCase();
-      })
-      .join('');
+    .split(SEPARATORS)
+    .map((word, index, all) => {
+      if (
+        index === 0 ||
+        index === all.length - 1 ||
+        !stop.includes(word.toLowerCase())
+      ) {
+        return capitalize(word);
+      }
+      return word.toLowerCase();
+    })
+    .join('');
 };
 
 /**
@@ -107,10 +104,10 @@ export const formatQuotesEN = (text: string): string | undefined => {
     return undefined;
   }
   return text
-      .replace(/(^|[-\u2014/([{"\s])'/g, '$1\u2018') // Opening singles (replaces opening ' with ‘)
-      .replace(/'/g, '\u2019') // Closing singles & apostrophes (replaces closing ' with ’)
-      .replace(/(^|[-\u2014/([{\u2018\s])"/g, '$1\u201c') // Opening doubles (replaces opening " with “)
-      .replace(/"/g, '\u201d'); // Closing doubles (replaces closing " with ”)
+    .replace(/(^|[-\u2014/([{"\s])'/g, '$1\u2018') // Opening singles (replaces opening ' with ‘)
+    .replace(/'/g, '\u2019') // Closing singles & apostrophes (replaces closing ' with ’)
+    .replace(/(^|[-\u2014/([{\u2018\s])"/g, '$1\u201c') // Opening doubles (replaces opening " with “)
+    .replace(/"/g, '\u201d'); // Closing doubles (replaces closing " with ”)
 };
 
 /**
@@ -126,17 +123,17 @@ export const formatQuotesDashesDE = (text: string): string | undefined => {
     return undefined;
   }
   return text
-      .replace(/(^|[-\u2014/([{\u2018\s])\u00AB/g, '$1\u201E') // Replaces opening « with „
-      .replace(/(^|[-\u2014/([{\u2018\s])\u00BB/g, '$1\u201E') // Replaces opening » with „
-      .replace(/\u00BB/g, '\u201D') // Replaces closing » with ”
-      .replace(/\u00AB/g, '\u201D') // Replaces closing « with ”
-      .replace(/(^|[-\u2014/([{\u2018\s])"/g, '$1\u201E') // Opening doubles (replaces opening " with „)
-      .replace(/"/g, '\u201D') // Closing doubles (replaces closing " with ”)
-      .replace(/(^|[-\u2014/([{\u2018\s])\u201c/g, '$1\u201E') // Replaces opening “ with „
-      .replace(/\s\u2014\s/g, ' \u2013 ') // Replace em dash (—) with en dash (–)
-      .replace(/\s-\s/g, ' \u2013 '); // Replace short dash (-) with long en dash (–)
+    .replace(/(^|[-\u2014/([{\u2018\s])\u00AB/g, '$1\u201E') // Replaces opening « with „
+    .replace(/(^|[-\u2014/([{\u2018\s])\u00BB/g, '$1\u201E') // Replaces opening » with „
+    .replace(/\u00BB/g, '\u201D') // Replaces closing » with ”
+    .replace(/\u00AB/g, '\u201D') // Replaces closing « with ”
+    .replace(/(^|[-\u2014/([{\u2018\s])"/g, '$1\u201E') // Opening doubles (replaces opening " with „)
+    .replace(/"/g, '\u201D') // Closing doubles (replaces closing " with ”)
+    .replace(/(^|[-\u2014/([{\u2018\s])\u201c/g, '$1\u201E') // Replaces opening “ with „
+    .replace(/\s\u2014\s/g, ' \u2013 ') // Replace em dash (—) with en dash (–)
+    .replace(/\s-\s/g, ' \u2013 '); // Replace short dash (-) with long en dash (–)
 };
 
-
-
 export * from './types';
+export * from './snowplow/index';
+export * from './snowplow/test-helpers';

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { Prospect } from '../types';
+import { Prospect } from '../src/types';
 import { CorpusLanguage, ProspectType, Topics } from 'content-common';
 
 // turn the enum into an array so we can grab a random one easily

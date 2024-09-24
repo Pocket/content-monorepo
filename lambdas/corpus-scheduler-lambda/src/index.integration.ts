@@ -15,11 +15,12 @@ import {
   mockGetUrlMetadata,
   mockPocketImageCache,
 } from './testHelpers';
-import { CorpusLanguage, ScheduledSurfacesEnum } from 'content-common';
 import {
+  CorpusLanguage,
+  ScheduledSurfacesEnum,
   resetSnowplowEvents,
   waitForSnowplowEvents,
-} from 'content-common/snowplow/test-helpers';
+} from 'content-common';
 import { extractScheduledCandidateEntity } from './events/testHelpers';
 import config from './config';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';

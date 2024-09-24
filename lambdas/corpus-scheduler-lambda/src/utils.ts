@@ -34,7 +34,7 @@ import {
   generateSnowplowSuccessEntity,
   queueSnowplowEvent,
 } from './events/snowplow';
-import { getEmitter, getTracker } from 'content-common/snowplow';
+import { getEmitter, getTracker } from 'content-common';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 import * as Sentry from '@sentry/serverless';
 import { Tracker } from '@snowplow/node-tracker';

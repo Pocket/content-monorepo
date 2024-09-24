@@ -30,7 +30,7 @@ import {
   mockPocketImageCache,
   mockSnowplow,
 } from './testHelpers';
-import {getEmitter, getTracker} from 'content-common/snowplow';
+import { getEmitter, getTracker } from 'content-common';
 import * as validation from './validation';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

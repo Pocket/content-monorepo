@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/node';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { getEmitter, getTracker } from './index';

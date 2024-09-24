@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node';
 
-import { getEmitter, getTracker } from 'content-common/snowplow';
+import { getEmitter, getTracker } from 'content-common';
 import config from '../../config';
 
 const emitter = getEmitter((error: object) => {
