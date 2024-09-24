@@ -37,6 +37,7 @@ export function getServer(
   return new ApolloServer<AdminAPIUserContext>({
     schema: buildSubgraphSchema([{ typeDefs: typeDefs, resolvers: resolvers }]),
     plugins,
+    introspection: true,
     formatError: errorHandler,
   });
 }

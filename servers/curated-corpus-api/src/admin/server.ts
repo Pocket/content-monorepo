@@ -45,6 +45,7 @@ export function getAdminServer(
   return new ApolloServer<IAdminContext>({
     schema,
     plugins,
+    introspection: true,
     formatError: errorHandler,
   });
 }

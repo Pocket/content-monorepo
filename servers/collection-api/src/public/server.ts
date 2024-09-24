@@ -40,6 +40,7 @@ export function getPublicServer(
   return new ApolloServer<IPublicContext>({
     schema,
     plugins,
+    introspection: true,
     formatError: errorHandler,
   });
 }

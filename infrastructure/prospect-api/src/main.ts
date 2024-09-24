@@ -225,12 +225,13 @@ class ProspectAPI extends TerraformStack {
       codeDeploy: {
         useCodeDeploy: true,
         useCodePipeline: false,
+        useTerraformBasedCodeDeploy: false,
+        generateAppSpec: false,
         snsNotificationTopicArn: snsTopic.arn,
         notifications: {
-          //only notify on failed deploys
           notifyOnFailed: true,
-          notifyOnStarted: false,
           notifyOnSucceeded: false,
+          notifyOnStarted: false,
         },
       },
       exposedContainer: {

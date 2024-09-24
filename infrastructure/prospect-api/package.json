@@ -15,8 +15,14 @@
     "format": "eslint --fix \"src/**/*.ts\""
   },
   "dependencies": {
-    "@pocket-tools/terraform-modules": "5.8.6",
-    "infrastructure-common": "workspace:*"
+    "infrastructure-common": "workspace:*",
+    "@cdktf/provider-aws": "19.33.0",
+    "@cdktf/provider-local": "10.1.0",
+    "@cdktf/provider-null": "10.0.0",
+    "@cdktf/provider-pagerduty": "13.11.6",
+    "cdktf": "0.20.8",
+    "cdktf-cli": "0.20.8",
+    "constructs": "10.3.0"
   },
   "devDependencies": {
     "eslint-config-custom": "workspace:*",
