@@ -22,7 +22,6 @@
     "migrate:prisma-deploy": "prisma migrate deploy",
     "migrate:prisma-reset": "prisma migrate reset --skip-seed --force",
     "prebuild": "dotenv -e .env.ci -- prisma generate",
-    "prestart": "prisma generate",
     "pretest": "dotenv -e .env.ci -- prisma generate",
     "pretest-integrations": "dotenv -e .env.ci -- prisma migrate reset --skip-seed --force"
   },
