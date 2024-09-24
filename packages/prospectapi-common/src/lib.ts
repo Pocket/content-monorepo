@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/node';
 
 import config from './config';
 import { getUrlMetadata } from './client-api-proxy';
-import { ClientApiItem } from '../types';
+import { ClientApiItem } from './types';
 import { UrlMetadata } from 'content-common';
 
 /**

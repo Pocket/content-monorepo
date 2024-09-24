@@ -1,4 +1,4 @@
-import { SEPARATORS, stop } from '../types';
+import { SEPARATORS, stop } from './types';
 
 /**
  * takes a comma separated string and returns an array of strings
@@ -134,6 +134,6 @@ export const formatQuotesDashesDE = (text: string): string | undefined => {
     .replace(/\s-\s/g, ' \u2013 '); // Replace short dash (-) with long en dash (–)
 };
 
-export * from '../types';
+export * from './types';
 export * from './snowplow/index';
 export * from './snowplow/test-helpers';

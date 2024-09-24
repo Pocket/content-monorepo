@@ -4,17 +4,5 @@
     "outDir": "./dist"
   },
   "exclude": ["node_modules", "**/*.spec.ts", "**/*.integration.ts"],
-  "include": [
-    "*.ts",
-    "src/client-api-proxy.spec.ts",
-    "src/client-api-proxy.ts",
-    "src/config.ts",
-    "src/dynamodb-client.ts",
-    "src/dynamodb.integration.ts",
-    "src/dynamodb.spec.ts",
-    "src/dynamodb.ts",
-    "src/index.ts",
-    "src/lib.spec.ts",
-    "src/lib.ts"
-  ]
+  "include": ["src/**/*.ts"]
 }
