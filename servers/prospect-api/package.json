@@ -44,7 +44,6 @@
     "@types/lodash": "4.14.202",
     "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
-    "lodash": "4.17.21",
     "nodemon": "3.0.1",
     "ts-jest": "29.1.2",
     "tsconfig": "workspace:*",
