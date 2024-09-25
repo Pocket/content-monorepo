@@ -40,7 +40,7 @@
     "@devoxa/prisma-relay-cursor-connection": "3.1.0",
     "@pocket-tools/apollo-utils": "3.5.0",
     "@pocket-tools/ts-logger": "^1.6.0",
-    "@prisma/client": "5.13.0",
+    "@prisma/client": "5.19.1",
     "@sentry/node": "7.112.2",
     "@sentry/tracing": "7.112.2",
     "@snowplow/node-tracker": "3.5.0",
@@ -57,7 +57,7 @@
     "luxon": "3.4.4",
     "metadata-scraper": "^0.2.61",
     "mime-types": "2.1.35",
-    "prisma": "5.13.0",
+    "prisma": "5.19.1",
     "tslib": "2.7.0",
     "uuid": "9.0.1"
   },
