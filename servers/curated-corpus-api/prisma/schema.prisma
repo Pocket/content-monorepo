@@ -82,6 +82,8 @@ model ScheduledItem {
 
   @@unique([approvedItemId, scheduledSurfaceGuid, scheduledDate], name: "ItemScheduledSurfaceDate")
   @@index([scheduledSurfaceGuid])
+  // this index exists to assist serving content to new tab, which requests by surface and date
+  @@index([scheduledSurfaceGuid, scheduledDate], name: "ScheduledSurfaceGuidScheduledDate")
 }
 
 model ScheduleReview {
