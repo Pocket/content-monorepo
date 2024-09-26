@@ -1,7 +1,6 @@
 import { Construct } from 'constructs';
 import {
   App,
-  DataTerraformRemoteState,
   TerraformStack,
   MigrateIds,
   Aspects,
@@ -12,7 +11,6 @@ import {
   ApplicationRDSCluster,
   PocketALBApplication,
   PocketAwsSyntheticChecks,
-  PocketPagerDuty,
   PocketVPC,
 } from '@pocket-tools/terraform-modules';
 import { DataAwsCallerIdentity } from '@cdktf/provider-aws/lib/data-aws-caller-identity';
@@ -23,7 +21,6 @@ import { ArchiveProvider } from '@cdktf/provider-archive/lib/provider';
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { LocalProvider } from '@cdktf/provider-local/lib/provider';
 import { NullProvider } from '@cdktf/provider-null/lib/provider';
-import { PagerdutyProvider } from '@cdktf/provider-pagerduty/lib/provider';
 import { CloudwatchLogGroup } from '@cdktf/provider-aws/lib/cloudwatch-log-group';
 import { S3Bucket } from '@cdktf/provider-aws/lib/s3-bucket';
 class CollectionAPI extends TerraformStack {
@@ -37,7 +34,6 @@ class CollectionAPI extends TerraformStack {
     });
     new LocalProvider(this, 'local_provider');
     new NullProvider(this, 'null_provider');
-    new PagerdutyProvider(this, 'pagerduty_provider', { token: undefined });
 
     new S3Backend(this, {
       bucket: `mozilla-content-team-${config.environment.toLowerCase()}-terraform-state`,
@@ -50,12 +46,9 @@ class CollectionAPI extends TerraformStack {
     const pocketVpc = new PocketVPC(this, 'pocket-vpc');
     const region = new DataAwsRegion(this, 'region');
 
-    const colApiPagerduty = this.createPagerDuty();
-
     this.createPocketAlbApplication({
       rds: this.createRds(pocketVpc),
       s3: this.createS3Bucket(),
-      pagerDuty: colApiPagerduty,
       secretsManagerKmsAlias: this.getSecretsManagerKmsAlias(),
       snsTopic: this.getCodeDeploySnsTopic(),
       region,
@@ -63,10 +56,7 @@ class CollectionAPI extends TerraformStack {
     });
 
     new PocketAwsSyntheticChecks(this, 'synthetics', {
-      alarmTopicArn:
-        config.environment === 'Prod'
-          ? colApiPagerduty.snsNonCriticalAlarmTopic.arn
-          : '',
+      alarmTopicArn: '',
       environment: config.environment,
       prefix: config.prefix,
       query: [
@@ -150,45 +140,9 @@ class CollectionAPI extends TerraformStack {
     });
   }
 
-  /**
-   * Create PagerDuty service for alerts
-   * @private
-   */
-  private createPagerDuty(): PocketPagerDuty | undefined {
-    if (config.isDev) {
-      // Don't create pagerduty services for a dev service.
-      return null;
-    }
-
-    const incidentManagement = new DataTerraformRemoteState(
-      this,
-      'incident_management',
-      {
-        organization: 'Pocket',
-        workspaces: {
-          name: 'incident-management',
-        },
-      },
-    );
-
-    return new PocketPagerDuty(this, 'pagerduty', {
-      prefix: config.prefix,
-      service: {
-        // This is a Tier 2 service and as such only raises non-critical alarms.
-        criticalEscalationPolicyId: incidentManagement
-          .get('policy_default_non_critical_id')
-          .toString(),
-        nonCriticalEscalationPolicyId: incidentManagement
-          .get('policy_default_non_critical_id')
-          .toString(),
-      },
-    });
-  }
-
   private createPocketAlbApplication(dependencies: {
     rds: ApplicationRDSCluster;
     s3: S3Bucket;
-    pagerDuty: PocketPagerDuty;
     region: DataAwsRegion;
     caller: DataAwsCallerIdentity;
     secretsManagerKmsAlias: DataAwsKmsAlias;
@@ -197,7 +151,6 @@ class CollectionAPI extends TerraformStack {
     const {
       rds,
       s3,
-      pagerDuty,
       region,
       caller,
       secretsManagerKmsAlias,
@@ -374,7 +327,7 @@ class CollectionAPI extends TerraformStack {
           threshold: 25, // 25%
           period: 300, // 5 minutes
           evaluationPeriods: 4, // 20 minutes total
-          actions: config.isDev ? [] : [pagerDuty.snsNonCriticalAlarmTopic.arn],
+          actions: [],
         },
       },
     });
