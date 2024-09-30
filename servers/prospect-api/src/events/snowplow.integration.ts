@@ -1,5 +1,4 @@
 import {
-  getAllSnowplowEvents,
   waitForSnowplowEvents,
   resetSnowplowEvents,
   getEmitter,
@@ -45,10 +44,6 @@ describe('snowplow', () => {
 
   beforeEach(async () => {
     await resetSnowplowEvents();
-    const totalEvents = await getAllSnowplowEvents();
-    console.log(
-      `BEFORE TEST: ${totalEvents.total} total events are in snowplow. (it should be 0.)`,
-    );
   });
 
   it('should accept an event with a prospect', async () => {

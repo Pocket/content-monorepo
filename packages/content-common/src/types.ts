@@ -107,7 +107,6 @@ export type CreateScheduledItemInput = {
 // https://mozilla-hub.atlassian.net/wiki/spaces/PE/pages/390642851/Pocket+Shared+Data#Prospect-Types
 export enum ProspectType {
   COUNTS = 'COUNTS',
-  COUNTS_MODELED = 'COUNTS_MODELED',
   DISMISSED = 'DISMISSED',
   DOMAIN_ALLOWLIST = 'DOMAIN_ALLOWLIST',
   PUBLISHER_SUBMITTED = 'PUBLISHER_SUBMITTED',
@@ -116,7 +115,6 @@ export enum ProspectType {
   RSS_LOGISTIC_RECENT = 'RSS_LOGISTIC_RECENT',
   SLATE_SCHEDULER_V2 = 'SLATE_SCHEDULER_V2',
   TIMESPENT = 'TIMESPENT',
-  TIMESPENT_MODELED = 'TIMESPENT_MODELED',
   TITLE_URL_MODELED = 'TITLE_URL_MODELED',
   TOP_SAVED = 'TOP_SAVED',
 }
@@ -222,12 +220,9 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     prospectTypes: [
       ProspectType.COUNTS,
       ProspectType.TIMESPENT,
-      ProspectType.RECOMMENDED,
       ProspectType.TOP_SAVED,
       ProspectType.DOMAIN_ALLOWLIST,
       ProspectType.DISMISSED,
-      ProspectType.COUNTS_MODELED,
-      ProspectType.TIMESPENT_MODELED,
       ProspectType.TITLE_URL_MODELED,
       ProspectType.RSS_LOGISTIC,
       ProspectType.RSS_LOGISTIC_RECENT,
@@ -303,28 +298,14 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     name: 'Pocket Hits (en-US)',
     guid: 'POCKET_HITS_EN_US',
     ianaTimezone: 'America/New_York',
-    prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TOP_SAVED,
-      ProspectType.TIMESPENT,
-      ProspectType.DISMISSED,
-      ProspectType.COUNTS_MODELED,
-      ProspectType.TITLE_URL_MODELED,
-      ProspectType.RSS_LOGISTIC,
-    ],
+    prospectTypes: [ProspectType.TOP_SAVED],
     accessGroup: MozillaAccessGroup.POCKET_HITS_CURATOR_ENUS,
   },
   {
     name: 'Pocket Hits (de-DE)',
     guid: 'POCKET_HITS_DE_DE',
     ianaTimezone: 'Europe/Berlin',
-    prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
-      ProspectType.TOP_SAVED,
-      ProspectType.DOMAIN_ALLOWLIST,
-      ProspectType.TITLE_URL_MODELED,
-    ],
+    prospectTypes: [ProspectType.TOP_SAVED],
     accessGroup: MozillaAccessGroup.POCKET_HITS_CURATOR_DEDE,
   },
 
