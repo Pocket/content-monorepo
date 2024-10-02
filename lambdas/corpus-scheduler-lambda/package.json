@@ -21,7 +21,7 @@
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.5",
     "luxon": "3.4.4",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "2.6.12",
     "typia": "^6.0.3",
     "tslib": "2.7.0",
     "@snowplow/node-tracker": "3.5.0"

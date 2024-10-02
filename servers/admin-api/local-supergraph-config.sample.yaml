@@ -1,0 +1,44 @@
+# See https://www.apollographql.com/docs/federation/quickstart/#configuration-file
+# for more info
+subgraphs:
+  parser-graphql-wrapper:
+    routing_url: https://parser-graphql-wrapper.getpocket.dev/
+    # schema defines the introspection endpoint - usually the same, but it could be different
+    schema:
+      subgraph_url: https://parser-graphql-wrapper.getpocket.dev/
+
+  # connect to collection api dev, or...
+  collection-api:
+    routing_url: https://collection-api.getpocket.dev/admin
+    schema:
+      subgraph_url: https://collection-api.getpocket.dev/admin
+
+  # ...see local setup instructions at https://github.com/Pocket/collection-api
+  #collection-api:
+  #  routing_url: http://localhost:4004/admin
+  #  schema:
+  #    subgraph_url: http://localhost:4004/admin
+
+  # connect to prospect api on dev, or...
+  prospect-api:
+    routing_url: https://prospect-api.getpocket.dev/
+    schema:
+      subgraph_url: https://prospect-api.getpocket.dev/
+
+  # ...see local setup instructions at https://github.com/Pocket/prospect-api
+  #prospect-api:
+  #   routing_url: http://localhost:4026/
+  #   schema:
+  #    subgraph_url: http://localhost:4026/
+
+  # connect to curated corpus api on dev, or...
+  curated-corpus-api:
+    routing_url: https://curated-corpus-api.getpocket.dev/admin
+    schema:
+      subgraph_url: https://curated-corpus-api.getpocket.dev/admin
+
+  # ...see local setup instructions at https://github.com/Pocket/curated-corpus-api/
+  #curated-corpus-api:
+  #  routing_url: http://localhost:4025/admin
+  #  schema:
+  #    subgraph_url: http://localhost:4025/admin
