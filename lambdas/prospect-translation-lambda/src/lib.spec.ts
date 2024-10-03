@@ -39,7 +39,7 @@ describe('lib', () => {
       prospect_id: '123abc',
       scheduled_surface_guid: 'NEW_TAB_EN_US',
       predicted_topic: Topics.ENTERTAINMENT,
-      prospect_source: ProspectType.RECOMMENDED,
+      prospect_source: ProspectType.TOP_SAVED,
       url: 'https://getpocket.com',
       save_count: 1680,
       rank: 1680,
@@ -227,7 +227,7 @@ describe('lib', () => {
     });
 
     it('should return false if the prospect_source is not valid for the given scheduled surface', () => {
-      // de-DE does not have a RECOMMENDED prospectType
+      // de-DE does not have a TOP_SAVED prospectType
       validSqsProspect.scheduled_surface_guid = 'NEW_TAB_DE_DE';
 
       expect(hasValidProspectSource(validSqsProspect)).toBeFalsy();

@@ -58,7 +58,7 @@ describe('lib', () => {
   describe('isValidProspectType', () => {
     it('should return true for a valid prospect type', () => {
       expect(
-        isValidProspectType('NEW_TAB_EN_US', ProspectType.RECOMMENDED),
+        isValidProspectType('NEW_TAB_EN_US', ProspectType.TOP_SAVED),
       ).toBeTruthy();
 
       expect(
@@ -68,7 +68,7 @@ describe('lib', () => {
 
     it('should return false for an invalid prospect type', () => {
       expect(
-        isValidProspectType('NEW_TAB_DE_DE', ProspectType.RECOMMENDED),
+        isValidProspectType('NEW_TAB_DE_DE', ProspectType.TOP_SAVED),
       ).toBeFalsy();
     });
   });
