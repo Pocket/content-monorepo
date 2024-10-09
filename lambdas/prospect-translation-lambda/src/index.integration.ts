@@ -1,12 +1,16 @@
 import { setupServer } from 'msw/node';
 import { Callback, Context } from 'aws-lambda';
+
+import config from './config';
+
 import { processor } from './';
 import {
+  SnowplowProspect,
   getGoodSnowplowEvents,
   parseSnowplowData,
+  resetSnowplowEvents,
   waitForSnowplowEvents,
-} from 'content-common/snowplow/test-helpers';
-import { SnowplowProspect } from 'content-common';
+} from 'content-common';
 
 /**
  * these tests are primarily to verify the entry function can run end to end.
@@ -18,6 +22,11 @@ describe('prospect api translation lambda entry function', () => {
 
   beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
 
+  beforeEach(() => {
+    // The Lambda waits for 10 seconds to flush Snowplow events. During tests we don't want to wait that long.
+    jest.replaceProperty(config.snowplow, 'emitterDelay', 500);
+  });
+
   afterEach(() => {
     // restoreAllMocks restores all mocks and replaced properties. clearAllMocks only clears mocks.
     jest.restoreAllMocks();
@@ -25,7 +34,6 @@ describe('prospect api translation lambda entry function', () => {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
     server.close();
   });
 
@@ -33,6 +41,8 @@ describe('prospect api translation lambda entry function', () => {
   const sqsCallback = null as unknown as Callback;
 
   it('emits a Snowplow event if prospect is successfully inserted into dynamo', async () => {
+    await resetSnowplowEvents();
+
     const expectedUrls = [
       'https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all',
       'https://getpocket.com/explore/item/my-discomfort-with-comfort-food',
@@ -56,14 +66,14 @@ describe('prospect api translation lambda entry function', () => {
           eventSourceARN:
             'arn:aws:sqs:us-east-1:996905175585:ProspectAPI-Prod-Sqs-Translation-Queue',
           awsRegion: 'us-east-1',
-          body: `{"version":"0","id":"ab02d85b-4cb6-9de9-b549-b572166b278f","detail-type":"prospect-generation","source":"prospect-events","account":"996905175585","time":"2024-04-16T00:05:59Z","region":"us-east-1","resources":[],"detail":{"id":"c71504d1-f14f-4181-a654-730d5855ec48","version":3,"candidates":[{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"f920104e-bd7e-5a19-94e3-767c5f30e073","url":"https://getpocket.com/explore/item/my-discomfort-with-comfort-food","prospect_source":"RECOMMENDED","save_count":0,"predicted_topic":"FOOD","rank":1,"data_source":"prospect"},{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"9c3d7650-e331-5926-9be2-5faaa0467217","url":"https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all","prospect_source":"RECOMMENDED","save_count":0,"predicted_topic":"ENTERTAINMENT","rank":2,"data_source":"prospect"}]}}`,
+          body: `{"version":"0","id":"ab02d85b-4cb6-9de9-b549-b572166b278f","detail-type":"prospect-generation","source":"prospect-events","account":"996905175585","time":"2024-04-16T00:05:59Z","region":"us-east-1","resources":[],"detail":{"id":"c71504d1-f14f-4181-a654-730d5855ec48","version":3,"candidates":[{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"f920104e-bd7e-5a19-94e3-767c5f30e073","url":"https://getpocket.com/explore/item/my-discomfort-with-comfort-food","prospect_source":"TOP_SAVED","save_count":0,"predicted_topic":"FOOD","rank":1,"data_source":"prospect"},{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"9c3d7650-e331-5926-9be2-5faaa0467217","url":"https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all","prospect_source":"TOP_SAVED","save_count":0,"predicted_topic":"ENTERTAINMENT","rank":2,"data_source":"prospect"}]}}`,
         },
       ],
     };
 
     await processor(fakePayload, sqsContext, sqsCallback);
 
-    const allEvents = await waitForSnowplowEvents();
+    const allEvents = await waitForSnowplowEvents(2);
 
     // 2 prospects created
     expect(allEvents.total).toEqual(2);
@@ -104,7 +114,7 @@ describe('prospect api translation lambda entry function', () => {
           eventSourceARN:
             'arn:aws:sqs:us-east-1:996905175585:ProspectAPI-Prod-Sqs-Translation-Queue',
           awsRegion: 'us-east-1',
-          body: '{"version":"0","id":"ab02d85b-4cb6-9de9-b549-b572166b278f","detail-type":"prospect-generation","source":"prospect-events","account":"996905175585","time":"2024-04-16T00:05:59Z","region":"us-east-1","resources":[],"detail":{"id":"c71504d1-f14f-4181-a654-730d5855ec48","version":3,"candidates":[{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"f920104e-bd7e-5a19-94e3-767c5f30e073","url":"https://getpocket.com/explore/item/my-discomfort-with-comfort-food","prospect_source":"RECOMMENDED","save_count":0,"predicted_topic":"FOOD","rank":1,"data_source":"prospect"},{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"9c3d7650-e331-5926-9be2-5faaa0467217","url":"https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all","prospect_source":"RECOMMENDED","save_count":0,"predicted_topic":"ENTERTAINMENT","rank":2,"data_source":"prospect"}]}}',
+          body: '{"version":"0","id":"ab02d85b-4cb6-9de9-b549-b572166b278f","detail-type":"prospect-generation","source":"prospect-events","account":"996905175585","time":"2024-04-16T00:05:59Z","region":"us-east-1","resources":[],"detail":{"id":"c71504d1-f14f-4181-a654-730d5855ec48","version":3,"candidates":[{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"f920104e-bd7e-5a19-94e3-767c5f30e073","url":"https://getpocket.com/explore/item/my-discomfort-with-comfort-food","prospect_source":"TOP_SAVED","save_count":0,"predicted_topic":"FOOD","rank":1,"data_source":"prospect"},{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"9c3d7650-e331-5926-9be2-5faaa0467217","url":"https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all","prospect_source":"TOP_SAVED","save_count":0,"predicted_topic":"ENTERTAINMENT","rank":2,"data_source":"prospect"}]}}',
         },
       ],
     };
@@ -137,7 +147,7 @@ describe('prospect api translation lambda entry function', () => {
           eventSourceARN:
             'arn:aws:sqs:us-east-1:996905175585:ProspectAPI-Prod-Sqs-Translation-Queue',
           awsRegion: 'us-east-1',
-          body: '{"version":"0","id":"ab02d85b-4cb6-9de9-b549-b572166b278f","detail-type":"prospect-generation","source":"prospect-events","account":"996905175585","time":"2024-04-16T00:05:59Z","region":"us-east-1","resources":[],"detail":{"id":"c71504d1-f14f-4181-a654-730d5855ec48","version":3,"candidates":[{"scheduled_surface_typo":"NEW_TAB_EN_US","prospect_id":"f920104e-bd7e-5a19-94e3-767c5f30e073","url":"https://getpocket.com/explore/item/my-discomfort-with-comfort-food","prospect_source":"RECOMMENDED","save_count":0,"predicted_topic":"FOOD","rank":1,"data_source":"prospect"},{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"9c3d7650-e331-5926-9be2-5faaa0467217","url":"https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all","prospect_source":"RECOMMENDED","save_count":0,"predicted_topic":"ENTERTAINMENT","rank":2,"data_source":"prospect"}]}}',
+          body: '{"version":"0","id":"ab02d85b-4cb6-9de9-b549-b572166b278f","detail-type":"prospect-generation","source":"prospect-events","account":"996905175585","time":"2024-04-16T00:05:59Z","region":"us-east-1","resources":[],"detail":{"id":"c71504d1-f14f-4181-a654-730d5855ec48","version":3,"candidates":[{"scheduled_surface_typo":"NEW_TAB_EN_US","prospect_id":"f920104e-bd7e-5a19-94e3-767c5f30e073","url":"https://getpocket.com/explore/item/my-discomfort-with-comfort-food","prospect_source":"TOP_SAVED","save_count":0,"predicted_topic":"FOOD","rank":1,"data_source":"prospect"},{"scheduled_surface_guid":"NEW_TAB_EN_US","prospect_id":"9c3d7650-e331-5926-9be2-5faaa0467217","url":"https://getpocket.com/explore/item/fun-delivered-world-s-foremost-experts-on-whoopee-cushions-and-silly-putty-tell-all","prospect_source":"TOP_SAVED","save_count":0,"predicted_topic":"ENTERTAINMENT","rank":2,"data_source":"prospect"}]}}',
         },
       ],
     };

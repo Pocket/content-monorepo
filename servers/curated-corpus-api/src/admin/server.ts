@@ -5,14 +5,12 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { ApolloServerPluginUsageReportingDisabled } from '@apollo/server/plugin/disabled';
-import { buildSubgraphSchema } from '@apollo/subgraph';
 import responseCachePlugin from '@apollo/server-plugin-response-cache';
 
 import { errorHandler, sentryPlugin } from '@pocket-tools/apollo-utils';
 
-import { typeDefsAdmin } from '../typeDefs';
-import { resolvers as resolversAdmin } from './resolvers';
 import { IAdminContext } from './context';
+import { schema } from './schema';
 
 /**
  * Sets up and configures an ApolloServer for the application.
@@ -45,11 +43,9 @@ export function getAdminServer(
   ];
 
   return new ApolloServer<IAdminContext>({
-    schema: buildSubgraphSchema({
-      typeDefs: typeDefsAdmin,
-      resolvers: resolversAdmin,
-    }),
+    schema,
     plugins,
+    introspection: true,
     formatError: errorHandler,
   });
 }

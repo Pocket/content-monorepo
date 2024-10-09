@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/node';
+
 import {
   AuthenticationError,
   UserInputError,
@@ -9,11 +11,7 @@ import {
   getProspectById,
 } from 'prospectapi-common';
 
-import {
-  UrlMetadata,
-  parseReasonsCsv,
-  sanitizeText
-} from 'content-common';
+import { UrlMetadata, parseReasonsCsv, sanitizeText } from 'content-common';
 
 import {
   getProspects,
@@ -35,7 +33,7 @@ import {
 
 import { GetProspectsFilters, Context } from './types';
 //import { sendEventBridgeEvent } from './events/events';
-import { getEmitter, getTracker } from 'content-common/snowplow';
+import { getEmitter, getTracker } from 'content-common';
 import { queueSnowplowEvent } from './events/snowplow';
 
 /**
@@ -162,7 +160,10 @@ export const resolvers = {
 
       // in the mean time, send the dismiss event directly to snowplow
       // initialize snowplow tracker
-      const snowplowEmitter = getEmitter();
+      const snowplowEmitter = getEmitter((error: object) => {
+        Sentry.addBreadcrumb({ message: 'Emitter Data', data: error });
+        Sentry.captureMessage(`Emitter Error`);
+      });
       const snowplowTracker = getTracker(
         snowplowEmitter,
         config.snowplow.appId,

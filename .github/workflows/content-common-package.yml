@@ -1,0 +1,23 @@
+name: Content Common Package
+on:
+  pull_request:
+    paths:
+      - 'packages/content-common/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/content-common-package.yml'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'packages/content-common/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/content-common-package.yml'
+jobs:
+  test-integrations:
+    if: github.event_name == 'pull_request'
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-test-integrations.yml@main
+    with:
+      scope: content-common
+    secrets: inherit

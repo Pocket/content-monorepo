@@ -3,21 +3,21 @@
   "version": "1.0.0",
   "description": "content ts monorepo",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "build": "dotenv -- turbo run build",
-    "dev": "dotenv -- turbo dev",
-    "synth": "dotenv -- turbo run synth",
-    "test": "dotenv -- turbo run test",
-    "test-integrations": "dotenv -- turbo run test-integrations --no-cache",
+    "clean": "rm -rf .turbo node_modules packages/**/.turbo packages/**/dist packages/**/node_modules servers/**/logs servers/**/.turbo servers/**/dist servers/**/node_modules lambdas/**/logs lambdas/**/.turbo lambdas/**/dist lambdas/**/node_modules infrastructure/**/dist infrastructure/**/node_modules infrastructure/**/.turbo infrastructure/**/cdktf.out",
     "db:dynamo-seed": "dotenv -- turbo run db:dynamo-seed",
     "db:generate-prisma-client": "dotenv -- turbo run db:generate-prisma-client",
-    "migrate:prisma-reset": "dotenv -- turbo run migrate:prisma-reset",
-    "lint": "turbo run lint",
+    "dev": "dotenv -- turbo dev",
+    "fix-mismatches": "syncpack fix-mismatches && pnpm install",
     "format": "turbo run format",
-    "clean": "rm -rf .turbo node_modules packages/**/.turbo packages/**/dist packages/**/node_modules servers/**/logs servers/**/.turbo servers/**/dist servers/**/node_modules lambdas/**/logs lambdas/**/.turbo lambdas/**/dist lambdas/**/node_modules infrastructure/**/dist infrastructure/**/node_modules infrastructure/**/.turbo infrastructure/**/cdktf.out",
-    "list-packages": "syncpack list",
+    "lint": "turbo run lint",
     "list-mismatches": "syncpack list-mismatches",
-    "fix-mismatches": "syncpack fix-mismatches && pnpm install"
+    "list-packages": "syncpack list",
+    "migrate:prisma-reset": "dotenv -- turbo run migrate:prisma-reset",
+    "preinstall": "npx only-allow pnpm",
+    "synth": "dotenv -- turbo run synth",
+    "test-integrations": "dotenv -- turbo run test-integrations --no-cache",
+    "test": "dotenv -- turbo run test"
   },
   "prisma": {
     "seed": "dotenv -- turbo run db:prisma-seed"
@@ -25,12 +25,13 @@
   "engines": {
     "node": "^20.12"
   },
-  "packageManager": "pnpm@8.15.3",
+  "packageManager": "pnpm@9.9.0",
   "dependencies": {
     "dotenv-cli": "latest"
   },
   "devDependencies": {
-    "syncpack": "^12.3.0",
-    "turbo": "latest"
+    "syncpack": "^13.0.0",
+    "tsconfig": "workspace:*",
+    "turbo": "^2.1.1"
   }
 }

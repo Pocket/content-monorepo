@@ -166,12 +166,13 @@ class CuratedCorpusAPI extends TerraformStack {
         databaseName: 'curation_corpus',
         masterUsername: 'pkt_curation_corpus',
         engine: 'aurora-mysql',
-        engineMode: 'serverless',
-        scalingConfiguration: {
+        engineMode: 'provisioned',
+        engineVersion: '8.0.mysql_aurora.3.06.0',
+        serverlessv2ScalingConfiguration: {
           minCapacity: config.rds.minCapacity,
           maxCapacity: config.rds.maxCapacity,
-          autoPause: false,
         },
+        createServerlessV2Instance: true,
       },
 
       tags: config.tags,
@@ -309,13 +310,14 @@ class CuratedCorpusAPI extends TerraformStack {
       ],
       codeDeploy: {
         useCodeDeploy: true,
-        useCodePipeline: true,
+        useCodePipeline: false,
+        useTerraformBasedCodeDeploy: false,
+        generateAppSpec: false,
         snsNotificationTopicArn: snsTopic.arn,
         notifications: {
-          //only notify on failed deploys
           notifyOnFailed: true,
-          notifyOnStarted: false,
           notifyOnSucceeded: false,
+          notifyOnStarted: false,
         },
       },
       exposedContainer: {

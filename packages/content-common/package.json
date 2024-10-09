@@ -2,30 +2,38 @@
   "name": "content-common",
   "version": "1.0.1",
   "description": "common code shared between multiple content services",
-  "main": "./dist/index.js",
-  "exports": {
-    ".": "./dist/index.js",
-    "./snowplow": "./dist/snowplow/index.js",
-    "./snowplow/test-helpers": "./dist/snowplow/test-helpers.js"
-  },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist && tsc",
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "pnpm run build --watch",
     "test": "jest \"\\.spec\\.ts\"",
-    "lint": "eslint --fix-dry-run \"*.ts\"",
+    "test-integrations": "jest \"\\.integration\\.ts\" --runInBand",
+    "lint": "eslint --fix-dry-run \"**/*.ts\"",
     "format": "eslint --fix \"**/*.ts\""
   },
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "author": "pocket",
   "license": "ISC",
   "private": true,
   "dependencies": {
-    "@snowplow/node-tracker": "3.5.0"
+    "@snowplow/node-tracker": "3.5.0",
+    "got": "11.8.6",
+    "tslib": "2.7.0",
+    "@sentry/node": "7.112.2"
   },
   "devDependencies": {
     "@types/jest": "29.5.12",
     "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
-    "msw": "2.1.2",
+    "msw": "2.4.7",
+    "node-fetch": "^2.6.7",
     "ts-jest": "29.1.2",
+    "tsup": "8.2.4",
     "tsconfig": "workspace:*"
   }
 }

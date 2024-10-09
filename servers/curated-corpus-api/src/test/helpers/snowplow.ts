@@ -1,6 +1,6 @@
 import config from '../../config';
 import { CuratedCorpusItemUpdate } from '../../events/snowplow/schema';
-import { parseSnowplowData } from 'content-common/snowplow/test-helpers';
+import { parseSnowplowData } from 'content-common';
 
 export function assertValidSnowplowObjectUpdateEvents(
   events,

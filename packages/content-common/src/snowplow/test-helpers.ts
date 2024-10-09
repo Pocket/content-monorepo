@@ -69,6 +69,8 @@ export async function waitForSnowplowEvents(
 
   while (totalWaitTime < maxWaitTime) {
     const eventCounts = await getAllSnowplowEvents();
+    // TODO why is this >= and not === ?
+    // if it's greater than expected, that seems to say it hasn't been properly cleared
     if (eventCounts.total >= expectedEventCount) {
       return eventCounts;
     } else {

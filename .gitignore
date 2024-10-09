@@ -33,6 +33,9 @@ yarn-error.log*
 # InteliJ
 .idea
 
+# VSCode
+.vscode
+
 # Pocket
 dist
 logs

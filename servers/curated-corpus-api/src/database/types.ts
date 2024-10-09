@@ -142,6 +142,7 @@ export type CorpusItem = {
   topic?: string;
   grade?: ApprovedItemGrade;
   target?: CorpusTarget;
+  isTimeSensitive: boolean;
 };
 
 export type Image = {

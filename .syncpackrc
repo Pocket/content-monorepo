@@ -32,9 +32,10 @@
     },
     {
       "dependencies": [
-        "*prisma/**"
+        "*prisma/**",
+        "prisma"
       ],
-      "pinVersion": "5.13.0",
+      "pinVersion": "5.20.0",
       "label": "Prisma"
     },
     {
