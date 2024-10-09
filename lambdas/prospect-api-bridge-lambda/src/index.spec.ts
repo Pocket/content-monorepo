@@ -5,7 +5,6 @@ import { SQSRecord } from 'aws-lambda/trigger/sqs';
 
 // Mock the EventBridge and Firehose send methods
 const eventBridgeSendMock = jest.fn().mockResolvedValue({});
-const firehoseSendMock = jest.fn().mockResolvedValue({});
 
 jest.mock('@aws-sdk/client-eventbridge', () => {
   const originalModule = jest.requireActual('@aws-sdk/client-eventbridge');
@@ -14,17 +13,6 @@ jest.mock('@aws-sdk/client-eventbridge', () => {
     ...originalModule,
     EventBridgeClient: jest.fn().mockImplementation(() => ({
       send: eventBridgeSendMock,
-    })),
-  };
-});
-
-jest.mock('@aws-sdk/client-firehose', () => {
-  const originalModule = jest.requireActual('@aws-sdk/client-firehose');
-
-  return {
-    ...originalModule,
-    FirehoseClient: jest.fn().mockImplementation(() => ({
-      send: firehoseSendMock,
     })),
   };
 });
@@ -141,39 +129,6 @@ describe('processor', () => {
           },
         }),
       );
-    });
-  });
-
-  describe('Firehose', () => {
-    it('sends the body to Firehose with a newline', async () => {
-      const sqsEvent: SQSEvent = {
-        Records: [
-          {
-            ...random<SQSRecord>(),
-            body: JSON.stringify(mockProspectSet),
-          },
-        ],
-      };
-
-      await processor(sqsEvent, mockContext, mockCallback);
-
-      // Check if Firehose send was called correctly
-      expect(firehoseSendMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          input: {
-            DeliveryStreamName: 'MetaflowTools-Local-1-RecsAPICandidateSet',
-            Record: {
-              Data: expect.any(Uint8Array),
-            },
-          },
-        }),
-      );
-
-      // Check that the decoded string matches the input body, with a newline added at the end.
-      const callArg = firehoseSendMock.mock.calls[0][0];
-      const sentData = callArg.input.Record.Data;
-      const decodedString = new TextDecoder().decode(sentData);
-      expect(decodedString).toEqual(sqsEvent.Records[0].body + '\n');
     });
   });
 });
