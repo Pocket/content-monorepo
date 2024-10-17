@@ -444,7 +444,7 @@ export async function collectionImageUpload(
   context: IAdminContext,
 ) {
   const { s3service } = context;
-  const { image, ...imageData } = data;
+  const { image: Upload, ...imageData } = data;
   await data.image.promise;
   const upload = await uploadImage(s3service, image.file);
 

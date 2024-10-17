@@ -3,7 +3,7 @@ import mime from 'mime-types';
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload as AWSUpload } from '@aws-sdk/lib-storage';
 import config from '../config';
-import Upload from 'graphql-upload/Upload.js';
+import Upload from 'graphql-upload/Upload.mjs';
 
 export type ImageUploadResponse = {
   fileName: string;
