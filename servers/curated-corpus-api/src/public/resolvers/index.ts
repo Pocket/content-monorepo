@@ -39,13 +39,21 @@ export const resolvers = {
     corpusItem: async (item, args, context: IPublicContext) => {
       const { givenUrl, resolvedUrl } = item;
 
-      const corpusItem =
-        (await context.dataLoaders.corpusItemsByUrl.load(givenUrl)) ??
-        // If a record is not found for a givenUrl, it could be that
-        // the URL changed -- try the resolvedUrl
-        (await context.dataLoaders.corpusItemsByUrl.load(resolvedUrl));
+      // try to get the corpusItem by the item's givenUrl
+      let corpusItem = await context.dataLoaders.corpusItemsByUrl.load(
+        givenUrl,
+      );
 
-      return corpusItem;
+      // if the item's givenUrl didn't return a corpusItem, and if the item has
+      // a resolvedUrl, try finding the corpusItem by resolvedUrl
+      if (!corpusItem && resolvedUrl) {
+        corpusItem = await context.dataLoaders.corpusItemsByUrl.load(
+          resolvedUrl,
+        );
+      }
+
+      // return the corpusItem or null
+      return corpusItem || null;
     },
   },
   Query: {
