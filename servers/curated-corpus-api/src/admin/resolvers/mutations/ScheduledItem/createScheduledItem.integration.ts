@@ -9,6 +9,7 @@ import { client } from '../../../../database/client';
 import {
   clearDb,
   createApprovedItemHelper,
+  createExcludedDomainHelper,
   createScheduledItemHelper,
 } from '../../../../test/helpers';
 import { CREATE_SCHEDULED_ITEM } from '../sample-mutations.gql';
@@ -389,6 +390,13 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       where: { domainName: 'example.com' },
     });
     expect(trustedDomain).toBeNull();
+  });
+
+  it('should not schedule a story if the domain is on the list of excluded domains', async () => {
+    await createExcludedDomainHelper(db, { domainName: 'excludeme.com' });
+    await createExcludedDomainHelper(db, { domainName: 'example.com' });
+
+    // TBC
   });
 
   it('should fail if user has read-only access', async () => {

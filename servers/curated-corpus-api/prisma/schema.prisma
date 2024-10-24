@@ -24,6 +24,10 @@ model TrustedDomain {
   domainName String @id @db.VarChar(255)
 }
 
+model ExcludedDomain {
+  domainName String @id @db.VarChar(255)
+}
+
 model ApprovedItem {
   id              Int                  @id @default(autoincrement())
   externalId      String               @unique @default(uuid()) @db.VarChar(255)
@@ -87,13 +91,13 @@ model ScheduledItem {
 }
 
 model ScheduleReview {
-  id                   Int        @id @default(autoincrement())
-  scheduledSurfaceGuid String     @db.VarChar(50)
-  scheduledDate        DateTime   @db.Date
-  reviewedAt           DateTime   @db.Date
-  reviewedBy           String     @db.VarChar(255)
-  createdAt            DateTime   @default(now())
-  updatedAt            DateTime   @updatedAt
+  id                   Int      @id @default(autoincrement())
+  scheduledSurfaceGuid String   @db.VarChar(50)
+  scheduledDate        DateTime @db.Date
+  reviewedAt           DateTime @db.Date
+  reviewedBy           String   @db.VarChar(255)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   @@unique([scheduledSurfaceGuid, scheduledDate], name: "ScheduledSurfaceDate")
 }
