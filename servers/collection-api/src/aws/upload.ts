@@ -3,7 +3,7 @@ import mime from 'mime-types';
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload as AWSUpload } from '@aws-sdk/lib-storage';
 import config from '../config';
-import Upload from 'graphql-upload/Upload.js';
+import { FileUpload } from 'graphql-upload/processRequest.mjs';
 
 export type ImageUploadResponse = {
   fileName: string;
@@ -17,7 +17,7 @@ export type ImageUploadResponse = {
  */
 export async function uploadImage(
   s3: S3Client,
-  image: Upload,
+  image: FileUpload,
 ): Promise<ImageUploadResponse> {
   const { mimetype, createReadStream } = image;
   const stream = createReadStream();

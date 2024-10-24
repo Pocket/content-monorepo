@@ -56,6 +56,7 @@ import {
 import { uploadImage } from '../../aws/upload';
 import { ACCESS_DENIED_ERROR } from '../../shared/constants';
 import { AdminAPIUser, IAdminContext } from '../context';
+import Upload from 'graphql-upload/Upload.mjs';
 
 /**
  * Executes a mutation, catches exceptions and records to sentry and console
@@ -444,8 +445,14 @@ export async function collectionImageUpload(
   context: IAdminContext,
 ) {
   const { s3service } = context;
-  const { image, ...imageData } = data;
-  await data.image.promise;
+  const image: Upload = await data.image.promise;
+
+  const imageData = {
+    width: data.width,
+    height: data.height,
+    fileSizeBytes: data.fileSizeBytes,
+  };
+
   const upload = await uploadImage(s3service, image.file);
 
   await executeMutation<CreateImageInput, Image>(

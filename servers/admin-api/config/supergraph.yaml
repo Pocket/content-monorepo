@@ -1,0 +1,47 @@
+federation_version: =2.7.0
+subgraphs:
+  # Pocket Monorepo
+  image-api:
+    routing_url: https://image-api.readitlater.com
+    schema:
+      subgraph_url: https://image-api.readitlater.com
+  parser:
+    routing_url: https://parser-graphql-wrapper.readitlater.com
+    schema: # Schema downloaded from GraphOS registry, does not poll for updates
+      graphref: pocket-admin-api@current
+      subgraph: parser
+    #routing_url: https://parser-graphql-wrapper.readitlater.com
+    #schema:
+    #  subgraph_url: https://parser-graphql-wrapper.readitlater.com
+    #routing_url: http://localhost:4001
+    #schema:
+    #  subgraph_url: http://localhost:4001
+  shareable-lists-api:
+    routing_url: https://shareablelistsapi.readitlater.com/admin
+    schema:
+      subgraph_url: https://shareablelistsapi.readitlater.com/admin
+
+  # # Content Monorepo
+  collection:
+    #routing_url: https://collection-api.readitlater.com/admin
+    routing_url: http://localhost:4004/admin
+    # schema:
+    #   subgraph_url: https://collection-api.readitlater.com
+    schema: # Schema downloaded from GraphOS registry, does not poll for updates
+      graphref: pocket-admin-api@current
+      subgraph: collection
+  curated-corpus:
+    routing_url: https://curated-corpus-api.readitlater.com/admin
+    # schema:
+    #   subgraph_url: https://curated-corpus-api.readitlater.com
+    schema: # Schema downloaded from GraphOS registry, does not poll for updates
+      graphref: pocket-admin-api@current
+      subgraph: curated-corpus
+  # curation-tools:
+  #   routing_url: 	https://curation-tools-api.readitlater.com
+  #   schema:
+  #     subgraph_url: 	https://curation-tools-api.readitlater.com
+  prospect-api:
+    routing_url: https://prospect-api.readitlater.com
+    schema:
+      subgraph_url: https://prospect-api.readitlater.com

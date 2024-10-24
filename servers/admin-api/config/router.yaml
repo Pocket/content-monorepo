@@ -1,0 +1,201 @@
+cors:
+  origins: []
+  allow_any_origin: true
+sandbox:
+  enabled: false
+# TODO: figure out why mimetype isn't making it through?
+# https://pocket.sentry.io/issues/6002377888/?project=5719842&query=is%3Aunresolved%20issue.priority%3A%5Bhigh%2C%20medium%5D&referrer=issue-stream&sort=date&statsPeriod=20m&stream_index=0
+preview_file_uploads:
+  enabled: true
+  protocols:
+    multipart:
+      enabled: true
+      mode: stream
+      limits:
+        max_file_size: 1mb
+        max_files: 10
+supergraph:
+  introspection: true
+  listen: 0.0.0.0:${env.PORT:-4001}
+  #query_planning:
+  #  cache:
+  #    redis:
+  #      urls: ['${env.REDIS_PROTOCOL:-rediss-cluster}://${env.REDIS_ENDPOINT}']
+  #      ttl: 48h # optional, by default no expiration
+include_subgraph_errors:
+  all: true # Propagate errors from all subgraphs
+health_check:
+  listen: 0.0.0.0:${env.PORT}
+  enabled: true
+  path: /.well-known/apollo/server-health
+limits:
+  parser_max_tokens: 15000 # This is the default value.
+  parser_max_recursion: 4096 # This is the default value.
+  max_depth: 100 # Must be 15 or larger to support standard introspection query
+  max_height: 225
+  max_aliases: 30
+  max_root_fields: 20
+authentication:
+  router:
+    jwt:
+      jwks:
+        - url: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_1alKls4qw/.well-known/jwks.json
+        - url: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_qYkccPmmu/.well-known/jwks.json
+        - url: https://getpocket.com/.well-known/jwk
+authorization:
+  require_authentication: false
+rhai:
+  scripts: './rhai'
+  main: 'main.rhai'
+#headers:
+#  all:
+#    request:
+#      # Note: Additional JWT headers and headers which need special processing
+#      # are handled in Rhai scripts
+#      - propagate:
+#          named: 'web-request-langugage'
+#          rename: 'gatewayLanguage'
+#      - propagate:
+#          named: 'web-request-ip-address'
+#          rename: 'gatewayIpAddress'
+#      - propagate:
+#          named: 'web-request-snowplow-domain-user-id'
+#          rename: 'gatewaySnowplowDomainUserId'
+#      - propagate:
+#          named: 'web-request-user-agent'
+#          rename: 'gatwayUserAgent'
+#      - propagate:
+#          named: 'transfersub'
+#      - propagate:
+#          named: 'web-request-snowplow-session-user-id'
+#          rename: 'gatewaySnowplowDomainSessionId'
+demand_control:
+  enabled: false
+  mode: measure
+  strategy:
+    static_estimated:
+      list_size: 10
+      max: 1000
+telemetry:
+  # instrumentation:
+  #   instruments:
+  #     router:
+  #       http.server.active_requests: true # (default false)
+  #       http.server.request.body.size: true # (default false)
+  #       http.server.request.duration: true # (default false)
+  #     subgraph:
+  #       http.client.request.body.size: true # (default false)
+  #       http.client.request.duration: true # (default false)
+  #       http.client.response.body.size: true # (default false)
+  #     # Costs are from https://www.apollographql.com/docs/graphos/routing/security/demand-control#examples
+  #     supergraph:
+  #       cost.estimated:
+  #         attributes:
+  #           cost.result: true
+  #           graphql.operation.name: true
+  #       cost.rejected.operations:
+  #         type: histogram
+  #         value:
+  #           # Estimated cost is used to populate the histogram
+  #           cost: estimated
+  #         description: "Estimated cost per rejected operation."
+  #         unit: delta
+  #         condition:
+  #           eq:
+  #             # Only show rejected operations.
+  #             - cost: result
+  #             - "COST_ESTIMATED_TOO_EXPENSIVE"
+  #         attributes:
+  #           graphql.operation.name: true # Graphql operation name is added as an attribute
+  #   events:
+  #     supergraph:
+  #       COST_DELTA_TOO_HIGH:
+  #         message: "cost delta high"
+  #         on: event_response
+  #         level: error
+  #         condition:
+  #           gt:
+  #             - cost: delta
+  #             - 1000
+  #         attributes:
+  #           graphql.operation.name: true
+  #           cost.delta: true
+  # spans:
+  #   supergraph:
+  #     attributes:
+  #       cost.estimated: true
+
+  apollo:
+    send_variable_values:
+      only:
+        - filters # getCollections
+        - page # getCollections
+        - perPage # getCollections
+        - slug # collectionBySlug
+  exporters:
+    logging:
+      common:
+        resource:
+          'environment.name': '${env.APP_ENVIRONMENT}'
+          'service.name': 'client-api'
+          'environment.namespace': pocket
+    metrics:
+      common:
+        resource:
+          'environment.name': '${env.APP_ENVIRONMENT}'
+          'service.name': 'client-api'
+          'environment.namespace': pocket
+        views:
+          # https://www.apollographql.com/docs/graphos/routing/security/demand-control#configuring-instrument-output
+          # Define a custom view because cost is different than the default latency-oriented view of OpenTelemetry
+          - name: cost.*
+            aggregation:
+              histogram:
+                buckets:
+                  - 0
+                  - 10
+                  - 100
+                  - 1000
+                  - 10000
+                  - 100000
+                  - 1000000
+      otlp:
+        enabled: false
+        endpoint: '${env.OTLP_COLLECTOR_URL:-http://localhost:4318}'
+        protocol: http
+        batch_processor:
+          scheduled_delay: 10000ms # 10 secs export due to google cloud rate limits
+          max_concurrent_exports: 1000
+          max_export_batch_size: 10000
+          max_export_timeout: 100s
+          max_queue_size: 10000
+    tracing:
+      common:
+        resource:
+          'environment.name': '${env.APP_ENVIRONMENT}'
+          'service.name': 'client-api'
+          'environment.namespace': pocket
+        sampler: 0.01 # (default) all requests are sampled (always_on|always_off|<0.0-1.0>)
+        parent_based_sampler: true
+      propagation:
+        aws_xray: true
+
+      experimental_response_trace_id:
+        enabled: true
+        header_name: 'pocket-trace-id'
+      otlp:
+        enabled: true
+        endpoint: '${env.OTLP_COLLECTOR_URL:-http://localhost:4318}'
+        protocol: http
+        batch_processor:
+          scheduled_delay: 100ms
+          max_concurrent_exports: 1000
+          max_export_batch_size: 10000
+          max_export_timeout: 2s
+          max_queue_size: 10000
+apq:
+  router:
+    cache:
+      redis:
+        urls: ['${env.REDIS_PROTOCOL:-rediss-cluster}://${env.REDIS_ENDPOINT}']
+        ttl: 24h # optional, by default no expiration

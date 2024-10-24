@@ -7,7 +7,7 @@ import * as Sentry from '@sentry/node';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 //See https://github.com/jaydenseric/graphql-upload/issues/305#issuecomment-1135285811 on why we do this
-import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
+import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
 
 import { serverLogger, setMorgan } from '@pocket-tools/ts-logger';
 
