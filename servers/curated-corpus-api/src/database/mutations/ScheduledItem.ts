@@ -7,7 +7,8 @@ import {
   MoveScheduledItemToBottomInput,
   ScheduledItem,
 } from '../types';
-import { NotFoundError } from '@pocket-tools/apollo-utils';
+import { ForbiddenError, NotFoundError } from '@pocket-tools/apollo-utils';
+import { isExcludedDomain } from './ExcludedDomain';
 
 /**
  * This mutation adds a scheduled entry for a Scheduled Surface.
@@ -35,6 +36,16 @@ export async function createScheduledItem(
   if (!approvedItem) {
     throw new NotFoundError(
       `Cannot create a scheduled entry: Approved Item with id "${approvedItemExternalId}" does not exist.`,
+    );
+  }
+
+  // Look up this story in the excluded domains list.
+  const isExcluded = await isExcludedDomain(db, approvedItem.domainName);
+
+  // Do not proceed with scheduling if this domain is excluded.
+  if (isExcluded) {
+    throw new ForbiddenError(
+      `Cannot schedule this story: "${approvedItem.domainName}" is on the excluded domains list.`,
     );
   }
 

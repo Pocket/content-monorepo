@@ -3,6 +3,7 @@ import { clearDb } from './clearDb';
 import { createApprovedItemHelper } from './createApprovedItemHelper';
 import { createScheduledItemHelper } from './createScheduledItemHelper';
 import { createRejectedCuratedCorpusItemHelper } from './createRejectedCuratedCorpusItemHelper';
+import { createExcludedDomainHelper } from './createExcludedDomainHelper';
 
 const db = new PrismaClient();
 
@@ -34,6 +35,8 @@ describe('clearDb', () => {
       title: '7 Life-Saving Tips About PHP',
     });
 
+    await createExcludedDomainHelper(db, { domainName: 'test.com' });
+
     // Check that we have data in the DB
     const items = await db.approvedItem.findMany({});
     expect(items).toHaveLength(2);
@@ -41,6 +44,8 @@ describe('clearDb', () => {
     expect(scheduledItems).toHaveLength(1);
     const rejectedItems = await db.rejectedCuratedCorpusItem.findMany({});
     expect(rejectedItems).toHaveLength(1);
+    const excludedDomains = await db.excludedDomain.findMany({});
+    expect(excludedDomains).toHaveLength(1);
 
     // Remove all the records
     await clearDb(db);
