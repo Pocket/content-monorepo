@@ -9,6 +9,7 @@ import { client } from '../../../../database/client';
 import {
   clearDb,
   createApprovedItemHelper,
+  createExcludedDomainHelper,
   createScheduledItemHelper,
 } from '../../../../test/helpers';
 import { CREATE_SCHEDULED_ITEM } from '../sample-mutations.gql';
@@ -193,6 +194,10 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
     const approvedItem = await createApprovedItemHelper(db, {
       title: 'A test story',
     });
+
+    // Make sure there's something in the excluded domain list
+    await createExcludedDomainHelper(db, { domainName: 'excludeme.com' });
+    await createExcludedDomainHelper(db, { domainName: 'test.com' });
 
     const input: CreateScheduledItemApiInput = {
       approvedItemExternalId: approvedItem.externalId,
@@ -389,6 +394,41 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       where: { domainName: 'example.com' },
     });
     expect(trustedDomain).toBeNull();
+  });
+
+  it('should not schedule a story if the domain is on the list of excluded domains', async () => {
+    await createExcludedDomainHelper(db, { domainName: 'excludeme.com' });
+    await createExcludedDomainHelper(db, { domainName: 'test.com' });
+
+    const approvedItem = await createApprovedItemHelper(db, {
+      url: 'https://excludeme.com/story/thats-a-no',
+      title: 'Please do not publish me here',
+    });
+
+    const input: CreateScheduledItemApiInput = {
+      approvedItemExternalId: approvedItem.externalId,
+      scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+      scheduledDate: toUtcDateString(new Date()),
+      source: ScheduledItemSource.ML,
+    };
+
+    // Run the mutation
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(CREATE_SCHEDULED_ITEM),
+        variables: { data: input },
+      });
+
+    // ...without success. There is no data
+    expect(result.body.data).toBeNull();
+
+    // And there is an access denied error
+    expect(result.body.errors).not.toBeUndefined();
+    expect(result.body.errors?.[0].message).toEqual(
+      'Cannot schedule this story: "excludeme.com" is on the excluded domains list.',
+    );
   });
 
   it('should fail if user has read-only access', async () => {

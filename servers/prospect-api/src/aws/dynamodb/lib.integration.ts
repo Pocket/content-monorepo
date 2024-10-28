@@ -413,7 +413,7 @@ describe('queries integration tests', () => {
           variables: {
             filters: {
               scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-              prospectType: ProspectType.RECOMMENDED,
+              prospectType: ProspectType.TOP_SAVED,
             },
           },
         });

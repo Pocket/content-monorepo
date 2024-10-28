@@ -547,7 +547,7 @@ describe('CorpusItem reference resolver', () => {
       );
     });
 
-    it('should return null on Item if the url provided is not known', async () => {
+    it('should return null on Item if the givenUrl and resolvedUrl provided are not known', async () => {
       const result = await request(app)
         .post(graphQLUrl)
         .send({
@@ -558,6 +558,27 @@ describe('CorpusItem reference resolver', () => {
                 __typename: 'Item',
                 givenUrl: 'ABRACADABRA',
                 resolvedUrl: 'ABRACADABRA',
+              },
+            ],
+          },
+        });
+
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data?._entities).toHaveLength(1);
+      expect(result.body.data?._entities[0].corpusItem).toBeNull();
+    });
+
+    it('should return null on Item if the givenUrl provided is not known and resolvedUrl is null', async () => {
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
+          variables: {
+            representations: [
+              {
+                __typename: 'Item',
+                givenUrl: 'ABRACADABRA',
+                resolvedUrl: null,
               },
             ],
           },

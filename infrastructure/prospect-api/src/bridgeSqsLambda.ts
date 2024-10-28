@@ -12,7 +12,6 @@ import { IamPolicy } from '@cdktf/provider-aws/lib/iam-policy';
 import { DataAwsIamPolicyDocument } from '@cdktf/provider-aws/lib/data-aws-iam-policy-document';
 import { IamUserPolicyAttachment } from '@cdktf/provider-aws/lib/iam-user-policy-attachment';
 import { IamUser } from '@cdktf/provider-aws/lib/iam-user';
-import { DataAwsKinesisFirehoseDeliveryStream } from '@cdktf/provider-aws/lib/data-aws-kinesis-firehose-delivery-stream';
 
 export class BridgeSqsLambda extends Construct {
   constructor(
@@ -29,12 +28,6 @@ export class BridgeSqsLambda extends Construct {
     const vpc = new PocketVPC(this, 'pocket-shared-vpc');
 
     const eventBridgeArn = `arn:aws:events:${region.name}:${caller.accountId}:event-bus/${config.envVars.eventBusName}`;
-
-    const metaflowFirehose = new DataAwsKinesisFirehoseDeliveryStream(
-      this,
-      'metaflow-firehose',
-      { name: config.envVars.metaflowFirehoseName },
-    );
 
     const sqsLambda = new PocketSQSWithLambdaTarget(this, 'bridge-sqs-lambda', {
       name: `${config.prefix}-Sqs-Bridge`,
@@ -58,16 +51,10 @@ export class BridgeSqsLambda extends Construct {
             resources: [eventBridgeArn],
             effect: 'Allow',
           },
-          {
-            actions: ['firehose:PutRecord'],
-            resources: [metaflowFirehose.arn],
-            effect: 'Allow',
-          },
         ],
         environment: {
           EVENT_BRIDGE_BUS_NAME: config.envVars.eventBusName,
           EVENT_BRIDGE_DETAIL_TYPE: config.envVars.eventDetailType,
-          METAFLOW_FIREHOSE_NAME: config.envVars.metaflowFirehoseName,
           SENTRY_DSN: this.getSentryDsn(),
           GIT_SHA: this.getGitSha(),
           ENVIRONMENT:

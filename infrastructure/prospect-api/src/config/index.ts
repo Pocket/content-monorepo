@@ -20,13 +20,6 @@ const snowplowEndpoint = isDev
   ? 'com-getpocket-prod1.mini.snplow.net'
   : 'd.getpocket.com';
 
-// Firehose infra-as-code is defined in AWS Metaflow CloudFormation for production and development, respectively:
-// https://github.com/Pocket/cloudformation-templates/blob/main/service/MetaflowTools/parameters_prod.json#L92
-// https://github.com/Pocket/cloudformation-templates/blob/main/service/MetaflowTools/parameters_dev.json#L101
-const metaflowFirehoseName = isDev
-  ? 'MetaflowTools-Dev-firehose'
-  : 'MetaflowTools-Prod-1-RecsAPICandidateSet';
-
 export const config = {
   name,
   isDev,
@@ -53,7 +46,6 @@ export const config = {
   envVars: {
     eventBusName: `PocketEventBridge-${environment}-Shared-Event-Bus`,
     eventDetailType: 'prospect-generation',
-    metaflowFirehoseName,
     snowplowEndpoint,
   },
   tags: {
