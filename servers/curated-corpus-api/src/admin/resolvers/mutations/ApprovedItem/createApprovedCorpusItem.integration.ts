@@ -19,6 +19,7 @@ import { client } from '../../../../database/client';
 import {
   clearDb,
   createApprovedItemHelper,
+  createExcludedDomainHelper,
   createRejectedCuratedCorpusItemHelper,
   createScheduledItemHelper,
 } from '../../../../test/helpers';
@@ -354,7 +355,33 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
     expect(trustedDomain).toBeTruthy();
   });
 
-  it('should not create a scheduled item if one of the scheduled properties was not suppplied', async () => {
+  it('should not create a corpus item if the domain is on the list of excluded domains', async () => {
+    // Add a couple of domains on the excluded domains list
+    await createExcludedDomainHelper(db, { domainName: 'excludeme.com' });
+    await createExcludedDomainHelper(db, { domainName: 'test.com' });
+
+    // Attempt to create a corpus item where the URL contains one of the excluded domains (test.com)
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(CREATE_APPROVED_ITEM),
+        variables: { data: input },
+      });
+
+    // ...without success. There is no data
+    expect(result.body.errors).not.toBeUndefined();
+
+    // An error awaits though
+    expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
+
+    // And there is the correct error from the resolvers
+    expect(result.body.errors?.[0].message).toContain(
+      `'Cannot schedule this story: "test.com" is on the excluded domains list.'`,
+    );
+  });
+
+  it('should not create a scheduled item if one of the scheduled properties was not supplied', async () => {
     // Set up event tracking
     const eventTracker = jest.fn();
     eventEmitter.on(ReviewedCorpusItemEventType.ADD_ITEM, eventTracker);
