@@ -4,10 +4,11 @@ import {
   CreateApprovedItemInput,
   UpdateApprovedItemInput,
 } from '../types';
-import { UserInputError } from '@pocket-tools/apollo-utils';
+import { ForbiddenError, UserInputError } from '@pocket-tools/apollo-utils';
 import { checkCorpusUrl } from '../helpers/checkCorpusUrl';
 import { GraphQLError } from 'graphql';
 import { getNormalizedDomainName } from '../../shared/utils';
+import { isExcludedDomain } from './ExcludedDomain';
 
 /**
  * This mutation creates an approved curated item.
@@ -25,6 +26,16 @@ export async function createApprovedItem(
   await checkCorpusUrl(db, data.url);
 
   const domainName = getNormalizedDomainName(data.url);
+
+  // Look up this story in the excluded domains list.
+  const isExcluded = await isExcludedDomain(db, domainName);
+
+  // Do not proceed with creating a corpus item if this domain is excluded.
+  if (isExcluded) {
+    throw new ForbiddenError(
+      `Cannot schedule this story: "${domainName}" is on the excluded domains list.`,
+    );
+  }
 
   return db.approvedItem.create({
     data: {
