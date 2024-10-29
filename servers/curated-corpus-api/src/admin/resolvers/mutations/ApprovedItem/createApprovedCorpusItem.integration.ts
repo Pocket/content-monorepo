@@ -87,6 +87,12 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
     const eventTracker = jest.fn();
     eventEmitter.on(ReviewedCorpusItemEventType.ADD_ITEM, eventTracker);
 
+    // Make sure excluded domains list contains some entries so that we know
+    // checking against this list is successful because the input domain
+    // is not on the list, and not because the list is empty.
+    await createExcludedDomainHelper(db, { domainName: 'excludeme.com' });
+    await createExcludedDomainHelper(db, { domainName: 'test111.com' });
+
     const result = await request(app)
       .post(graphQLUrl)
       .set(headers)
@@ -373,11 +379,11 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
     expect(result.body.errors).not.toBeUndefined();
 
     // An error awaits though
-    expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
+    expect(result.body.errors?.[0].extensions?.code).toEqual('FORBIDDEN');
 
     // And there is the correct error from the resolvers
     expect(result.body.errors?.[0].message).toContain(
-      `'Cannot schedule this story: "test.com" is on the excluded domains list.'`,
+      `Cannot schedule this story: "test.com" is on the excluded domains list.`,
     );
   });
 
