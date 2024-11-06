@@ -35,7 +35,7 @@
         "*prisma/**",
         "prisma"
       ],
-      "pinVersion": "5.20.0",
+      "pinVersion": "5.22.0",
       "label": "Prisma"
     },
     {

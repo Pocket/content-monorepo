@@ -37,7 +37,7 @@
     "@aws-sdk/lib-storage": "3.529.1",
     "@pocket-tools/apollo-utils": "3.5.0",
     "@pocket-tools/ts-logger": "^1.6.0",
-    "@prisma/client": "5.20.0",
+    "@prisma/client": "5.22.0",
     "@sentry/node": "7.112.2",
     "@sentry/tracing": "7.112.2",
     "content-common": "workspace:*",
@@ -48,7 +48,7 @@
     "graphql-upload": "15.0.2",
     "graphql": "16.9.0",
     "mime-types": "2.1.35",
-    "prisma": "5.20.0",
+    "prisma": "5.22.0",
     "slugify": "1.6.6",
     "tslib": "2.7.0",
     "uuid": "9.0.1"
