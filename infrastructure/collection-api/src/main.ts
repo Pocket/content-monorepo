@@ -251,6 +251,11 @@ class CollectionAPI extends TerraformStack {
               name: 'OTLP_COLLECTOR_URL',
               value: config.tracing.url,
             },
+            {
+              name: 'LOG_LEVEL',
+              // do not log http, graphql, or debug events
+              value: 'info',
+            },
           ],
           logGroup: this.createCustomLogGroup('app'),
           logMultilinePattern: '^\\S.+',

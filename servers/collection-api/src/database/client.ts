@@ -3,7 +3,6 @@ import { serverLogger } from '@pocket-tools/ts-logger';
 import { Prisma, PrismaClient } from '.prisma/client';
 
 import { collectionStoryInjectItemMiddleware } from '../middleware/prisma';
-import config from '../config';
 
 let prisma;
 
