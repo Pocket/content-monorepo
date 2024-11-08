@@ -1,18 +1,29 @@
-// nodeSDKBuilder must be the first import!!
-import { serverLogger } from '@pocket-tools/ts-logger';
-
 import config from './config';
+import { initSentry } from '@pocket-tools/sentry';
 
+// Init sentry MUST come before any other imports for auto instrumentation to kick in (request isolation)
+initSentry({
+  ...config.sentry,
+  skipOpenTelemetrySetup: true,
+  integrations(integrations) {
+    return integrations.filter((integration) => {
+      return integration.name !== 'NodeFetch';
+    });
+  },
+});
+
+import { nodeSDKBuilder } from '@pocket-tools/tracing';
+import { unleash } from './unleash';
+nodeSDKBuilder({ ...config.tracing, unleash: unleash() }).then(() => {
+  startServer(config.app.port).then(async ({ publicUrl, adminUrl }) => {
+    serverLogger.info(
+      `🚀 Public server is ready at http://localhost:${config.app.port}${publicUrl}`,
+    );
+
+    serverLogger.info(
+      `🚀 Admin server is ready at http://localhost:${config.app.port}${adminUrl}`,
+    );
+  });
+});
+import { serverLogger } from '@pocket-tools/ts-logger';
 import { startServer } from './express';
-
-(async () => {
-  const { adminUrl, publicUrl } = await startServer(config.app.port);
-
-  serverLogger.info(
-    `🚀 Public server is ready at http://localhost:${config.app.port}${publicUrl}`,
-  );
-
-  serverLogger.info(
-    `🚀 Admin server is ready at http://localhost:${config.app.port}${adminUrl}`,
-  );
-})();
