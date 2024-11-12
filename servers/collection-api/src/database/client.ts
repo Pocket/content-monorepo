@@ -27,7 +27,7 @@ export function client(): PrismaClient {
   });
 
   // local development - for easy viewing of the actual SQL being
-  // generated/sent by prisma, uncomment the console.log statement below.
+  // generated/sent by prisma, uncomment the block below.
 
   //prisma.$on('query', (e) => {
   //  e.source = 'prisma';

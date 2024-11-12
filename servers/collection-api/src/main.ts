@@ -6,6 +6,9 @@ initSentry({
   ...config.sentry,
   skipOpenTelemetrySetup: true,
   integrations(integrations) {
+    // we need to filter out NodeFetch integrations to avoid double tracing of
+    // HTTP requests. HTTP instrumentation is already configured by default in
+    // Sentry, which captures HTTP requests made by node fetch.
     return integrations.filter((integration) => {
       return integration.name !== 'NodeFetch';
     });
