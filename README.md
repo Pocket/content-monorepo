@@ -240,8 +240,8 @@ We leverage [Pocket's tracing package](https://www.npmjs.com/package/@pocket-too
 - Curated Corpus API (coming soon)
 - Prospect API (coming soon)
 
-Tracing is performed using Open Telemetry NPM packages that export trace data to GCP. The Pocket tracing package also implements an
-[Open Telemetry package](https://www.npmjs.com/package/@opentelemetry/auto-instrumentations-node) that hooks into the Winston logger (which we implement via the Pocket `ts-logger` package) to auto forward log data to GCP.
+Tracing is performed using Open Telemetry NPM packages that send trace data to a standalone collector ECS service in AWS, which in turn exports trace data to GCP. The Pocket tracing package also implements an
+[Open Telemetry package](https://www.npmjs.com/package/@opentelemetry/auto-instrumentations-node) that hooks into the Winston logger (which we implement via the Pocket `ts-logger` package) to auto-forward log data to GCP.
 
 ### Enable/Disable Tracing in Prod & Dev
 
@@ -253,10 +253,11 @@ To enable and configure the feature flag:
 2. Toggle the `default` environment to "On" in the left hand "Enabled in environments" box
 3. Expand the `default` environment in the main, right-hand panel
 4. Click the ✎ pencil icon to edit the "Gradual rollout" strategy
-5. Move the "Rollout" slider to the percentage of traces you want to collect
-   - In production, this should usually be 1% to begin with, and can be increased slowly if insufficient
-6. Click "Save strategy"
-7. After some requests have been made to the service, go look at traces in GCP (using links above)
+5. Move the "Rolleout" slider to 100%
+6. Click the "Variants" tab and adjust the "Payload" number to the sample rate you'd like for your traces
+   - In production, this should usually be 1% (0.01) to begin with, and can be increased slowly if needed
+7. Click "Save strategy"
+8. After some requests have been made to the service, go look at traces in GCP (using links above)
 
 To disable tracing on a service, simply toggle the `default` environment to "Off".
 
