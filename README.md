@@ -214,9 +214,60 @@ pnpm update
 pnpm build
 ```
 
-#### aws-sdk versions
+## Package Synchronization
 
-⚠ Keep aws-sdk versions in sync, because AWS sometimes introduces incompatibilities without notice.
+We use [Syncpack](https://jamiemason.github.io/syncpack/guide/getting-started/) to keep package versions consistent across servers, lambdas, and shared packages. Outside of the consistent functional expecations of using the same package version in all places, it's important to keep some package groups in sync to mitigate cross-package bugs, e.g AWS and Prisma packages.
 
-- When adding a new aws-sdk, pin it to the version used throughout the monorepo.
-- When upgrading aws-sdk, upgrade it consistently throughout the monorepo.
+The syncpack config can be found in the `./syncpackrc` file.
+
+There are two command line operations associated with Syncpack:
+
+1. `pnpm list-mismatches` will tell you if any packages are out of sync/in violation of the rules set in `.syncpackrc`. This should only happen if your current branch is changing packages/package versions. Our CI will error if the rules in `.syncpackrc` are in violation.
+
+2. `pnpm fix-mismatches` will automatically fix `package.json` files that are in violation of the rules set in `.syncpackrc` by changing package versions. This is a quick and easy way to perform an upgrade, but as with any operation that can change things at scale, be sure you check the result is what you expect.
+
+## Tracing (Servers Only - WIP)
+
+We leverage [Pocket's tracing package](https://www.npmjs.com/package/@pocket-tools/tracing) to perform traces in our `server` applications:
+
+- Collection API
+
+  - [GCP Traces](<https://console.cloud.google.com/traces/list?project=moz-fx-pocket-prod-61fb&pageState=(%22traceIntervalPicker%22:(%22groupValue%22:%22P7D%22,%22customValue%22:null),%22traceFilter%22:(%22chips%22:%22%255B%257B_22k_22_3A_22service.name_22_2C_22t_22_3A10_2C_22v_22_3A_22_5C_22collection-api_5C_22_22_2C_22s_22_3Atrue_2C_22i_22_3A_22service.name_22%257D%255D%22))>)
+  - [GCP Logs](https://cloudlogging.app.goo.gl/3Ft9tbRDo3cHfC9K7)
+  - [Unleash feature flag](https://featureflags.getpocket.dev/projects/default/features/perm.content.tracing.collections) (Dev)
+  - [Unleash feature flag](https://featureflags.readitlater.com/projects/default/features/perm.content.tracing.collections) (Prod)
+
+- Curated Corpus API (coming soon)
+- Prospect API (coming soon)
+
+Tracing is performed using Open Telemetry NPM packages that export trace data to GCP. The Pocket tracing package also implements an
+[Open Telemetry package](https://www.npmjs.com/package/@opentelemetry/auto-instrumentations-node) that hooks into the Winston logger (which we implement via the Pocket `ts-logger` package) to auto forward log data to GCP.
+
+### Enable/Disable Tracing in Prod & Dev
+
+Tracing can be enabled and disabled using an Unleash feature flag, which exists per service implementing tracing.
+
+To enable and configure the feature flag:
+
+1. Visit the feature flag URL for the environment in question (linked above)
+2. Toggle the `default` environment to "On" in the left hand "Enabled in environments" box
+3. Expand the `default` environment in the main, right-hand panel
+4. Click the ✎ pencil icon to edit the "Gradual rollout" strategy
+5. Move the "Rollout" slider to the percentage of traces you want to collect
+   - In production, this should usually be 1% to begin with, and can be increased slowly if insufficient
+6. Click "Save strategy"
+7. After some requests have been made to the service, go look at traces in GCP (using links above)
+
+To disable tracing on a service, simply toggle the `default` environment to "Off".
+
+### Local Tracing
+
+Local tracing is enabled by default and sends trace data to a Grafana Docker image. To view traces locally:
+
+1. Make sure the local service you want to trace has activity, e.g. by running a query in the Apollo Server Playground
+2. Navigate to the Grafana docker image endpoint at `http://localhost:3000/explore`
+3. Click "Explore" in the left hand menu
+4. In the dropdown at the top left of the middle pane, select "Tempo"
+5. In the main panel, select the "Service Graph" for "Query type"
+6. Click the service you want to view traces for and select "View traces"
+7. Trace away!
