@@ -28,7 +28,7 @@ import { CloudwatchLogGroup } from '@cdktf/provider-aws/lib/cloudwatch-log-group
 
 import { config } from './config';
 import { DynamoDB } from 'infrastructure-common';
-import { BridgeSqsLambda } from './bridgeSqsLambda';
+import { IamUser } from '@cdktf/provider-aws/lib/iam-user';
 
 class ProspectAPI extends TerraformStack {
   constructor(scope: Construct, name: string) {
@@ -61,7 +61,10 @@ class ProspectAPI extends TerraformStack {
       config.tags,
     );
 
-    new BridgeSqsLambda(this, 'bridge-lambda', { region, caller });
+    new IamUser(this, 'iam_user', {
+      name: `${config.prefix}-Queue-User`,
+      tags: config.tags,
+    });
 
     this.createPocketAlbApplication({
       s3: this.createS3Bucket(),
