@@ -39,6 +39,7 @@ import {
 
 import { getLabelById } from '../shared/resolvers/types';
 import { getCollectionByInternalId } from '../database/queries';
+import { serverLogger } from '@pocket-tools/ts-logger';
 
 /** Transformation functions below to map collection object's sub types to the ones in snowplow schema  */
 
@@ -307,8 +308,10 @@ export async function sendEventBridgeEvent(
     // Don't halt program, but capture the failure in Sentry and Cloudwatch
     Sentry.addBreadcrumb(failedEventError);
     Sentry.captureException(error);
-    console.log(failedEventError);
-    console.log(error);
+    serverLogger.error('event failed - failed sending to event bridge', {
+      failedEventError,
+      error,
+    });
   }
 }
 
@@ -343,6 +346,6 @@ export async function sendEvent(eventPayload: any) {
 
     // Don't halt program, but capture the failure in Sentry and Cloudwatch
     Sentry.captureException(failedEventError);
-    console.log(failedEventError);
+    serverLogger.error('event failed - event bridge error', eventPayload);
   }
 }

@@ -23,6 +23,7 @@ import {
 } from './types';
 import { CollectionComplete } from '../database/types';
 import { PrismaClient } from '.prisma/client';
+import { serverLogger } from '@pocket-tools/ts-logger';
 
 describe('event helpers: ', () => {
   const dbClient: PrismaClient = client();
@@ -36,7 +37,7 @@ describe('event helpers: ', () => {
 
   const sentryStub = sandbox.stub(Sentry, 'captureException').resolves();
   const crumbStub = sandbox.stub(Sentry, 'addBreadcrumb').resolves();
-  const consoleSpy = sandbox.spy(console, 'log');
+  const loggerSpy = sandbox.spy(serverLogger, 'error');
 
   let getCollectionLabelsForSnowplowStub: sinon.SinonStub;
 
@@ -212,7 +213,7 @@ describe('event helpers: ', () => {
         return;
       }, 100);
       expect(sentryStub.callCount).to.equal(0);
-      expect(consoleSpy.callCount).to.equal(0);
+      expect(loggerSpy.callCount).to.equal(0);
 
       // Event was sent to Event Bus
       expect(clientStub.callCount).to.equal(1);
@@ -234,10 +235,6 @@ describe('event helpers: ', () => {
     });
 
     it('should log error if any events fail to send for collection-created and collection-updated events', async () => {
-      /**
-       * This test will log errors to the console and that is expected
-       */
-
       clientStub.restore();
       sandbox
         .stub(EventBridgeClient.prototype, 'send')
@@ -260,9 +257,15 @@ describe('event helpers: ', () => {
       expect(sentryStub.getCall(0).firstArg.message).to.contain(
         `sendEvent: Failed to send event 'collection-created' to event bus`,
       );
-      expect(consoleSpy.callCount).to.equal(1);
-      expect(consoleSpy.getCall(0).firstArg.message).to.contain(
-        `Failed to send event 'collection-created' to event bus`,
+
+      expect(loggerSpy.callCount).to.equal(1);
+      expect(loggerSpy.firstCall.firstArg).to.equal(
+        `event failed - event bridge error`,
+      );
+
+      // lastArg is the event payload we tried to send to event bridge
+      expect(loggerSpy.firstCall.lastArg.eventType).to.equal(
+        'collection-created',
       );
 
       /**
@@ -271,7 +274,7 @@ describe('event helpers: ', () => {
 
       // resetting mocks and spies
       sentryStub.reset();
-      consoleSpy.resetHistory();
+      loggerSpy.resetHistory();
 
       payload = await events.generateEventBridgePayload(
         dbClient,
@@ -290,9 +293,14 @@ describe('event helpers: ', () => {
       expect(sentryStub.getCall(0).firstArg.message).to.contain(
         `Failed to send event 'collection-updated' to event bus`,
       );
-      expect(consoleSpy.callCount).to.equal(1);
-      expect(consoleSpy.getCall(0).firstArg.message).to.contain(
-        `sendEvent: Failed to send event 'collection-updated' to event bus`,
+      expect(loggerSpy.callCount).to.equal(1);
+      expect(loggerSpy.getCall(0).firstArg).to.equal(
+        `event failed - event bridge error`,
+      );
+
+      // lastArg is the event payload we tried to send to event bridge
+      expect(loggerSpy.firstCall.lastArg.eventType).to.equal(
+        'collection-updated',
       );
     });
   });
@@ -321,11 +329,11 @@ describe('event helpers: ', () => {
       expect(crumbStub.getCall(0).firstArg.message).to.contain(
         `sendEventBridgeEvent: Failed to send event 'collection-created' to event bus`,
       );
-      expect(consoleSpy.callCount).to.equal(2);
-      expect(consoleSpy.getCall(0).firstArg.message).to.contain(
-        `sendEventBridgeEvent: Failed to send event 'collection-created' to event bus`,
+      expect(loggerSpy.callCount).to.equal(1);
+      expect(loggerSpy.firstCall.firstArg).to.equal(
+        `event failed - failed sending to event bridge`,
       );
-      expect(consoleSpy.getCall(1).firstArg.message).to.equal('boo!');
+      expect(loggerSpy.firstCall.lastArg.error.message).to.equal('boo!');
     });
   });
 });

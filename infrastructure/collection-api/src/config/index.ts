@@ -14,10 +14,6 @@ const rds = {
   minCapacity: isDev ? 1 : 4,
   maxCapacity: isDev ? 1 : 128,
 };
-const githubConnectionArn = isDev
-  ? 'arn:aws:codestar-connections:us-east-1:410318598490:connection/7426c139-1aa0-49e2-aabc-5aef11092032'
-  : 'arn:aws:codestar-connections:us-east-1:996905175585:connection/5fa5aa2b-a2d2-43e3-ab5a-72ececfc1870';
-const branch = isDev ? 'dev' : 'main';
 const eventBusName = `PocketEventBridge-${environment}-Shared-Event-Bus`;
 
 export const config = {
@@ -30,17 +26,17 @@ export const config = {
   domain,
   graphqlVariant,
   rds,
-  codePipeline: {
-    githubConnectionArn,
-    repository: 'pocket/collection-api',
-    branch,
-  },
   tags: {
     service: name,
     environment,
     app_code: 'pocket',
     component_code: `pocket-${name.toLowerCase()}`,
     env_code: isDev ? 'dev' : 'prod',
+  },
+  tracing: {
+    url: isDev
+      ? 'https://otel-collector.getpocket.dev:443'
+      : 'https://otel-collector.readitlater.com:443',
   },
   eventBusName,
 };

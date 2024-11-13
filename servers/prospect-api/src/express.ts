@@ -13,7 +13,6 @@ import { setLogger, setMorgan } from '@pocket-tools/ts-logger';
 import { AdminAPIUserContext } from './types';
 import { getContext } from './context';
 import { startApolloServer } from './server';
-import config from './config';
 
 export const serverLogger: any = setLogger();
 
@@ -31,36 +30,6 @@ export async function startServer(port: number): Promise<{
   // provided to drain plugin for graceful shutdown.
   const app = express();
   const httpServer = http.createServer(app);
-
-  Sentry.init({
-    ...config.sentry,
-    includeLocalVariables: true,
-    maxValueLength: 2000,
-    integrations: [
-      // apollo integration is broken at the moment 😕
-      // https://github.com/getsentry/sentry-javascript/issues/6899
-      //new Sentry.Integrations.Apollo(),
-      new Sentry.Integrations.GraphQL(),
-      new Sentry.Integrations.Mysql(),
-      // enable HTTP calls tracing
-      new Sentry.Integrations.Http({ tracing: true }),
-      // enable Express.js middleware tracing
-      new Sentry.Integrations.Express({
-        // to trace all requests to the default router
-        app,
-      }),
-    ],
-    debug: config.sentry.environment === 'development',
-  });
-
-  // RequestHandler creates a separate execution context, so that all
-  // transactions/spans/breadcrumbs are isolated across requests.
-  // Because NODE is a single running process loop!
-  // MUST BE THE FIRST MIDDLEWARE ADDED!
-  app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
-
-  // TracingHandler creates a trace for every incoming request
-  app.use(Sentry.Handlers.tracingHandler());
 
   // JSON parser to enable POST body with JSON
   app.use(express.json(), setMorgan(serverLogger));
@@ -82,7 +51,7 @@ export async function startServer(port: number): Promise<{
   );
 
   // The error handler must be before any other error middleware and after all controllers
-  app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
+  Sentry.setupExpressErrorHandler(app);
 
   await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
   return { app, apolloServer, url };
