@@ -1,6 +1,7 @@
 import { Collection } from '.prisma/client';
 import * as Sentry from '@sentry/node';
 import { getCollectionUrlSlug } from '../../utils';
+import { serverLogger } from '@pocket-tools/ts-logger';
 
 /**
  * @param givenUrl
@@ -21,7 +22,10 @@ export async function collection(
       return null;
     }
   } catch (err) {
-    console.log(err);
+    serverLogger.error('failed loading collection on Item', {
+      err,
+      givenUrl,
+    });
     Sentry.captureException(err);
     throw err;
   }
