@@ -38,6 +38,7 @@ export default {
     },
     region: process.env.AWS_DEFAULT_REGION || 'us-east-1',
     eventBus: {
+      endpoint: localEndpoint,
       name:
         process.env.EVENT_BUS_NAME || 'PocketEventBridge-Dev-Shared-Event-Bus',
       eventBridge: { source: 'collection-events' },

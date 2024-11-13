@@ -1,15 +1,6 @@
-import {
-  PutEventsCommand,
-  PutEventsCommandOutput,
-} from '@aws-sdk/client-eventbridge';
 import * as Sentry from '@sentry/node';
-import config from '../config/';
-import { eventBridgeClient } from '../aws/eventBridgeClient';
 
 import {
-  CollectionEventBusPayload,
-  EventBridgeEventType,
-  Collection,
   CollectionStatus,
   CollectionLanguage,
   CollectionAuthor,
@@ -21,7 +12,11 @@ import {
   CollectionPartnershipType,
   IABChildCategory,
   IABParentCategory,
-} from './types';
+  CollectionPayload,
+  PocketEventType,
+  CollectionPocketEventType,
+  CollectionEvent,
+} from '@pocket-tools/event-bridge';
 import {
   CollectionComplete,
   CollectionStoryAuthor as dbCollectionStoryAuthor,
@@ -39,6 +34,8 @@ import {
 
 import { getLabelById } from '../shared/resolvers/types';
 import { getCollectionByInternalId } from '../database/queries';
+import { eventBridgeClient } from '../aws/eventBridgeClient';
+import config from '../config';
 
 /** Transformation functions below to map collection object's sub types to the ones in snowplow schema  */
 
@@ -185,7 +182,7 @@ function getDateInSeconds(date: Date): number {
 export function transformDbCollectionToSnowplowCollection(
   collection: CollectionComplete,
   collectionLabels: dbLabel[],
-): Collection {
+): CollectionPayload['collection'] {
   const hasAuthors = collection.authors && collection.authors.length !== 0;
   const hasStories = collection.stories && collection.stories.length !== 0;
 
@@ -203,16 +200,16 @@ export function transformDbCollectionToSnowplowCollection(
     labels: transformCollectionLabels(collectionLabels),
     curationCategory: collection.curationCategory
       ? transformCollectionCurationCategory(collection.curationCategory)
-      : {},
+      : null,
     partnership: collection.partnership
       ? transformCollectionPartnership(collection.partnership)
-      : {},
+      : null,
     IABParentCategory: collection.IABParentCategory
       ? transformCollectionIABParentCategory(collection.IABParentCategory)
-      : {},
+      : null,
     IABChildCategory: collection.IABChildCategory
       ? transformCollectionIABChildCategory(collection.IABChildCategory)
-      : {},
+      : null,
     createdAt: getDateInSeconds(collection.createdAt),
     updatedAt: getDateInSeconds(collection.updatedAt),
     publishedAt: collection.publishedAt
@@ -227,9 +224,9 @@ export function transformDbCollectionToSnowplowCollection(
  */
 export async function generateEventBridgePayload(
   dbClient: PrismaClient,
-  eventType: EventBridgeEventType,
+  eventType: CollectionPocketEventType,
   collection: CollectionComplete,
-): Promise<CollectionEventBusPayload> {
+): Promise<CollectionEvent> {
   // check if collection has any labels and fetch them
   const hasLabels = collection.labels && collection.labels.length !== 0;
   const collectionLabels = hasLabels
@@ -237,12 +234,16 @@ export async function generateEventBridgePayload(
     : [];
 
   return {
-    collection: transformDbCollectionToSnowplowCollection(
-      collection,
-      collectionLabels, // pass in collection labels to the main transform function
-    ),
-    eventType: eventType,
-    object_version: 'new',
+    source: config.aws.eventBus.eventBridge.source,
+    'detail-type': eventType,
+    detail: {
+      collection: transformDbCollectionToSnowplowCollection(
+        collection,
+        collectionLabels, // pass in collection labels to the main transform function
+      ),
+      // eventType: eventType,
+      // object_version: 'new',
+    },
   };
 }
 
@@ -273,7 +274,7 @@ export async function sendEventBridgeEventUpdateFromInternalCollectionId(
   // Send to event bridge with the data
   await sendEventBridgeEvent(
     dbClient,
-    EventBridgeEventType.COLLECTION_UPDATED,
+    PocketEventType.COLLECTION_UPDATED,
     collection,
   );
 }
@@ -284,7 +285,7 @@ export async function sendEventBridgeEventUpdateFromInternalCollectionId(
  */
 export async function sendEventBridgeEvent(
   dbClient: PrismaClient,
-  eventType: EventBridgeEventType,
+  eventType: CollectionPocketEventType,
   collection: CollectionComplete,
 ) {
   const payload = await generateEventBridgePayload(
@@ -295,13 +296,13 @@ export async function sendEventBridgeEvent(
 
   // Send to Event Bridge. Yay!
   try {
-    await sendEvent(payload);
+    await eventBridgeClient.sendPocketEvent(payload);
   } catch (error) {
     // In the unlikely event that the payload generator throws an error,
     // log to Sentry and Cloudwatch but don't halt program
     const failedEventError = new Error(
       `sendEventBridgeEvent: Failed to send event '${
-        payload.eventType
+        payload['detail-type']
       }' to event bus. Event Body:\n ${JSON.stringify(payload)}`,
     );
     // Don't halt program, but capture the failure in Sentry and Cloudwatch
@@ -309,40 +310,5 @@ export async function sendEventBridgeEvent(
     Sentry.captureException(error);
     console.log(failedEventError);
     console.log(error);
-  }
-}
-
-/**
- * Send event to Event Bus, pulling the event bus and the event source
- * from the config.
- * Will not throw errors if event fails; instead, log exception to Sentry
- * and add to Cloudwatch logs.
- */
-export async function sendEvent(eventPayload: any) {
-  const putEventCommand = new PutEventsCommand({
-    Entries: [
-      {
-        EventBusName: config.aws.eventBus.name,
-        Detail: JSON.stringify(eventPayload),
-        Source: config.aws.eventBus.eventBridge.source,
-        DetailType: eventPayload.eventType,
-      },
-    ],
-  });
-
-  const output: PutEventsCommandOutput = await eventBridgeClient.send(
-    putEventCommand,
-  );
-
-  if (output.FailedEntryCount) {
-    const failedEventError = new Error(
-      `sendEvent: Failed to send event '${
-        eventPayload.eventType
-      }' to event bus. Event Body:\n ${JSON.stringify(eventPayload)}`,
-    );
-
-    // Don't halt program, but capture the failure in Sentry and Cloudwatch
-    Sentry.captureException(failedEventError);
-    console.log(failedEventError);
   }
 }
