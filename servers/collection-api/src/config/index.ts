@@ -29,6 +29,7 @@ export default {
       maxFiles: 10,
     },
     defaultLanguage: 'EN',
+    serviceName: 'collection-api',
   },
   aws: {
     s3: {
@@ -56,8 +57,15 @@ export default {
     environment: process.env.NODE_ENV || 'development',
   },
   tracing: {
-    // for AWS, it's fine to leave this defaulting to localhost
-    host: process.env.OTLP_COLLECTOR_HOST || 'localhost',
+    url: process.env.OTLP_COLLECTOR_URL || 'http://localhost:4318',
+    flagName: 'perm.content.tracing.collections',
     serviceName: 'collection-api',
+    release: process.env.GIT_SHA || 'local',
+  },
+  unleash: {
+    clientKey: process.env.UNLEASH_KEY || 'unleash-key-fake',
+    endpoint: process.env.UNLEASH_ENDPOINT || 'http://localhost:4242/api',
+    refreshInterval: 60 * 1000, // ms
+    timeout: 2 * 1000, // ms
   },
 };

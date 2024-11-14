@@ -21,14 +21,21 @@
         "!dev"
       ],
       "pinVersion": "3.529.1",
-      "label": "AWS SDK Dependencies should all have the same version"
+      "label": "AWS SDK dependencies should all have the same version"
     },
     {
       "dependencies": [
-        "@sentry/**"
+        "@sentry/node"
+      ],
+      "pinVersion": "8.37.1",
+      "label": "Sentry node dependencies should all have the same version"
+    },
+    {
+      "dependencies": [
+        "@sentry/serverless"
       ],
       "pinVersion": "7.112.2",
-      "label": "AWS SDK Dependencies should all have the same version"
+      "label": "Sentry serverless (Lambda) dependencies should all have the same version"
     },
     {
       "dependencies": [

@@ -34,8 +34,9 @@ import {
 
 import { getLabelById } from '../shared/resolvers/types';
 import { getCollectionByInternalId } from '../database/queries';
-import { eventBridgeClient } from '../aws/eventBridgeClient';
+import { serverLogger } from '@pocket-tools/ts-logger';
 import config from '../config';
+import { eventBridgeClient } from '../aws/eventBridgeClient';
 
 /** Transformation functions below to map collection object's sub types to the ones in snowplow schema  */
 
@@ -306,7 +307,9 @@ export async function sendEventBridgeEvent(
     // Don't halt program, but capture the failure in Sentry and Cloudwatch
     Sentry.addBreadcrumb(failedEventError);
     Sentry.captureException(error);
-    console.log(failedEventError);
-    console.log(error);
+    serverLogger.error('event failed - failed sending to event bridge', {
+      failedEventError,
+      error,
+    });
   }
 }

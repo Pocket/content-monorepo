@@ -22,6 +22,7 @@ import {
 } from './testData';
 import { CollectionComplete } from '../database/types';
 import { PrismaClient } from '.prisma/client';
+import { serverLogger } from '@pocket-tools/ts-logger';
 
 describe('event helpers: ', () => {
   const dbClient: PrismaClient = client();
@@ -35,7 +36,7 @@ describe('event helpers: ', () => {
 
   const sentryStub = sandbox.stub(Sentry, 'captureException').resolves();
   const crumbStub = sandbox.stub(Sentry, 'addBreadcrumb').resolves();
-  const consoleSpy = sandbox.spy(console, 'log');
+  const loggerSpy = sandbox.spy(serverLogger, 'error');
 
   let getCollectionLabelsForSnowplowStub: sinon.SinonStub;
 
@@ -213,11 +214,11 @@ describe('event helpers: ', () => {
       expect(crumbStub.getCall(0).firstArg.message).to.contain(
         `sendEventBridgeEvent: Failed to send event 'collection-created' to event bus`,
       );
-      expect(consoleSpy.callCount).to.equal(2);
-      expect(consoleSpy.getCall(0).firstArg.message).to.contain(
-        `sendEventBridgeEvent: Failed to send event 'collection-created' to event bus`,
+      expect(loggerSpy.callCount).to.equal(1);
+      expect(loggerSpy.firstCall.firstArg).to.equal(
+        `event failed - failed sending to event bridge`,
       );
-      expect(consoleSpy.getCall(1).firstArg.message).to.equal('boo!');
+      expect(loggerSpy.firstCall.lastArg.error.message).to.equal('boo!');
     });
   });
 });

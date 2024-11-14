@@ -73,7 +73,7 @@ export function generateJwt(privateKey: any) {
     iss: config.jwt.iss,
     aud: config.jwt.aud,
     iat: now,
-    exp: now + 60 * 5, //expires in 5 mins
+    exp: now + 60 * 10, //expires in 10 mins.
     name: config.jwt.name,
     identities: [{ userId: config.jwt.userId }],
     // this group gives us full access in corpus API
