@@ -190,9 +190,9 @@ export function transformDbCollectionToSnowplowCollection(
     externalId: collection.externalId,
     slug: collection.slug,
     title: collection.title,
-    excerpt: collection.excerpt ?? '',
-    intro: collection.intro ?? '',
-    imageUrl: collection.imageUrl ?? '',
+    excerpt: collection.excerpt ?? null,
+    intro: collection.intro ?? null,
+    imageUrl: collection.imageUrl ?? null,
     status: CollectionStatus[collection.status],
     language: CollectionLanguage[collection.language],
     authors: hasAuthors ? transformCollectionAuthors(collection.authors) : [],
@@ -241,8 +241,6 @@ export async function generateEventBridgePayload(
         collection,
         collectionLabels, // pass in collection labels to the main transform function
       ),
-      // eventType: eventType,
-      // object_version: 'new',
     },
   };
 }
