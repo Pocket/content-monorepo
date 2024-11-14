@@ -13,7 +13,7 @@ import {
   sendEventBridgeEvent,
   sendEventBridgeEventUpdateFromInternalCollectionId,
 } from '../../events/events';
-import { EventBridgeEventType } from '../../events/types';
+import { PocketEventType } from '@pocket-tools/event-bridge';
 
 /**
  * @param db
@@ -56,7 +56,7 @@ export async function createCollectionStory(
   });
   await sendEventBridgeEvent(
     db,
-    EventBridgeEventType.COLLECTION_UPDATED,
+    PocketEventType.COLLECTION_UPDATED,
     collection,
   );
   return story;

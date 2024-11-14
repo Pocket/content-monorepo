@@ -2,8 +2,12 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import * as Sentry from '@sentry/node';
 import { client } from '../database/client';
-import { EventBridgeClient } from '@aws-sdk/client-eventbridge';
-import config from '../config';
+import {
+  CollectionLanguage,
+  CollectionStatus,
+  PocketEventBridgeClient,
+  PocketEventType,
+} from '@pocket-tools/event-bridge';
 
 import * as events from './events';
 
@@ -16,11 +20,6 @@ import {
   testPartnership,
   testStory,
 } from './testData';
-import {
-  EventBridgeEventType,
-  CollectionStatus,
-  CollectionLanguage,
-} from './types';
 import { CollectionComplete } from '../database/types';
 import { PrismaClient } from '.prisma/client';
 import { serverLogger } from '@pocket-tools/ts-logger';
@@ -32,8 +31,8 @@ describe('event helpers: ', () => {
   const sandbox = sinon.createSandbox();
 
   const clientStub = sandbox
-    .stub(EventBridgeClient.prototype, 'send')
-    .resolves({ FailedEntryCount: 0 });
+    .stub(PocketEventBridgeClient.prototype, 'sendPocketEvent')
+    .resolves();
 
   const sentryStub = sandbox.stub(Sentry, 'captureException').resolves();
   const crumbStub = sandbox.stub(Sentry, 'addBreadcrumb').resolves();
@@ -60,7 +59,7 @@ describe('event helpers: ', () => {
     it('should transform db collection object to event payload', async () => {
       const payload = await events.generateEventBridgePayload(
         dbClient,
-        EventBridgeEventType.COLLECTION_CREATED,
+        PocketEventType.COLLECTION_CREATED,
         { ...testCollection, status: 'ARCHIVED', publishedAt: undefined },
       );
 
@@ -68,38 +67,36 @@ describe('event helpers: ', () => {
       expect(getCollectionLabelsForSnowplowStub.calledOnce).to.be.true;
 
       // assert all the collection object top level properties are correct
-      expect(payload.collection.externalId).to.equal(testCollection.externalId);
-      expect(payload.collection.title).to.equal(testCollection.title);
-      expect(payload.collection.slug).to.equal(testCollection.slug);
-      expect(payload.collection.excerpt).to.equal('');
-      expect(payload.collection.imageUrl).to.equal('');
-      expect(payload.collection.intro).to.equal('');
+      expect(payload.detail.collection.externalId).to.equal(
+        testCollection.externalId,
+      );
+      expect(payload.detail.collection.title).to.equal(testCollection.title);
+      expect(payload.detail.collection.slug).to.equal(testCollection.slug);
+      expect(payload.detail.collection.excerpt).to.be.null;
+      expect(payload.detail.collection.imageUrl).to.be.null;
+      expect(payload.detail.collection.intro).to.be.null;
 
-      expect(payload.collection.status).to.equal('archived');
-      expect(payload.collection.language).to.equal(
+      expect(payload.detail.collection.status).to.equal('archived');
+      expect(payload.detail.collection.language).to.equal(
         CollectionLanguage[testCollection.language],
       );
-      expect(payload.collection.authors.length).to.equal(0);
-      expect(payload.collection.stories.length).to.equal(0);
-      expect(payload.collection.labels.length).to.equal(testLabels.length);
+      expect(payload.detail.collection.authors.length).to.equal(0);
+      expect(payload.detail.collection.stories.length).to.equal(0);
+      expect(payload.detail.collection.labels.length).to.equal(
+        testLabels.length,
+      );
 
-      // asserting on the empty object ({}) properties
-      expect(payload.collection.curationCategory).is.empty;
-      expect(payload.collection.partnership).is.empty;
-      expect(payload.collection.IABParentCategory).is.empty;
-      expect(payload.collection.IABChildCategory).is.empty;
+      // asserting on the null object () properties
+      expect(payload.detail.collection.curationCategory).to.be.null;
+      expect(payload.detail.collection.partnership).to.be.null;
+      expect(payload.detail.collection.IABParentCategory).to.be.null;
+      expect(payload.detail.collection.IABChildCategory).to.be.null;
 
       // assert Date time stamps are converted to unix seconds format
-      expect(payload.collection.createdAt).to.equal(1672549200);
-      expect(payload.collection.updatedAt).to.equal(1672549200);
+      expect(payload.detail.collection.createdAt).to.equal(1672549200);
+      expect(payload.detail.collection.updatedAt).to.equal(1672549200);
       // missing publishedAt should be set to null
-      expect(payload.collection.publishedAt).to.equal(null);
-
-      // assert the remaining two props of the payload object are correct
-      expect(payload.eventType).to.equal(
-        EventBridgeEventType.COLLECTION_CREATED,
-      );
-      expect(payload.object_version).to.equal('new');
+      expect(payload.detail.collection.publishedAt).to.equal(null);
     });
 
     it('should transform db collection sub types to event payload collection sub types', async () => {
@@ -115,20 +112,20 @@ describe('event helpers: ', () => {
 
       const payload = await events.generateEventBridgePayload(
         dbClient,
-        EventBridgeEventType.COLLECTION_UPDATED,
+        PocketEventType.COLLECTION_UPDATED,
         dbCollection,
       );
 
-      expect(payload.collection.status).to.equal(
+      expect(payload.detail.collection.status).to.equal(
         CollectionStatus[testCollection.status],
       );
-      expect(payload.collection.publishedAt).to.equal(1672549200);
+      expect(payload.detail.collection.publishedAt).to.equal(1672549200);
 
       // Testing the transform functions here by deep assertions.
       // These assertions could've been included in the above test but breaking it down into two tests.
 
       const author = dbCollection.authors[0];
-      expect(payload.collection.authors[0]).to.deep.equal({
+      expect(payload.detail.collection.authors[0]).to.deep.equal({
         collection_author_id: author.externalId,
         image_url: author.imageUrl,
         name: author.name,
@@ -138,7 +135,7 @@ describe('event helpers: ', () => {
       });
 
       const story = dbCollection.stories[0];
-      expect(payload.collection.stories[0]).to.deep.equal({
+      expect(payload.detail.collection.stories[0]).to.deep.equal({
         collection_story_id: story.externalId,
         image_url: story.imageUrl,
         is_from_partner: story.fromPartner,
@@ -155,7 +152,7 @@ describe('event helpers: ', () => {
         publisher: story.publisher,
       });
 
-      expect(payload.collection.labels).to.deep.equal([
+      expect(payload.detail.collection.labels).to.deep.equal([
         {
           collection_label_id: testLabels[0].externalId,
           name: testLabels[0].name,
@@ -166,14 +163,14 @@ describe('event helpers: ', () => {
         },
       ]);
 
-      expect(payload.collection.curationCategory).to.deep.equal({
+      expect(payload.detail.collection.curationCategory).to.deep.equal({
         collection_curation_category_id:
           dbCollection.curationCategory.externalId,
         name: dbCollection.curationCategory.name,
         slug: dbCollection.curationCategory.slug,
       });
 
-      expect(payload.collection.partnership).to.deep.equal({
+      expect(payload.detail.collection.partnership).to.deep.equal({
         collection_partnership_id: dbCollection.partnership.externalId,
         name: dbCollection.partnership.name,
         blurb: dbCollection.partnership.blurb,
@@ -182,14 +179,14 @@ describe('event helpers: ', () => {
         url: dbCollection.partnership.url,
       });
 
-      expect(payload.collection.IABParentCategory).to.deep.equal({
+      expect(payload.detail.collection.IABParentCategory).to.deep.equal({
         collection_iab_parent_category_id:
           dbCollection.IABParentCategory.externalId,
         name: dbCollection.IABParentCategory.name,
         slug: dbCollection.IABParentCategory.slug,
       });
 
-      expect(payload.collection.IABChildCategory).to.deep.equal({
+      expect(payload.detail.collection.IABChildCategory).to.deep.equal({
         collection_iab_child_category_id:
           dbCollection.IABChildCategory.externalId,
         name: dbCollection.IABChildCategory.name,
@@ -198,130 +195,18 @@ describe('event helpers: ', () => {
     });
   });
 
-  describe('sendEvent function', () => {
-    it('should send event to event bus with proper event data', async () => {
-      const payload = await events.generateEventBridgePayload(
-        dbClient,
-        EventBridgeEventType.COLLECTION_CREATED,
-        testCollection,
-      );
-
-      await events.sendEvent(payload);
-
-      // Wait just a tad in case promise needs time to resolve
-      setTimeout(() => {
-        return;
-      }, 100);
-      expect(sentryStub.callCount).to.equal(0);
-      expect(loggerSpy.callCount).to.equal(0);
-
-      // Event was sent to Event Bus
-      expect(clientStub.callCount).to.equal(1);
-
-      // Check that the payload is correct; since it's JSON, we need to decode the data
-      // otherwise it also does ordering check
-      const sendCommand = clientStub.getCall(0).args[0].input as any;
-      expect(sendCommand).to.have.property('Entries');
-      expect(sendCommand.Entries[0]).to.contain({
-        Source: config.aws.eventBus.eventBridge.source,
-        EventBusName: config.aws.eventBus.name,
-        DetailType: EventBridgeEventType.COLLECTION_CREATED,
-      });
-
-      // Compare to initial payload
-      expect(sendCommand.Entries[0]['Detail']).to.equal(
-        JSON.stringify(payload),
-      );
-    });
-
-    it('should log error if any events fail to send for collection-created and collection-updated events', async () => {
-      clientStub.restore();
-      sandbox
-        .stub(EventBridgeClient.prototype, 'send')
-        .resolves({ FailedEntryCount: 1 });
-
-      let payload = await events.generateEventBridgePayload(
-        dbClient,
-        EventBridgeEventType.COLLECTION_CREATED,
-        testCollection,
-      );
-
-      await events.sendEvent(payload);
-
-      // Wait in case promise needs time to resolve
-      setTimeout(() => {
-        return;
-      }, 100);
-
-      expect(sentryStub.callCount).to.equal(1);
-      expect(sentryStub.getCall(0).firstArg.message).to.contain(
-        `sendEvent: Failed to send event 'collection-created' to event bus`,
-      );
-
-      expect(loggerSpy.callCount).to.equal(1);
-      expect(loggerSpy.firstCall.firstArg).to.equal(
-        `event failed - event bridge error`,
-      );
-
-      // lastArg is the event payload we tried to send to event bridge
-      expect(loggerSpy.firstCall.lastArg.eventType).to.equal(
-        'collection-created',
-      );
-
-      /**
-       * asserting for collection-updated event now
-       */
-
-      // resetting mocks and spies
-      sentryStub.reset();
-      loggerSpy.resetHistory();
-
-      payload = await events.generateEventBridgePayload(
-        dbClient,
-        EventBridgeEventType.COLLECTION_UPDATED, // event type i collection-updated
-        testCollection,
-      );
-
-      await events.sendEvent(payload);
-
-      // Wait in case promise needs time to resolve
-      setTimeout(() => {
-        return;
-      }, 100);
-
-      expect(sentryStub.callCount).to.equal(1);
-      expect(sentryStub.getCall(0).firstArg.message).to.contain(
-        `Failed to send event 'collection-updated' to event bus`,
-      );
-      expect(loggerSpy.callCount).to.equal(1);
-      expect(loggerSpy.getCall(0).firstArg).to.equal(
-        `event failed - event bridge error`,
-      );
-
-      // lastArg is the event payload we tried to send to event bridge
-      expect(loggerSpy.firstCall.lastArg.eventType).to.equal(
-        'collection-updated',
-      );
-    });
-  });
-
   describe('sendEventBridgeEvent function', () => {
     it('should log error if send call throws error', async () => {
       clientStub.restore();
       sandbox
-        .stub(EventBridgeClient.prototype, 'send')
+        .stub(PocketEventBridgeClient.prototype, 'sendPocketEvent')
         .rejects(new Error('boo!'));
 
       await events.sendEventBridgeEvent(
         dbClient,
-        EventBridgeEventType.COLLECTION_CREATED,
+        PocketEventType.COLLECTION_CREATED,
         testCollection,
       );
-
-      // Wait in case promise needs time to resolve
-      setTimeout(() => {
-        return;
-      }, 100);
 
       expect(sentryStub.callCount).to.equal(1);
       expect(sentryStub.getCall(0).firstArg.message).to.contain('boo!');

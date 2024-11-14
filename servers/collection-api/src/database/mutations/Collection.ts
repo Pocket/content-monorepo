@@ -12,7 +12,7 @@ import { checkCollectionLabelLimit } from '../utils';
 import { NotFoundError } from '@pocket-tools/apollo-utils';
 import { AdminAPIUser } from '../../admin/context';
 import { sendEventBridgeEvent } from '../../events/events';
-import { EventBridgeEventType } from '../../events/types';
+import { PocketEventType } from '@pocket-tools/event-bridge';
 
 /**
  * @param db
@@ -129,7 +129,7 @@ export async function createCollection(
 
   await sendEventBridgeEvent(
     db,
-    EventBridgeEventType.COLLECTION_CREATED,
+    PocketEventType.COLLECTION_CREATED,
     collection,
   );
 
@@ -312,7 +312,7 @@ export async function updateCollection(
   // send event bridge event for collection_updated event type
   await sendEventBridgeEvent(
     db,
-    EventBridgeEventType.COLLECTION_UPDATED,
+    PocketEventType.COLLECTION_UPDATED,
     collection,
   );
 
@@ -357,7 +357,7 @@ export async function updateCollectionImageUrl(
   // send event bridge event for collection_updated event type
   await sendEventBridgeEvent(
     db,
-    EventBridgeEventType.COLLECTION_UPDATED,
+    PocketEventType.COLLECTION_UPDATED,
     collection,
   );
   return collection;
