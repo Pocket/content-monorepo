@@ -296,7 +296,7 @@ export const hasValidUrl = (sqsProspect: SqsProspect): boolean => {
 
   try {
     url = new URL(sqsProspect.url);
-  } catch (_) {
+  } catch {
     return false;
   }
 
@@ -390,22 +390,21 @@ export const hydrateProspectMetadata = (
   prospect: Prospect,
   urlMetadata: UrlMetadata,
 ): Prospect => {
-  // check if candidate is EN language to (not) apply title formatting
-  const isCandidateEnglish =
-    urlMetadata.language?.toUpperCase() === CorpusLanguage.EN;
-  // check if candidate is German language to apply German formatting for quotes / dashes
-  const isCandidateGerman =
-    urlMetadata.language?.toUpperCase() === CorpusLanguage.DE;
-  const title = isCandidateEnglish
-    ? (formatQuotesEN(applyApTitleCase(urlMetadata.title)) as string)
-    : isCandidateGerman
-    ? (formatQuotesDashesDE(urlMetadata.title) as string)
-    : urlMetadata.title;
-  const excerpt = isCandidateEnglish
-    ? (formatQuotesEN(urlMetadata.excerpt) as string)
-    : isCandidateGerman
-    ? (formatQuotesDashesDE(urlMetadata.excerpt) as string)
-    : urlMetadata.excerpt;
+  // title and excerpt have different formatting based on prospect language
+  let title: string;
+  let excerpt: string;
+
+  if (urlMetadata.language?.toUpperCase() === CorpusLanguage.EN) {
+    title = formatQuotesEN(applyApTitleCase(urlMetadata.title)) as string;
+    excerpt = formatQuotesEN(urlMetadata.excerpt) as string;
+  } else if (urlMetadata.language?.toUpperCase() === CorpusLanguage.DE) {
+    title = formatQuotesDashesDE(urlMetadata.title) as string;
+    excerpt = formatQuotesDashesDE(urlMetadata.excerpt) as string;
+  } else {
+    title = urlMetadata.title;
+    excerpt = urlMetadata.excerpt;
+  }
+
   // Mutating the function argument here to avoid creating
   // more objects and be memory efficient
 
