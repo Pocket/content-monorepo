@@ -20,31 +20,32 @@ if (!awsEnvironments.includes(process.env.NODE_ENV ?? '')) {
 // Environment variables below are set in .aws/src/main.ts
 export default {
   app: {
-    port: 4025,
-    environment: process.env.NODE_ENV || 'development',
     defaultMaxAge: 86400,
+    environment: process.env.NODE_ENV || 'development',
     pagination: {
       approvedItemsPerPage: 30,
       rejectedItemsPerPage: 30,
       maxAllowedResults: 100,
       scheduledSurfaceHistory: 10,
     },
+    port: 4025,
     removeReasonMaxLength: 100,
+    serviceName: 'curated-corpus-api',
     upload: {
       maxSize: 10000000, // in bytes => 10MB
       maxFiles: 10,
     },
   },
   aws: {
-    region: process.env.AWS_REGION || 'us-east-1',
     endpoint: localEndpoint,
+    eventBus: {
+      name: process.env.EVENT_BUS_NAME || 'default',
+    },
+    region: process.env.AWS_REGION || 'us-east-1',
     s3: {
       localEndpoint,
       bucket,
       path: s3path,
-    },
-    eventBus: {
-      name: process.env.EVENT_BUS_NAME || 'default',
     },
   },
   events: {
@@ -52,19 +53,19 @@ export default {
     version: '0.0.2',
   },
   eventBridge: {
-    addScheduledItemEventType: 'add-scheduled-item',
-    removeScheduledItemEventType: 'remove-scheduled-item',
-    updateScheduledItemEventType: 'update-scheduled-item',
-    updateApprovedItemEventType: 'update-approved-item',
     addApprovedItemEventType: 'add-approved-item',
+    addScheduledItemEventType: 'add-scheduled-item',
     removeApprovedItemEventType: 'remove-approved-item',
+    removeScheduledItemEventType: 'remove-scheduled-item',
     source: 'curation-migration-datasync',
+    updateApprovedItemEventType: 'update-approved-item',
+    updateScheduledItemEventType: 'update-scheduled-item',
   },
   sentry: {
     dsn: process.env.SENTRY_DSN || '',
-    release: process.env.GIT_SHA || '',
     environment: process.env.NODE_ENV || 'development',
     includeLocalVariables: true,
+    release: process.env.GIT_SHA || '',
   },
   snowplow: {
     // appId should end in '-dev' outside of production such that Dbt can filter events:
@@ -84,8 +85,15 @@ export default {
     },
   },
   tracing: {
-    // for AWS, it's fine to leave this defaulting to localhost
-    host: process.env.OTLP_COLLECTOR_HOST || 'localhost',
+    flagName: 'perm.content.tracing.curated-corpus-api',
+    release: process.env.GIT_SHA || 'local',
     serviceName: 'curated-corpus-api',
+    url: process.env.OTLP_COLLECTOR_URL || 'http://localhost:4318',
+  },
+  unleash: {
+    clientKey: process.env.UNLEASH_KEY || 'unleash-key-fake',
+    endpoint: process.env.UNLEASH_ENDPOINT || 'http://localhost:4242/api',
+    refreshInterval: 60 * 1000, // ms
+    timeout: 2 * 1000, // ms
   },
 };

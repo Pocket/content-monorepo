@@ -1,5 +1,6 @@
-import { PrismaClient } from '.prisma/client';
-import { TrustedDomain } from '.prisma/client';
+import { serverLogger } from '@pocket-tools/ts-logger';
+
+import { PrismaClient, TrustedDomain } from '.prisma/client';
 
 /**
  * Created a TrustedDomain if the domain has been scheduled in the past, and can therefore be trusted.
@@ -50,7 +51,7 @@ export async function createTrustedDomain(
   } catch (error) {
     if (error.code === 'P2002') {
       // Concurrent inserts with the same domain can cause a unique constraint failure.
-      console.log(`TrustedDomain ${domainName} already existed.`);
+      serverLogger.info(`TrustedDomain ${domainName} already existed.`);
       return await getTrustedDomain(db, domainName);
     } else {
       // For all other errors, do not retry.
