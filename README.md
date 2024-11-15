@@ -253,7 +253,7 @@ To enable and configure the feature flag:
 2. Toggle the `default` environment to "On" in the left hand "Enabled in environments" box
 3. Expand the `default` environment in the main, right-hand panel
 4. Click the ✎ pencil icon to edit the "Gradual rollout" strategy
-5. Move the "Rolleout" slider to 100%
+5. Move the "Rollout" slider to 100%
 6. Click the "Variants" tab and adjust the "Payload" number to the sample rate you'd like for your traces
    - In production, this should usually be 1% (0.01) to begin with, and can be increased slowly if needed
 7. Click "Save strategy"
@@ -272,3 +272,16 @@ Local tracing is enabled by default and sends trace data to a Grafana Docker ima
 5. In the main panel, select the "Service Graph" for "Query type"
 6. Click the service you want to view traces for and select "View traces"
 7. Trace away!
+
+## CI Status
+
+### Servers
+
+[![Collection API](https://github.com/Pocket/content-monorepo/actions/workflows/collection-api.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/collection-api.yml)  
+[![Curated Corpus API](https://github.com/Pocket/content-monorepo/actions/workflows/curated-corpus-api.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/curated-corpus-api.yml)  
+[![Prospect API](https://github.com/Pocket/content-monorepo/actions/workflows/prospect-api.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/prospect-api.yml)
+
+### Lambdas
+
+[![Prospect Translation Lambda](https://github.com/Pocket/content-monorepo/actions/workflows/prospect-translation-lambda.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/prospect-translation-lambda.yml)  
+[![Corpus Scheduler Lambda](https://github.com/Pocket/content-monorepo/actions/workflows/corpus-scheduler-lambda.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/corpus-scheduler-lambda.yml)
