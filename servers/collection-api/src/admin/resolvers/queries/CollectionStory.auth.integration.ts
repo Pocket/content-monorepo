@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -43,9 +42,9 @@ describe('auth: CollectionStory', () => {
           },
         });
 
-      expect(result.body.data.getCollectionStory).not.to.exist;
-      expect(result.body.errors[0].message).to.equal(ACCESS_DENIED_ERROR);
-      expect(result.body.errors[0].extensions.code).to.equal('FORBIDDEN');
+      expect(result.body.data.getCollectionStory).not.toBeTruthy();
+      expect(result.body.errors[0].message).toEqual(ACCESS_DENIED_ERROR);
+      expect(result.body.errors[0].extensions.code).toEqual('FORBIDDEN');
     });
 
     it('should fail if user does not have access', async () => {
@@ -66,9 +65,9 @@ describe('auth: CollectionStory', () => {
           },
         });
 
-      expect(result.body.data.getCollectionStory).not.to.exist;
-      expect(result.body.errors[0].message).to.equal(ACCESS_DENIED_ERROR);
-      expect(result.body.errors[0].extensions.code).to.equal('FORBIDDEN');
+      expect(result.body.data.getCollectionStory).not.toBeTruthy();
+      expect(result.body.errors[0].message).toEqual(ACCESS_DENIED_ERROR);
+      expect(result.body.errors[0].extensions.code).toEqual('FORBIDDEN');
     });
 
     it('should succeed if user has read only access', async () => {
@@ -89,8 +88,8 @@ describe('auth: CollectionStory', () => {
         });
 
       // we should get a not found error instead of a forbidden error
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].extensions.code).to.equal('NOT_FOUND');
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].extensions.code).toEqual('NOT_FOUND');
     });
 
     it('should succeed if user has full access', async () => {
@@ -111,8 +110,8 @@ describe('auth: CollectionStory', () => {
         });
 
       // we should get a not found error instead of a forbidden error
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].extensions.code).to.equal('NOT_FOUND');
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].extensions.code).toEqual('NOT_FOUND');
     });
   });
 });

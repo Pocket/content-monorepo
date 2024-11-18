@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -70,10 +69,10 @@ describe('queries: CollectionPartner', () => {
 
       const data = result.body.data.getCollectionPartners;
 
-      expect(data.partners[0].name).to.equal('Free Range Voiceover');
-      expect(data.partners[1].name).to.equal('True Swag');
-      expect(data.partners[2].name).to.equal('Wearable Tools');
-      expect(data.partners[3].name).to.equal('Your Choice Wearables');
+      expect(data.partners[0].name).toEqual('Free Range Voiceover');
+      expect(data.partners[1].name).toEqual('True Swag');
+      expect(data.partners[2].name).toEqual('Wearable Tools');
+      expect(data.partners[3].name).toEqual('Your Choice Wearables');
     });
 
     it('should get all available properties of collection partners', async () => {
@@ -90,11 +89,11 @@ describe('queries: CollectionPartner', () => {
 
       const data = result.body.data.getCollectionPartners;
 
-      expect(data.partners[0].externalId).to.exist;
-      expect(data.partners[0].name).to.exist;
-      expect(data.partners[0].url).to.exist;
-      expect(data.partners[0].imageUrl).to.exist;
-      expect(data.partners[0].blurb).to.exist;
+      expect(data.partners[0].externalId).toBeTruthy();
+      expect(data.partners[0].name).toBeTruthy();
+      expect(data.partners[0].url).toBeTruthy();
+      expect(data.partners[0].imageUrl).toBeTruthy();
+      expect(data.partners[0].blurb).toBeTruthy();
     });
 
     it('should respect pagination', async () => {
@@ -112,11 +111,11 @@ describe('queries: CollectionPartner', () => {
       const data = result.body.data.getCollectionPartners;
 
       // We expect to get two results back
-      expect(data.partners.length).to.equal(2);
+      expect(data.partners.length).toEqual(2);
 
       // Starting from page 2 of results, that is, from Wearable Tools
-      expect(data.partners[0].name).to.equal('Wearable Tools');
-      expect(data.partners[1].name).to.equal('Your Choice Wearables');
+      expect(data.partners[0].name).toEqual('Wearable Tools');
+      expect(data.partners[1].name).toEqual('Your Choice Wearables');
     });
 
     it('should return a pagination object', async () => {
@@ -133,10 +132,10 @@ describe('queries: CollectionPartner', () => {
 
       const data = result.body.data.getCollectionPartners;
 
-      expect(data.pagination.currentPage).to.equal(2);
-      expect(data.pagination.totalPages).to.equal(2);
-      expect(data.pagination.totalResults).to.equal(4);
-      expect(data.pagination.perPage).to.equal(3);
+      expect(data.pagination.currentPage).toEqual(2);
+      expect(data.pagination.totalPages).toEqual(2);
+      expect(data.pagination.totalResults).toEqual(4);
+      expect(data.pagination.perPage).toEqual(3);
     });
 
     it('should return data if no variables are supplied', async () => {
@@ -148,11 +147,11 @@ describe('queries: CollectionPartner', () => {
       const data = result.body.data.getCollectionPartners;
 
       // Expect to get all our authors back
-      expect(data.partners.length).to.equal(4);
+      expect(data.partners.length).toEqual(4);
 
       // Expect to see the app defaults for 'page' and 'perPage' variables
-      expect(data.pagination.currentPage).to.equal(1);
-      expect(data.pagination.perPage).to.equal(
+      expect(data.pagination.currentPage).toEqual(1);
+      expect(data.pagination.perPage).toEqual(
         config.app.pagination.partnersPerPage,
       );
     });
@@ -183,11 +182,11 @@ describe('queries: CollectionPartner', () => {
 
       const data = result.body.data.getCollectionPartner;
 
-      expect(data.externalId).to.exist;
-      expect(data.name).to.exist;
-      expect(data.url).to.exist;
-      expect(data.imageUrl).to.exist;
-      expect(data.blurb).to.exist;
+      expect(data.externalId).toBeTruthy();
+      expect(data.name).toBeTruthy();
+      expect(data.url).toBeTruthy();
+      expect(data.imageUrl).toBeTruthy();
+      expect(data.blurb).toBeTruthy();
     });
 
     it('should return NOT_FOUND on an invalid partner id', async () => {
@@ -199,12 +198,12 @@ describe('queries: CollectionPartner', () => {
           variables: { id: 'invalid-id' },
         });
 
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         `Error - Not Found: invalid-id`,
       );
-      expect(result.body.errors[0].extensions.code).to.equal('NOT_FOUND');
-      expect(result.body.data.getCollectionPartner).not.to.exist;
+      expect(result.body.errors[0].extensions.code).toEqual('NOT_FOUND');
+      expect(result.body.data.getCollectionPartner).not.toBeTruthy();
     });
   });
 
@@ -224,9 +223,9 @@ describe('queries: CollectionPartner', () => {
 
       const data = result.body.data.getCollectionPartnerAssociation;
 
-      expect(data).to.exist;
-      expect(data.type).to.equal(CollectionPartnershipType.PARTNERED);
-      expect(data.partner).to.exist;
+      expect(data).toBeTruthy();
+      expect(data.type).toEqual(CollectionPartnershipType.PARTNERED);
+      expect(data.partner).toBeTruthy();
     });
 
     it('should return NOT_FOUND on an invalid externalId', async () => {
@@ -242,12 +241,12 @@ describe('queries: CollectionPartner', () => {
           variables: { externalId: 'invalid-id' },
         });
 
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         `Error - Not Found: invalid-id`,
       );
-      expect(result.body.errors[0].extensions.code).to.equal('NOT_FOUND');
-      expect(result.body.data.getCollectionPartnerAssociation).not.to.exist;
+      expect(result.body.errors[0].extensions.code).toEqual('NOT_FOUND');
+      expect(result.body.data.getCollectionPartnerAssociation).not.toBeTruthy();
     });
   });
 });

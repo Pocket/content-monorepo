@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -87,26 +86,24 @@ describe('admin queries: Collection', () => {
 
       const collection = result.body.data.getCollection;
 
-      expect(collection.title).to.equal('test me');
+      expect(collection.title).toEqual('test me');
 
       // we should return an author
-      expect(collection.authors.length).to.be.greaterThan(0);
+      expect(collection.authors.length).toBeGreaterThan(0);
 
       // we should return a curation category
-      expect(collection.curationCategory).not.to.be.undefined;
-      expect(collection.curationCategory.name).to.equal(curationCategory.name);
-      expect(collection.curationCategory.slug).to.equal(curationCategory.slug);
-      expect(collection.IABParentCategory.name).to.equal(
-        IABParentCategory.name,
-      );
-      expect(collection.IABChildCategory.name).to.equal(IABChildCategory.name);
+      expect(collection.curationCategory).not.toBeUndefined();
+      expect(collection.curationCategory.name).toEqual(curationCategory.name);
+      expect(collection.curationCategory.slug).toEqual(curationCategory.slug);
+      expect(collection.IABParentCategory.name).toEqual(IABParentCategory.name);
+      expect(collection.IABChildCategory.name).toEqual(IABChildCategory.name);
 
       // the array should be empty (bc we skipped creating stories above)
-      expect(collection.stories.length).to.equal(0);
+      expect(collection.stories.length).toEqual(0);
 
       // there should be no partnership (we didn't set one up)
-      expect(collection.partnership).to.be.null;
-      expect(collection.labels.length).to.equal(0);
+      expect(collection.partnership).toBeNull();
+      expect(collection.labels.length).toEqual(0);
     });
 
     it('should get a collection with stories with authors', async () => {
@@ -128,8 +125,8 @@ describe('admin queries: Collection', () => {
       const collection = result.body.data.getCollection;
 
       // stories should have authors
-      expect(collection.stories[0].authors.length).to.be.greaterThan(0);
-      expect(collection.stories[0].authors[0]).not.to.be.undefined;
+      expect(collection.stories[0].authors.length).toBeGreaterThan(0);
+      expect(collection.stories[0].authors[0]).not.toBeUndefined();
     });
 
     it('should get a collection with story authors sorted correctly', async () => {
@@ -152,7 +149,7 @@ describe('admin queries: Collection', () => {
 
       // the default sort returned from prisma should match our expected
       // manual sort
-      expect(collection.stories[0].authors).to.equal(
+      expect(collection.stories[0].authors).toEqual(
         sortCollectionStoryAuthors(collection.stories[0].authors),
       );
     });
@@ -179,10 +176,8 @@ describe('admin queries: Collection', () => {
 
       const collection = result.body.data.getCollection;
 
-      expect(collection.partnership.externalId).to.equal(
-        association.externalId,
-      );
-      expect(collection.partnership.type).to.equal(association.type);
+      expect(collection.partnership.externalId).toEqual(association.externalId);
+      expect(collection.partnership.type).toEqual(association.type);
     });
 
     it('should get a collection with labels', async () => {
@@ -221,8 +216,8 @@ describe('admin queries: Collection', () => {
       const collection = result.body.data.getCollection;
 
       // stories should have authors
-      expect(collection.labels.length).to.be.greaterThan(0);
-      expect(collection.labels[0]).to.deep.equal({
+      expect(collection.labels.length).toBeGreaterThan(0);
+      expect(collection.labels[0]).toEqual({
         externalId: testLabel.externalId,
         name: testLabel.name,
       });
@@ -244,12 +239,12 @@ describe('admin queries: Collection', () => {
           },
         });
 
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         `Error - Not Found: ${created.externalId}type-o`,
       );
-      expect(result.body.errors[0].extensions.code).to.equal('NOT_FOUND');
-      expect(result.body.data.getCollection).not.to.exist;
+      expect(result.body.errors[0].extensions.code).toEqual('NOT_FOUND');
+      expect(result.body.data.getCollection).not.toBeTruthy();
     });
   });
 
@@ -341,13 +336,11 @@ describe('admin queries: Collection', () => {
 
       const collections = result.body.data.searchCollections?.collections;
 
-      expect(collections.length).to.equal(1);
-      expect(collections[0].title).to.equal('the dude abides man');
-      expect(collections[0].labels.length).to.equal(2);
-      expect(collections[0].labels[0].externalId).to.equal(
-        fakeLabel.externalId,
-      );
-      expect(collections[0].labels[1].externalId).to.equal(
+      expect(collections.length).toEqual(1);
+      expect(collections[0].title).toEqual('the dude abides man');
+      expect(collections[0].labels.length).toEqual(2);
+      expect(collections[0].labels[0].externalId).toEqual(fakeLabel.externalId);
+      expect(collections[0].labels[1].externalId).toEqual(
         fakeLabel2.externalId,
       );
     });
@@ -367,10 +360,10 @@ describe('admin queries: Collection', () => {
 
       const collections = result.body.data.searchCollections?.collections;
 
-      expect(collections.length).to.equal(1);
-      expect(collections[0].title).to.equal('finishing my coffee');
-      expect(collections[0].labels.length).to.equal(1);
-      expect(collections[0].labels[0].externalId).to.equal(
+      expect(collections.length).toEqual(1);
+      expect(collections[0].title).toEqual('finishing my coffee');
+      expect(collections[0].labels.length).toEqual(1);
+      expect(collections[0].labels[0].externalId).toEqual(
         fakeLabel3.externalId,
       );
     });
@@ -390,13 +383,11 @@ describe('admin queries: Collection', () => {
 
       const collections = result.body.data.searchCollections?.collections;
 
-      expect(collections.length).to.equal(1);
-      expect(collections[0].title).to.equal('the dude abides man');
-      expect(collections[0].labels.length).to.equal(2);
-      expect(collections[0].labels[0].externalId).to.equal(
-        fakeLabel.externalId,
-      );
-      expect(collections[0].labels[1].externalId).to.equal(
+      expect(collections.length).toEqual(1);
+      expect(collections[0].title).toEqual('the dude abides man');
+      expect(collections[0].labels.length).toEqual(2);
+      expect(collections[0].labels[0].externalId).toEqual(fakeLabel.externalId);
+      expect(collections[0].labels[1].externalId).toEqual(
         fakeLabel2.externalId,
       );
     });
@@ -416,7 +407,7 @@ describe('admin queries: Collection', () => {
 
       const collections = result.body.data.searchCollections?.collections;
 
-      expect(collections.length).to.equal(0);
+      expect(collections.length).toEqual(0);
     });
 
     it('should search by status', async () => {
@@ -434,9 +425,9 @@ describe('admin queries: Collection', () => {
 
       const collections = result.body.data.searchCollections?.collections;
 
-      expect(collections.length).to.equal(1);
-      expect(collections[0].title).to.equal('does the dude abide?');
-      expect(collections[0].stories.length).to.equal(0);
+      expect(collections.length).toEqual(1);
+      expect(collections[0].title).toEqual('does the dude abide?');
+      expect(collections[0].stories.length).toEqual(0);
     });
 
     it('should search by author', async () => {
@@ -454,11 +445,11 @@ describe('admin queries: Collection', () => {
 
       const collections = result.body.data.searchCollections?.collections;
 
-      expect(collections.length).to.equal(2);
+      expect(collections.length).toEqual(2);
 
       // sort order is by updatedAt descending
-      expect(collections[0].title).to.equal('your opinion man');
-      expect(collections[1].title).to.equal('the dude abides');
+      expect(collections[0].title).toEqual('your opinion man');
+      expect(collections[1].title).toEqual('the dude abides');
     });
 
     it('should search by title', async () => {
@@ -476,12 +467,12 @@ describe('admin queries: Collection', () => {
 
       const collections = result.body.data.searchCollections?.collections;
 
-      expect(collections.length).to.equal(3);
+      expect(collections.length).toEqual(3);
 
       // sort order is by updatedAt descending
-      expect(collections[0].title).to.equal('the dude abides man');
-      expect(collections[1].title).to.equal('does the dude abide?');
-      expect(collections[2].title).to.equal('the dude abides');
+      expect(collections[0].title).toEqual('the dude abides man');
+      expect(collections[1].title).toEqual('does the dude abide?');
+      expect(collections[2].title).toEqual('the dude abides');
     });
 
     it('should search by multiple filters', async () => {
@@ -501,8 +492,8 @@ describe('admin queries: Collection', () => {
 
       const collections = result.body.data.searchCollections?.collections;
 
-      expect(collections.length).to.equal(1);
-      expect(collections[0].title).to.equal('finishing my coffee');
+      expect(collections.length).toEqual(1);
+      expect(collections[0].title).toEqual('finishing my coffee');
     });
 
     it('should return no collections when other filters match but label filters do not match', async () => {
@@ -523,7 +514,7 @@ describe('admin queries: Collection', () => {
 
       const collections = result.body.data.searchCollections?.collections;
 
-      expect(collections.length).to.equal(0);
+      expect(collections.length).toEqual(0);
     });
 
     it('should return all associated data - authors, stories, and story authors, labels', async () => {
@@ -543,11 +534,11 @@ describe('admin queries: Collection', () => {
       let collectionsWithLabels = 0;
 
       for (let i = 0; i < collections.length; i++) {
-        expect(collections[i].authors.length).to.be.greaterThan(0);
-        expect(collections[i].stories.length).to.be.greaterThan(0);
+        expect(collections[i].authors.length).toBeGreaterThan(0);
+        expect(collections[i].stories.length).toBeGreaterThan(0);
 
         for (let j = 0; j < collections[i].stories.length; j++) {
-          expect(collections[i].stories[j].authors.length).to.be.greaterThan(0);
+          expect(collections[i].stories[j].authors.length).toBeGreaterThan(0);
         }
 
         if (collections[i].labels.length > 0) {
@@ -556,7 +547,7 @@ describe('admin queries: Collection', () => {
       }
 
       // in the before each block we are only creating two collections with labels
-      expect(collectionsWithLabels).to.equal(2);
+      expect(collectionsWithLabels).toEqual(2);
     });
 
     it('should respect pagination', async () => {
@@ -579,10 +570,10 @@ describe('admin queries: Collection', () => {
       const collections = result.body.data.searchCollections?.collections;
 
       // ensure our perPage is respected
-      expect(collections.length).to.equal(1);
+      expect(collections.length).toEqual(1);
 
       // ensure we are getting the second result (page 2)
-      expect(collections[0].title).to.equal('finishing my coffee');
+      expect(collections[0].title).toEqual('finishing my coffee');
     });
 
     it('should get published collections with story authors sorted correctly', async () => {
@@ -602,7 +593,7 @@ describe('admin queries: Collection', () => {
 
       // the default sort returned from prisma should match our expected
       // manual sort
-      expect(collections[0].stories[0].authors).to.equal(
+      expect(collections[0].stories[0].authors).toEqual(
         sortCollectionStoryAuthors(collections[0].stories[0].authors),
       );
     });

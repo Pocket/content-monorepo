@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -57,9 +56,9 @@ describe('auth: Label', () => {
         });
 
       // we shouldn't have any errors
-      expect(resultCreate.body.errors).not.to.exist;
+      expect(resultCreate.body.errors).not.toBeTruthy();
 
-      expect(resultCreate.body.data).to.exist;
+      expect(resultCreate.body.data).toBeTruthy();
 
       // update label simon-le-bon to simon-le-bon-update
       const input: UpdateLabelInput = {
@@ -75,9 +74,9 @@ describe('auth: Label', () => {
         });
 
       // we shouldn't have any errors
-      expect(resultUpdate.body.errors).not.to.exist;
+      expect(resultUpdate.body.errors).not.toBeTruthy();
 
-      expect(resultUpdate.body.data).to.exist;
+      expect(resultUpdate.body.data).toBeTruthy();
     });
     it('should fail if a user has only READONLY access', async () => {
       const headers = {
@@ -95,9 +94,9 @@ describe('auth: Label', () => {
           variables: { name: 'katerina-ch-1' },
         });
 
-      expect(resultCreate.body.errors[0].message).to.equal(ACCESS_DENIED_ERROR);
+      expect(resultCreate.body.errors[0].message).toEqual(ACCESS_DENIED_ERROR);
 
-      expect(resultCreate.body.data).not.to.exist;
+      expect(resultCreate.body.data).not.toBeTruthy();
 
       // update label simon-le-bon to simon-le-bon-update
       const input: UpdateLabelInput = {
@@ -112,9 +111,9 @@ describe('auth: Label', () => {
           variables: { data: input },
         });
 
-      expect(resultUpdate.body.errors[0].message).to.equal(ACCESS_DENIED_ERROR);
+      expect(resultUpdate.body.errors[0].message).toEqual(ACCESS_DENIED_ERROR);
 
-      expect(resultUpdate.body.data).not.to.exist;
+      expect(resultUpdate.body.data).not.toBeTruthy();
     });
 
     it('should fail if user does not have access', async () => {
@@ -133,9 +132,9 @@ describe('auth: Label', () => {
           variables: { name: 'katerina-ch-1' },
         });
 
-      expect(resultCreate.body.errors[0].message).to.equal(ACCESS_DENIED_ERROR);
+      expect(resultCreate.body.errors[0].message).toEqual(ACCESS_DENIED_ERROR);
 
-      expect(resultCreate.body.data).not.to.exist;
+      expect(resultCreate.body.data).not.toBeTruthy();
 
       // update label simon-le-bon to simon-le-bon-update
       const input: UpdateLabelInput = {
@@ -150,9 +149,9 @@ describe('auth: Label', () => {
           variables: { data: input },
         });
 
-      expect(resultUpdate.body.errors[0].message).to.equal(ACCESS_DENIED_ERROR);
+      expect(resultUpdate.body.errors[0].message).toEqual(ACCESS_DENIED_ERROR);
 
-      expect(resultUpdate.body.data).not.to.exist;
+      expect(resultUpdate.body.data).not.toBeTruthy();
     });
 
     it('should fail if auth headers are empty', async () => {
@@ -164,9 +163,9 @@ describe('auth: Label', () => {
           variables: { name: 'katerina-ch-1' },
         });
 
-      expect(resultCreate.body.errors[0].message).to.equal(ACCESS_DENIED_ERROR);
+      expect(resultCreate.body.errors[0].message).toEqual(ACCESS_DENIED_ERROR);
 
-      expect(resultCreate.body.data).not.to.exist;
+      expect(resultCreate.body.data).not.toBeTruthy();
 
       // update label simon-le-bon to simon-le-bon-update
       const input: UpdateLabelInput = {
@@ -180,9 +179,9 @@ describe('auth: Label', () => {
           variables: { data: input },
         });
 
-      expect(resultUpdate.body.errors[0].message).to.equal(ACCESS_DENIED_ERROR);
+      expect(resultUpdate.body.errors[0].message).toEqual(ACCESS_DENIED_ERROR);
 
-      expect(resultUpdate.body.data).not.to.exist;
+      expect(resultUpdate.body.data).not.toBeTruthy();
     });
   });
 });

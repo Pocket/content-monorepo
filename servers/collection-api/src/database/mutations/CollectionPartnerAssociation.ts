@@ -8,7 +8,7 @@ import {
   UpdateCollectionPartnerAssociationInput,
 } from '../types';
 import { getCollectionPartnerAssociation } from '../queries';
-import { sendEventBridgeEventUpdateFromInternalCollectionId } from '../../events/events';
+import { sendEventBridgeEventUpdateFromInternalCollectionId } from '../../events/helpers';
 
 /**
  * @param db

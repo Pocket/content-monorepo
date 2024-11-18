@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -64,16 +63,16 @@ describe('mutations: CollectionPartner', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.createCollectionPartner.name).to.equal(
+      expect(result.body.data.createCollectionPartner.name).toEqual(
         'Podcast Kings',
       );
-      expect(result.body.data.createCollectionPartner.url).to.equal(
+      expect(result.body.data.createCollectionPartner.url).toEqual(
         'https://test.com',
       );
-      expect(result.body.data.createCollectionPartner.blurb).to.equal(
+      expect(result.body.data.createCollectionPartner.blurb).toEqual(
         'What else is there to talk on a podcast about? Only kittens',
       );
-      expect(result.body.data.createCollectionPartner.imageUrl).to.equal(
+      expect(result.body.data.createCollectionPartner.imageUrl).toEqual(
         'https://i.imgur.com/b0O3wZo.jpg',
       );
     });
@@ -99,14 +98,12 @@ describe('mutations: CollectionPartner', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.updateCollectionPartner.name).to.equal(
-        input.name,
-      );
-      expect(result.body.data.updateCollectionPartner.url).to.equal(input.url);
-      expect(result.body.data.updateCollectionPartner.blurb).to.equal(
+      expect(result.body.data.updateCollectionPartner.name).toEqual(input.name);
+      expect(result.body.data.updateCollectionPartner.url).toEqual(input.url);
+      expect(result.body.data.updateCollectionPartner.blurb).toEqual(
         input.blurb,
       );
-      expect(result.body.data.updateCollectionPartner.imageUrl).to.equal(
+      expect(result.body.data.updateCollectionPartner.imageUrl).toEqual(
         input.imageUrl,
       );
     });
@@ -130,9 +127,9 @@ describe('mutations: CollectionPartner', () => {
           variables: { data: input },
         });
 
-      expect(
-        result.body.data.updateCollectionPartnerImageUrl.imageUrl,
-      ).to.equal(input.imageUrl);
+      expect(result.body.data.updateCollectionPartnerImageUrl.imageUrl).toEqual(
+        input.imageUrl,
+      );
     });
 
     it('should not update any other partner fields', async () => {
@@ -152,13 +149,13 @@ describe('mutations: CollectionPartner', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.updateCollectionPartnerImageUrl.name).to.equal(
+      expect(result.body.data.updateCollectionPartnerImageUrl.name).toEqual(
         partner.name,
       );
-      expect(result.body.data.updateCollectionPartnerImageUrl.url).to.equal(
+      expect(result.body.data.updateCollectionPartnerImageUrl.url).toEqual(
         partner.url,
       );
-      expect(result.body.data.updateCollectionPartnerImageUrl.blurb).to.equal(
+      expect(result.body.data.updateCollectionPartnerImageUrl.blurb).toEqual(
         partner.blurb,
       );
     });

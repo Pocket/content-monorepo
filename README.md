@@ -156,6 +156,17 @@ pnpm build
 pnpm test-integrations --filter=curated-corpus-api
 ```
 
+### Debugging Tests in VSCode
+
+To enable step-through debugging in VSCode:
+
+1. Install the [Jest Runner](https://marketplace.visualstudio.com/items?itemName=firsttris.vscode-jest-runner) extension. (Be sure it's this one! There are a couple other extensions with almost the same name.)
+2. Open up your settings and search for `jest-runner`.
+3. In the "Jest-Runner Config" section, make sure the "Jestrunner: Config Path" setting is empty. (It's probably got a default value.)
+4. Open up a test file and click the `Run` and `Debug` commands that float above the test definition. It should work!
+
+If you have trouble with any of the steps above, try re-starting VSCode.
+
 ## DynamoDB
 
 Prospect-api uses `dynamodb` as the db system. When running `docker compose up`, the `localstack` container executes a `dynamodb.sh` script where the prospect-api table

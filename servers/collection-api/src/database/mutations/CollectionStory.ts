@@ -9,10 +9,8 @@ import {
   UpdateCollectionStorySortOrderInput,
   UpdateCollectionStoryImageUrlInput,
 } from '../types';
-import {
-  sendEventBridgeEvent,
-  sendEventBridgeEventUpdateFromInternalCollectionId,
-} from '../../events/events';
+import { sendEventBridgeEvent } from '../../events/events';
+import { sendEventBridgeEventUpdateFromInternalCollectionId } from '../../events/helpers';
 import { EventBridgeEventType } from '../../events/types';
 
 /**
@@ -54,11 +52,13 @@ export async function createCollectionStory(
       },
     },
   });
+
   await sendEventBridgeEvent(
     db,
     EventBridgeEventType.COLLECTION_UPDATED,
     collection,
   );
+
   return story;
 }
 
@@ -117,6 +117,7 @@ export async function updateCollectionStory(
     db,
     existingStory.collectionId,
   );
+
   return story;
 }
 

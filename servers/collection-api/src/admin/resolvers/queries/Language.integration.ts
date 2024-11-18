@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -37,10 +36,10 @@ describe('queries: Language', () => {
         .send({ query: print(GET_LANGUAGES) });
       const data = result.body.data.getLanguages;
 
-      expect(data.length).to.equal(Object.values(CollectionLanguage).length);
+      expect(data.length).toEqual(Object.values(CollectionLanguage).length);
 
       data.forEach((language) => {
-        expect(language in CollectionLanguage).to.be.true;
+        expect(language in CollectionLanguage).toBe(true);
       });
     });
   });

@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -92,27 +91,31 @@ describe('mutations: CollectionPartnerAssociation', () => {
         });
 
       // All the optional fields should be empty
-      expect(result.body.data.createCollectionPartnerAssociation.name).not.to
-        .exist;
-      expect(result.body.data.createCollectionPartnerAssociation.url).not.to
-        .exist;
-      expect(result.body.data.createCollectionPartnerAssociation.blurb).not.to
-        .exist;
-      expect(result.body.data.createCollectionPartnerAssociation.imageUrl).not
-        .to.exist;
+      expect(
+        result.body.data.createCollectionPartnerAssociation.name,
+      ).toBeFalsy();
+      expect(
+        result.body.data.createCollectionPartnerAssociation.url,
+      ).toBeFalsy();
+      expect(
+        result.body.data.createCollectionPartnerAssociation.blurb,
+      ).toBeFalsy();
+      expect(
+        result.body.data.createCollectionPartnerAssociation.imageUrl,
+      ).not.toBeTruthy();
 
       // There should be a type set
-      expect(result.body.data.createCollectionPartnerAssociation.type).to.equal(
+      expect(result.body.data.createCollectionPartnerAssociation.type).toEqual(
         CollectionPartnershipType.PARTNERED,
       );
 
       // There should be a linked partner
       expect(
         result.body.data.createCollectionPartnerAssociation.partner.externalId,
-      ).to.equal(partner.externalId);
+      ).toEqual(partner.externalId);
       expect(
         result.body.data.createCollectionPartnerAssociation.partner.name,
-      ).to.equal(partner.name);
+      ).toEqual(partner.name);
     });
 
     it('should create a collection partner association with customized partner data', async () => {
@@ -135,31 +138,31 @@ describe('mutations: CollectionPartnerAssociation', () => {
         });
 
       // There should be a type set
-      expect(result.body.data.createCollectionPartnerAssociation.type).to.equal(
+      expect(result.body.data.createCollectionPartnerAssociation.type).toEqual(
         CollectionPartnershipType.PARTNERED,
       );
 
       // All the optional fields should match our inputs
-      expect(result.body.data.createCollectionPartnerAssociation.name).to.equal(
+      expect(result.body.data.createCollectionPartnerAssociation.name).toEqual(
         input.name,
       );
-      expect(result.body.data.createCollectionPartnerAssociation.url).to.equal(
+      expect(result.body.data.createCollectionPartnerAssociation.url).toEqual(
         input.url,
       );
-      expect(
-        result.body.data.createCollectionPartnerAssociation.blurb,
-      ).to.equal(input.blurb);
+      expect(result.body.data.createCollectionPartnerAssociation.blurb).toEqual(
+        input.blurb,
+      );
       expect(
         result.body.data.createCollectionPartnerAssociation.imageUrl,
-      ).to.equal(input.imageUrl);
+      ).toEqual(input.imageUrl);
 
       // There should be a linked partner
       expect(
         result.body.data.createCollectionPartnerAssociation.partner.externalId,
-      ).to.equal(partner.externalId);
+      ).toEqual(partner.externalId);
       expect(
         result.body.data.createCollectionPartnerAssociation.partner.name,
-      ).to.equal(partner.name);
+      ).toEqual(partner.name);
     });
   });
 
@@ -188,21 +191,21 @@ describe('mutations: CollectionPartnerAssociation', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.updateCollectionPartnerAssociation.type).to.equal(
+      expect(result.body.data.updateCollectionPartnerAssociation.type).toEqual(
         input.type,
       );
-      expect(result.body.data.updateCollectionPartnerAssociation.name).to.equal(
+      expect(result.body.data.updateCollectionPartnerAssociation.name).toEqual(
         input.name,
       );
-      expect(result.body.data.updateCollectionPartnerAssociation.url).to.equal(
+      expect(result.body.data.updateCollectionPartnerAssociation.url).toEqual(
         input.url,
       );
-      expect(
-        result.body.data.updateCollectionPartnerAssociation.blurb,
-      ).to.equal(input.blurb);
+      expect(result.body.data.updateCollectionPartnerAssociation.blurb).toEqual(
+        input.blurb,
+      );
       expect(
         result.body.data.updateCollectionPartnerAssociation.imageUrl,
-      ).to.equal(input.imageUrl);
+      ).toEqual(input.imageUrl);
     });
 
     it('should update to a different collection partner', async () => {
@@ -236,7 +239,7 @@ describe('mutations: CollectionPartnerAssociation', () => {
 
       expect(
         result.body.data.updateCollectionPartnerAssociation.partner,
-      ).to.deep.equal(newPartner);
+      ).toEqual(newPartner);
     });
   });
 
@@ -262,7 +265,7 @@ describe('mutations: CollectionPartnerAssociation', () => {
 
       expect(
         result.body.data.updateCollectionPartnerAssociationImageUrl.imageUrl,
-      ).to.equal(input.imageUrl);
+      ).toEqual(input.imageUrl);
     });
 
     it('should not update any other association fields', async () => {
@@ -288,13 +291,13 @@ describe('mutations: CollectionPartnerAssociation', () => {
 
       expect(
         result.body.data.updateCollectionPartnerAssociationImageUrl.name,
-      ).to.equal(association.name);
+      ).toEqual(association.name);
       expect(
         result.body.data.updateCollectionPartnerAssociationImageUrl.url,
-      ).to.equal(association.url);
+      ).toEqual(association.url);
       expect(
         result.body.data.updateCollectionPartnerAssociationImageUrl.blurb,
-      ).to.equal(association.blurb);
+      ).toEqual(association.blurb);
     });
   });
 
@@ -316,15 +319,15 @@ describe('mutations: CollectionPartnerAssociation', () => {
           variables: { externalId: association.externalId },
         });
 
-      expect(result.body.data.deleteCollectionPartnerAssociation.type).to.equal(
+      expect(result.body.data.deleteCollectionPartnerAssociation.type).toEqual(
         association.type,
       );
 
       expect(
         result.body.data.deleteCollectionPartnerAssociation.partner.externalId,
-      ).to.equal(association.partner.externalId);
+      ).toEqual(association.partner.externalId);
 
-      expect(result.body.data.deleteCollectionPartnerAssociation.name).to.equal(
+      expect(result.body.data.deleteCollectionPartnerAssociation.name).toEqual(
         association.name,
       );
 
@@ -334,7 +337,7 @@ describe('mutations: CollectionPartnerAssociation', () => {
         association.externalId,
       );
 
-      expect(found).not.to.exist;
+      expect(found).not.toBeTruthy();
     });
 
     it('should fail to delete a collection partner association if the externalId cannot be found', async () => {
@@ -346,8 +349,8 @@ describe('mutations: CollectionPartnerAssociation', () => {
           variables: { externalId: association.externalId + 'typo' },
         });
 
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         `Cannot delete a collection partner association with external ID "${association.externalId}typo"`,
       );
     });
@@ -368,7 +371,7 @@ describe('mutations: CollectionPartnerAssociation', () => {
         },
       });
 
-      expect(sponsoredStories.length).to.equal(0);
+      expect(sponsoredStories.length).toEqual(0);
     });
   });
 });
