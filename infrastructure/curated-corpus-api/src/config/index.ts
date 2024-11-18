@@ -48,4 +48,9 @@ export const config = {
     timeout: 5,
     startPeriod: 0,
   },
+  tracing: {
+    url: isDev
+      ? 'https://otel-collector.getpocket.dev:443'
+      : 'https://otel-collector.readitlater.com:443',
+  },
 };
