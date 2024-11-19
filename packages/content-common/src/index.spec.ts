@@ -129,7 +129,7 @@ describe('content-common', () => {
       const sentencesWithContractions = [
         {
           result: "Here's what you haven't noticed 'foo bar' foo'S: foo Bar",
-          expected: "Here's What You Haven't Noticed 'Foo Bar' Foo'S: Foo Bar",
+          expected: "Here's What You Haven't Noticed 'Foo Bar' Foo's: Foo Bar",
         },
       ];
       sentencesWithContractions.forEach((swc) => {
@@ -142,9 +142,11 @@ describe('content-common', () => {
       const result = lowercaseAfterApostrophe("foo'S");
       expect(result).toEqual("foo's");
     });
-    it('lowercase letter after apostrophe, ignore string in quotes, & return new string', () => {
-      const result = lowercaseAfterApostrophe("'Foo' foo'S DaY's");
-      expect(result).toEqual("'Foo' foo's DaY's");
+    it('lowercase the first letter after apostrophe, ignore string in quotes, & return new string', () => {
+      const result = lowercaseAfterApostrophe(
+        "'Foo' foo'S DaY's You'Ll 'foo Bar foo'Ss'",
+      );
+      expect(result).toEqual("'Foo' foo's DaY's You'll 'foo Bar foo'ss'");
     });
   });
   // taken from curation admin tools

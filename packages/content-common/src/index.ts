@@ -48,20 +48,18 @@ export const sanitizeText = (input: string, maxLength: number): string => {
 };
 
 /**
- * Format a string: Capture the letter after an apostrophe at the end of a
- * sentence (without requiring a space) or with a white space following the letter.
+ * Format a string: Match the letter after an apostrophe & capture the apostrophe and matched char.
  * Lowercase the captured letter & return the formatted string.
  * @param input
  * @returns {string}
  */
 export const lowercaseAfterApostrophe = (input: string): string => {
-  // matches a char (num or letter) right after an apostrophe,
-  // only if the apostrophe is preceded by a char & is followed
-  // by a space or end of the str.
-  const regex = /(?<=\w)'(\w)(?=\s|$)/g;
+  // matches an apostrophe followed by a char
+  // ensures only the first char after the apostrophe is converted to lowercase
+  const regex = /(?<=\w)(')(\w)/g;
 
-  return input.replace(regex, (match, p1) => {
-    return `'${p1.toLowerCase()}`; // Replace with the apostrophe and the lowercase letter
+  return input.replace(regex, (match, p1, char) => {
+    return `'${char.toLowerCase()}`; // Lowercase the first char after the apostrophe
   });
 };
 
