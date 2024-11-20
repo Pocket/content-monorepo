@@ -22,6 +22,9 @@
     "@aws-sdk/client-eventbridge": "3.529.1",
     "@aws-sdk/lib-dynamodb": "3.529.1",
     "@pocket-tools/apollo-utils": "3.5.0",
+    "@pocket-tools/feature-flags-client": "1.0.0",
+    "@pocket-tools/sentry": "1.0.0",
+    "@pocket-tools/tracing": "1.8.9",
     "@pocket-tools/ts-logger": "^1.9.4",
     "content-common": "workspace:*",
     "@apollo/server": "4.11.0",
@@ -38,7 +41,6 @@
   },
   "devDependencies": {
     "@faker-js/faker": "8.4.1",
-    "@types/chai-spies": "1.0.6",
     "@types/jest": "29.5.12",
     "@types/lodash": "4.14.202",
     "eslint-config-custom": "workspace:*",

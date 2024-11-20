@@ -54,4 +54,9 @@ export const config = {
     component_code: `content-${name.toLowerCase()}`,
     env_code: isDev ? 'dev' : 'prod',
   },
+  tracing: {
+    url: isDev
+      ? 'https://otel-collector.getpocket.dev:443'
+      : 'https://otel-collector.readitlater.com:443',
+  },
 };

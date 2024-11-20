@@ -243,13 +243,23 @@ We leverage [Pocket's tracing package](https://www.npmjs.com/package/@pocket-too
 
 - Collection API
 
-  - [GCP Traces](<https://console.cloud.google.com/traces/list?project=moz-fx-pocket-prod-61fb&pageState=(%22traceIntervalPicker%22:(%22groupValue%22:%22P7D%22,%22customValue%22:null),%22traceFilter%22:(%22chips%22:%22%255B%257B_22k_22_3A_22service.name_22_2C_22t_22_3A10_2C_22v_22_3A_22_5C_22collection-api_5C_22_22_2C_22s_22_3Atrue_2C_22i_22_3A_22service.name_22%257D%255D%22))>)
-  - [GCP Logs](https://cloudlogging.app.goo.gl/3Ft9tbRDo3cHfC9K7)
   - [Unleash feature flag](https://featureflags.getpocket.dev/projects/default/features/perm.content.tracing.collections) (Dev)
   - [Unleash feature flag](https://featureflags.readitlater.com/projects/default/features/perm.content.tracing.collections) (Prod)
 
 - Curated Corpus API (coming soon)
-- Prospect API (coming soon)
+
+  - [Unleash feature flag](https://featureflags.getpocket.dev/projects/default/features/perm.content.tracing.curated-corpus-api) (Dev)
+  - [Unleash feature flag](https://featureflags.readitlater.com/projects/default/features/perm.content.tracing.curated-corpus-api) (Prod)
+
+- Prospect API
+
+  - [Unleash feature flag](https://featureflags.getpocket.dev/projects/default/features/perm.content.tracing.prospect-api) (Dev)
+  - [Unleash feature flag](https://featureflags.readitlater.com/projects/default/features/perm.content.tracing.prospect-api) (Prod)
+
+Traces and logs for the above services can be found in GCP (filter by service name):
+
+- [GCP Logs Explorer](https://console.cloud.google.com/logs/query;cursorTimestamp=2024-11-20T16:35:39.086537379Z;customDuration=today?inv=1&invt=AbiAGg&project=moz-fx-pocket-prod-61fb)
+- [GCP Trace Explorer](https://console.cloud.google.com/traces/list?inv=1&invt=AbiAGg&project=moz-fx-pocket-prod-61fb)
 
 Tracing is performed using Open Telemetry NPM packages that send trace data to a standalone collector ECS service in AWS, which in turn exports trace data to GCP. The Pocket tracing package also implements an
 [Open Telemetry package](https://www.npmjs.com/package/@opentelemetry/auto-instrumentations-node) that hooks into the Winston logger (which we implement via the Pocket `ts-logger` package) to auto-forward log data to GCP.
