@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -128,26 +127,26 @@ describe('public queries: Collection', () => {
 
       const collections = result.body.data?.getCollections?.collections;
 
-      expect(collections.length).to.equal(2);
+      expect(collections.length).toEqual(2);
 
       // ensure we are getting all client data
       for (let i = 0; i < collections.length; i++) {
-        expect(collections[i].title).not.to.be.empty;
-        expect(collections[i].authors.length).to.equal(1);
-        expect(collections[i].stories.length).to.be.greaterThan(0);
-        expect(collections[i].curationCategory.name).to.equal(
+        expect(collections[i].title).toBeTruthy();
+        expect(collections[i].authors.length).toEqual(1);
+        expect(collections[i].stories.length).toBeGreaterThan(0);
+        expect(collections[i].curationCategory.name).toEqual(
           curationCategory.name,
         );
-        expect(collections[i].stories[0].authors).not.to.be.empty;
-        expect(collections[i].stories[0].item.givenUrl).not.to.be.null;
-        expect(collections[i].IABParentCategory.name).to.equal(
+        expect(collections[i].stories[0].authors).toBeTruthy();
+        expect(collections[i].stories[0].item.givenUrl).not.toBeNull();
+        expect(collections[i].IABParentCategory.name).toEqual(
           IABParentCategory.name,
         );
-        expect(collections[i].IABChildCategory.name).to.equal(
+        expect(collections[i].IABChildCategory.name).toEqual(
           IABChildCategory.name,
         );
-        expect(collections[i].labels[0].externalId).to.equal(label.externalId);
-        expect(collections[i].labels[0].name).to.equal(label.name);
+        expect(collections[i].labels[0].externalId).toEqual(label.externalId);
+        expect(collections[i].labels[0].name).toEqual(label.name);
       }
     });
 
@@ -185,7 +184,7 @@ describe('public queries: Collection', () => {
       const data = result.body.data;
 
       // only two collections above are published
-      expect(data?.getCollections.collections.length).to.equal(2);
+      expect(data?.getCollections.collections.length).toEqual(2);
     });
 
     it('should respect pagination', async () => {
@@ -236,19 +235,19 @@ describe('public queries: Collection', () => {
 
       const collections = result.body.data?.getCollections?.collections;
 
-      expect(collections.length).to.equal(2);
-      expect(collections[0].title).to.equal('3');
-      expect(collections[1].title).to.equal('2');
+      expect(collections.length).toEqual(2);
+      expect(collections[0].title).toEqual('3');
+      expect(collections[1].title).toEqual('2');
 
       // verify pagination
       const pagination = result.body.data?.getCollections?.pagination;
 
       // there are 5 total published collections
-      expect(pagination.totalResults).to.equal(5);
+      expect(pagination.totalResults).toEqual(5);
       // two collections per page, so we should have 3 pages
-      expect(pagination.totalPages).to.equal(3);
+      expect(pagination.totalPages).toEqual(3);
       // verify the page returned is the one requested
-      expect(pagination.currentPage).to.equal(2);
+      expect(pagination.currentPage).toEqual(2);
     });
 
     it('should respect pagination when filtering by language', async () => {
@@ -313,19 +312,19 @@ describe('public queries: Collection', () => {
 
       const collections = result.body.data?.getCollections?.collections;
 
-      expect(collections.length).to.equal(2);
-      expect(collections[0].title).to.equal('3');
-      expect(collections[1].title).to.equal('2');
+      expect(collections.length).toEqual(2);
+      expect(collections[0].title).toEqual('3');
+      expect(collections[1].title).toEqual('2');
 
       // verify pagination
       const pagination = result.body.data?.getCollections?.pagination;
 
       // there are 5 total published collections
-      expect(pagination.totalResults).to.equal(5);
+      expect(pagination.totalResults).toEqual(5);
       // two collections per page, so we should have 3 pages
-      expect(pagination.totalPages).to.equal(3);
+      expect(pagination.totalPages).toEqual(3);
       // verify the page returned is the one requested
-      expect(pagination.currentPage).to.equal(2);
+      expect(pagination.currentPage).toEqual(2);
     });
 
     it('should get collections with null page and perPage inputs', async () => {
@@ -348,12 +347,12 @@ describe('public queries: Collection', () => {
         });
 
       // we should get only one collection back
-      expect(result.body.data?.getCollections?.collections.length).to.equal(1);
+      expect(result.body.data?.getCollections?.collections.length).toEqual(1);
 
       const pagination = result.body.data?.getCollections?.pagination;
 
-      expect(pagination.currentPage).to.equal(1);
-      expect(pagination.perPage).to.equal(
+      expect(pagination.currentPage).toEqual(1);
+      expect(pagination.perPage).toEqual(
         config.app.pagination.collectionsPerPage,
       );
     });
@@ -397,7 +396,7 @@ describe('public queries: Collection', () => {
       const collections = result.body.data?.getCollections?.collections;
 
       // only two published collections are in `EN`
-      expect(collections.length).to.equal(2);
+      expect(collections.length).toEqual(2);
     });
 
     it('should get only published collections filtered by language', async () => {
@@ -445,7 +444,7 @@ describe('public queries: Collection', () => {
 
       const collections = result.body.data?.getCollections?.collections;
 
-      expect(collections.length).to.equal(2);
+      expect(collections.length).toEqual(2);
     });
 
     it('should get only published collections filtered by language in lowercase', async () => {
@@ -492,7 +491,7 @@ describe('public queries: Collection', () => {
 
       const collections = result.body.data?.getCollections?.collections;
 
-      expect(collections.length).to.equal(2);
+      expect(collections.length).toEqual(2);
     });
 
     it('should get only `EN` published collections if an unsupported language is provided', async () => {
@@ -541,7 +540,7 @@ describe('public queries: Collection', () => {
       const collections = result.body.data?.getCollections?.collections;
 
       // there are two `EN` language published collections above
-      expect(collections.length).to.equal(2);
+      expect(collections.length).toEqual(2);
     });
 
     it('should get published collections with story authors sorted correctly', async () => {
@@ -564,7 +563,7 @@ describe('public queries: Collection', () => {
 
       // the default sort returned from prisma should match our expected
       // manual sort
-      expect(collections[0].stories[0].authors).to.equal(
+      expect(collections[0].stories[0].authors).toEqual(
         sortCollectionStoryAuthors(collections[0].stories[0].authors),
       );
     });
@@ -605,10 +604,10 @@ describe('public queries: Collection', () => {
       const collections = result.body.data?.getCollections?.collections;
 
       // we should get only one collection back
-      expect(collections.length).to.equal(1);
+      expect(collections.length).toEqual(1);
       // returned collection should only have one label
-      expect(collections[0].labels.length).to.equal(1);
-      expect(collections[0].labels[0].name).to.equal(label.name);
+      expect(collections[0].labels.length).toEqual(1);
+      expect(collections[0].labels[0].name).toEqual(label.name);
     });
 
     it('should get collection when only one of its assigned labels is provided in filters', async () => {
@@ -655,12 +654,12 @@ describe('public queries: Collection', () => {
       const collections = result.body.data?.getCollections?.collections;
 
       // we should get only one collection back
-      expect(collections.length).to.equal(1);
-      expect(collections[0].externalId).to.equal(testCollection.externalId);
+      expect(collections.length).toEqual(1);
+      expect(collections[0].externalId).toEqual(testCollection.externalId);
       // returned collection should have two labels
-      expect(collections[0].labels.length).to.equal(2);
-      expect(collections[0].labels[0].name).to.equal(labels[0].name);
-      expect(collections[0].labels[1].name).to.equal(labels[1].name);
+      expect(collections[0].labels.length).toEqual(2);
+      expect(collections[0].labels[0].name).toEqual(labels[0].name);
+      expect(collections[0].labels[1].name).toEqual(labels[1].name);
     });
 
     it('should get only one collection when the label provided is only assigned to one', async () => {
@@ -707,11 +706,11 @@ describe('public queries: Collection', () => {
       const collections = result.body.data?.getCollections?.collections;
 
       // we should get only one collection back
-      expect(collections.length).to.equal(1);
-      expect(collections[0].externalId).to.equal(testCollection.externalId);
+      expect(collections.length).toEqual(1);
+      expect(collections[0].externalId).toEqual(testCollection.externalId);
       // returned collection should only one label
-      expect(collections[0].labels.length).to.equal(1);
-      expect(collections[0].labels[0].name).to.equal(label.name);
+      expect(collections[0].labels.length).toEqual(1);
+      expect(collections[0].labels[0].name).toEqual(label.name);
 
       clearDb(db);
     });
@@ -770,7 +769,7 @@ describe('public queries: Collection', () => {
       const collections = result.body.data?.getCollections?.collections;
 
       // we should get no collections back
-      expect(collections.length).to.equal(0);
+      expect(collections.length).toEqual(0);
     });
   });
 
@@ -803,10 +802,7 @@ describe('public queries: Collection', () => {
           variables: { slug },
         });
 
-      expect(result.body).to.have.nested.property(
-        'data._entities[0].title',
-        title,
-      );
+      expect(result.body.data._entities[0].title).toEqual(title);
     });
 
     it('errors NOT_FOUND when collection is not published', async () => {
@@ -823,10 +819,7 @@ describe('public queries: Collection', () => {
           variables: { slug },
         });
 
-      expect(result.body).to.have.nested.property(
-        'errors[0].extensions.code',
-        'NOT_FOUND',
-      );
+      expect(result.body.errors[0].extensions.code).toEqual('NOT_FOUND');
     });
 
     it('errors NOT_FOUND when slug is not found', async () => {
@@ -837,10 +830,7 @@ describe('public queries: Collection', () => {
           variables: { slug },
         });
 
-      expect(result.body).to.have.nested.property(
-        'errors[0].extensions.code',
-        'NOT_FOUND',
-      );
+      expect(result.body.errors[0].extensions.code).toEqual('NOT_FOUND');
     });
 
     it('throws UserInputError when slug is null', async () => {
@@ -851,10 +841,7 @@ describe('public queries: Collection', () => {
           variables: { slug: null },
         });
 
-      expect(result.body).to.have.nested.property(
-        'errors[0].extensions.code',
-        'BAD_USER_INPUT',
-      );
+      expect(result.body.errors[0].extensions.code).toEqual('BAD_USER_INPUT');
     });
   });
 
@@ -882,19 +869,17 @@ describe('public queries: Collection', () => {
       const collection = result.body.data?.getCollectionBySlug;
 
       // ensure we are getting all client data
-      expect(collection.title).to.equal('ultra suede is a miracle');
-      expect(collection.authors.length).to.equal(1);
-      expect(collection.stories.length).to.be.greaterThan(0);
-      expect(collection.stories[0].item.givenUrl).not.to.be.null;
-      expect(collection.curationCategory.name).to.equal(curationCategory.name);
-      expect(collection.stories[0].authors).not.to.be.empty;
-      expect(collection.IABParentCategory.name).to.equal(
-        IABParentCategory.name,
-      );
-      expect(collection.IABChildCategory.name).to.equal(IABChildCategory.name);
+      expect(collection.title).toEqual('ultra suede is a miracle');
+      expect(collection.authors.length).toEqual(1);
+      expect(collection.stories.length).toBeGreaterThan(0);
+      expect(collection.stories[0].item.givenUrl).not.toBeNull();
+      expect(collection.curationCategory.name).toEqual(curationCategory.name);
+      expect(collection.stories[0].authors).toBeTruthy();
+      expect(collection.IABParentCategory.name).toEqual(IABParentCategory.name);
+      expect(collection.IABChildCategory.name).toEqual(IABChildCategory.name);
 
       // ensure no label data appears as this collection doesn't have one
-      expect(collection.labels).to.have.lengthOf(0);
+      expect(collection.labels).toHaveLength(0);
     });
 
     it('happy path: can get a collection with label data', async () => {
@@ -929,9 +914,9 @@ describe('public queries: Collection', () => {
       const collection = result.body.data?.getCollectionBySlug;
 
       // ensure we are getting label data back
-      expect(collection.labels).to.have.lengthOf(1);
-      expect(collection.labels[0].externalId).to.equal(label.externalId);
-      expect(collection.labels[0].name).to.equal(label.name);
+      expect(collection.labels).toHaveLength(1);
+      expect(collection.labels[0].externalId).toEqual(label.externalId);
+      expect(collection.labels[0].name).toEqual(label.name);
     });
 
     it('should get a collection that is in REVIEW status', async () => {
@@ -955,7 +940,7 @@ describe('public queries: Collection', () => {
 
       const collection = result.body.data?.getCollectionBySlug;
 
-      expect(collection.title).to.equal('I am under review');
+      expect(collection.title).toEqual('I am under review');
     });
 
     it("should not get a collection that isn't published/under review", async () => {
@@ -974,7 +959,7 @@ describe('public queries: Collection', () => {
           },
         });
 
-      expect(result.body.data?.getCollectionBySlug).to.be.null;
+      expect(result.body.data?.getCollectionBySlug).toBeNull();
     });
 
     it('can get a collection by slug with getCollectionBySlug with story authors sorted correctly', async () => {
@@ -997,7 +982,7 @@ describe('public queries: Collection', () => {
 
       // the default sort returned from prisma should match our expected
       // manual sort
-      expect(collection.stories[0].authors).to.equal(
+      expect(collection.stories[0].authors).toEqual(
         sortCollectionStoryAuthors(collection.stories[0].authors),
       );
     });
@@ -1022,7 +1007,7 @@ describe('public queries: Collection', () => {
 
       // the default sort returned from prisma should match our expected
       // manual sort
-      expect(collection.stories[0].authors).to.equal(
+      expect(collection.stories[0].authors).toEqual(
         sortCollectionStoryAuthors(collection.stories[0].authors),
       );
     });
@@ -1037,12 +1022,12 @@ describe('public queries: Collection', () => {
           },
         });
 
-      expect(result.body.data?.getCollectionBySlug).not.to.exist;
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.data?.getCollectionBySlug).not.toBeTruthy();
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         `Error - Not Found: this-is-just-good-timing`,
       );
-      expect(result.body.errors[0].extensions.code).to.equal('NOT_FOUND');
+      expect(result.body.errors[0].extensions.code).toEqual('NOT_FOUND');
     });
   });
 
@@ -1066,10 +1051,10 @@ describe('public queries: Collection', () => {
           },
         });
 
-      expect(result.body.errors).to.be.undefined;
-      expect(result.body.data._entities.length).to.equal(1);
-      expect(result.body.data._entities[0].givenUrl).to.equal(givenUrl);
-      expect(result.body.data._entities[0].collection.slug).to.equal(
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data._entities.length).toEqual(1);
+      expect(result.body.data._entities[0].givenUrl).toEqual(givenUrl);
+      expect(result.body.data._entities[0].collection.slug).toEqual(
         collectionItem.slug,
       );
     });
@@ -1086,8 +1071,8 @@ describe('public queries: Collection', () => {
           },
         });
 
-      expect(result.body.errors).to.be.undefined;
-      expect(result.body.data._entities[0].collection).to.equal(null);
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data._entities[0].collection).toEqual(null);
     });
   });
 });

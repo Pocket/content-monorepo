@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -79,12 +78,12 @@ describe('queries: CollectionAuthor', () => {
         });
       const data = result.body.data.getCollectionAuthors;
 
-      expect(data.authors[0].name).to.equal('Agatha Christie');
-      expect(data.authors[1].name).to.equal('Alexander Pushkin');
-      expect(data.authors[2].name).to.equal('Carl Sagan');
-      expect(data.authors[3].name).to.equal('J. R. R. Tolkien');
-      expect(data.authors[4].name).to.equal('René Goscinny');
-      expect(data.authors[5].name).to.equal('William Shakespeare');
+      expect(data.authors[0].name).toEqual('Agatha Christie');
+      expect(data.authors[1].name).toEqual('Alexander Pushkin');
+      expect(data.authors[2].name).toEqual('Carl Sagan');
+      expect(data.authors[3].name).toEqual('J. R. R. Tolkien');
+      expect(data.authors[4].name).toEqual('René Goscinny');
+      expect(data.authors[5].name).toEqual('William Shakespeare');
     });
 
     it('should get all available properties of collection authors', async () => {
@@ -100,12 +99,12 @@ describe('queries: CollectionAuthor', () => {
         });
       const data = result.body.data.getCollectionAuthors;
 
-      expect(data.authors[0].externalId).to.exist;
-      expect(data.authors[0].name).to.exist;
-      expect(data.authors[0].slug).to.exist;
-      expect(data.authors[0].bio).to.exist;
-      expect(data.authors[0].imageUrl).to.exist;
-      expect(data.authors[0].active).to.exist;
+      expect(data.authors[0].externalId).toBeTruthy();
+      expect(data.authors[0].name).toBeTruthy();
+      expect(data.authors[0].slug).toBeTruthy();
+      expect(data.authors[0].bio).toBeTruthy();
+      expect(data.authors[0].imageUrl).toBeTruthy();
+      expect(data.authors[0].active).toBeTruthy();
     });
 
     it('should respect pagination', async () => {
@@ -122,11 +121,11 @@ describe('queries: CollectionAuthor', () => {
       const data = result.body.data.getCollectionAuthors;
 
       // We expect to get two results back
-      expect(data.authors.length).to.equal(2);
+      expect(data.authors.length).toEqual(2);
 
       // Starting from page 2 of results, that is, from Carl Sagan
-      expect(data.authors[0].name).to.equal('Carl Sagan');
-      expect(data.authors[1].name).to.equal('J. R. R. Tolkien');
+      expect(data.authors[0].name).toEqual('Carl Sagan');
+      expect(data.authors[1].name).toEqual('J. R. R. Tolkien');
     });
 
     it('should return a pagination object', async () => {
@@ -142,10 +141,10 @@ describe('queries: CollectionAuthor', () => {
         });
       const data = result.body.data.getCollectionAuthors;
 
-      expect(data.pagination.currentPage).to.equal(2);
-      expect(data.pagination.totalPages).to.equal(2);
-      expect(data.pagination.totalResults).to.equal(6);
-      expect(data.pagination.perPage).to.equal(3);
+      expect(data.pagination.currentPage).toEqual(2);
+      expect(data.pagination.totalPages).toEqual(2);
+      expect(data.pagination.totalResults).toEqual(6);
+      expect(data.pagination.perPage).toEqual(3);
     });
 
     it('should return data if no variables are supplied', async () => {
@@ -156,11 +155,11 @@ describe('queries: CollectionAuthor', () => {
       const data = result.body.data.getCollectionAuthors;
 
       // Expect to get all our authors back
-      expect(data.authors.length).to.equal(6);
+      expect(data.authors.length).toEqual(6);
 
       // Expect to see the app defaults for 'page' and 'perPage' variables
-      expect(data.pagination.currentPage).to.equal(1);
-      expect(data.pagination.perPage).to.equal(
+      expect(data.pagination.currentPage).toEqual(1);
+      expect(data.pagination.perPage).toEqual(
         config.app.pagination.authorsPerPage,
       );
     });
@@ -191,12 +190,12 @@ describe('queries: CollectionAuthor', () => {
         });
       const data = result.body.data.getCollectionAuthor;
 
-      expect(data.externalId).to.exist;
-      expect(data.name).to.exist;
-      expect(data.slug).to.exist;
-      expect(data.bio).to.exist;
-      expect(data.imageUrl).to.exist;
-      expect(data.active).to.exist;
+      expect(data.externalId).toBeTruthy();
+      expect(data.name).toBeTruthy();
+      expect(data.slug).toBeTruthy();
+      expect(data.bio).toBeTruthy();
+      expect(data.imageUrl).toBeTruthy();
+      expect(data.active).toBeTruthy();
     });
 
     it('should return NOT_FOUND on an invalid author id', async () => {
@@ -208,12 +207,12 @@ describe('queries: CollectionAuthor', () => {
           variables: { id: 'invalid-id' },
         });
 
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         `Error - Not Found: invalid-id`,
       );
-      expect(result.body.errors[0].extensions.code).to.equal('NOT_FOUND');
-      expect(result.body.data.getCollectionAuthor).not.to.exist;
+      expect(result.body.errors[0].extensions.code).toEqual('NOT_FOUND');
+      expect(result.body.data.getCollectionAuthor).not.toBeTruthy();
     });
   });
 });

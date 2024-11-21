@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -61,8 +60,8 @@ describe('mutations: CollectionAuthor', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.createCollectionAuthor.name).to.equal('the dude');
-      expect(result.body.data.createCollectionAuthor.slug).to.equal('the-dude');
+      expect(result.body.data.createCollectionAuthor.name).toEqual('the dude');
+      expect(result.body.data.createCollectionAuthor.slug).toEqual('the-dude');
     });
 
     it('should create a collection author with all fields specified', async () => {
@@ -81,14 +80,14 @@ describe('mutations: CollectionAuthor', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.createCollectionAuthor.name).to.equal('the dude');
-      expect(result.body.data.createCollectionAuthor.slug).to.equal(
+      expect(result.body.data.createCollectionAuthor.name).toEqual('the dude');
+      expect(result.body.data.createCollectionAuthor.slug).toEqual(
         'his-dudeness',
       );
-      expect(result.body.data.createCollectionAuthor.bio).to.equal(
+      expect(result.body.data.createCollectionAuthor.bio).toEqual(
         'the dude abides',
       );
-      expect(result.body.data.createCollectionAuthor.imageUrl).to.equal(
+      expect(result.body.data.createCollectionAuthor.imageUrl).toEqual(
         'https://i.imgur.com/YeydXfW.gif',
       );
     });
@@ -119,8 +118,8 @@ describe('mutations: CollectionAuthor', () => {
           variables: { data: input },
         });
 
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         'An author with the slug "his-dudeness" already exists',
       );
     });
@@ -145,8 +144,8 @@ describe('mutations: CollectionAuthor', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.updateCollectionAuthor.name).to.equal(input.name);
-      expect(result.body.data.updateCollectionAuthor.bio).to.equal(input.bio);
+      expect(result.body.data.updateCollectionAuthor.name).toEqual(input.name);
+      expect(result.body.data.updateCollectionAuthor.bio).toEqual(input.bio);
     });
 
     it('should update to a specified collection author slug', async () => {
@@ -166,7 +165,7 @@ describe('mutations: CollectionAuthor', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.updateCollectionAuthor.slug).to.equal(input.slug);
+      expect(result.body.data.updateCollectionAuthor.slug).toEqual(input.slug);
     });
 
     it('should fail to update a collection author slug if another author has that slug', async () => {
@@ -193,8 +192,8 @@ describe('mutations: CollectionAuthor', () => {
 
       // should fail trying to make walter's slug 'the dude'
       // there's only one the dude
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         'An author with the slug "the-dude" already exists',
       );
     });
@@ -218,7 +217,7 @@ describe('mutations: CollectionAuthor', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.updateCollectionAuthorImageUrl.imageUrl).to.equal(
+      expect(result.body.data.updateCollectionAuthorImageUrl.imageUrl).toEqual(
         input.imageUrl,
       );
     });
@@ -240,16 +239,16 @@ describe('mutations: CollectionAuthor', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.updateCollectionAuthorImageUrl.name).to.equal(
+      expect(result.body.data.updateCollectionAuthorImageUrl.name).toEqual(
         author.name,
       );
-      expect(result.body.data.updateCollectionAuthorImageUrl.slug).to.equal(
+      expect(result.body.data.updateCollectionAuthorImageUrl.slug).toEqual(
         author.slug,
       );
-      expect(result.body.data.updateCollectionAuthorImageUrl.bio).to.equal(
+      expect(result.body.data.updateCollectionAuthorImageUrl.bio).toEqual(
         author.bio,
       );
-      expect(result.body.data.updateCollectionAuthorImageUrl.active).to.equal(
+      expect(result.body.data.updateCollectionAuthorImageUrl.active).toEqual(
         author.active,
       );
     });

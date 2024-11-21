@@ -1,5 +1,3 @@
-import { expect } from 'chai';
-import sinon from 'sinon';
 import * as Sentry from '@sentry/node';
 import { client } from '../database/client';
 import { EventBridgeClient } from '@aws-sdk/client-eventbridge';
@@ -28,32 +26,32 @@ import { serverLogger } from '@pocket-tools/ts-logger';
 describe('event helpers: ', () => {
   const dbClient: PrismaClient = client();
 
-  // setting up stubs and spies
-  const sandbox = sinon.createSandbox();
+  const eventBridgeSendMock = jest.spyOn(EventBridgeClient.prototype, 'send');
 
-  const clientStub = sandbox
-    .stub(EventBridgeClient.prototype, 'send')
-    .resolves({ FailedEntryCount: 0 });
+  eventBridgeSendMock.mockImplementation(() => {
+    return { FailedEntryCount: 0 };
+  });
 
-  const sentryStub = sandbox.stub(Sentry, 'captureException').resolves();
-  const crumbStub = sandbox.stub(Sentry, 'addBreadcrumb').resolves();
-  const loggerSpy = sandbox.spy(serverLogger, 'error');
+  const sentryStub = jest.spyOn(Sentry, 'captureException').mockReturnThis();
+  const crumbStub = jest.spyOn(Sentry, 'addBreadcrumb').mockReturnThis();
+  const loggerSpy = jest.spyOn(serverLogger, 'error');
 
-  let getCollectionLabelsForSnowplowStub: sinon.SinonStub;
+  let getCollectionLabelsForSnowplowStub;
 
   beforeEach(() => {
-    sinon.restore();
-    getCollectionLabelsForSnowplowStub = sinon
-      .stub(events, 'getCollectionLabelsForSnowplow')
-      .resolves(testLabels);
+    jest.clearAllMocks();
+
+    getCollectionLabelsForSnowplowStub = jest
+      .spyOn(events, 'getCollectionLabelsForSnowplow')
+      .mockResolvedValue(testLabels);
   });
 
   afterEach(() => {
-    sandbox.resetHistory();
-    getCollectionLabelsForSnowplowStub.reset();
+    jest.clearAllMocks();
   });
+
   afterAll(() => {
-    sandbox.restore();
+    jest.restoreAllMocks();
   });
 
   describe('generateEventBridgePayload function', () => {
@@ -65,41 +63,41 @@ describe('event helpers: ', () => {
       );
 
       // assert that db call to fetch labels for collection via CollectionLabel ids is called
-      expect(getCollectionLabelsForSnowplowStub.calledOnce).to.be.true;
+      expect(getCollectionLabelsForSnowplowStub).toHaveBeenCalledTimes(1);
 
       // assert all the collection object top level properties are correct
-      expect(payload.collection.externalId).to.equal(testCollection.externalId);
-      expect(payload.collection.title).to.equal(testCollection.title);
-      expect(payload.collection.slug).to.equal(testCollection.slug);
-      expect(payload.collection.excerpt).to.equal('');
-      expect(payload.collection.imageUrl).to.equal('');
-      expect(payload.collection.intro).to.equal('');
+      expect(payload.collection.externalId).toEqual(testCollection.externalId);
+      expect(payload.collection.title).toEqual(testCollection.title);
+      expect(payload.collection.slug).toEqual(testCollection.slug);
+      expect(payload.collection.excerpt).toEqual('');
+      expect(payload.collection.imageUrl).toEqual('');
+      expect(payload.collection.intro).toEqual('');
 
-      expect(payload.collection.status).to.equal('archived');
-      expect(payload.collection.language).to.equal(
+      expect(payload.collection.status).toEqual('archived');
+      expect(payload.collection.language).toEqual(
         CollectionLanguage[testCollection.language],
       );
-      expect(payload.collection.authors.length).to.equal(0);
-      expect(payload.collection.stories.length).to.equal(0);
-      expect(payload.collection.labels.length).to.equal(testLabels.length);
+      expect(payload.collection.authors.length).toEqual(0);
+      expect(payload.collection.stories.length).toEqual(0);
+      expect(payload.collection.labels.length).toEqual(testLabels.length);
 
       // asserting on the empty object ({}) properties
-      expect(payload.collection.curationCategory).is.empty;
-      expect(payload.collection.partnership).is.empty;
-      expect(payload.collection.IABParentCategory).is.empty;
-      expect(payload.collection.IABChildCategory).is.empty;
+      expect(payload.collection.curationCategory).toEqual({});
+      expect(payload.collection.partnership).toEqual({});
+      expect(payload.collection.IABParentCategory).toEqual({});
+      expect(payload.collection.IABChildCategory).toEqual({});
 
       // assert Date time stamps are converted to unix seconds format
-      expect(payload.collection.createdAt).to.equal(1672549200);
-      expect(payload.collection.updatedAt).to.equal(1672549200);
+      expect(payload.collection.createdAt).toEqual(1672549200);
+      expect(payload.collection.updatedAt).toEqual(1672549200);
       // missing publishedAt should be set to null
-      expect(payload.collection.publishedAt).to.equal(null);
+      expect(payload.collection.publishedAt).toEqual(null);
 
       // assert the remaining two props of the payload object are correct
-      expect(payload.eventType).to.equal(
+      expect(payload.eventType).toEqual(
         EventBridgeEventType.COLLECTION_CREATED,
       );
-      expect(payload.object_version).to.equal('new');
+      expect(payload.object_version).toEqual('new');
     });
 
     it('should transform db collection sub types to event payload collection sub types', async () => {
@@ -119,16 +117,16 @@ describe('event helpers: ', () => {
         dbCollection,
       );
 
-      expect(payload.collection.status).to.equal(
+      expect(payload.collection.status).toEqual(
         CollectionStatus[testCollection.status],
       );
-      expect(payload.collection.publishedAt).to.equal(1672549200);
+      expect(payload.collection.publishedAt).toEqual(1672549200);
 
       // Testing the transform functions here by deep assertions.
       // These assertions could've been included in the above test but breaking it down into two tests.
 
       const author = dbCollection.authors[0];
-      expect(payload.collection.authors[0]).to.deep.equal({
+      expect(payload.collection.authors[0]).toEqual({
         collection_author_id: author.externalId,
         image_url: author.imageUrl,
         name: author.name,
@@ -138,7 +136,7 @@ describe('event helpers: ', () => {
       });
 
       const story = dbCollection.stories[0];
-      expect(payload.collection.stories[0]).to.deep.equal({
+      expect(payload.collection.stories[0]).toEqual({
         collection_story_id: story.externalId,
         image_url: story.imageUrl,
         is_from_partner: story.fromPartner,
@@ -155,7 +153,7 @@ describe('event helpers: ', () => {
         publisher: story.publisher,
       });
 
-      expect(payload.collection.labels).to.deep.equal([
+      expect(payload.collection.labels).toEqual([
         {
           collection_label_id: testLabels[0].externalId,
           name: testLabels[0].name,
@@ -166,14 +164,14 @@ describe('event helpers: ', () => {
         },
       ]);
 
-      expect(payload.collection.curationCategory).to.deep.equal({
+      expect(payload.collection.curationCategory).toEqual({
         collection_curation_category_id:
           dbCollection.curationCategory.externalId,
         name: dbCollection.curationCategory.name,
         slug: dbCollection.curationCategory.slug,
       });
 
-      expect(payload.collection.partnership).to.deep.equal({
+      expect(payload.collection.partnership).toEqual({
         collection_partnership_id: dbCollection.partnership.externalId,
         name: dbCollection.partnership.name,
         blurb: dbCollection.partnership.blurb,
@@ -182,14 +180,14 @@ describe('event helpers: ', () => {
         url: dbCollection.partnership.url,
       });
 
-      expect(payload.collection.IABParentCategory).to.deep.equal({
+      expect(payload.collection.IABParentCategory).toEqual({
         collection_iab_parent_category_id:
           dbCollection.IABParentCategory.externalId,
         name: dbCollection.IABParentCategory.name,
         slug: dbCollection.IABParentCategory.slug,
       });
 
-      expect(payload.collection.IABChildCategory).to.deep.equal({
+      expect(payload.collection.IABChildCategory).toEqual({
         collection_iab_child_category_id:
           dbCollection.IABChildCategory.externalId,
         name: dbCollection.IABChildCategory.name,
@@ -212,35 +210,37 @@ describe('event helpers: ', () => {
       setTimeout(() => {
         return;
       }, 100);
-      expect(sentryStub.callCount).to.equal(0);
-      expect(loggerSpy.callCount).to.equal(0);
+
+      expect(sentryStub).toHaveBeenCalledTimes(0);
+      expect(loggerSpy).toHaveBeenCalledTimes(0);
 
       // Event was sent to Event Bus
-      expect(clientStub.callCount).to.equal(1);
+      expect(eventBridgeSendMock).toHaveBeenCalledTimes(1);
 
       // Check that the payload is correct; since it's JSON, we need to decode the data
       // otherwise it also does ordering check
-      const sendCommand = clientStub.getCall(0).args[0].input as any;
-      expect(sendCommand).to.have.property('Entries');
-      expect(sendCommand.Entries[0]).to.contain({
+      const sendCommand = eventBridgeSendMock.mock.calls[0][0].input as any;
+
+      expect(sendCommand).toHaveProperty('Entries');
+
+      expect(sendCommand.Entries[0]).toMatchObject({
         Source: config.aws.eventBus.eventBridge.source,
         EventBusName: config.aws.eventBus.name,
         DetailType: EventBridgeEventType.COLLECTION_CREATED,
       });
 
       // Compare to initial payload
-      expect(sendCommand.Entries[0]['Detail']).to.equal(
-        JSON.stringify(payload),
-      );
+      expect(sendCommand.Entries[0]['Detail']).toEqual(JSON.stringify(payload));
     });
 
-    it('should log error if any events fail to send for collection-created and collection-updated events', async () => {
-      clientStub.restore();
-      sandbox
-        .stub(EventBridgeClient.prototype, 'send')
-        .resolves({ FailedEntryCount: 1 });
+    it('should log error if any events fail to send for collection-created event', async () => {
+      eventBridgeSendMock.mockClear();
 
-      let payload = await events.generateEventBridgePayload(
+      eventBridgeSendMock.mockImplementation(() => {
+        return { FailedEntryCount: 1 };
+      });
+
+      const payload = await events.generateEventBridgePayload(
         dbClient,
         EventBridgeEventType.COLLECTION_CREATED,
         testCollection,
@@ -253,32 +253,38 @@ describe('event helpers: ', () => {
         return;
       }, 100);
 
-      expect(sentryStub.callCount).to.equal(1);
-      expect(sentryStub.getCall(0).firstArg.message).to.contain(
+      expect(sentryStub).toHaveBeenCalledTimes(1);
+
+      expect(sentryStub.mock.calls[0][0].message).toContain(
         `sendEvent: Failed to send event 'collection-created' to event bus`,
       );
 
-      expect(loggerSpy.callCount).to.equal(1);
-      expect(loggerSpy.firstCall.firstArg).to.equal(
+      expect(loggerSpy).toHaveBeenCalledTimes(1);
+
+      // get array of inputs to the first call to the logger
+      const loggerFirstCallInputs = loggerSpy.mock.calls[0];
+
+      // the first input to the logger should be...
+      expect(loggerFirstCallInputs.at(0)).toEqual(
         `event failed - event bridge error`,
       );
 
-      // lastArg is the event payload we tried to send to event bridge
-      expect(loggerSpy.firstCall.lastArg.eventType).to.equal(
-        'collection-created',
-      );
+      // the second input to the logger is an object - let's verify the eventType
+      expect(loggerFirstCallInputs.at(1)).toMatchObject({
+        eventType: 'collection-created',
+      });
+    });
 
-      /**
-       * asserting for collection-updated event now
-       */
+    it('should log error if any events fail to send for collection-updated event', async () => {
+      eventBridgeSendMock.mockClear();
 
-      // resetting mocks and spies
-      sentryStub.reset();
-      loggerSpy.resetHistory();
+      eventBridgeSendMock.mockImplementation(() => {
+        return { FailedEntryCount: 1 };
+      });
 
-      payload = await events.generateEventBridgePayload(
+      const payload = await events.generateEventBridgePayload(
         dbClient,
-        EventBridgeEventType.COLLECTION_UPDATED, // event type i collection-updated
+        EventBridgeEventType.COLLECTION_UPDATED, // event type is collection-updated
         testCollection,
       );
 
@@ -289,28 +295,36 @@ describe('event helpers: ', () => {
         return;
       }, 100);
 
-      expect(sentryStub.callCount).to.equal(1);
-      expect(sentryStub.getCall(0).firstArg.message).to.contain(
-        `Failed to send event 'collection-updated' to event bus`,
+      expect(sentryStub).toHaveBeenCalledTimes(1);
+
+      expect(sentryStub.mock.calls[0][0].message).toContain(
+        `sendEvent: Failed to send event 'collection-updated' to event bus`,
       );
-      expect(loggerSpy.callCount).to.equal(1);
-      expect(loggerSpy.getCall(0).firstArg).to.equal(
+
+      expect(loggerSpy).toHaveBeenCalledTimes(1);
+
+      // get array of inputs to the first call to the logger
+      const loggerFirstCallInputs = loggerSpy.mock.calls[0];
+
+      // the first input to the logger should be...
+      expect(loggerFirstCallInputs.at(0)).toEqual(
         `event failed - event bridge error`,
       );
 
-      // lastArg is the event payload we tried to send to event bridge
-      expect(loggerSpy.firstCall.lastArg.eventType).to.equal(
-        'collection-updated',
-      );
+      // the second input to the logger is an object - let's verify the eventType
+      expect(loggerFirstCallInputs.at(1)).toMatchObject({
+        eventType: 'collection-updated',
+      });
     });
   });
 
   describe('sendEventBridgeEvent function', () => {
     it('should log error if send call throws error', async () => {
-      clientStub.restore();
-      sandbox
-        .stub(EventBridgeClient.prototype, 'send')
-        .rejects(new Error('boo!'));
+      eventBridgeSendMock.mockClear();
+
+      eventBridgeSendMock.mockImplementation(() => {
+        throw new Error('boo!');
+      });
 
       await events.sendEventBridgeEvent(
         dbClient,
@@ -323,17 +337,26 @@ describe('event helpers: ', () => {
         return;
       }, 100);
 
-      expect(sentryStub.callCount).to.equal(1);
-      expect(sentryStub.getCall(0).firstArg.message).to.contain('boo!');
-      expect(crumbStub.callCount).to.equal(1);
-      expect(crumbStub.getCall(0).firstArg.message).to.contain(
+      expect(sentryStub).toHaveBeenCalledTimes(1);
+
+      expect(sentryStub.mock.calls[0][0].message).toContain('boo!');
+
+      expect(crumbStub).toHaveBeenCalledTimes(1);
+
+      expect(crumbStub.mock.calls[0][0].message).toContain(
         `sendEventBridgeEvent: Failed to send event 'collection-created' to event bus`,
       );
-      expect(loggerSpy.callCount).to.equal(1);
-      expect(loggerSpy.firstCall.firstArg).to.equal(
+
+      expect(loggerSpy).toHaveBeenCalledTimes(1);
+
+      // get array of inputs to the first call to the logger
+      const loggerFirstCallInputs = loggerSpy.mock.calls[0];
+
+      expect(loggerFirstCallInputs.at(0)).toEqual(
         `event failed - failed sending to event bridge`,
       );
-      expect(loggerSpy.firstCall.lastArg.error.message).to.equal('boo!');
+
+      expect(loggerFirstCallInputs.at(1)['error'].message).toEqual('boo!');
     });
   });
 });

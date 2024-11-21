@@ -1,7 +1,5 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
-import * as sinon from 'sinon';
 
 import { ApolloServer } from '@apollo/server';
 import { Collection, CollectionStatus, PrismaClient } from '.prisma/client';
@@ -56,9 +54,9 @@ describe('mutations: Collection', () => {
   };
 
   // create a stub for the sendEventBridgeEvent function and make it resolve to null.
-  const sendEventBridgeEventStub = sinon
-    .stub(EventBridgeEvents, 'sendEventBridgeEvent')
-    .resolves(null);
+  const sendEventBridgeEventStub = jest
+    .spyOn(EventBridgeEvents, 'sendEventBridgeEvent')
+    .mockResolvedValue(null);
 
   beforeAll(async () => {
     // port 0 tells express to dynamically assign an available port
@@ -111,7 +109,7 @@ describe('mutations: Collection', () => {
       title: 'walter bowls',
     };
 
-    sendEventBridgeEventStub.reset();
+    sendEventBridgeEventStub.mockClear();
   });
 
   describe('createCollection', () => {
@@ -124,8 +122,8 @@ describe('mutations: Collection', () => {
           variables: { data: minimumData },
         });
 
-      expect(result.body.data.createCollection).to.exist;
-      expect(result.body.data.createCollection.status).to.equal(
+      expect(result.body.data.createCollection).toBeTruthy();
+      expect(result.body.data.createCollection.status).toEqual(
         CollectionStatus.DRAFT,
       );
     });
@@ -139,7 +137,7 @@ describe('mutations: Collection', () => {
           variables: { data: minimumData },
         });
 
-      expect(result.body.data.createCollection.publishedAt).not.to.exist;
+      expect(result.body.data.createCollection.publishedAt).toBeFalsy();
     });
 
     it('should store the curation category when provided', async () => {
@@ -156,7 +154,7 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data.createCollection.curationCategory).to.exist;
+      expect(result.body.data.createCollection.curationCategory).toBeTruthy();
     });
 
     it('should fail on a duplicate slug', async () => {
@@ -174,9 +172,9 @@ describe('mutations: Collection', () => {
           variables: { data: minimumData },
         });
 
-      expect(result.body.data).not.to.exist;
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.data).toBeFalsy();
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         'A collection with the slug "walter-bowls" already exists',
       );
     });
@@ -195,13 +193,13 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data.createCollection.authors).to.exist;
+      expect(result.body.data.createCollection.authors).toBeTruthy();
       expect(
         result.body.data.createCollection.curationCategory.externalId,
-      ).to.equal(curationCategory.externalId);
-      expect(result.body.data.createCollection.stories).to.exist;
+      ).toEqual(curationCategory.externalId);
+      expect(result.body.data.createCollection.stories).toBeTruthy();
       // there will never be stories on a freshly created collection
-      expect(result.body.data.createCollection.stories.length).to.equal(0);
+      expect(result.body.data.createCollection.stories.length).toEqual(0);
     });
 
     it('should create a collection with an IAB parent category', async () => {
@@ -220,7 +218,7 @@ describe('mutations: Collection', () => {
 
       expect(
         result.body.data.createCollection.IABParentCategory.externalId,
-      ).to.equal(IABParentCategory.externalId);
+      ).toEqual(IABParentCategory.externalId);
     });
 
     it('should create a collection with IAB parent and child categories', async () => {
@@ -240,11 +238,11 @@ describe('mutations: Collection', () => {
 
       expect(
         result.body.data.createCollection.IABParentCategory.externalId,
-      ).to.equal(IABParentCategory.externalId);
+      ).toEqual(IABParentCategory.externalId);
 
       expect(
         result.body.data.createCollection.IABChildCategory.externalId,
-      ).to.equal(IABChildCategory.externalId);
+      ).toEqual(IABChildCategory.externalId);
     });
 
     it('should create a collection with a label', async () => {
@@ -261,10 +259,10 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data.createCollection.labels[0].externalId).to.equal(
+      expect(result.body.data.createCollection.labels[0].externalId).toEqual(
         label1.externalId,
       );
-      expect(result.body.data.createCollection.labels[0].name).to.equal(
+      expect(result.body.data.createCollection.labels[0].name).toEqual(
         label1.name,
       );
     });
@@ -283,7 +281,7 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data.createCollection.labels).to.have.length(2);
+      expect(result.body.data.createCollection.labels).toHaveLength(2);
     });
 
     it('should create collection with max collection-label limit', async () => {
@@ -302,7 +300,7 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data.createCollection.labels).to.have.length(
+      expect(result.body.data.createCollection.labels).toHaveLength(
         config.app.collectionLabelLimit,
       );
     });
@@ -321,9 +319,9 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data).not.to.exist;
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.data).not.toBeTruthy();
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         `Too many labels provided: ${config.app.collectionLabelLimit} allowed, ${labelListIds.length} provided.`,
       );
     });
@@ -342,7 +340,9 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data.createCollection.IABChildCategory).not.to.exist;
+      expect(
+        result.body.data.createCollection.IABChildCategory,
+      ).not.toBeTruthy();
     });
 
     it('should not connect a partnership', async () => {
@@ -356,7 +356,7 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data.createCollection.partnership).not.to.exist;
+      expect(result.body.data.createCollection.partnership).not.toBeTruthy();
     });
 
     it('should send event bridge event for collection_created event when collection status is PUBLISHED', async () => {
@@ -371,7 +371,7 @@ describe('mutations: Collection', () => {
         });
 
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventStub).toHaveBeenCalledTimes(1);
     });
 
     it('should send event bridge event for collection_created event when collection status is ARCHIVED', async () => {
@@ -389,7 +389,7 @@ describe('mutations: Collection', () => {
         });
 
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventStub).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -427,13 +427,13 @@ describe('mutations: Collection', () => {
         });
 
       // should return the updated info
-      expect(result.body.data.updateCollection.title).to.equal(
+      expect(result.body.data.updateCollection.title).toEqual(
         'second iteration',
       );
-      expect(result.body.data.updateCollection.language).to.equal('DE');
+      expect(result.body.data.updateCollection.language).toEqual('DE');
 
       // should return the updated author
-      expect(result.body.data.updateCollection.authors[0].name).to.equal(
+      expect(result.body.data.updateCollection.authors[0].name).toEqual(
         newAuthor.name,
       );
     });
@@ -464,7 +464,7 @@ describe('mutations: Collection', () => {
       const updated = await updateCollection(db, input, adminApiUser);
 
       // should have updated the updatedAt field
-      expect(updated.updatedAt.getTime()).to.be.greaterThan(
+      expect(updated.updatedAt.getTime()).toBeGreaterThan(
         initial.updatedAt.getTime(),
       );
     });
@@ -500,7 +500,7 @@ describe('mutations: Collection', () => {
 
       // make sure a curation category was connected
       // should return the updated curation category
-      expect(result.body.data.updateCollection.curationCategory.name).to.equal(
+      expect(result.body.data.updateCollection.curationCategory.name).toEqual(
         newCurationCategory.name,
       );
     });
@@ -527,7 +527,9 @@ describe('mutations: Collection', () => {
         });
 
       // make sure a curation category was disconnected
-      expect(result.body.data.updateCollection.curationCategory).not.to.exist;
+      expect(
+        result.body.data.updateCollection.curationCategory,
+      ).not.toBeTruthy();
     });
 
     it('should update a collection with an IAB parent category', async () => {
@@ -552,7 +554,7 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data.updateCollection.IABParentCategory.name).to.equal(
+      expect(result.body.data.updateCollection.IABParentCategory.name).toEqual(
         IABParentCategory.name,
       );
     });
@@ -580,10 +582,10 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data.updateCollection.IABParentCategory.name).to.equal(
+      expect(result.body.data.updateCollection.IABParentCategory.name).toEqual(
         IABParentCategory.name,
       );
-      expect(result.body.data.updateCollection.IABChildCategory.name).to.equal(
+      expect(result.body.data.updateCollection.IABChildCategory.name).toEqual(
         IABChildCategory.name,
       );
     });
@@ -617,8 +619,12 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data.updateCollection.IABParentCategory).not.to.exist;
-      expect(result.body.data.updateCollection.IABChildCategory).not.to.exist;
+      expect(
+        result.body.data.updateCollection.IABParentCategory,
+      ).not.toBeTruthy();
+      expect(
+        result.body.data.updateCollection.IABChildCategory,
+      ).not.toBeTruthy();
     });
 
     it('should throw an error for adding number of labels exceeding collection-label limit', async () => {
@@ -643,9 +649,9 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data).not.to.exist;
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.data).not.toBeTruthy();
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         `Too many labels provided: ${config.app.collectionLabelLimit} allowed, ${labelListIds.length} provided.`,
       );
     });
@@ -675,10 +681,10 @@ describe('mutations: Collection', () => {
         });
 
       // make sure there are no errors before running other expect() statements
-      expect(result.body.data.errors).to.be.undefined;
+      expect(result.body.data.errors).toBeUndefined();
 
       // expect to see max allowed labels
-      expect(result.body.data.updateCollection.labels).to.have.length(
+      expect(result.body.data.updateCollection.labels).toHaveLength(
         config.app.collectionLabelLimit,
       );
     });
@@ -706,10 +712,10 @@ describe('mutations: Collection', () => {
         });
 
       // make sure there are no errors before running other expect() statements
-      expect(result.body.data.errors).to.be.undefined;
+      expect(result.body.data.errors).toBeUndefined();
 
       // expect to see two new labels
-      expect(result.body.data.updateCollection.labels).to.have.length(2);
+      expect(result.body.data.updateCollection.labels).toHaveLength(2);
     });
 
     it('should remove existing labels on a collection if no new labels are provided', async () => {
@@ -750,10 +756,10 @@ describe('mutations: Collection', () => {
         });
 
       // make sure there are no errors before running other expect() statements
-      expect(result.body.data.errors).to.be.undefined;
+      expect(result.body.data.errors).toBeUndefined();
 
       // expect to see no labels whatsoever after the update
-      expect(result.body.data.updateCollection.labels).to.have.length(0);
+      expect(result.body.data.updateCollection.labels).toHaveLength(0);
     });
 
     it('should replace labels if a new set of labels was provided', async () => {
@@ -799,22 +805,22 @@ describe('mutations: Collection', () => {
         });
 
       // make sure there are no errors before running other expect() statements
-      expect(result.body.errors).to.be.undefined;
+      expect(result.body.errors).toBeUndefined();
 
       // expect to see two labels
-      expect(result.body.data.updateCollection.labels).to.have.length(2);
+      expect(result.body.data.updateCollection.labels).toHaveLength(2);
 
       // make sure it's the two new labels we provided in the update variables
-      expect(result.body.data.updateCollection.labels[0].name).to.equal(
+      expect(result.body.data.updateCollection.labels[0].name).toEqual(
         label3.name,
       );
-      expect(result.body.data.updateCollection.labels[0].externalId).to.equal(
+      expect(result.body.data.updateCollection.labels[0].externalId).toEqual(
         label3.externalId,
       );
-      expect(result.body.data.updateCollection.labels[1].name).to.equal(
+      expect(result.body.data.updateCollection.labels[1].name).toEqual(
         label4.name,
       );
-      expect(result.body.data.updateCollection.labels[1].externalId).to.equal(
+      expect(result.body.data.updateCollection.labels[1].externalId).toEqual(
         label4.externalId,
       );
     });
@@ -845,27 +851,29 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(
-        result.body.data.updateCollection.authors.length,
-      ).to.be.greaterThan(0);
-      expect(
-        result.body.data.updateCollection.stories.length,
-      ).to.be.greaterThan(0);
+      expect(result.body.data.updateCollection.authors.length).toBeGreaterThan(
+        0,
+      );
+      expect(result.body.data.updateCollection.stories.length).toBeGreaterThan(
+        0,
+      );
 
       for (
         let i = 0;
         i < result.body.data.updateCollection.stories.length;
         i++
       ) {
-        expect(result.body.data.updateCollection.stories[i].authors).to.exist;
+        expect(
+          result.body.data.updateCollection.stories[i].authors,
+        ).toBeTruthy();
         expect(
           result.body.data.updateCollection.stories[i].authors.length,
-        ).to.be.greaterThan(0);
+        ).toBeGreaterThan(0);
       }
-      expect(result.body.data.updateCollection.curationCategory).to.exist;
-      expect(result.body.data.updateCollection.IABParentCategory).to.exist;
-      expect(result.body.data.updateCollection.IABChildCategory).to.exist;
-      expect(result.body.data.updateCollection.labels).to.have.lengthOf(2);
+      expect(result.body.data.updateCollection.curationCategory).toBeTruthy();
+      expect(result.body.data.updateCollection.IABParentCategory).toBeTruthy();
+      expect(result.body.data.updateCollection.IABChildCategory).toBeTruthy();
+      expect(result.body.data.updateCollection.labels).toHaveLength(2);
     });
 
     it('should return story author sorted correctly', async () => {
@@ -890,7 +898,7 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data.updateCollection.stories[0].authors).to.equal(
+      expect(result.body.data.updateCollection.stories[0].authors).toEqual(
         sortCollectionStoryAuthors(
           result.body.data.updateCollection.stories[0].authors,
         ),
@@ -919,7 +927,7 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data.updateCollection.publishedAt).to.exist;
+      expect(result.body.data.updateCollection.publishedAt).toBeTruthy();
     });
 
     it('should not update publishedAt when already published', async () => {
@@ -968,7 +976,7 @@ describe('mutations: Collection', () => {
         });
 
       // make sure the publishedAt value hasn't changed
-      expect(published.publishedAt).to.deep.equal(
+      expect(published.publishedAt).toEqual(
         updatedResult.body.data.updateCollection.publishedAt,
       );
     });
@@ -1001,9 +1009,9 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(result.body.data).not.to.exist;
-      expect(result.body.errors).to.exist;
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.data).not.toBeTruthy();
+      expect(result.body.errors).toBeTruthy();
+      expect(result.body.errors[0].message).toEqual(
         'A collection with the slug "first-iteration" already exists',
       );
     });
@@ -1029,7 +1037,7 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventStub).toHaveBeenCalledTimes(1);
     });
 
     it('should send event bridge event for collection_updated event when collection status is ARCHIVED', async () => {
@@ -1053,7 +1061,7 @@ describe('mutations: Collection', () => {
           },
         });
 
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventStub).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1086,24 +1094,24 @@ describe('mutations: Collection', () => {
         });
 
       // we should have a new image url
-      expect(result.body.data.updateCollectionImageUrl.imageUrl).to.equal(
+      expect(result.body.data.updateCollectionImageUrl.imageUrl).toEqual(
         randomKitten,
       );
 
       // other data should be as it was previously
-      expect(result.body.data.updateCollectionImageUrl.title).to.equal(
+      expect(result.body.data.updateCollectionImageUrl.title).toEqual(
         initial.title,
       );
-      expect(result.body.data.updateCollectionImageUrl.slug).to.equal(
+      expect(result.body.data.updateCollectionImageUrl.slug).toEqual(
         initial.slug,
       );
-      expect(result.body.data.updateCollectionImageUrl.excerpt).to.equal(
+      expect(result.body.data.updateCollectionImageUrl.excerpt).toEqual(
         initial.excerpt,
       );
-      expect(result.body.data.updateCollectionImageUrl.intro).to.equal(
+      expect(result.body.data.updateCollectionImageUrl.intro).toEqual(
         initial.intro,
       );
-      expect(result.body.data.updateCollectionImageUrl.status).to.equal(
+      expect(result.body.data.updateCollectionImageUrl.status).toEqual(
         initial.status,
       );
     });

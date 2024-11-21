@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -54,10 +53,10 @@ describe('queries: CurationCategory', () => {
         .send({ query: print(GET_CURATION_CATEGORIES) });
       const data = result.body.data.getCurationCategories;
 
-      expect(data[0].name).to.equal('Business');
-      expect(data[1].name).to.equal('Climate Change');
-      expect(data[2].name).to.equal('Food and Drink');
-      expect(data[3].name).to.equal('Technology');
+      expect(data[0].name).toEqual('Business');
+      expect(data[1].name).toEqual('Climate Change');
+      expect(data[2].name).toEqual('Food and Drink');
+      expect(data[3].name).toEqual('Technology');
     });
 
     it('should get all available properties of curation categories', async () => {
@@ -67,9 +66,9 @@ describe('queries: CurationCategory', () => {
         .send({ query: print(GET_CURATION_CATEGORIES) });
       const data = result.body.data.getCurationCategories;
 
-      expect(data[0].externalId).to.exist;
-      expect(data[0].name).to.exist;
-      expect(data[0].slug).to.exist;
+      expect(data[0].externalId).toBeTruthy();
+      expect(data[0].name).toBeTruthy();
+      expect(data[0].slug).toBeTruthy();
     });
   });
 });

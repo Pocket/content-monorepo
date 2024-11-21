@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -57,7 +56,7 @@ describe('mutations: Label', () => {
           query: print(CREATE_LABEL),
           variables: { name: 'katerina-ch-1' },
         });
-      expect(result.body.data.createLabel.name).to.equal('katerina-ch-1');
+      expect(result.body.data.createLabel.name).toEqual('katerina-ch-1');
     });
 
     it('should not create label that already exists', async () => {
@@ -68,8 +67,8 @@ describe('mutations: Label', () => {
           query: print(CREATE_LABEL),
           variables: { name: 'simon-le-bon' },
         });
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         `A label with the name "simon-le-bon" already exists`,
       );
     });
@@ -83,7 +82,7 @@ describe('mutations: Label', () => {
           query: print(CREATE_LABEL),
           variables: { name: 'fake-label-1' },
         });
-      expect(resultCreate.body.data.createLabel.name).to.equal('fake-label-1');
+      expect(resultCreate.body.data.createLabel.name).toEqual('fake-label-1');
 
       const input: UpdateLabelInput = {
         externalId: resultCreate.body.data.createLabel.externalId,
@@ -97,10 +96,10 @@ describe('mutations: Label', () => {
           query: print(UPDATE_LABEL),
           variables: { data: input },
         });
-      expect(resultUpdate.body.data.updateLabel.name).to.equal(
+      expect(resultUpdate.body.data.updateLabel.name).toEqual(
         'fake-label-1-update',
       );
-      expect(resultUpdate.body.data.updateLabel.externalId).to.equal(
+      expect(resultUpdate.body.data.updateLabel.externalId).toEqual(
         resultCreate.body.data.createLabel.externalId,
       );
     });
@@ -114,7 +113,7 @@ describe('mutations: Label', () => {
           query: print(CREATE_LABEL),
           variables: { name: 'fake-label-2' },
         });
-      expect(resultCreate.body.data.createLabel.name).to.equal('fake-label-2');
+      expect(resultCreate.body.data.createLabel.name).toEqual('fake-label-2');
 
       const input: UpdateLabelInput = {
         externalId: resultCreate.body.data.createLabel.externalId,
@@ -128,9 +127,9 @@ describe('mutations: Label', () => {
           query: print(UPDATE_LABEL),
           variables: { data: input },
         });
-      expect(resultUpdate.body.data).not.to.exist;
-      expect(resultUpdate.body.errors.length).to.equal(1);
-      expect(resultUpdate.body.errors[0].message).to.equal(
+      expect(resultUpdate.body.data).not.toBeTruthy();
+      expect(resultUpdate.body.errors.length).toEqual(1);
+      expect(resultUpdate.body.errors[0].message).toEqual(
         `A label with the name "simon-le-bon" already exists`,
       );
     });
@@ -161,10 +160,10 @@ describe('mutations: Label', () => {
 
       expect(
         resultCollection.body.data.createCollection.labels[0].externalId,
-      ).to.equal(label1.externalId);
+      ).toEqual(label1.externalId);
       expect(
         resultCollection.body.data.createCollection.labels[0].name,
-      ).to.equal(label1.name);
+      ).toEqual(label1.name);
 
       // try to update the label
       const input: UpdateLabelInput = {
@@ -179,9 +178,9 @@ describe('mutations: Label', () => {
           query: print(UPDATE_LABEL),
           variables: { data: input },
         });
-      expect(resultUpdate.body.data).not.to.exist;
-      expect(resultUpdate.body.errors.length).to.equal(1);
-      expect(resultUpdate.body.errors[0].message).to.equal(
+      expect(resultUpdate.body.data).not.toBeTruthy();
+      expect(resultUpdate.body.errors.length).toEqual(1);
+      expect(resultUpdate.body.errors[0].message).toEqual(
         `Cannot update label; it is associated with at least one collection`,
       );
     });
