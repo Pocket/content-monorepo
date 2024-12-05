@@ -11,7 +11,12 @@ const snowplowEndpoint = isDev
   : 'd.getpocket.com';
 
 const rds = {
-  minCapacity: isDev ? 1 : 64, // TODO: do we need this high for min?
+  // set on 2024-12-04 after slowly reducing from 64 & monitoring performance.
+  // note - during the minimum ACU reduction period (~2 weeks), CPU usage never
+  // climbed over 1% - even with a minimum ACU of 4. we could potentially reduce
+  // the minimum down to 2 or lower, but of course upcoming product/system usage
+  // and changes should be considered.
+  minCapacity: isDev ? 1 : 4,
   maxCapacity: isDev ? 1 : 128, // max allowed by AWS for Aurora Serverless V2
 };
 
