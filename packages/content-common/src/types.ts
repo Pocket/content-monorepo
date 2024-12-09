@@ -117,6 +117,11 @@ export enum ProspectType {
   TIMESPENT = 'TIMESPENT',
   TITLE_URL_MODELED = 'TITLE_URL_MODELED',
   TOP_SAVED = 'TOP_SAVED',
+  QA_ENTERTAINMENT = 'QA_ENTERTAINMENT',
+  QA_GAMING = 'QA_GAMING',
+  QA_HISTORY = 'QA_HISTORY',
+  QA_RELATIONSHIPS = 'QA_RELATIONSHIPS',
+  QA_SPORTS = 'QA_SPORTS',
 }
 
 export enum ProspectReviewStatus {
@@ -228,6 +233,11 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.RSS_LOGISTIC_RECENT,
       ProspectType.SLATE_SCHEDULER_V2,
       ProspectType.PUBLISHER_SUBMITTED,
+      ProspectType.QA_ENTERTAINMENT,
+      ProspectType.QA_GAMING,
+      ProspectType.QA_HISTORY,
+      ProspectType.QA_RELATIONSHIPS,
+      ProspectType.QA_SPORTS,
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENUS,
   },
@@ -244,6 +254,9 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.RSS_LOGISTIC,
       ProspectType.SLATE_SCHEDULER_V2,
       ProspectType.PUBLISHER_SUBMITTED,
+      ProspectType.QA_ENTERTAINMENT,
+      ProspectType.QA_GAMING,
+      ProspectType.QA_SPORTS,
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_DEDE,
   },
