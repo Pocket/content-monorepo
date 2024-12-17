@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   dbClient,
+  deriveDomainName,
   deriveUrlMetadata,
   insertProspect,
   Prospect,
@@ -22,7 +23,7 @@ import {
   UrlMetadata,
 } from 'content-common';
 
-import { SqsProspect } from './types';
+import { SqsProspect, ProspectTypesWithMlUrlMetadata } from './types';
 import { generateSnowplowEntity, queueSnowplowEvent } from './events/snowplow';
 import { Tracker } from '@snowplow/node-tracker';
 
@@ -128,38 +129,36 @@ export const getProspectRunDetailsFromMessageJson = (
   }
 };
 
+/**
+ * retrieves URL metadata from the Parser to hydrate the prospect.
+ * inserts the prospect into dynamo and sends snowplow event.
+ *
+ * @param prospect a Prospect object with partially hydrated data
+ * @param runDetails the ML run details, sent to snowplow
+ * @param features the ML prospect features, sent to snowplow
+ * @param tracker the snowplow Tracker
+ * @returns Promise<void>
+ */
 export const processProspect = async (
   prospect: Prospect,
-  idsProcessed: string[],
-  prospectSource: string,
   runDetails: ProspectRunDetails,
   features: ProspectFeatures,
   tracker: Tracker,
-): Promise<string[]> => {
+): Promise<void> => {
+  // get URL metadata from the Parser
   const urlMetadata = await deriveUrlMetadata(prospect.url);
 
+  // hydrate necessary URL metadata
   prospect = hydrateProspectMetadata(prospect, urlMetadata);
 
+  // insert the prospect into dynamodb
   await insertProspect(dbClient, prospect);
-
-  // an edge case we've hit before - ML was sending duplicate prospects in a
-  // single batch. we don't need to error here - dynamo will silently replace
-  // the existing entry. logging seems like the best approach for now.
-  if (idsProcessed.includes(prospect.id)) {
-    console.log(
-      `${prospect.id} is a duplicate in this ${prospect.scheduledSurfaceGuid} / ${prospect.prospectType} batch!`,
-    );
-  }
-
-  idsProcessed.push(prospect.id);
 
   // Finally, Send a Snowplow event after the prospect got successfully created in dynamo.
   queueSnowplowEvent(
     tracker,
-    generateSnowplowEntity(prospect, prospectSource, runDetails, features),
+    generateSnowplowEntity(prospect, runDetails, features),
   );
-
-  return idsProcessed;
 };
 
 /**
@@ -363,10 +362,17 @@ export const validateProperties = (sqsProspect: SqsProspect): boolean => {
   }
 };
 
+/**
+ * takes a raw prospect from SQS and converts it to a Prospect object as
+ * expecte by DynamoDB
+ *
+ * @param sqsProspect raw prospect object from SQS
+ * @returns Prospect object
+ */
 export const convertSqsProspectToProspect = (
   sqsProspect: SqsProspect,
 ): Prospect => {
-  return {
+  let prospect: Prospect = {
     id: uuidv4(),
     prospectId: sqsProspect.prospect_id,
     // make sure this matches our ALL CAPS guid value
@@ -377,6 +383,59 @@ export const convertSqsProspectToProspect = (
     saveCount: sqsProspect.save_count,
     rank: sqsProspect.rank,
   };
+
+  // 2024-12-12
+  // some prospects will have ML-supplied URL metadata. this is currently
+  // experimental to validate metadata from ML, so we want to capture any
+  // issues in Sentry, but not block processing to ensure editors see the
+  // missing pieces of data.
+  if (ProspectTypesWithMlUrlMetadata.includes(prospect.prospectType)) {
+    try {
+      prospect.authors = sqsProspect.authors.join(',');
+    } catch {
+      Sentry.captureException(
+        `Invalid ML supplied value for 'authors': ${sqsProspect.authors}`,
+      );
+    }
+
+    try {
+      prospect.excerpt = sqsProspect.excerpt.toString();
+    } catch {
+      Sentry.captureException(
+        `Invalid ML supplied value for 'excerpt': ${sqsProspect.excerpt}`,
+      );
+    }
+
+    try {
+      prospect.imageUrl = sqsProspect.image_url.toString();
+    } catch {
+      Sentry.captureException(
+        `Invalid ML supplied value for 'image_url': ${sqsProspect.image_url}`,
+      );
+    }
+
+    try {
+      prospect.title = sqsProspect.title.toString();
+    } catch {
+      Sentry.captureException(
+        `Invalid ML supplied value for 'title': ${sqsProspect.title}`,
+      );
+    }
+
+    // language must map to our enum - if it doesn't, skip setting this property
+    if (
+      sqsProspect.language &&
+      sqsProspect.language.toUpperCase() in CorpusLanguage
+    ) {
+      prospect.language = sqsProspect.language.toUpperCase();
+    } else {
+      Sentry.captureException(
+        `Invalid ML supplied value for 'language': ${sqsProspect.language}`,
+      );
+    }
+  }
+
+  return prospect;
 };
 
 /**
@@ -390,38 +449,43 @@ export const hydrateProspectMetadata = (
   prospect: Prospect,
   urlMetadata: UrlMetadata,
 ): Prospect => {
-  // title and excerpt have different formatting based on prospect language
-  let title: string;
-  let excerpt: string;
+  // while we are moving towards ML-supplied metadata, the Parser must still
+  // give us the publisher name.
+  // (from the legacy MySQL `readitla_b.domain_business_metadata` table)
+  prospect.publisher = urlMetadata.publisher;
 
-  if (urlMetadata.language?.toUpperCase() === CorpusLanguage.EN) {
-    title = formatQuotesEN(applyApTitleCase(urlMetadata.title)) as string;
-    excerpt = formatQuotesEN(urlMetadata.excerpt) as string;
-  } else if (urlMetadata.language?.toUpperCase() === CorpusLanguage.DE) {
-    title = formatQuotesDashesDE(urlMetadata.title) as string;
-    excerpt = formatQuotesDashesDE(urlMetadata.excerpt) as string;
+  // ML is no longer sending syndicated/collections as prospects
+  prospect.isCollection = false;
+  prospect.isSyndicated = false;
+
+  if (ProspectTypesWithMlUrlMetadata.includes(prospect.prospectType)) {
+    // URL metadata was supplied by ML and assigned in
+    // `convertSqsProspectToProspect` above. we specifically do *not* want to
+    // fall-back to Parser metadata in this scenario, as we want to know if
+    // any data is missing from ML.
+
+    // `deriveDomainName` is the same method used under the hood in
+    // `deriveUrlMetadata` - calling directly here to clarify no Parser use.
+    prospect.domain = deriveDomainName(prospect.url);
   } else {
-    title = urlMetadata.title;
-    excerpt = urlMetadata.excerpt;
+    // URL metadata *not* supplied by ML, so use the Parser
+    // NOTE: urlMetadata fields might be undefined/empty
+    prospect.authors = urlMetadata.authors;
+    prospect.domain = urlMetadata.domain;
+    prospect.excerpt = urlMetadata.excerpt;
+    prospect.imageUrl = urlMetadata.imageUrl;
+    prospect.language = urlMetadata.language;
+    prospect.title = urlMetadata.title;
   }
 
-  // Mutating the function argument here to avoid creating
-  // more objects and be memory efficient
-
-  // While the the urlMetaData and prospect fields match currently,
-  // they're not guaranteed to be the same in the future hence we're
-  // directly assigning them
-
-  // NOTE: individual url metadata fields might be undefined
-  prospect.domain = urlMetadata.domain;
-  prospect.excerpt = excerpt;
-  prospect.imageUrl = urlMetadata.imageUrl;
-  prospect.isCollection = urlMetadata.isCollection;
-  prospect.isSyndicated = urlMetadata.isSyndicated;
-  prospect.language = urlMetadata.language;
-  prospect.publisher = urlMetadata.publisher;
-  prospect.title = title;
-  prospect.authors = urlMetadata.authors;
+  // apply title/excerpt formatting for EN & DE
+  if (prospect.language?.toUpperCase() === CorpusLanguage.EN) {
+    prospect.title = formatQuotesEN(applyApTitleCase(prospect.title)) as string;
+    prospect.excerpt = formatQuotesEN(prospect.excerpt) as string;
+  } else if (prospect.language?.toUpperCase() === CorpusLanguage.DE) {
+    prospect.title = formatQuotesDashesDE(prospect.title) as string;
+    prospect.excerpt = formatQuotesDashesDE(prospect.excerpt) as string;
+  }
 
   return prospect;
 };

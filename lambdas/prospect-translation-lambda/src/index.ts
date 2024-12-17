@@ -110,14 +110,18 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
         // now get the metadata and put it into dynamo
         // this function will send an exception to sentry if any part of it
         // fails.
-        prospectIdsProcessed = await processProspect(
-          prospect,
-          prospectIdsProcessed,
-          rawSqsProspect.prospect_source,
-          runDetails,
-          features,
-          tracker,
-        );
+        await processProspect(prospect, runDetails, features, tracker);
+
+        // an edge case we've hit before - ML was sending duplicate prospects in a
+        // single batch. we don't need to error here - dynamo will silently replace
+        // the existing entry. logging seems like the best approach for now.
+        if (prospectIdsProcessed.includes(prospect.id)) {
+          console.log(
+            `${prospect.id} is a duplicate in this ${prospect.scheduledSurfaceGuid} / ${prospect.prospectType} batch!`,
+          );
+        }
+
+        prospectIdsProcessed.push(prospect.id);
       }
     }
   }

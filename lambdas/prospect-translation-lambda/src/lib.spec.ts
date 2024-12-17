@@ -24,6 +24,7 @@ import {
   validateProperties,
   validateStructure,
 } from './lib';
+import { SqsProspect, ProspectTypesWithMlUrlMetadata } from './types';
 
 describe('lib', () => {
   const captureExceptionSpy = jest
@@ -61,7 +62,7 @@ describe('lib', () => {
       title: 'Test-Title',
       publisher: 'test-publisher',
       isCollection: false,
-      isSyndicated: true,
+      isSyndicated: false,
       authors: 'questlove,rafael frumkin',
     };
 
@@ -317,6 +318,165 @@ describe('lib', () => {
       expect(result.topic).toEqual(expected.topic);
       expect(result.saveCount).toEqual(expected.saveCount);
     });
+
+    it('should create a prospect from an SqsProspect with ML-supplied metadata', () => {
+      const validSqsProspectWithMlData: SqsProspect = {
+        ...validSqsProspect,
+        // pick any prospect type that has ML-supplied metadata
+        prospect_source: ProspectTypesWithMlUrlMetadata[0],
+        authors: ['Daniel Lingenh\u00f6hl'],
+        excerpt:
+          'Die Bergkette wurde durch ein seltenes vulkanisches Ph\u00e4nomen gebildet',
+        image_url:
+          'https://static.spektrum.de/fm/912/f1920x1080/triplejunction_gis_2014_lrg.8200272.png',
+        language: 'EN',
+        title: 'Eines der l\u00e4ngsten Gebirge liegt tief unter dem Meer',
+      };
+
+      const expected: Prospect = {
+        id: 'c3h5n3o9',
+        prospectId: validSqsProspectWithMlData.prospect_id,
+        scheduledSurfaceGuid: validSqsProspectWithMlData.scheduled_surface_guid,
+        url: validSqsProspectWithMlData.url,
+        prospectType: ProspectType[validSqsProspectWithMlData.prospect_source],
+        topic: Topics[validSqsProspectWithMlData.predicted_topic],
+        saveCount: validSqsProspectWithMlData.save_count,
+        rank: validSqsProspectWithMlData.rank,
+        authors: 'Daniel Lingenh\u00f6hl',
+        excerpt:
+          'Die Bergkette wurde durch ein seltenes vulkanisches Ph\u00e4nomen gebildet',
+        imageUrl:
+          'https://static.spektrum.de/fm/912/f1920x1080/triplejunction_gis_2014_lrg.8200272.png',
+        language: 'EN',
+        title: 'Eines der l\u00e4ngsten Gebirge liegt tief unter dem Meer',
+      };
+
+      const result = convertSqsProspectToProspect(validSqsProspectWithMlData);
+
+      expect(result.id).toBeDefined(); // we trust uuidV4 to work
+      expect(result.prospectId).toEqual(expected.prospectId);
+      expect(result.scheduledSurfaceGuid).toEqual(
+        expected.scheduledSurfaceGuid,
+      );
+      expect(result.url).toEqual(expected.url);
+      expect(result.prospectType).toEqual(expected.prospectType);
+      expect(result.topic).toEqual(expected.topic);
+      expect(result.saveCount).toEqual(expected.saveCount);
+      expect(result.authors).toEqual(expected.authors);
+      expect(result.excerpt).toEqual(expected.excerpt);
+      expect(result.imageUrl).toEqual(expected.imageUrl);
+      expect(result.language).toEqual(expected.language);
+      expect(result.title).toEqual(expected.title);
+    });
+
+    it('should emit Sentry errors when ML-supplied URL metadata is invalid', () => {
+      const validSqsProspectWithMlData: any = {
+        ...validSqsProspect,
+        // pick any prospect type that has ML-supplied metadata
+        prospect_source: ProspectTypesWithMlUrlMetadata[0],
+        // invalid - should get thrown out
+        authors: 42,
+        excerpt:
+          'Die Bergkette wurde durch ein seltenes vulkanisches Ph\u00e4nomen gebildet',
+        // should get converted to a string
+        image_url: 16,
+        // invalid - should get thrown out
+        language: 'BB',
+      };
+
+      const expected: Prospect = {
+        id: 'c3h5n3o9',
+        prospectId: validSqsProspectWithMlData.prospect_id,
+        scheduledSurfaceGuid: validSqsProspectWithMlData.scheduled_surface_guid,
+        url: validSqsProspectWithMlData.url,
+        prospectType: ProspectType[validSqsProspectWithMlData.prospect_source],
+        topic: Topics[validSqsProspectWithMlData.predicted_topic],
+        saveCount: validSqsProspectWithMlData.save_count,
+        rank: validSqsProspectWithMlData.rank,
+        excerpt:
+          'Die Bergkette wurde durch ein seltenes vulkanisches Ph\u00e4nomen gebildet',
+        imageUrl: '16',
+      };
+
+      const result = convertSqsProspectToProspect(validSqsProspectWithMlData);
+
+      expect(result.id).toBeDefined(); // we trust uuidV4 to work
+      expect(result.prospectId).toEqual(expected.prospectId);
+      expect(result.scheduledSurfaceGuid).toEqual(
+        expected.scheduledSurfaceGuid,
+      );
+      expect(result.url).toEqual(expected.url);
+      expect(result.prospectType).toEqual(expected.prospectType);
+      expect(result.topic).toEqual(expected.topic);
+      expect(result.saveCount).toEqual(expected.saveCount);
+      expect(result.authors).toEqual(undefined);
+      expect(result.excerpt).toEqual(expected.excerpt);
+      expect(result.imageUrl).toEqual(expected.imageUrl);
+      expect(result.language).toEqual(undefined);
+      expect(result.title).toEqual(undefined);
+
+      expect(captureExceptionSpy).toHaveBeenCalledTimes(3);
+
+      expect(captureExceptionSpy).toHaveBeenNthCalledWith(
+        1,
+        `Invalid ML supplied value for 'authors': 42`,
+      );
+
+      expect(captureExceptionSpy).toHaveBeenNthCalledWith(
+        2,
+        `Invalid ML supplied value for 'title': undefined`,
+      );
+
+      expect(captureExceptionSpy).toHaveBeenNthCalledWith(
+        3,
+        `Invalid ML supplied value for 'language': BB`,
+      );
+    });
+
+    it('should not use ML-supplied URL metadata if the prospect is not configured to do so', () => {
+      const validSqsProspectWithMlData: any = {
+        ...validSqsProspect,
+        // pick any prospect type NOT configured to use ML-supplied metadata
+        prospect_source: ProspectType.RSS_LOGISTIC,
+        authors: ['Daniel Lingenh\u00f6hl'],
+        excerpt:
+          'Die Bergkette wurde durch ein seltenes vulkanisches Ph\u00e4nomen gebildet',
+        image_url:
+          'https://static.spektrum.de/fm/912/f1920x1080/triplejunction_gis_2014_lrg.8200272.png',
+        language: 'EN',
+        title: 'Eines der l\u00e4ngsten Gebirge liegt tief unter dem Meer',
+      };
+
+      const expected: Prospect = {
+        id: 'c3h5n3o9',
+        prospectId: validSqsProspectWithMlData.prospect_id,
+        scheduledSurfaceGuid: validSqsProspectWithMlData.scheduled_surface_guid,
+        url: validSqsProspectWithMlData.url,
+        prospectType: ProspectType[validSqsProspectWithMlData.prospect_source],
+        topic: Topics[validSqsProspectWithMlData.predicted_topic],
+        saveCount: validSqsProspectWithMlData.save_count,
+        rank: validSqsProspectWithMlData.rank,
+      };
+
+      const result = convertSqsProspectToProspect(validSqsProspectWithMlData);
+
+      expect(result.id).toBeDefined(); // we trust uuidV4 to work
+      expect(result.prospectId).toEqual(expected.prospectId);
+      expect(result.scheduledSurfaceGuid).toEqual(
+        expected.scheduledSurfaceGuid,
+      );
+      expect(result.url).toEqual(expected.url);
+      expect(result.prospectType).toEqual(expected.prospectType);
+      expect(result.topic).toEqual(expected.topic);
+      expect(result.saveCount).toEqual(expected.saveCount);
+      expect(result.authors).toEqual(undefined);
+      expect(result.excerpt).toEqual(undefined);
+      expect(result.imageUrl).toEqual(undefined);
+      expect(result.language).toEqual(undefined);
+      expect(result.title).toEqual(undefined);
+
+      expect(captureExceptionSpy).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('hydrateProspectMetaData', () => {
@@ -388,8 +548,8 @@ describe('lib', () => {
         language: undefined,
         title: undefined,
         publisher: undefined,
-        isCollection: undefined,
-        isSyndicated: undefined,
+        isCollection: false,
+        isSyndicated: false,
         authors: undefined,
       };
 

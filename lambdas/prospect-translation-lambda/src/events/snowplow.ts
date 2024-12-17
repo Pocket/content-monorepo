@@ -54,14 +54,13 @@ export const generateContext = (
  */
 export const generateSnowplowEntity = (
   prospect: Prospect,
-  prospectSource: string,
   runDetails: ProspectRunDetails,
   features: ProspectFeatures,
 ): SnowplowProspect => {
   return {
     object_version: 'new',
     prospect_id: prospect.prospectId,
-    prospect_source: prospectSource,
+    prospect_source: prospect.prospectType,
     scheduled_surface_id: prospect.scheduledSurfaceGuid,
     url: prospect.url,
     title: prospect.title,
