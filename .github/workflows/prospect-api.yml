@@ -6,7 +6,6 @@ on:
       - 'packages/**'
       - 'docker-compose.yml'
       - 'servers/prospect-api/**'
-      - 'lambdas/prospect-api-bridge-lambda/**'
       - 'pnpm-lock.yaml'
       - 'Dockerfile'
       - '.github/workflows/prospect-api.yml'
@@ -18,7 +17,6 @@ on:
       - 'infrastructure/prospect-api/**'
       - 'packages/**'
       - 'servers/prospect-api/**'
-      - 'lambdas/prospect-api-bridge-lambda/**'
       - 'pnpm-lock.yaml'
       - 'Dockerfile'
       - '.github/workflows/prospect-api.yml'
@@ -65,18 +63,6 @@ jobs:
       terraform-output: ${{needs.infrastructure.outputs.terraform-output}}
     secrets: inherit
 
-  sqs-lambda:
-    # this will reference the file below on the main branch
-    uses: pocket/pocket-monorepo/.github/workflows/reuse-build-and-push-lambda.yml@main
-    needs: [infrastructure]
-    with:
-      scope: prospect-api-bridge-aws_lambda
-      sentry-project: prospect-api
-      s3-bucket-pattern: pocket-prospectapi-{0}-sqs-bridge
-      codedeploy-app-name-pattern: ProspectAPI-{0}-Sqs-Bridge-Lambda
-      codedeploy-group-name-pattern: ProspectAPI-{0}-Sqs-Bridge-Lambda
-      function-name-pattern: ProspectAPI-{0}-Sqs-Bridge-Function
-    secrets: inherit
   sentry:
     if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
     # this will reference the file below on the main branch

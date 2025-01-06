@@ -1,8 +1,10 @@
 export default {
   environment: process.env.NODE_ENV || 'development',
   app: {
+    port: 4026,
     prospectBatchSize: 50, // # of prospects we return at once to the client
     removeReasonMaxLength: 100, // max length of remove reason text we allow
+    serviceName: 'prospect-api',
   },
   aws: {
     localEndpoint: process.env.AWS_ENDPOINT,
@@ -42,8 +44,15 @@ export default {
     },
   },
   tracing: {
-    // for AWS, it's fine to leave this defaulting to localhost
-    host: process.env.OTLP_COLLECTOR_HOST || 'localhost',
+    flagName: 'perm.content.tracing.prospect-api',
+    release: process.env.GIT_SHA || 'local',
     serviceName: 'prospect-api',
+    url: process.env.OTLP_COLLECTOR_URL || 'http://localhost:4318',
+  },
+  unleash: {
+    clientKey: process.env.UNLEASH_KEY || 'unleash-key-fake',
+    endpoint: process.env.UNLEASH_ENDPOINT || 'http://localhost:4242/api',
+    refreshInterval: 60 * 1000, // ms
+    timeout: 2 * 1000, // ms
   },
 };

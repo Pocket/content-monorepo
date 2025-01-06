@@ -200,6 +200,15 @@ class CollectionAPI extends TerraformStack {
               name: 'EVENT_BUS_NAME',
               value: config.eventBusName,
             },
+            {
+              name: 'OTLP_COLLECTOR_URL',
+              value: config.tracing.url,
+            },
+            {
+              name: 'LOG_LEVEL',
+              // do not log http, graphql, or debug events
+              value: 'info',
+            },
           ],
           logGroup: this.createCustomLogGroup('app'),
           logMultilinePattern: '^\\S.+',
@@ -211,6 +220,14 @@ class CollectionAPI extends TerraformStack {
             {
               name: 'DATABASE_URL',
               valueFrom: `${rds.secretARN}:database_url::`,
+            },
+            {
+              name: 'UNLEASH_ENDPOINT',
+              valueFrom: `arn:aws:ssm:${region.name}:${caller.accountId}:parameter/Shared/${config.environment}/UNLEASH_ENDPOINT`,
+            },
+            {
+              name: 'UNLEASH_KEY',
+              valueFrom: `arn:aws:secretsmanager:${region.name}:${caller.accountId}:secret:${config.name}/${config.environment}/UNLEASH_KEY`,
             },
           ],
         },
@@ -255,6 +272,8 @@ class CollectionAPI extends TerraformStack {
             resources: [
               `arn:aws:ssm:${region.name}:${caller.accountId}:parameter/${config.name}/${config.environment}`,
               `arn:aws:ssm:${region.name}:${caller.accountId}:parameter/${config.name}/${config.environment}/*`,
+              `arn:aws:ssm:${region.name}:${caller.accountId}:parameter/Shared/${config.environment}/*`,
+              `arn:aws:ssm:${region.name}:${caller.accountId}:parameter/Shared/${config.environment}`,
             ],
             effect: 'Allow',
           },
@@ -279,11 +298,6 @@ class CollectionAPI extends TerraformStack {
               'logs:CreateLogStream',
               'logs:DescribeLogStreams',
               'logs:DescribeLogGroups',
-              'xray:PutTraceSegments',
-              'xray:PutTelemetryRecords',
-              'xray:GetSamplingRules',
-              'xray:GetSamplingTargets',
-              'xray:GetSamplingStatisticSummaries',
             ],
             resources: ['*'],
             effect: 'Allow',

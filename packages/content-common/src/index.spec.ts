@@ -5,6 +5,7 @@ import {
   capitalize,
   parseReasonsCsv,
   sanitizeText,
+  lowercaseAfterApostrophe,
 } from './index';
 
 // refactor/move if/when needed
@@ -111,6 +112,41 @@ describe('content-common', () => {
       expect(output).toEqual(
         'A Random String to Format! Random-String:Random!',
       );
+    });
+    it('should differentiate between strings in quotes and apostrophe', () => {
+      const sentencesWithContractions = [
+        {
+          result: "Here's what you haven't noticed 'foo bar' foo'S",
+          expected: "Here's What You Haven't Noticed 'Foo Bar' Foo's",
+        },
+      ];
+      sentencesWithContractions.forEach((swc) => {
+        expect(applyApTitleCase(swc.result)).toEqual(swc.expected);
+      });
+    });
+
+    it('should capitalize after a colon (:)', () => {
+      const sentencesWithContractions = [
+        {
+          result: "Here's what you haven't noticed 'foo bar' foo'S: foo Bar",
+          expected: "Here's What You Haven't Noticed 'Foo Bar' Foo's: Foo Bar",
+        },
+      ];
+      sentencesWithContractions.forEach((swc) => {
+        expect(applyApTitleCase(swc.result)).toEqual(swc.expected);
+      });
+    });
+  });
+  describe('lowercaseAfterApostrophe', () => {
+    it('lowercase letter after apostrophe & return new string', () => {
+      const result = lowercaseAfterApostrophe("foo'S");
+      expect(result).toEqual("foo's");
+    });
+    it('lowercase the first letter after apostrophe, ignore string in quotes, & return new string', () => {
+      const result = lowercaseAfterApostrophe(
+        "'Foo' foo'S DaY's You'Ll 'foo Bar foo'Ss'",
+      );
+      expect(result).toEqual("'Foo' foo's DaY's You'll 'foo Bar foo'ss'");
     });
   });
   // taken from curation admin tools

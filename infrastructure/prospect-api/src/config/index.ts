@@ -45,7 +45,6 @@ export const config = {
   },
   envVars: {
     eventBusName: `PocketEventBridge-${environment}-Shared-Event-Bus`,
-    eventDetailType: 'prospect-generation',
     snowplowEndpoint,
   },
   tags: {
@@ -54,5 +53,10 @@ export const config = {
     app_code: 'content',
     component_code: `content-${name.toLowerCase()}`,
     env_code: isDev ? 'dev' : 'prod',
+  },
+  tracing: {
+    url: isDev
+      ? 'https://otel-collector.getpocket.dev:443'
+      : 'https://otel-collector.readitlater.com:443',
   },
 };

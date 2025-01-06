@@ -38,7 +38,7 @@ import {
 } from '.prisma/client';
 
 import { getLabelById } from '../shared/resolvers/types';
-import { getCollectionByInternalId } from '../database/queries';
+import { serverLogger } from '@pocket-tools/ts-logger';
 
 /** Transformation functions below to map collection object's sub types to the ones in snowplow schema  */
 
@@ -248,38 +248,6 @@ export async function generateEventBridgePayload(
 
 /**
  *
- * Function called in the collection stories database mutation functions for create and update to emit to eventbridge
- */
-export async function sendEventBridgeEventUpdateFromInternalCollectionId(
-  dbClient: PrismaClient,
-  collectionId: number,
-) {
-  Sentry.addBreadcrumb({
-    level: 'debug',
-    message: 'fetching collection for eventbridge',
-    data: { collectionId },
-  });
-  // retrieve the current record, pre-update
-  const collection = await getCollectionByInternalId(dbClient, collectionId);
-
-  if (!collection) {
-    Sentry.captureEvent({
-      message:
-        'Could not find collection to send to event bridge for an update',
-    });
-    // No-op because not being able to send an event should not be a fatal error
-    return;
-  }
-  // Send to event bridge with the data
-  await sendEventBridgeEvent(
-    dbClient,
-    EventBridgeEventType.COLLECTION_UPDATED,
-    collection,
-  );
-}
-
-/**
- *
  * Function called in the collection database mutation functions for create and update to emit to eventbridge
  */
 export async function sendEventBridgeEvent(
@@ -307,8 +275,10 @@ export async function sendEventBridgeEvent(
     // Don't halt program, but capture the failure in Sentry and Cloudwatch
     Sentry.addBreadcrumb(failedEventError);
     Sentry.captureException(error);
-    console.log(failedEventError);
-    console.log(error);
+    serverLogger.error('event failed - failed sending to event bridge', {
+      payload,
+      error,
+    });
   }
 }
 
@@ -343,6 +313,6 @@ export async function sendEvent(eventPayload: any) {
 
     // Don't halt program, but capture the failure in Sentry and Cloudwatch
     Sentry.captureException(failedEventError);
-    console.log(failedEventError);
+    serverLogger.error('event failed - event bridge error', eventPayload);
   }
 }

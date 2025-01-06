@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -27,7 +26,6 @@ import { createCollectionStory } from '../../../database/mutations/CollectionSto
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
 import * as EventBridgeEvents from '../../../events/events';
-import sinon from 'sinon';
 
 describe('mutations: CollectionStory', () => {
   let app: Express.Application;
@@ -45,9 +43,9 @@ describe('mutations: CollectionStory', () => {
   let collection;
 
   // create a stub for the sendEventBridgeEvent function and make it resolve to null.
-  const sendEventBridgeEventStub = sinon
-    .stub(EventBridgeEvents, 'sendEventBridgeEvent')
-    .resolves(null);
+  const sendEventBridgeEventSpy = jest
+    .spyOn(EventBridgeEvents, 'sendEventBridgeEvent')
+    .mockReturnValue(null);
 
   beforeAll(async () => {
     // port 0 tells express to dynamically assign an available port
@@ -58,6 +56,7 @@ describe('mutations: CollectionStory', () => {
   afterAll(async () => {
     await db.$disconnect();
     await server.stop();
+    sendEventBridgeEventSpy.mockRestore();
   });
 
   beforeEach(async () => {
@@ -70,7 +69,7 @@ describe('mutations: CollectionStory', () => {
       author,
     });
 
-    sendEventBridgeEventStub.reset();
+    sendEventBridgeEventSpy.mockClear();
   });
 
   describe('createCollectionStory', () => {
@@ -102,18 +101,18 @@ describe('mutations: CollectionStory', () => {
 
       const story = result.body.data.createCollectionStory;
 
-      expect(story.url).to.equal(input.url);
-      expect(story.title).to.equal(input.title);
-      expect(story.excerpt).to.equal(input.excerpt);
-      expect(story.imageUrl).to.equal(input.imageUrl);
-      expect(story.authors.length).to.equal(input.authors.length);
-      expect(story.publisher).to.equal(input.publisher);
+      expect(story.url).toEqual(input.url);
+      expect(story.title).toEqual(input.title);
+      expect(story.excerpt).toEqual(input.excerpt);
+      expect(story.imageUrl).toEqual(input.imageUrl);
+      expect(story.authors.length).toEqual(input.authors.length);
+      expect(story.publisher).toEqual(input.publisher);
 
       // default sort order of 0 should be there
-      expect(result.body.data.createCollectionStory.sortOrder).to.equal(0);
+      expect(result.body.data.createCollectionStory.sortOrder).toEqual(0);
 
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should create a collection story with a default sort order', async () => {
@@ -126,9 +125,9 @@ describe('mutations: CollectionStory', () => {
         });
 
       // default sort order of 0 should be there
-      expect(result.body.data.createCollectionStory.sortOrder).to.equal(0);
+      expect(result.body.data.createCollectionStory.sortOrder).toEqual(0);
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should create a collection story with a default `fromPartner` value', async () => {
@@ -141,11 +140,9 @@ describe('mutations: CollectionStory', () => {
         });
 
       // default 'fromPartner' value of 'false' should be present
-      expect(result.body.data.createCollectionStory.fromPartner).to.equal(
-        false,
-      );
+      expect(result.body.data.createCollectionStory.fromPartner).toEqual(false);
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should return story authors sorted correctly', async () => {
@@ -160,13 +157,13 @@ describe('mutations: CollectionStory', () => {
       const story = result.body.data.createCollectionStory;
 
       // (authors are returned sorted by sortOrder asc)
-      expect(story.authors[0].name).to.equal('donny');
-      expect(story.authors[1].name).to.equal('walter');
+      expect(story.authors[0].name).toEqual('donny');
+      expect(story.authors[1].name).toEqual('walter');
 
       // default sort order of 0 should be there
-      expect(story.sortOrder).to.equal(0);
+      expect(story.sortOrder).toEqual(0);
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should create a collection story with a sort order', async () => {
@@ -182,9 +179,9 @@ describe('mutations: CollectionStory', () => {
 
       const story = result.body.data.createCollectionStory;
 
-      expect(story.sortOrder).to.equal(4);
+      expect(story.sortOrder).toEqual(4);
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should create a collection story with no authors', async () => {
@@ -200,10 +197,10 @@ describe('mutations: CollectionStory', () => {
 
       const story = result.body.data.createCollectionStory;
 
-      expect(story).to.exist;
-      expect(story.authors.length).to.equal(0);
+      expect(story).toBeTruthy();
+      expect(story.authors.length).toEqual(0);
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should fail adding the same url to the same collection', async () => {
@@ -215,8 +212,8 @@ describe('mutations: CollectionStory', () => {
           variables: { data: input },
         });
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
-      sendEventBridgeEventStub.reset();
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
+      sendEventBridgeEventSpy.mockClear();
       const result = await request(app)
         .post(graphQLUrl)
         .set(headers)
@@ -225,12 +222,12 @@ describe('mutations: CollectionStory', () => {
           variables: { data: input },
         });
 
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.errors.length).toEqual(1);
+      expect(result.body.errors[0].message).toEqual(
         `A story with the url "${input.url}" already exists in this collection`,
       );
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.false;
+      expect(sendEventBridgeEventSpy).not.toHaveBeenCalled();
     });
 
     it('should add a url that already exists in a different collection', async () => {
@@ -244,8 +241,8 @@ describe('mutations: CollectionStory', () => {
         });
       const dataStory1 = result1.body.data;
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
-      sendEventBridgeEventStub.reset();
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
+      sendEventBridgeEventSpy.mockClear();
 
       // create a second collection
       const collection2 = await createCollectionHelper(db, {
@@ -267,11 +264,11 @@ describe('mutations: CollectionStory', () => {
       const dataStory2 = result2.body.data;
 
       // the urls should be the same
-      expect(dataStory2.createCollectionStory.url).to.equal(
+      expect(dataStory2.createCollectionStory.url).toEqual(
         dataStory1.createCollectionStory.url,
       );
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -295,6 +292,9 @@ describe('mutations: CollectionStory', () => {
       };
 
       story = await createCollectionStory(db, data);
+
+      // we don't want this beforeEach impacting the number of calls we expect in tests
+      sendEventBridgeEventSpy.mockClear();
     });
 
     it('should update a collection story', async () => {
@@ -323,14 +323,14 @@ describe('mutations: CollectionStory', () => {
 
       const updated = result.body.data.updateCollectionStory;
 
-      expect(updated.url).to.equal(story.url);
-      expect(updated.title).to.equal(input.title);
-      expect(updated.excerpt).to.equal(input.excerpt);
-      expect(updated.imageUrl).to.equal(input.imageUrl);
-      expect(updated.publisher).to.equal(input.publisher);
-      expect(updated.sortOrder).to.equal(input.sortOrder);
+      expect(updated.url).toEqual(story.url);
+      expect(updated.title).toEqual(input.title);
+      expect(updated.excerpt).toEqual(input.excerpt);
+      expect(updated.imageUrl).toEqual(input.imageUrl);
+      expect(updated.publisher).toEqual(input.publisher);
+      expect(updated.sortOrder).toEqual(input.sortOrder);
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should update the collection story authors and return them properly sorted', async () => {
@@ -360,13 +360,13 @@ describe('mutations: CollectionStory', () => {
 
       const updated = result.body.data.updateCollectionStory;
 
-      expect(updated.authors.length).to.equal(3);
+      expect(updated.authors.length).toEqual(3);
       // (authors are returned sorted by sortOrder asc)
-      expect(updated.authors[0].name).to.equal('brandt');
-      expect(updated.authors[1].name).to.equal('karl');
-      expect(updated.authors[2].name).to.equal('maude');
+      expect(updated.authors[0].name).toEqual('brandt');
+      expect(updated.authors[1].name).toEqual('karl');
+      expect(updated.authors[2].name).toEqual('maude');
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should update a collection story with no authors', async () => {
@@ -390,12 +390,12 @@ describe('mutations: CollectionStory', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.updateCollectionStory.authors.length).to.equal(0);
+      expect(result.body.data.updateCollectionStory.authors.length).toEqual(0);
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
-    it("should update a collection story URL as long as it doesn't already exist", async () => {
+    it('should update a collection story URL as long as it does not already exist', async () => {
       const input: UpdateCollectionStoryInput = {
         externalId: story.externalId,
         url: 'https://openpuppies.com/',
@@ -419,9 +419,10 @@ describe('mutations: CollectionStory', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.updateCollectionStory.url).to.equal(input.url);
+      expect(result.body.data.updateCollectionStory.url).toEqual(input.url);
+
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should fail updating to a url that already exists in the same collection', async () => {
@@ -441,12 +442,13 @@ describe('mutations: CollectionStory', () => {
         fromPartner: false,
       };
 
+      // this results in an event bridge call
       await createCollectionStory(db, createData);
 
       // Update the test story with the newly added story's URL
       const input: UpdateCollectionStoryInput = {
         externalId: story.externalId,
-        url: 'https://www.anything-goes.com/',
+        url: createData.url,
         title: 'a fest of lebowskis',
         excerpt: 'new excerpt',
         imageUrl: '',
@@ -459,6 +461,7 @@ describe('mutations: CollectionStory', () => {
         fromPartner: false,
       };
 
+      // this is expected to fail, so should not result in an event bridge call
       const result = await request(app)
         .post(graphQLUrl)
         .set(headers)
@@ -467,12 +470,14 @@ describe('mutations: CollectionStory', () => {
           variables: { data: input },
         });
 
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.errors.length).toEqual(1);
+
+      expect(result.body.errors[0].message).toEqual(
         `A story with the url "${input.url}" already exists in this collection`,
       );
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.false;
+
+      // assert that the event emitter function is called once - only for the story creation!
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should update to a url that already exists in a different collection', async () => {
@@ -524,9 +529,9 @@ describe('mutations: CollectionStory', () => {
           variables: { data: input },
         });
 
-      expect(result.body.data.updateCollectionStory.url).to.equal(input.url);
+      expect(result.body.data.updateCollectionStory.url).toEqual(input.url);
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledTwice).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(2);
     });
 
     it('should allow updates with optional fields omitted in input data', async () => {
@@ -549,14 +554,14 @@ describe('mutations: CollectionStory', () => {
         });
 
       // The two optional fields should stay as they are
-      expect(result.body.data.updateCollectionStory.sortOrder).to.equal(
+      expect(result.body.data.updateCollectionStory.sortOrder).toEqual(
         story.sortOrder,
       );
-      expect(result.body.data.updateCollectionStory.fromPartner).to.equal(
+      expect(result.body.data.updateCollectionStory.fromPartner).toEqual(
         story.fromPartner,
       );
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -580,6 +585,8 @@ describe('mutations: CollectionStory', () => {
       };
 
       story = await createCollectionStory(db, data);
+
+      sendEventBridgeEventSpy.mockClear();
     });
 
     it('should update the sortOrder of a collection story', async () => {
@@ -596,11 +603,11 @@ describe('mutations: CollectionStory', () => {
           },
         });
 
-      expect(
-        result.body.data.updateCollectionStorySortOrder.sortOrder,
-      ).to.equal(story.sortOrder + 1);
+      expect(result.body.data.updateCollectionStorySortOrder.sortOrder).toEqual(
+        story.sortOrder + 1,
+      );
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should not update any other properties when updating sortOrder', async () => {
@@ -619,14 +626,14 @@ describe('mutations: CollectionStory', () => {
 
       const updated = result.body.data.updateCollectionStorySortOrder;
 
-      expect(updated.title).to.equal(story.title);
-      expect(updated.url).to.equal(story.url);
-      expect(updated.excerpt).to.equal(story.excerpt);
-      expect(updated.imageUrl).to.equal(story.imageUrl);
-      expect(updated.authors.length).to.equal(story.authors.length);
-      expect(updated.publisher).to.equal(story.publisher);
+      expect(updated.title).toEqual(story.title);
+      expect(updated.url).toEqual(story.url);
+      expect(updated.excerpt).toEqual(story.excerpt);
+      expect(updated.imageUrl).toEqual(story.imageUrl);
+      expect(updated.authors.length).toEqual(story.authors.length);
+      expect(updated.publisher).toEqual(story.publisher);
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -650,6 +657,8 @@ describe('mutations: CollectionStory', () => {
       };
 
       story = await createCollectionStory(db, data);
+
+      sendEventBridgeEventSpy.mockClear();
     });
 
     it('should update the imageUrl of a collection story', async () => {
@@ -668,11 +677,11 @@ describe('mutations: CollectionStory', () => {
           },
         });
 
-      expect(result.body.data.updateCollectionStoryImageUrl.imageUrl).to.equal(
+      expect(result.body.data.updateCollectionStoryImageUrl.imageUrl).toEqual(
         randomKitten,
       );
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should not update any other properties when updating sortOrder', async () => {
@@ -689,26 +698,26 @@ describe('mutations: CollectionStory', () => {
           },
         });
 
-      expect(result.body.data.updateCollectionStoryImageUrl.title).to.equal(
+      expect(result.body.data.updateCollectionStoryImageUrl.title).toEqual(
         story.title,
       );
-      expect(result.body.data.updateCollectionStoryImageUrl.url).to.equal(
+      expect(result.body.data.updateCollectionStoryImageUrl.url).toEqual(
         story.url,
       );
-      expect(result.body.data.updateCollectionStoryImageUrl.excerpt).to.equal(
+      expect(result.body.data.updateCollectionStoryImageUrl.excerpt).toEqual(
         story.excerpt,
       );
-      expect(result.body.data.updateCollectionStoryImageUrl.sortOrder).to.equal(
+      expect(result.body.data.updateCollectionStoryImageUrl.sortOrder).toEqual(
         story.sortOrder,
       );
       expect(
         result.body.data.updateCollectionStoryImageUrl.authors.length,
-      ).to.equal(story.authors.length);
-      expect(result.body.data.updateCollectionStoryImageUrl.publisher).to.equal(
+      ).toEqual(story.authors.length);
+      expect(result.body.data.updateCollectionStoryImageUrl.publisher).toEqual(
         story.publisher,
       );
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -732,6 +741,8 @@ describe('mutations: CollectionStory', () => {
       };
 
       story = await createCollectionStory(db, data);
+
+      sendEventBridgeEventSpy.mockClear();
     });
 
     it('should delete a collection story and return the deleted data', async () => {
@@ -746,21 +757,19 @@ describe('mutations: CollectionStory', () => {
         });
 
       // should have direct model data
-      expect(result.body.data.deleteCollectionStory.title).to.equal(
-        story.title,
-      );
+      expect(result.body.data.deleteCollectionStory.title).toEqual(story.title);
 
       // should have related author data
       expect(
         result.body.data.deleteCollectionStory.authors.length,
-      ).to.be.greaterThan(0);
+      ).toBeGreaterThan(0);
 
       // make sure the story is really gone
       const found = await getCollectionStory(db, story.externalId);
 
-      expect(found).to.be.null;
+      expect(found).toBeNull();
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should delete a collection story and return the story authors sorted correctly', async () => {
@@ -775,14 +784,14 @@ describe('mutations: CollectionStory', () => {
         });
 
       // (authors are returned sorted by sortOrder asc)
-      expect(result.body.data.deleteCollectionStory.authors[0].name).to.equal(
+      expect(result.body.data.deleteCollectionStory.authors[0].name).toEqual(
         'donny',
       );
-      expect(result.body.data.deleteCollectionStory.authors[1].name).to.equal(
+      expect(result.body.data.deleteCollectionStory.authors[1].name).toEqual(
         'walter',
       );
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should delete all related collection story authors', async () => {
@@ -802,9 +811,9 @@ describe('mutations: CollectionStory', () => {
         },
       });
 
-      expect((await relatedAuthors).length).to.equal(0);
+      expect((await relatedAuthors).length).toEqual(0);
       // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should fail to delete a collection story if the externalId cannot be found', async () => {
@@ -818,12 +827,14 @@ describe('mutations: CollectionStory', () => {
           },
         });
 
-      expect(result.body.errors.length).to.equal(1);
-      expect(result.body.errors[0].message).to.equal(
+      expect(result.body.errors.length).toEqual(1);
+
+      expect(result.body.errors[0].message).toEqual(
         `Cannot delete a collection story with external ID "${story.externalId}typo"`,
       );
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub.calledOnce).to.be.true;
+
+      // assert that the event emitter function was not called (as the above operation errors first)
+      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(0);
     });
   });
 });

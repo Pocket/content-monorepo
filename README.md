@@ -156,6 +156,17 @@ pnpm build
 pnpm test-integrations --filter=curated-corpus-api
 ```
 
+### Debugging Tests in VSCode
+
+To enable step-through debugging in VSCode:
+
+1. Install the [Jest Runner](https://marketplace.visualstudio.com/items?itemName=firsttris.vscode-jest-runner) extension. (Be sure it's this one! There are a couple other extensions with almost the same name.)
+2. Open up your settings and search for `jest-runner`.
+3. In the "Jest-Runner Config" section, make sure the "Jestrunner: Config Path" setting is empty. (It's probably got a default value.)
+4. Open up a test file and click the `Run` and `Debug` commands that float above the test definition. It should work!
+
+If you have trouble with any of the steps above, try re-starting VSCode.
+
 ## DynamoDB
 
 Prospect-api uses `dynamodb` as the db system. When running `docker compose up`, the `localstack` container executes a `dynamodb.sh` script where the prospect-api table
@@ -214,9 +225,84 @@ pnpm update
 pnpm build
 ```
 
-#### aws-sdk versions
+## Package Synchronization
 
-⚠ Keep aws-sdk versions in sync, because AWS sometimes introduces incompatibilities without notice.
+We use [Syncpack](https://jamiemason.github.io/syncpack/guide/getting-started/) to keep package versions consistent across servers, lambdas, and shared packages. Outside of the consistent functional expecations of using the same package version in all places, it's important to keep some package groups in sync to mitigate cross-package bugs, e.g AWS and Prisma packages.
 
-- When adding a new aws-sdk, pin it to the version used throughout the monorepo.
-- When upgrading aws-sdk, upgrade it consistently throughout the monorepo.
+The syncpack config can be found in the `./syncpackrc` file.
+
+There are two command line operations associated with Syncpack:
+
+1. `pnpm list-mismatches` will tell you if any packages are out of sync/in violation of the rules set in `.syncpackrc`. This should only happen if your current branch is changing packages/package versions. Our CI will error if the rules in `.syncpackrc` are in violation.
+
+2. `pnpm fix-mismatches` will automatically fix `package.json` files that are in violation of the rules set in `.syncpackrc` by changing package versions. This is a quick and easy way to perform an upgrade, but as with any operation that can change things at scale, be sure you check the result is what you expect.
+
+## Tracing (Servers Only - WIP)
+
+We leverage [Pocket's tracing package](https://www.npmjs.com/package/@pocket-tools/tracing) to perform traces in our `server` applications:
+
+- Collection API
+
+  - [Unleash feature flag](https://featureflags.getpocket.dev/projects/default/features/perm.content.tracing.collections) (Dev)
+  - [Unleash feature flag](https://featureflags.readitlater.com/projects/default/features/perm.content.tracing.collections) (Prod)
+
+- Curated Corpus API (coming soon)
+
+  - [Unleash feature flag](https://featureflags.getpocket.dev/projects/default/features/perm.content.tracing.curated-corpus-api) (Dev)
+  - [Unleash feature flag](https://featureflags.readitlater.com/projects/default/features/perm.content.tracing.curated-corpus-api) (Prod)
+
+- Prospect API
+
+  - [Unleash feature flag](https://featureflags.getpocket.dev/projects/default/features/perm.content.tracing.prospect-api) (Dev)
+  - [Unleash feature flag](https://featureflags.readitlater.com/projects/default/features/perm.content.tracing.prospect-api) (Prod)
+
+Traces and logs for the above services can be found in GCP (filter by service name):
+
+- [GCP Logs Explorer](https://console.cloud.google.com/logs/query;cursorTimestamp=2024-11-20T16:35:39.086537379Z;customDuration=today?inv=1&invt=AbiAGg&project=moz-fx-pocket-prod-61fb)
+- [GCP Trace Explorer](https://console.cloud.google.com/traces/list?inv=1&invt=AbiAGg&project=moz-fx-pocket-prod-61fb)
+
+Tracing is performed using Open Telemetry NPM packages that send trace data to a standalone collector ECS service in AWS, which in turn exports trace data to GCP. The Pocket tracing package also implements an
+[Open Telemetry package](https://www.npmjs.com/package/@opentelemetry/auto-instrumentations-node) that hooks into the Winston logger (which we implement via the Pocket `ts-logger` package) to auto-forward log data to GCP.
+
+### Enable/Disable Tracing in Prod & Dev
+
+Tracing can be enabled and disabled using an Unleash feature flag, which exists per service implementing tracing.
+
+To enable and configure the feature flag:
+
+1. Visit the feature flag URL for the environment in question (linked above)
+2. Toggle the `default` environment to "On" in the left hand "Enabled in environments" box
+3. Expand the `default` environment in the main, right-hand panel
+4. Click the ✎ pencil icon to edit the "Gradual rollout" strategy
+5. Move the "Rollout" slider to 100%
+6. Click the "Variants" tab and adjust the "Payload" number to the sample rate you'd like for your traces
+   - In production, this should usually be 1% (0.01) to begin with, and can be increased slowly if needed
+7. Click "Save strategy"
+8. After some requests have been made to the service, go look at traces in GCP (using links above)
+
+To disable tracing on a service, simply toggle the `default` environment to "Off".
+
+### Local Tracing
+
+Local tracing is enabled by default and sends trace data to a Grafana Docker image. To view traces locally:
+
+1. Make sure the local service you want to trace has activity, e.g. by running a query in the Apollo Server Playground
+2. Navigate to the Grafana docker image endpoint at `http://localhost:3000/explore`
+3. Click "Explore" in the left hand menu
+4. In the dropdown at the top left of the middle pane, select "Tempo"
+5. In the main panel, select the "Service Graph" for "Query type"
+6. Click the service you want to view traces for and select "View traces"
+7. Trace away!
+
+## CI Status
+
+### Servers
+
+[![Collection API](https://github.com/Pocket/content-monorepo/actions/workflows/collection-api.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/collection-api.yml)  
+[![Curated Corpus API](https://github.com/Pocket/content-monorepo/actions/workflows/curated-corpus-api.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/curated-corpus-api.yml)  
+[![Prospect API](https://github.com/Pocket/content-monorepo/actions/workflows/prospect-api.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/prospect-api.yml)
+
+### Lambdas
+
+[![Prospect Translation Lambda](https://github.com/Pocket/content-monorepo/actions/workflows/prospect-translation-lambda.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/prospect-translation-lambda.yml)  
+[![Corpus Scheduler Lambda](https://github.com/Pocket/content-monorepo/actions/workflows/corpus-scheduler-lambda.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/corpus-scheduler-lambda.yml)

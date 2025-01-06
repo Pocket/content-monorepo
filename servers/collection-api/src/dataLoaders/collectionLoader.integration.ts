@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { PrismaClient, CollectionStatus, Label } from '.prisma/client';
 import { getCollectionsBySlugs } from '../database/queries/Collection';
 import {
@@ -66,30 +65,30 @@ describe('queries: Collection', () => {
         'test-me-2',
       ]);
 
-      expect(collections[0].title).to.equal('test me');
-      expect(collections[1].title).to.equal('test me 2');
-      expect(collections[0].authors).to.exist;
-      expect(collections[1].authors).to.exist;
-      expect(collections[0].stories).to.exist;
-      expect(collections[0].stories[0].authors.length).to.be.greaterThan(0);
-      expect(collections[0].stories[0].authors[0]).to.exist;
-      expect(collections[1].stories).to.exist;
-      expect(collections[0].stories[1].authors.length).to.be.greaterThan(0);
-      expect(collections[1].IABParentCategory.name).to.equal(
+      expect(collections[0].title).toEqual('test me');
+      expect(collections[1].title).toEqual('test me 2');
+      expect(collections[0].authors).toBeTruthy();
+      expect(collections[1].authors).toBeTruthy();
+      expect(collections[0].stories).toBeTruthy();
+      expect(collections[0].stories[0].authors.length).toBeGreaterThan(0);
+      expect(collections[0].stories[0].authors[0]).toBeTruthy();
+      expect(collections[1].stories).toBeTruthy();
+      expect(collections[0].stories[1].authors.length).toBeGreaterThan(0);
+      expect(collections[1].IABParentCategory.name).toEqual(
         IABParentCategory.name,
       );
-      expect(collections[1].IABChildCategory.name).to.equal(
+      expect(collections[1].IABChildCategory.name).toEqual(
         IABChildCategory.name,
       );
 
       // Not much to go on given we're testing a database resolver here
-      expect(collections[1].labels).to.have.lengthOf(1);
+      expect(collections[1].labels).toHaveLength(1);
 
       // It's a database-level resolver so there's not much to go on.
       // Let's make sure it connects to the right label - the GraphQL-level
       // resolvers will do the rest.
-      expect(collections[1].labels[0].labelId).to.equal(label.id);
-      expect(collections[1].labels[0].collectionId).to.equal(collection2.id);
+      expect(collections[1].labels[0].labelId).toEqual(label.id);
+      expect(collections[1].labels[0].collectionId).toEqual(collection2.id);
     });
 
     it('gets only published collections', async () => {
@@ -118,8 +117,8 @@ describe('queries: Collection', () => {
         'i-am-le-draft',
       ]);
 
-      expect(collections.length).to.equal(1);
-      expect(collections[0].title).to.equal('published 1');
+      expect(collections.length).toEqual(1);
+      expect(collections[0].title).toEqual('published 1');
     });
 
     it('can get collections by slugs with story authors sorted correctly', async () => {
@@ -141,7 +140,7 @@ describe('queries: Collection', () => {
 
       // the default sort returned from prisma should match our expected
       // manual sort
-      expect(collections[0].stories[0].authors).to.equal(
+      expect(collections[0].stories[0].authors).toEqual(
         sortCollectionStoryAuthors(collections[0].stories[0].authors),
       );
     });

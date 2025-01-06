@@ -69,7 +69,7 @@ describe('utils', function () {
   let expectedCreateApprovedCorpusItemApiOutput: CreateApprovedCorpusItemApiInput;
   let parserItem: UrlMetadata;
   const now = new Date('2021-01-01 10:20:30');
-  const exp = new Date('2021-01-01 10:25:30');
+  const exp = new Date('2021-01-01 10:30:30');
 
   const emitter = getEmitter();
   const tracker = getTracker(emitter, config.snowplow.appId);

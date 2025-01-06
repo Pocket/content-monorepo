@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -51,10 +50,10 @@ describe('auth: Label', () => {
         .send({ query: print(LABELS) });
 
       // we shouldn't have any errors
-      expect(result.body.errors).not.to.exist;
+      expect(result.body.errors).not.toBeTruthy();
 
       // and data should exist
-      expect(result.body.data).to.exist;
+      expect(result.body.data).toBeTruthy();
     });
 
     it('should fail if user does not have access', async () => {
@@ -71,11 +70,11 @@ describe('auth: Label', () => {
         .send({ query: print(LABELS) });
 
       // ...without success. There is no data
-      expect(result.body.data).not.to.exist;
+      expect(result.body.data).not.toBeTruthy();
 
       // And there is an "access denied" error
-      expect(result.body.errors[0].message).to.equal(ACCESS_DENIED_ERROR);
-      expect(result.body.errors[0].extensions.code).to.equal('FORBIDDEN');
+      expect(result.body.errors[0].message).toEqual(ACCESS_DENIED_ERROR);
+      expect(result.body.errors[0].extensions.code).toEqual('FORBIDDEN');
     });
 
     it('should fail if auth headers are empty', async () => {
@@ -84,11 +83,11 @@ describe('auth: Label', () => {
         .send({ query: print(LABELS) });
 
       // ...without success. There is no data
-      expect(result.body.data).not.to.exist;
+      expect(result.body.data).not.toBeTruthy();
 
       // And there is an "access denied" error
-      expect(result.body.errors[0].message).to.equal(ACCESS_DENIED_ERROR);
-      expect(result.body.errors[0].extensions.code).to.equal('FORBIDDEN');
+      expect(result.body.errors[0].message).toEqual(ACCESS_DENIED_ERROR);
+      expect(result.body.errors[0].extensions.code).toEqual('FORBIDDEN');
     });
   });
 });

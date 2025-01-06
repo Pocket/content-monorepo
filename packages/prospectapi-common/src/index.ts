@@ -4,7 +4,7 @@
 
 export { DynamoItem, GetProspectsFilters, Prospect } from './types';
 export { ScheduledSurfaces, ScheduledSurface } from 'content-common';
-export { toUnixTimestamp, deriveUrlMetadata } from './lib';
+export { toUnixTimestamp, deriveDomainName, deriveUrlMetadata } from './lib';
 export {
   scanAllRows,
   generateInsertParams,

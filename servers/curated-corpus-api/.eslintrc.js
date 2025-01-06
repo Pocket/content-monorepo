@@ -1,3 +1,3 @@
 module.exports = {
-  extends: ['custom/graphql'],
+  extends: ['custom/common'],
 };

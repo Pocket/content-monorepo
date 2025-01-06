@@ -47,7 +47,22 @@ export const sanitizeText = (input: string, maxLength: number): string => {
   return sanitized.substring(0, maxLength - 1);
 };
 
-/* Taken from https://github.com/Pocket/curation-admin-tools/blob/main/src/_shared/utils/applyApTitleCase.ts*/
+/**
+ * Format a string: Match the letter after an apostrophe & capture the apostrophe and matched char.
+ * Lowercase the captured letter & return the formatted string.
+ * @param input
+ * @returns {string}
+ */
+export const lowercaseAfterApostrophe = (input: string): string => {
+  // matches an apostrophe followed by a char
+  // ensures only the first char after the apostrophe is converted to lowercase
+  const regex = /(?<=\w)(')(\w)/g;
+
+  return input.replace(regex, (match, p1, char) => {
+    return `'${char.toLowerCase()}`; // Lowercase the first char after the apostrophe
+  });
+};
+
 /**
  * Capitalize first character for string
  *
@@ -73,22 +88,40 @@ export const applyApTitleCase = (value: string): string | undefined => {
   if (!value) {
     return undefined;
   }
-  // split by separators, check if word is first or last
-  // or not blacklisted, then capitalize
-  return value
-    .split(SEPARATORS)
+
+  // Split and filter empty strings
+  // Boolean here acts as a callback, evaluates each word:
+  // If it's a non-empty string, keep the word in the array;
+  // If it's an empty string (or falsy), remove from array.
+  const allWords = value.split(SEPARATORS).filter(Boolean); // Split and filter empty strings
+
+  const result = allWords
     .map((word, index, all) => {
+      const isAfterColon = index > 0 && all[index - 1].trim() === ':';
+
+      const isAfterQuote =
+        index > 0 &&
+        (allWords[index - 1] === "'" ||
+          allWords[index - 1] === '"' ||
+          allWords[index - 1] === '\u2018' || // Opening single quote ’
+          allWords[index - 1] === '\u201C'); // Opening double quote “
+
       if (
-        index === 0 ||
-        index === all.length - 1 ||
-        !stop.includes(word.toLowerCase())
+        index === 0 || // first word
+        index === all.length - 1 || // last word
+        isAfterColon || // capitalize the first word after a colon
+        isAfterQuote || // capitalize the first word after a quote
+        !stop.includes(word.toLowerCase()) // not a stop word
       ) {
         return capitalize(word);
       }
+
       return word.toLowerCase();
     })
-    .join('');
+    .join(''); // join without additional spaces
+  return lowercaseAfterApostrophe(result);
 };
+
 
 /**
  * Helper to replace opening and closing curly single and double quotes for English

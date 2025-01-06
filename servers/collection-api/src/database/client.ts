@@ -3,7 +3,6 @@ import { serverLogger } from '@pocket-tools/ts-logger';
 import { Prisma, PrismaClient } from '.prisma/client';
 
 import { collectionStoryInjectItemMiddleware } from '../middleware/prisma';
-import config from '../config';
 
 let prisma;
 
@@ -16,20 +15,7 @@ export function client(): PrismaClient {
       level: 'error',
       emit: 'event',
     },
-    {
-      level: 'warn',
-      emit: 'event',
-    },
-    {
-      level: 'info',
-      emit: 'event',
-    },
   ];
-
-  // For non-prod environments, log all queries, too.
-  if (config.app.environment !== 'production') {
-    log.push({ level: 'query', emit: 'event' });
-  }
 
   prisma = new PrismaClient({
     log,
@@ -40,24 +26,13 @@ export function client(): PrismaClient {
     serverLogger.error(e);
   });
 
-  prisma.$on('warn', (e) => {
-    e.source = 'prisma';
-    serverLogger.warn(e);
-  });
+  // local development - for easy viewing of the actual SQL being
+  // generated/sent by prisma, uncomment the block below.
 
-  prisma.$on('info', (e) => {
-    e.source = 'prisma';
-    serverLogger.info(e);
-  });
-
-  // Allow logger to subscribe to query events from Prisma
-  // in non-production environments only.
-  if (config.app.environment !== 'production') {
-    prisma.$on('query', (e) => {
-      e.source = 'prisma';
-      serverLogger.debug(e);
-    });
-  }
+  //prisma.$on('query', (e) => {
+  //  e.source = 'prisma';
+  //  console.log(e);
+  //});
 
   // this is a middleware function that injects non-database / non-prisma
   // data into each CollectionStory. this extra data is necessary to relate

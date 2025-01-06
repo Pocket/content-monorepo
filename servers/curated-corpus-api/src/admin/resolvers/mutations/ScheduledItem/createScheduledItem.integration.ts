@@ -195,7 +195,9 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       title: 'A test story',
     });
 
-    // Make sure there's something in the excluded domain list
+    // Make sure excluded domains list contains some entries so that we know
+    // checking against this list is successful because the approved item's domain
+    // is not on the list, and not because the list is empty.
     await createExcludedDomainHelper(db, { domainName: 'excludeme.com' });
     await createExcludedDomainHelper(db, { domainName: 'test.com' });
 

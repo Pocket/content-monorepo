@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
@@ -50,9 +49,9 @@ describe('queries: Label', () => {
         .send({ query: print(LABELS) });
       const data = result.body.data.labels;
 
-      expect(data[0].name).to.equal('john-bon-jovi');
-      expect(data[1].name).to.equal('leonard-cohen');
-      expect(data[2].name).to.equal('simon-le-bon');
+      expect(data[0].name).toEqual('john-bon-jovi');
+      expect(data[1].name).toEqual('leonard-cohen');
+      expect(data[2].name).toEqual('simon-le-bon');
     });
 
     it('should get all publicly available properties of labels', async () => {
@@ -62,8 +61,8 @@ describe('queries: Label', () => {
         .send({ query: print(LABELS) });
       const data = result.body.data.labels;
 
-      expect(data[0].externalId).to.exist;
-      expect(data[0].name).to.exist;
+      expect(data[0].externalId).toBeTruthy();
+      expect(data[0].name).toBeTruthy();
     });
   });
 });

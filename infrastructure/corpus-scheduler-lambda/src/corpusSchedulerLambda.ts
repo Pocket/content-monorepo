@@ -35,7 +35,7 @@ export class CorpusSchedulerSQSLambda extends Construct {
         lambda: {
           runtime: LAMBDA_RUNTIMES.NODEJS20,
           handler: 'index.handler',
-          timeout: 360,
+          timeout: 600, // Also update generateJwt expiration time when changing this.
           memorySizeInMb: 512,
           reservedConcurrencyLimit: 1,
           environment: {
