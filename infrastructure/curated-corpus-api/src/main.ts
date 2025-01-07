@@ -1,7 +1,6 @@
 import { Construct } from 'constructs';
 import {
   App,
-  DataTerraformRemoteState,
   TerraformStack,
   MigrateIds,
   Aspects,
@@ -184,26 +183,11 @@ class CuratedCorpusAPI extends TerraformStack {
    * @private
    */
   private createPagerDuty() {
-    const incidentManagement = new DataTerraformRemoteState(
-      this,
-      'incident_management',
-      {
-        organization: 'Pocket',
-        workspaces: {
-          name: 'incident-management',
-        },
-      },
-    );
-
     return new PocketPagerDuty(this, 'pagerduty', {
       prefix: config.prefix,
       service: {
-        criticalEscalationPolicyId: incidentManagement
-          .get('policy_default_critical_id')
-          .toString(),
-        nonCriticalEscalationPolicyId: incidentManagement
-          .get('policy_default_non_critical_id')
-          .toString(),
+        criticalEscalationPolicyId: "PQ2EUPZ",
+        nonCriticalEscalationPolicyId: "PXOQVEP",
       },
     });
   }
