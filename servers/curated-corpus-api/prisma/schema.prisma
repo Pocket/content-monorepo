@@ -53,6 +53,7 @@ model ApprovedItem {
   scheduledItems  ScheduledItem[]
   domainName      String               @db.VarChar(255)
   grade           ApprovedItemGrade?
+  sectionItems    SectionItem[]
 
   @@index([domainName])
 }
@@ -82,7 +83,7 @@ model ScheduledItem {
   scheduledDate        DateTime            @db.Date
   scheduledSurfaceGuid String              @db.VarChar(50)
   approvedItem         ApprovedItem        @relation(fields: [approvedItemId], references: [id])
-  source               ScheduledItemSource
+  source               ActivitySource
 
   @@unique([approvedItemId, scheduledSurfaceGuid, scheduledDate], name: "ItemScheduledSurfaceDate")
   @@index([scheduledSurfaceGuid])
@@ -102,6 +103,60 @@ model ScheduleReview {
   @@unique([scheduledSurfaceGuid, scheduledDate], name: "ScheduledSurfaceDate")
 }
 
+// Sections allows us to group ApprovedItems arbitrarily for display on surfaces
+model Section {
+  id                    Int             @id @default(autoincrement())
+  // note - for ML-generated Sections, externalId will be set by ML
+  externalId            String          @unique @default(uuid()) @db.VarChar(255)
+  title                 String          @db.VarChar(255)
+  scheduledSurfaceGuid  String          @db.VarChar(50)
+  // sort may only apply during initial experimentation with ML-generated Sections,
+  // meaning this field may be dropped
+  sort                  Int?
+  // we will not delete Sections, instead deactivate them
+  active                Boolean         @default(false)
+  // track who created the Section
+  createSource          ActivitySource // (ML or MANUAL) 
+  // track who deactivated the Section
+  deactivateSource      ActivitySource? // (ML or MANUAL)
+  // track who updated the Section
+  // initially, this will only be ML
+  updateSource          ActivitySource? // (ML or MANUAL)
+  // track when the Section was deactivated
+  deactivatedAt         DateTime?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  // relations
+  sectionItems          SectionItem[]
+}
+
+model SectionItem {
+  id                Int             @id @default(autoincrement())
+  externalId        String          @unique @default(uuid()) @db.VarChar(255)
+  sectionId         Int
+  approvedItemId    Int
+  // the initial rank of the SectionItem in relation to its siblings. used as a
+  // fallback when there is no engagement/click data available. may only apply to
+  // ML-generated SectionItems.
+  rank              Int?
+  // we will not delete SectionItem history, instead will deactivate items
+  active            Boolean         @default(true)
+  // track who deactivated the SectionItem
+  deactivateSource  ActivitySource? // (ML or MANUAL)
+  // track when the Section was deactivated
+  deactivatedAt     DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  // relations
+  section           Section         @relation(fields: [sectionId], references: [id])
+  approvedItem      ApprovedItem    @relation(fields: [approvedItemId], references: [id])
+
+  // access pattern for this table will be by section where active = true
+  @@index([sectionId, active], name: "SectionIdActive")
+}
+
 enum CuratedStatus {
   RECOMMENDATION
   CORPUS
@@ -114,7 +169,7 @@ enum CuratedItemSource {
   ML
 }
 
-enum ScheduledItemSource {
+enum ActivitySource {
   MANUAL
   ML
 }
