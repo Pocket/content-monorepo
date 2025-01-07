@@ -162,7 +162,7 @@ class CollectionAPI extends TerraformStack {
       prefix: config.prefix,
       service: {
         // This is a Tier 2 service and as such only raises non-critical alarms.
-        criticalEscalationPolicyId: "PQ2EUPZ",
+        criticalEscalationPolicyId: "PXOQVEP",
         nonCriticalEscalationPolicyId: "PXOQVEP",
       },
     });
