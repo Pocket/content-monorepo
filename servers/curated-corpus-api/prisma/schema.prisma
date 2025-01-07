@@ -112,18 +112,18 @@ model Section {
   scheduledSurfaceGuid  String          @db.VarChar(50)
   // sort may only apply during initial experimentation with ML-generated Sections,
   // meaning this field may be dropped
-  sort                  Int
+  sort                  Int?
   // we will not delete Sections, instead deactivate them
   active                Boolean         @default(false)
   // track who created the Section
   createSource          ActivitySource // (ML or MANUAL) 
   // track who deactivated the Section
-  deactivateSource      ActivitySource // (ML or MANUAL)
+  deactivateSource      ActivitySource? // (ML or MANUAL)
   // track who updated the Section
   // initially, this will only be ML
-  updateSource          ActivitySource // (ML or MANUAL)
+  updateSource          ActivitySource? // (ML or MANUAL)
   // track when the Section was deactivated
-  deactivatedAt         DateTime
+  deactivatedAt         DateTime?
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
 
@@ -139,13 +139,13 @@ model SectionItem {
   // the initial rank of the SectionItem in relation to its siblings. used as a
   // fallback when there is no engagement/click data available. may only apply to
   // ML-generated SectionItems.
-  rank              Int             @default(0)
+  rank              Int?
   // we will not delete SectionItem history, instead will deactivate items
   active            Boolean         @default(true)
   // track who deactivated the SectionItem
-  deactivateSource  ActivitySource // (ML or MANUAL)
+  deactivateSource  ActivitySource? // (ML or MANUAL)
   // track when the Section was deactivated
-  deactivatedAt     DateTime
+  deactivatedAt     DateTime?
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
