@@ -1,11 +1,5 @@
 import { Construct } from 'constructs';
-import {
-  App,
-  TerraformStack,
-  MigrateIds,
-  Aspects,
-  S3Backend,
-} from 'cdktf';
+import { App, TerraformStack, MigrateIds, Aspects, S3Backend } from 'cdktf';
 import { config } from './config';
 import {
   ApplicationRDSCluster,
@@ -162,8 +156,10 @@ class CollectionAPI extends TerraformStack {
       prefix: config.prefix,
       service: {
         // This is a Tier 2 service and as such only raises non-critical alarms.
-        criticalEscalationPolicyId: "PXOQVEP",
-        nonCriticalEscalationPolicyId: "PXOQVEP",
+        criticalEscalationPolicyId:
+          config.pagerduty.escalationPolicyIdNonCritical,
+        nonCriticalEscalationPolicyId:
+          config.pagerduty.escalationPolicyIdNonCritical,
       },
     });
   }

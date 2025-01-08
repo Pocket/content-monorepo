@@ -1,3 +1,5 @@
+import { infraConfig } from 'infrastructure-common';
+
 const name = 'ProspectAPI';
 const isDev = process.env.NODE_ENV === 'development';
 const githubConnectionArn = isDev
@@ -47,6 +49,7 @@ export const config = {
     eventBusName: `PocketEventBridge-${environment}-Shared-Event-Bus`,
     snowplowEndpoint,
   },
+  pagerduty: infraConfig.pagerduty,
   tags: {
     service: name,
     environment,

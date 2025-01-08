@@ -23,7 +23,8 @@
     "@pocket-tools/terraform-modules": "5.14.2",
     "cdktf-cli": "0.20.8",
     "cdktf": "0.20.8",
-    "constructs": "10.3.0"
+    "constructs": "10.3.0",
+    "infrastructure-common": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "~20.12",
