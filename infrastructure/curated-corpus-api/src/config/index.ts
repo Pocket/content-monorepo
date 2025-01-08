@@ -1,3 +1,5 @@
+import { infraConfig } from 'infrastructure-common';
+
 const name = 'CuratedCorpusAPI';
 const domainPrefix = 'curated-corpus-api';
 const isDev = process.env.NODE_ENV === 'development';
@@ -53,6 +55,7 @@ export const config = {
     timeout: 5,
     startPeriod: 0,
   },
+  pagerduty: infraConfig.pagerduty,
   tracing: {
     url: isDev
       ? 'https://otel-collector.getpocket.dev:443'

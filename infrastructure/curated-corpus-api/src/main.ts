@@ -1,11 +1,5 @@
 import { Construct } from 'constructs';
-import {
-  App,
-  TerraformStack,
-  MigrateIds,
-  Aspects,
-  S3Backend,
-} from 'cdktf';
+import { App, TerraformStack, MigrateIds, Aspects, S3Backend } from 'cdktf';
 import { AwsProvider } from '@cdktf/provider-aws/lib/provider';
 import { PagerdutyProvider } from '@cdktf/provider-pagerduty/lib/provider';
 import { LocalProvider } from '@cdktf/provider-local/lib/provider';
@@ -186,8 +180,9 @@ class CuratedCorpusAPI extends TerraformStack {
     return new PocketPagerDuty(this, 'pagerduty', {
       prefix: config.prefix,
       service: {
-        criticalEscalationPolicyId: "PQ2EUPZ",
-        nonCriticalEscalationPolicyId: "PXOQVEP",
+        criticalEscalationPolicyId: config.pagerduty.escalationPolicyIdCritical,
+        nonCriticalEscalationPolicyId:
+          config.pagerduty.escalationPolicyIdNonCritical,
       },
     });
   }

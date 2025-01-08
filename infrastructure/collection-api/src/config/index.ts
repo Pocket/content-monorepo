@@ -1,3 +1,5 @@
+import { infraConfig } from 'infrastructure-common';
+
 const name = 'CollectionAPI';
 const domainPrefix = 'collection-api';
 const isDev = process.env.NODE_ENV === 'development';
@@ -26,6 +28,7 @@ export const config = {
   domain,
   graphqlVariant,
   rds,
+  pagerduty: infraConfig.pagerduty,
   tags: {
     service: name,
     environment,
