@@ -1,7 +1,6 @@
 import { Construct } from 'constructs';
 import {
   App,
-  DataTerraformRemoteState,
   TerraformStack,
   MigrateIds,
   Aspects,
@@ -159,28 +158,12 @@ class CollectionAPI extends TerraformStack {
       // Don't create pagerduty services for a dev service.
       return null;
     }
-
-    const incidentManagement = new DataTerraformRemoteState(
-      this,
-      'incident_management',
-      {
-        organization: 'Pocket',
-        workspaces: {
-          name: 'incident-management',
-        },
-      },
-    );
-
     return new PocketPagerDuty(this, 'pagerduty', {
       prefix: config.prefix,
       service: {
         // This is a Tier 2 service and as such only raises non-critical alarms.
-        criticalEscalationPolicyId: incidentManagement
-          .get('policy_default_non_critical_id')
-          .toString(),
-        nonCriticalEscalationPolicyId: incidentManagement
-          .get('policy_default_non_critical_id')
-          .toString(),
+        criticalEscalationPolicyId: "PXOQVEP",
+        nonCriticalEscalationPolicyId: "PXOQVEP",
       },
     });
   }
