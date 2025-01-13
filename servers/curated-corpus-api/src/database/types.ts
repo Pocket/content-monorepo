@@ -4,6 +4,7 @@ import {
   CuratedStatus,
   ScheduledItem as ScheduledItemModel,
   ScheduleReview,
+  SectionItem as SectionItemModel,
 } from '.prisma/client';
 import {
   ApprovedItemAuthor,
@@ -110,8 +111,18 @@ export type CreateScheduleReviewInput = {
   scheduledDate: string;
 };
 
+export type CreateSectionItemInput = {
+  sectionId: number;
+  approvedItemExternalId: string;
+  rank?: number;
+};
+
 export type ApprovedItem = ApprovedItemModel & {
   authors: ApprovedItemAuthor[];
+};
+
+export type SectionItem = SectionItemModel & {
+  approvedItem: ApprovedItem;
 };
 
 /**

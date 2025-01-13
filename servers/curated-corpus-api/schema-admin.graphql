@@ -534,6 +534,54 @@ type ScheduleReview {
 }
 
 """
+An ApprovedItem belonging to a Section
+"""
+type SectionItem {
+  """
+  An alternative primary key in UUID format that is generated on creation.
+  """
+  externalId: ID!
+  """
+  The associated Approved Item.
+  """
+  approvedItem: ApprovedCorpusItem!
+  """
+  The initial rank of the SectionItem in relation to its siblings. Used as a
+  fallback in Merino when there is no engagement/click data available. May only apply to
+  ML-generated SectionItems.
+  """
+  rank: Int
+  """
+  A Unix timestamp of when the entity was created.
+  """
+  createdAt: Int!
+  """
+  A Unix timestamp of when the entity was last updated.
+  """
+  updatedAt: Int!
+}
+
+"""
+Input data for adding a SectionItem to a Section
+"""
+input CreateSectionItemInput {
+  """
+  The ID of the ApprovedItem backing the SectionItem.
+  """
+  approvedItemExternalId: ID!
+  """
+  The ID of the Section to contain the new SectionItem.
+  """
+  sectionExternalId: ID!
+  """
+  The initial rank of the SectionItem in relation to its siblings. Used as a
+  fallback in Merino when there is no engagement/click data available. May only apply to
+  ML-generated SectionItems.
+  """
+  rank: Int
+}
+
+"""
 Input data for marking the given scheduled surface as reviewed
 by human curators for a given date.
 """
@@ -1199,6 +1247,11 @@ type Mutation {
   Marks the given scheduled surface as reviewed by human curators for a given date.
   """
   createScheduleReview(data: CreateScheduleReviewInput!): ScheduleReview!
+
+  """
+  Creates a SectionItem within a Section.
+  """
+  createSectionItem(data: CreateSectionItemInput!): SectionItem!
 }
 
 """

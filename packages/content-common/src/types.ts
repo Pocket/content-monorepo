@@ -75,6 +75,12 @@ export type ApprovedItemRequiredInput = {
   isTimeSensitive: boolean;
 };
 
+export type CreateSectionItemApiInput = {
+  sectionExternalId: string;
+  approvedItemExternalId: string;
+  rank?: number;
+};
+
 // maps to the CreateApprovedCorpusItemInput type in corpus API admin schema
 export type CreateApprovedCorpusItemApiInput = ApprovedItemRequiredInput & {
   // These required properties are set once only at creation time
@@ -217,6 +223,7 @@ export type ScheduledSurface = {
   prospectTypes: ProspectType[];
   accessGroup: string;
 };
+
 export const ScheduledSurfaces: ScheduledSurface[] = [
   {
     name: 'New Tab (en-US)',
