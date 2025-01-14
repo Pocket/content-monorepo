@@ -1,6 +1,6 @@
 import { PrismaClient, Section } from '.prisma/client';
 
-import { ScheduledItemSource, ScheduledSurfacesEnum } from 'content-common';
+import { ActivitySource, ScheduledSurfacesEnum } from 'content-common';
 
 import { clearDb } from './clearDb';
 import {
@@ -30,7 +30,7 @@ describe('createSectionHelper', () => {
 
   it('should create a Section with all props supplied', async () => {
     const data: CreateSectionHelperOptionalInput = {
-      createSource: ScheduledItemSource.ML,
+      createSource: ActivitySource.ML,
       externalId: 'AnExternalIdFromML',
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
       title: 'How to Build Community',

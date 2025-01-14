@@ -66,7 +66,7 @@ export const SectionData = gql`
       title
       scheduledSurfaceGuid
       sort
-      source
+      createSource
       active
       createdAt
       updatedAt

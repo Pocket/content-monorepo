@@ -4,7 +4,7 @@ import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient, Section } from '.prisma/client';
 
-import { ScheduledItemSource, CreateSectionItemApiInput } from 'content-common';
+import { ActivitySource, CreateSectionItemApiInput } from 'content-common';
 
 import { client } from '../../../../database/client';
 import { ApprovedItem } from '../../../../database/types';
@@ -49,7 +49,7 @@ describe('mutations: SectionItem (createSectionItem)', () => {
   beforeEach(async () => {
     // we need a Section and an ApprovedItem to create a SectionItem
     section = await createSectionHelper(db, {
-      createSource: ScheduledItemSource.ML,
+      createSource: ActivitySource.ML,
     });
 
     approvedItem = await createApprovedItemHelper(db, {

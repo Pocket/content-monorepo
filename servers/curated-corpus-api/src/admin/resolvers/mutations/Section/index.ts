@@ -1,4 +1,4 @@
-import { AuthenticationError, NotFoundError, UserInputError } from '@pocket-tools/apollo-utils';
+import { AuthenticationError, UserInputError } from '@pocket-tools/apollo-utils';
 
 import {
   createSection as dbCreateSection,
