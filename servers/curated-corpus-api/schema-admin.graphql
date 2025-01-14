@@ -163,6 +163,20 @@ enum CorpusItemSource {
 }
 
 """
+The source of en entity
+"""
+enum ActivitySource {
+  """
+  Manually entered through the curation admin tool
+  """
+  MANUAL
+  """
+  Created by ML
+  """
+  ML
+}
+
+"""
 The source of the Scheduled item
 """
 enum ScheduledItemSource {
@@ -531,6 +545,72 @@ type ScheduleReview {
   A Unix timestamp of when the scheduled was last reviewed.
   """
   reviewedAt: Date!
+}
+
+type Section {
+  """
+  An alternative primary key in UUID format supplied by ML.
+  """
+  externalId: ID!
+  """
+  The title of the Section displayed to the users.
+  """
+  title: String!
+  """
+  The GUID of the Scheduled Surface. Example: 'NEW_TAB_EN_US'.
+  """
+  scheduledSurfaceGuid: ID!
+  """
+  Controls the display order of Sections.
+  """
+  sort: Int
+  """
+  The source which created the Section.
+  """
+  createSource: ActivitySource!
+  """
+  Indicates whether or not a Section is available for display.
+  """
+  active: Boolean!
+  """
+  A Unix timestamp of when the Section was created.
+  """
+  createdAt: Int!
+  """
+  A Unix timestamp of when the Section was last updated.
+  """
+  updatedAt: Int!
+}
+
+"""
+Input data for creating a Section
+"""
+input CreateSectionInput {
+  """
+  An alternative primary key in UUID format supplied by ML.
+  """
+  externalId: ID!
+  """
+  The title of the Section displayed to the users.
+  """
+  title: String!
+  """
+  The GUID of the Scheduled Surface. Example: 'NEW_TAB_EN_US'.
+  """
+  scheduledSurfaceGuid: ID!
+  """
+  Controls the display order of Sections.
+  """
+  sort: Int
+  """
+  The source which created the Section.
+  """
+  createSource: ActivitySource!
+  """
+  Indicates whether or not a Section is available for display.
+  """
+  active: Boolean!
+
 }
 
 """
@@ -1199,6 +1279,11 @@ type Mutation {
   Marks the given scheduled surface as reviewed by human curators for a given date.
   """
   createScheduleReview(data: CreateScheduleReviewInput!): ScheduleReview!
+
+  """
+  Create a Section entity.
+  """
+  createSection(data: CreateSectionInput!): Section!
 }
 
 """

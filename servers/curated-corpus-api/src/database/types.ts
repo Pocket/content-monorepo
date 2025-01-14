@@ -4,8 +4,10 @@ import {
   CuratedStatus,
   ScheduledItem as ScheduledItemModel,
   ScheduleReview,
+  Section as SectionModel,
 } from '.prisma/client';
 import {
+  ActivitySource,
   ApprovedItemAuthor,
   ApprovedItemRequiredInput,
   CorpusItemSource,
@@ -109,6 +111,17 @@ export type CreateScheduleReviewInput = {
   scheduledSurfaceGuid: string;
   scheduledDate: string;
 };
+
+export type CreateSectionInput = {
+  externalId: string;
+  title: string;
+  scheduledSurfaceGuid: string;
+  sort?: number;
+  createSource: ActivitySource;
+  active: boolean;
+}
+
+export type Section = SectionModel;
 
 export type ApprovedItem = ApprovedItemModel & {
   authors: ApprovedItemAuthor[];

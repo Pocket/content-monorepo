@@ -59,3 +59,16 @@ export const ScheduledItemData = gql`
   }
   ${CuratedItemData}
 `;
+
+export const SectionData = gql`
+  fragment SectionData on Section {
+      externalId
+      title
+      scheduledSurfaceGuid
+      sort
+      source
+      active
+      createdAt
+      updatedAt
+  }
+`;

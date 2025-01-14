@@ -29,6 +29,7 @@ import {
 } from '../../database/queries';
 import { getOpenGraphFields } from './queries/OpenGraphFields';
 import { hasTrustedDomain } from './queries/ApprovedItem/hasTrustedDomain';
+import { createSection } from './mutations/Section'
 
 export const resolvers = {
   // The custom scalars from GraphQL-Scalars that we find useful.
@@ -84,6 +85,10 @@ export const resolvers = {
     createdAt: UnixTimestampResolver,
     updatedAt: UnixTimestampResolver,
   },
+  Section: {
+    createdAt: UnixTimestampResolver,
+    updatedAt: UnixTimestampResolver
+  },
   // The queries available
   Query: {
     approvedCorpusItemByExternalId: getApprovedItemByExternalId,
@@ -106,5 +111,6 @@ export const resolvers = {
     uploadApprovedCorpusItemImage: uploadApprovedItemImage,
     updateApprovedCorpusItemGrade: updateApprovedItemGrade,
     createScheduleReview: createScheduleReview,
+    createSection: createSection,
   },
 };

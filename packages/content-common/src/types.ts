@@ -50,6 +50,11 @@ export enum CuratedStatus {
   CORPUS = 'CORPUS',
 }
 
+export enum ActivitySource {
+  MANUAL = 'MANUAL', // manually entered through the curation admin tool
+  ML = 'ML', // created by ML
+}
+
 export enum ScheduledItemSource {
   MANUAL = 'MANUAL', // manually entered through the curation admin tool
   ML = 'ML', // created by ML
@@ -102,6 +107,15 @@ export type CreateScheduledItemInput = {
   scheduledDate: string;
   source: ScheduledItemSource;
 };
+
+export type CreateSectionApiInput = {
+  externalId: string;
+  title: string;
+  scheduledSurfaceGuid: string;
+  sort?: number;
+  createSource: ActivitySource;
+  active: boolean;
+}
 
 // these values will need to match those listed in the source of truth doc:
 // https://mozilla-hub.atlassian.net/wiki/spaces/PE/pages/390642851/Pocket+Shared+Data#Prospect-Types
