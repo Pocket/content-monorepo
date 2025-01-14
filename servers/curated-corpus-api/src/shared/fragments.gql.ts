@@ -72,3 +72,16 @@ export const SectionData = gql`
       updatedAt
   }
 `;
+
+export const SectionItemData = gql`
+  fragment SectionItemData on SectionItem {
+    externalId
+    approvedItem {
+      ...CuratedItemData
+    }
+    rank
+    createdAt
+    updatedAt
+  }
+  ${CuratedItemData}
+`;

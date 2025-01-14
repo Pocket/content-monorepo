@@ -5,6 +5,7 @@ import {
   ScheduledItem as ScheduledItemModel,
   ScheduleReview,
   Section as SectionModel,
+  SectionItem as SectionItemModel,
 } from '.prisma/client';
 import {
   ActivitySource,
@@ -123,8 +124,18 @@ export type CreateSectionInput = {
 
 export type Section = SectionModel;
 
+export type CreateSectionItemInput = {
+  sectionId: number;
+  approvedItemExternalId: string;
+  rank?: number;
+};
+
 export type ApprovedItem = ApprovedItemModel & {
   authors: ApprovedItemAuthor[];
+};
+
+export type SectionItem = SectionItemModel & {
+  approvedItem: ApprovedItem;
 };
 
 /**
