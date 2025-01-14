@@ -4,3 +4,4 @@ export { createExcludedDomainHelper } from './createExcludedDomainHelper';
 export { createScheduledItemHelper } from './createScheduledItemHelper';
 export { createRejectedCuratedCorpusItemHelper } from './createRejectedCuratedCorpusItemHelper';
 export { createScheduleReviewHelper } from './createScheduleReviewHelper';
+export { createSectionHelper } from './createSectionHelper';
