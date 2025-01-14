@@ -6,7 +6,7 @@ import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
 
 /**
- * Adds a curated item to a scheduled surface for a given date.
+ * Adds a SectionItem to a Section.
  *
  * @param parent
  * @param data
