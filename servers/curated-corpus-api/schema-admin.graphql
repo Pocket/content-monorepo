@@ -549,7 +549,7 @@ type ScheduleReview {
 
 type Section {
   """
-  An alternative primary key in UUID format supplied by ML.
+  An alternative primary key in UUID format.
   """
   externalId: ID!
   """
@@ -585,7 +585,7 @@ type Section {
 """
 Input data for creating a Section
 """
-input CreateSectionInput {
+input CreateOrUpdateSectionInput {
   """
   An alternative primary key in UUID format supplied by ML.
   """
@@ -1329,9 +1329,11 @@ type Mutation {
   createScheduleReview(data: CreateScheduleReviewInput!): ScheduleReview!
 
   """
-  Create a Section entity.
+  Creates a new Section entity. If a Section already exists, the existing
+  Section gets updated, associated active SectionItems are set to in-active.
+  This mutation is to be used by ML-automated processes.
   """
-  createSection(data: CreateSectionInput!): Section!
+  createOrUpdateSection(data: CreateOrUpdateSectionInput!): Section!
 
   """
   Creates a SectionItem within a Section.

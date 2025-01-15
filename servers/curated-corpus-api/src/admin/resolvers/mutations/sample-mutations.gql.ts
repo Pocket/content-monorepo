@@ -105,9 +105,9 @@ export const CREATE_SCHEDULE_REVIEW = gql`
   ${AdminScheduleReviewData}
 `;
 
-export const CREATE_SECTION = gql`
-    mutation createSection($data: CreateSectionInput!) {
-        createSection(data: $data) {
+export const CREATE_OR_UPDATE_SECTION = gql`
+    mutation createOrUpdateSection($data: CreateOrUpdateSectionInput!) {
+        createOrUpdateSection(data: $data) {
             ...SectionData
         }
     }

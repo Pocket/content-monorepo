@@ -80,6 +80,15 @@ export type ApprovedItemRequiredInput = {
   isTimeSensitive: boolean;
 };
 
+export type CreateOrUpdateSectionApiInput = {
+  externalId: string;
+  title: string;
+  scheduledSurfaceGuid: string;
+  sort?: number;
+  createSource: ActivitySource;
+  active: boolean;
+}
+
 export type CreateSectionItemApiInput = {
   sectionExternalId: string;
   approvedItemExternalId: string;
@@ -114,14 +123,6 @@ export type CreateScheduledItemInput = {
   source: ScheduledItemSource;
 };
 
-export type CreateSectionApiInput = {
-  externalId: string;
-  title: string;
-  scheduledSurfaceGuid: string;
-  sort?: number;
-  createSource: ActivitySource;
-  active: boolean;
-}
 
 // these values will need to match those listed in the source of truth doc:
 // https://mozilla-hub.atlassian.net/wiki/spaces/PE/pages/390642851/Pocket+Shared+Data#Prospect-Types

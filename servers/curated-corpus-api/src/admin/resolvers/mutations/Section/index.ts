@@ -16,7 +16,7 @@ import { ActivitySource } from 'content-common';
  * @param data
  * @param context
  */
-export async function createSection(
+export async function createOrUpdateSection(
   parent,
   { data },
   context: IAdminContext,
