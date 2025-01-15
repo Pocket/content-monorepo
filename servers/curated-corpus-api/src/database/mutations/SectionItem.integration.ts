@@ -6,7 +6,7 @@ import { createSectionItem } from './SectionItem';
 import { createApprovedItemHelper } from '../../test/helpers';
 import { createSectionHelper } from '../../test/helpers';
 
-describe('ScheduleReview', () => {
+describe('SectionItem', () => {
   let db: PrismaClient;
 
   beforeAll(async () => {

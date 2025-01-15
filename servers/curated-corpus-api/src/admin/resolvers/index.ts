@@ -29,6 +29,7 @@ import {
 } from '../../database/queries';
 import { getOpenGraphFields } from './queries/OpenGraphFields';
 import { hasTrustedDomain } from './queries/ApprovedItem/hasTrustedDomain';
+import { createOrUpdateSection } from './mutations/Section'
 import { createSectionItem } from './mutations/SectionItem';
 
 export const resolvers = {
@@ -85,6 +86,10 @@ export const resolvers = {
     createdAt: UnixTimestampResolver,
     updatedAt: UnixTimestampResolver,
   },
+  Section: {
+    createdAt: UnixTimestampResolver,
+    updatedAt: UnixTimestampResolver,
+  },
   SectionItem: {
     createdAt: UnixTimestampResolver,
     updatedAt: UnixTimestampResolver,
@@ -111,6 +116,7 @@ export const resolvers = {
     uploadApprovedCorpusItemImage: uploadApprovedItemImage,
     updateApprovedCorpusItemGrade: updateApprovedItemGrade,
     createScheduleReview: createScheduleReview,
+    createOrUpdateSection: createOrUpdateSection,
     createSectionItem: createSectionItem,
   },
 };

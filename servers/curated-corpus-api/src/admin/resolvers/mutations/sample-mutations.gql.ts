@@ -1,6 +1,7 @@
 import { gql } from 'graphql-tag';
 import {
   RejectedItemData,
+  SectionData,
   SectionItemData,
 } from '../../../shared/fragments.gql';
 import {
@@ -102,6 +103,15 @@ export const CREATE_SCHEDULE_REVIEW = gql`
     }
   }
   ${AdminScheduleReviewData}
+`;
+
+export const CREATE_OR_UPDATE_SECTION = gql`
+    mutation createOrUpdateSection($data: CreateOrUpdateSectionInput!) {
+        createOrUpdateSection(data: $data) {
+            ...SectionData
+        }
+    }
+    ${SectionData}
 `;
 
 export const CREATE_SECTION_ITEM = gql`
