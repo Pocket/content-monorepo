@@ -1,0 +1,18 @@
+{
+  "extends": "tsconfig/lambda.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "strictNullChecks": true
+  },
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    "**/testHelpers.ts",
+    "**/*.integration.ts",
+    "jest.config.js",
+    "jest.setup.js"
+  ],
+  "include": ["src/**/*.ts"]
+}

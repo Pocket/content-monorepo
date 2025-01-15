@@ -1,0 +1,59 @@
+name: Section Manager Lambda
+on:
+  pull_request:
+    paths:
+      - 'infrastructure/section-manager-lambda/**'
+      - 'packages/**'
+      - 'docker-compose.yml'
+      - 'lambdas/section-manager-lambda/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/section-manager-lambda.yml'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'infrastructure/section-manager-lambda/**'
+      - 'packages/**'
+      - 'lambdas/section-manager-lambda/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/section-manager-lambda.yml'
+jobs:
+  test-integrations:
+    if: github.event_name == 'pull_request'
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-test-integrations.yml@main
+    with:
+      scope: section-manager-lambda
+    secrets: inherit
+
+  infrastructure:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main
+    with:
+      scope: section-manager-lambda-cdk
+      stack-output-path: infrastructure/section-manager-lambda/cdktf.out/stacks/section-manager-lambda-wrapper
+    secrets: inherit
+
+  sqs-lambda:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-build-and-push-lambda.yml@main
+    needs: [infrastructure]
+    with:
+      scope: section-manager-lambda
+      sentry-project: section-manager-lambda
+      s3-bucket-pattern: pocket-sectionManagerlambda-{0}-sqs
+      codedeploy-app-name-pattern: SectioinManagerLambda-{0}-SQS-Lambda
+      codedeploy-group-name-pattern: SectioinManagerLambda-{0}-SQS-Lambda
+      function-name-pattern: SectioinManagerLambda-{0}-SQS-Function
+    secrets: inherit
+
+  sentry:
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-sentry-release.yml@main
+    needs: [sqs-lambda]
+    with:
+      sentry-project: section-manager-lambda
+      sentry-environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    secrets: inherit
