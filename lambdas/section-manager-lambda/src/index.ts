@@ -15,7 +15,12 @@ Sentry.AWSLambda.init({
  *  Lambda batchSize is 1 to avoid retrying successfully processed records.
  */
 export const processor: SQSHandler = async (event: SQSEvent) => {
-  console.log('WIP Section manager Lambda invoked...');
+  console.log('Section Manager Lambda skeleton invoked...');
+
+  console.log('records received from SQS:');
+  for await (const record of event.Records) {
+    console.log(record);
+  }
 };
 
 // the actual function has to be wrapped in order for sentry to work
