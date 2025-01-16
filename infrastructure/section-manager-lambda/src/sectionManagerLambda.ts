@@ -19,6 +19,9 @@ export class SectionManagerSQSLambda extends Construct {
   ) {
     super(scope, name);
 
+    const environment =
+      config.environment === 'Prod' ? 'production' : 'development';
+
     const pocketSqsLambda = new PocketSQSWithLambdaTarget(
       this,
       'section-manager-sqs-lambda',
@@ -45,15 +48,13 @@ export class SectionManagerSQSLambda extends Construct {
             SENTRY_DSN: this.getSentryDsn(),
             // TODO: we will implement the JWT stuff in MC-1644
             // JWT_KEY: `${config.name}/${config.environment}/JWT_KEY`,
-            ENVIRONMENT:
-              config.environment === 'Prod' ? 'production' : 'development',
-            NODE_ENV:
-              config.environment === 'Prod' ? 'production' : 'development',
+            ENVIRONMENT: environment,
+            NODE_ENV: environment,
             // TODO: we are in limbo with our data pipeline strategy. keeping
             // this here in case we stay with snowplow
             // SNOWPLOW_ENDPOINT: config.envVars.snowplowEndpoint,
           },
-          // why is this here?
+          // why do we have `ignoreEnvironmentVars`?
           // 2025-01-15
           //
           // we *think* this stops a lambda from updating any time the GIT_SHA
