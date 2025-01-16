@@ -43,9 +43,9 @@ jobs:
       scope: section-manager-lambda
       sentry-project: section-manager-lambda
       s3-bucket-pattern: pocket-sectionmanagerlambda-{0}-sqs
-      codedeploy-app-name-pattern: SectioinManagerLambda-{0}-SQS-Lambda
-      codedeploy-group-name-pattern: SectioinManagerLambda-{0}-SQS-Lambda
-      function-name-pattern: SectioinManagerLambda-{0}-SQS-Function
+      codedeploy-app-name-pattern: SectionManagerLambda-{0}-SQS-Lambda
+      codedeploy-group-name-pattern: SectionManagerLambda-{0}-SQS-Lambda
+      function-name-pattern: SectionManagerLambda-{0}-SQS-Function
     secrets: inherit
 
   sentry:
