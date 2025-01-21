@@ -573,6 +573,10 @@ type Section {
   """
   active: Boolean!
   """
+  An array of active and in-active SectionItems in a Section.
+  """
+  sectionItems: [SectionItem]
+  """
   A Unix timestamp of when the Section was created.
   """
   createdAt: Int!
@@ -1251,6 +1255,11 @@ type Query {
   Tool to get OG description of URL that is not yet implemented in parser
   """
   getOpenGraphFields(url: Url!): OpenGraphFields
+
+  """
+  Retrieves a Section with its associated SectionItems with the given external ID.
+  """
+  getSectionWithSectionItems(externalId: ID!): Section
 }
 
 type Mutation {
