@@ -1,4 +1,4 @@
-import { PrismaClient } from '.prisma/client';
+import { PrismaClient, Prisma } from '.prisma/client';
 import { CreateSectionInput, Section } from '../types';
 import { ActivitySource } from 'content-common';
 
@@ -13,7 +13,14 @@ export async function createSection(
   db: PrismaClient,
   data: CreateSectionInput,
 ): Promise<Section> {
-  const { externalId, title, scheduledSurfaceGuid, sort, createSource, active } = data;
+  const {
+    externalId,
+    title,
+    scheduledSurfaceGuid,
+    sort,
+    createSource,
+    active,
+  } = data;
 
   const createData = {
     externalId,
@@ -21,11 +28,11 @@ export async function createSection(
     scheduledSurfaceGuid,
     sort,
     createSource,
-    active
+    active,
   };
 
   return await db.section.create({
-    data: createData
+    data: createData,
   });
 }
 
@@ -34,48 +41,47 @@ export async function createSection(
  *
  * @param db
  * @param data
- * @param username
+ * @param sectionId
+ * @returns
  */
-export async  function updateSection (
+export async function updateSection(
   db: PrismaClient,
-  data: CreateSectionInput
+  data: CreateSectionInput,
+  sectionId: number,
 ): Promise<Section> {
   const { externalId, title, scheduledSurfaceGuid, sort, active } = data;
 
-  // Get the id of the Section to update using the externalId
-  // this is for updating any associated SectionItems
-  const section = await db.section.findUnique({
-    where: {externalId: externalId}
-  })
-
-  const updateData = {
-    title,
-    scheduledSurfaceGuid,
-    sort,
-    active
+  const sectionItemUpdateData: Prisma.SectionItemUpdateManyMutationInput = {
+    active: false,
+    deactivateSource: ActivitySource.ML,
+    deactivatedAt: new Date(),
   };
-
-  // if Section is marked as in-active, set the deactivateSource
-  if(!active) {
-    updateData['deactivateSource'] = ActivitySource.ML;
-  }
-
 
   // if a Section has any active SectionItems associted with it, mark those as in-active.
   await db.sectionItem.updateMany({
     where: {
-      sectionId: section.id,
-      active: true
+      sectionId: sectionId,
+      active: true,
     },
-    data: {
-      active: false,
-      deactivateSource: ActivitySource.ML
-    },
+    data: sectionItemUpdateData,
   });
+
+  const sectionUpdateData: Prisma.SectionUpdateInput = {
+    title,
+    scheduledSurfaceGuid,
+    sort,
+    active,
+  };
+
+  // if Section is marked as in-active, set the deactivateSource and time
+  if (!active) {
+    sectionUpdateData.deactivateSource = ActivitySource.ML;
+    sectionUpdateData.deactivatedAt = new Date();
+  }
 
   // Update the existing Section
   return await db.section.update({
-    where: { externalId: section.externalId },
-    data: updateData
-  })
+    where: { externalId: externalId },
+    data: sectionUpdateData,
+  });
 }
