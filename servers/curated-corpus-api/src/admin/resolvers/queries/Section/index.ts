@@ -1,25 +1,23 @@
 import { AuthenticationError } from '@pocket-tools/apollo-utils';
 
 import {
-  getSectionWithSectionItems as dbGetSectionWithSectionItems
+  getSectionsWithSectionItems as dbGetSectionsWithSectionItems
 } from '../../../../database/queries';
 import { Section } from '../../../../database/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
 
 /**
- * Retrieve a Section with its SectionItems. Returns null if the Section
- * externalId is not found.
+ * Retrieve all Sections with their SectionItems. Returns empty array if no Sections found.
  *
  * @param parent
- * @param externalId
  * @param context
  */
-export async function getSectionWithSectionItems(
+export async function getSectionsWithSectionItems(
   parent,
   args,
   context: IAdminContext,
-): Promise<Section | null> {
+): Promise<Section[]> {
   // Check if the user does not have the permissions to access this query
   if (
     !context.authenticatedUser.hasReadOnly &&
@@ -27,5 +25,5 @@ export async function getSectionWithSectionItems(
   ) {
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
-  return await dbGetSectionWithSectionItems(context.db, args.externalId);
+  return await dbGetSectionsWithSectionItems(context.db);
 }

@@ -12,4 +12,4 @@ export {
   getScheduledItems,
   getItemsForScheduledSurface,
 } from './ScheduledItem';
-export { getSectionWithSectionItems } from './Section';
+export { getSectionsWithSectionItems } from './Section';

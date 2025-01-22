@@ -1257,9 +1257,9 @@ type Query {
   getOpenGraphFields(url: Url!): OpenGraphFields
 
   """
-  Retrieves a Section with its associated SectionItems with the given external ID.
+  Retrieves a list of Sections with their corresponding SectionItems.
   """
-  getSectionWithSectionItems(externalId: ID!): Section
+  getSectionsWithSectionItems: [Section!]!
 }
 
 type Mutation {

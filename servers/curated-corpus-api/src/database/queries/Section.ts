@@ -2,19 +2,16 @@ import { PrismaClient } from '.prisma/client';
 import { Section } from '../types';
 
 /**
- * This query retrieves a Section by externalId & its associated SectionItems.
- * Returns null if externalId is not found in the database.
+ * This query retrieves all Sections & their associated SectionItems.
+ * Returns an empty array if no Sections are found.
  *
  * @param db
- * @param externalId
  * @param username
  */
-export async function getSectionWithSectionItems(
+export async function getSectionsWithSectionItems(
   db: PrismaClient,
-  externalId: string,
-): Promise<Section | null> {
-  return await db.section.findUnique({
-    where: {externalId},
+): Promise<Section[]> {
+  const sections = await db.section.findMany({
     include: {
       sectionItems: {
         include: {
@@ -29,4 +26,5 @@ export async function getSectionWithSectionItems(
       }
     }
   });
+  return sections;
 }

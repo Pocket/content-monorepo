@@ -155,9 +155,9 @@ export const GET_OPEN_GRAPH_FIELDS = gql`
   }
 `;
 
-export const GET_SECTION_WITH_SECTION_ITEMS = gql`
-  query GetSectionWithSectionItems($externalId: ID!){
-      getSectionWithSectionItems(externalId: $externalId) {
+export const GET_SECTIONS_WITH_SECTION_ITEMS = gql`
+  query GetSectionsWithSectionItems{
+      getSectionsWithSectionItems {
         ...SectionData
     }
   }
