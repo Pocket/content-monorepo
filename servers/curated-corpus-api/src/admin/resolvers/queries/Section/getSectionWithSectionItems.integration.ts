@@ -4,7 +4,7 @@ import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient, Section, SectionItem } from '.prisma/client';
 
-import { ActivitySource } from 'content-common';
+import { ActivitySource, ScheduledSurfacesEnum } from 'content-common';
 
 
 import { client } from '../../../../database/client';
@@ -32,6 +32,7 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
   let sectionItem1: SectionItem;
   let sectionItem2: SectionItem;
   let approvedItem: ApprovedItem;
+  let approvedItem2: ApprovedItem;
 
   const headers = {
     name: 'Test User',
@@ -52,13 +53,26 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
   });
 
   beforeEach(async () => {
+    // Create active Sections
     section1 = await createSectionHelper(db, {
       externalId: 'bcg-456',
       createSource: ActivitySource.ML,
+      scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      active: true
     });
     section2 = await createSectionHelper(db, {
       externalId: 'xyz-123',
       createSource: ActivitySource.ML,
+      scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      active: true
+    });
+
+    // Create in-active Section
+    await createSectionHelper(db, {
+      externalId: 'abc-123',
+      createSource: ActivitySource.ML,
+      scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      active: false
     });
   });
 
@@ -66,27 +80,30 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     await clearDb(db);
   });
 
-  it('should retrieve all Sections with no SectionItems', async () => {
+  it('should retrieve all active Sections with no SectionItems', async () => {
     const result = await request(app)
       .post(graphQLUrl)
       .set(headers)
       .send({
         query: print(GET_SECTIONS_WITH_SECTION_ITEMS),
+        variables: {
+          scheduledSurfaceGuid: "NEW_TAB_EN_US"
+        },
       });
 
     expect(result.body.errors).toBeUndefined();
     expect(result.body.data).not.toBeNull();
-
-    // There should be 2 Sections in the array
+    console.log("result.body.data?.getSectionsWithSectionItems: ", result.body.data?.getSectionsWithSectionItems);
+    // There should be 2 active Sections in the array, Section #3 is in-active
     expect(result.body.data?.getSectionsWithSectionItems.length).toEqual(2);
 
-    // Both Sections should not have any SectionItems
+    // Both active Sections should not have any SectionItems
     expect(result.body.data?.getSectionsWithSectionItems[0].sectionItems).toEqual([]);
     expect(result.body.data?.getSectionsWithSectionItems[1].sectionItems).toEqual([]);
   });
 
-  it('should retrieve all Sections with their corresponding SectionItems', async () => {
-    // Create a few SectionItems
+  it('should retrieve all active Sections with their corresponding active SectionItems', async () => {
+    // Create a few active SectionItems
     approvedItem = await createApprovedItemHelper(db, {
       title: '10 Reasons You Should Quit Social Media',
     });
@@ -94,13 +111,27 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     sectionItem1 = await createSectionItemHelper(db, {
       approvedItemId: approvedItem.id,
       sectionId: section1.id,
-      rank: 1
+      rank: 1,
+      active: true,
     });
 
     sectionItem2 = await createSectionItemHelper(db, {
       approvedItemId: approvedItem.id,
       sectionId: section2.id,
-      rank: 1
+      rank: 2,
+      active: true,
+    });
+
+    // Create an in-active SectionItem for Section #1
+    approvedItem2 = await createApprovedItemHelper(db, {
+      title: 'John Doe',
+    });
+
+    await createSectionItemHelper(db, {
+      approvedItemId: approvedItem2.id,
+      sectionId: section1.id,
+      rank: 1,
+      active: false,
     });
 
     const result = await request(app)
@@ -108,17 +139,21 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
       .set(headers)
       .send({
         query: print(GET_SECTIONS_WITH_SECTION_ITEMS),
+        variables: {
+          scheduledSurfaceGuid: "NEW_TAB_EN_US"
+        },
       });
 
     expect(result.body.errors).toBeUndefined();
     expect(result.body.data).not.toBeNull();
 
-    // All Sections should be returned
+    // All active Sections should be returned, Section #3 (abc-123) is in-active
     expect(result.body.data?.getSectionsWithSectionItems.length).toEqual(2);
     expect(result.body.data?.getSectionsWithSectionItems[0].externalId).toEqual('bcg-456');
     expect(result.body.data?.getSectionsWithSectionItems[1].externalId).toEqual('xyz-123');
 
-    // Each Section should have a SectionItem
+    // Each active Section should have an active SectionItem
+    // Section #1 has 2 SectionItems but only the active (1) SectionItem is returned
     expect(result.body.data?.getSectionsWithSectionItems[0].sectionItems.length).toEqual(1);
     expect(result.body.data?.getSectionsWithSectionItems[0].sectionItems[0].externalId).toEqual(sectionItem1.externalId);
 
@@ -135,6 +170,9 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
       .set(headers)
       .send({
         query: print(GET_SECTIONS_WITH_SECTION_ITEMS),
+        variables: {
+          scheduledSurfaceGuid: "NEW_TAB_EN_US"
+        },
       });
 
     expect(result.body.errors).toBeUndefined();

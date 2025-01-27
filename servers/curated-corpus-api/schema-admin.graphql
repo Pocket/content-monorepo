@@ -1257,9 +1257,9 @@ type Query {
   getOpenGraphFields(url: Url!): OpenGraphFields
 
   """
-  Retrieves a list of Sections with their corresponding SectionItems.
+  Retrieves a list of active Sections with their corresponding active SectionItems for a scheduled surface.
   """
-  getSectionsWithSectionItems: [Section!]!
+  getSectionsWithSectionItems(scheduledSurfaceGuid: ID!): [Section!]!
 }
 
 type Mutation {

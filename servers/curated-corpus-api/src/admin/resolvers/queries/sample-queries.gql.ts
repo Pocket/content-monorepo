@@ -156,8 +156,8 @@ export const GET_OPEN_GRAPH_FIELDS = gql`
 `;
 
 export const GET_SECTIONS_WITH_SECTION_ITEMS = gql`
-  query GetSectionsWithSectionItems{
-      getSectionsWithSectionItems {
+  query GetSectionsWithSectionItems($scheduledSurfaceGuid: ID!){
+      getSectionsWithSectionItems(scheduledSurfaceGuid: $scheduledSurfaceGuid) {
         ...SectionData
     }
   }

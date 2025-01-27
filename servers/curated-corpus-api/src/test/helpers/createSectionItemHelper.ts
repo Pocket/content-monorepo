@@ -3,7 +3,8 @@ import { PrismaClient, SectionItem } from '.prisma/client';
 export interface CreateSectionItemHelperInput {
   approvedItemId: number,
   sectionId: number,
-  rank?: number
+  rank?: number,
+  active?: boolean
 }
 
 /**
