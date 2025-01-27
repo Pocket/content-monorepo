@@ -1,4 +1,7 @@
-import { AuthenticationError, UserInputError } from '@pocket-tools/apollo-utils';
+import {
+  AuthenticationError,
+  UserInputError,
+} from '@pocket-tools/apollo-utils';
 
 import {
   createSection as dbCreateSection,
@@ -27,9 +30,9 @@ export async function createOrUpdateSection(
   }
 
   // Make sure createSource == ML for now for this mutation
-  if(data.createSource !== ActivitySource.ML) {
+  if (data.createSource !== ActivitySource.ML) {
     throw new UserInputError(
-      "Cannot create a Section: createSource must be ML"
+      'Cannot create a Section: createSource must be ML',
     );
   }
 
@@ -40,7 +43,7 @@ export async function createOrUpdateSection(
 
   // if the Section exists, update it
   if (section) {
-    return await dbUpdateSection(context.db, data);
+    return await dbUpdateSection(context.db, data, section.id);
   }
 
   return await dbCreateSection(context.db, data);
