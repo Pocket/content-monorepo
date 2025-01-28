@@ -1,0 +1,99 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+# For more information on configuring this file:
+# https://mozilla.github.io/glean/book/reference/yaml/metrics.html
+
+---
+$schema: moz://mozilla.org/schemas/glean/metrics/2-0-0
+
+curated_corpus:
+  reviewed_corpus_item:
+    type: event
+    description: >
+      Recorded when a curated corpus item is reviewed. This is converted from the Snowplow
+      "reviewed_corpus_item" event. Any array or object fields are JSON-encoded into strings.
+    bugs:
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=000000
+    data_reviews:
+      - https://bugzilla.mozilla.org/show_bug.cgi?id=000000
+    notification_emails:
+      - your-team@example.com
+    expires: never
+    # Glean events always require a 'ping' lifetime
+    send_in_pings:
+      - events
+    extra_keys:
+      object_version:
+        type: string
+        description: "Indicates old/new version."
+      approved_corpus_item_external_id:
+        type: string
+        description: "A guid that identifies the reviewed_corpus_item’s approved_corpus_item_external_id in backend systems, sometimes referred to as an approved corpus item’s external_id."
+      rejected_corpus_item_external_id:
+        type: string
+        description: "A guid that identifies the reviewed_corpus_item’s rejected_corpus_item_external_id in backend systems, sometimes referred to as a rejected corpus item’s external_id."
+      prospect_id:
+        type: string
+        description: "Identifier for the curation prospect."
+      url:
+        type: string
+        description: "URL of the reviewed corpus item."
+      loaded_from:
+        type: string
+        description: "Backend source for the item (PROSPECT, MANUAL, etc.)."
+      corpus_review_status:
+        type: string
+        description: "Decision by the curator on the item’s validity (recommendation/corpus/rejected)."
+      rejection_reasons_json:
+        type: string
+        description: "JSON-encoded array of rejection reasons."
+      action_screen:
+        type: string
+        description: "UI screen where action took place (PROSPECTING, SCHEDULE, CORPUS) or null."
+      title:
+        type: string
+        description: "Title of the reviewed corpus item."
+      excerpt:
+        type: string
+        description: "Excerpt for the reviewed corpus item."
+      image_url:
+        type: string
+        description: "URL of the main image."
+      language:
+        type: string
+        description: "Language code of the item."
+      topic:
+        type: string
+        description: "Topic of the item."
+      is_collection:
+        type: boolean
+        description: "Whether this item is a collection."
+      is_syndicated:
+        type: boolean
+        description: "Whether the item is syndicated."
+      is_time_sensitive:
+        type: boolean
+        description: "Whether the item is time-sensitive (e.g. news)."
+      created_at:
+        type: string
+        description: "Unix timestamp (in seconds) for item creation."
+      created_by:
+        type: string
+        description: "Curator who created the item."
+      updated_at:
+        type: string
+        description: "Unix timestamp (in seconds) for last item update."
+      updated_by:
+        type: string
+        description: "Curator who last updated the item."
+      authors_json:
+        type: string
+        description: "JSON-encoded list of authors."
+      publisher:
+        type: string
+        description: "Online publication that published this story."
+      experimental_json:
+        type: string
+        description: "Experimental metadata properties associated with the reviewed Corpus Item."
