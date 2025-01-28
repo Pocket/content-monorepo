@@ -122,8 +122,6 @@ export type CreateSectionInput = {
   active: boolean;
 }
 
-export type Section = SectionModel;
-
 export type CreateSectionItemInput = {
   sectionId: number;
   approvedItemExternalId: string;
@@ -136,6 +134,10 @@ export type ApprovedItem = ApprovedItemModel & {
 
 export type SectionItem = SectionItemModel & {
   approvedItem: ApprovedItem;
+};
+
+export type Section = SectionModel & {
+  sectionItems?: SectionItem[];
 };
 
 /**

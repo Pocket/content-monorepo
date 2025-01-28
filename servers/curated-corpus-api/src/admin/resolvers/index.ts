@@ -29,6 +29,7 @@ import {
 } from '../../database/queries';
 import { getOpenGraphFields } from './queries/OpenGraphFields';
 import { hasTrustedDomain } from './queries/ApprovedItem/hasTrustedDomain';
+import { getSectionsWithSectionItems } from './queries/Section';
 import { createOrUpdateSection } from './mutations/Section'
 import { createSectionItem } from './mutations/SectionItem';
 
@@ -103,6 +104,7 @@ export const resolvers = {
     getApprovedCorpusItemByUrl: getApprovedItemByUrl,
     getScheduledSurfacesForUser: getScheduledSurfacesForUser,
     getOpenGraphFields: getOpenGraphFields,
+    getSectionsWithSectionItems: getSectionsWithSectionItems,
   },
   // Mutations that we need in the admin interface
   Mutation: {
