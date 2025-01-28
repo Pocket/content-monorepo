@@ -149,7 +149,7 @@ export enum ProspectType {
   QA_NBA = 'QA_NBA',
   QA_NFL = 'QA_NFL',
   QA_NHL = 'QA_NHL',
-  QA_EPL = 'QA_EPL' // placeholder for now
+  QA_SOCCER = 'QA_SOCCER' // placeholder for now
 }
 
 export enum ProspectReviewStatus {
@@ -271,7 +271,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.QA_NBA,
       ProspectType.QA_NFL,
       ProspectType.QA_NHL,
-      ProspectType.QA_EPL
+      ProspectType.QA_SOCCER
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENUS,
   },
