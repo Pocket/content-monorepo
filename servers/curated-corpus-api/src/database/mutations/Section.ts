@@ -31,9 +31,14 @@ export async function createSection(
     active,
   };
 
-  return await db.section.create({
+  const newSection = await db.section.create({
     data: createData,
   });
+
+  return {
+    ...newSection,
+    sectionItems: []
+  }
 }
 
 /**
@@ -80,8 +85,13 @@ export async function updateSection(
   }
 
   // Update the existing Section
-  return await db.section.update({
+  const updatedSection = await db.section.update({
     where: { externalId: externalId },
     data: sectionUpdateData,
   });
+  
+  return {
+    ...updatedSection,
+    sectionItems: []
+  }
 }

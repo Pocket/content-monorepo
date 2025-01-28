@@ -574,8 +574,9 @@ type Section {
   active: Boolean!
   """
   An array of active and in-active SectionItems in a Section.
+  This field returns an empty array when creating a new Section or updating a Section.
   """
-  sectionItems: [SectionItem]
+  sectionItems: [SectionItem!]!
   """
   A Unix timestamp of when the Section was created.
   """
