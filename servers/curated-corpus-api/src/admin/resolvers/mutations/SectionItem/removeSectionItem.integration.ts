@@ -127,4 +127,30 @@ describe('mutations: SectionItem (removeSectionItem)', () => {
       `Error - Not Found: Cannot remove a section item: Section item with id "fake-external-id" does not exist.`,
     );
   });
+
+  it('should fail to remove a SectionItem if SectionItem is already in-active', async () => {
+    const updatedSectionItem = await db.sectionItem.update({
+      where: {externalId: sectionItem.externalId},
+      data: {
+        active: false
+      }
+    });
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(REMOVE_SECTION_ITEM),
+        variables: { externalId: updatedSectionItem.externalId },
+      });
+
+    // we should have a NOT_FOUND error
+    expect(result.body.errors).not.toBeUndefined();
+    expect(result.body.errors?.[0].extensions?.code).toEqual('NOT_FOUND');
+
+    // error message should reference the updated in-active SectionItem externalId
+    expect(result.body.errors?.[0].message).toContain(
+      `Error - Not Found: Cannot remove a section item: Section item with id "${updatedSectionItem.externalId}" does not exist.`,
+    );
+  });
 });

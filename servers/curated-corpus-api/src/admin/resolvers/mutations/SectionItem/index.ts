@@ -62,9 +62,9 @@ export async function removeSectionItem(
   args,
   context: IAdminContext,
 ): Promise<SectionItem> {
-  // First check if the SectionItem exists
+  // First check if the SectionItem exists & check if it is active
   const sectionItemToRemove =  await context.db.sectionItem.findUnique({
-    where: { externalId: args.externalId}
+    where: { externalId: args.externalId, active: true}
   });
 
   if(sectionItemToRemove) {

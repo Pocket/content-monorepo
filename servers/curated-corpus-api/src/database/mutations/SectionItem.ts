@@ -77,7 +77,8 @@ export async function removeSectionItem(
 
   return await db.sectionItem.update({
     where: {
-      externalId
+      externalId,
+      active: true
     },
     data: removeSectionItemData,
     include: {
