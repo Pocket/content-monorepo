@@ -31,10 +31,10 @@ export interface ScheduledCorpusItem {
   authors?: string[];
 }
 
-export const allowedScheduledSurfaces: string[] = ['NEW_TAB_EN_US', 'NEW_TAB_DE_DE'];
-
-export const pocketImageCache =
-  'https://pocket-image-cache.com/x/filters:format(jpeg):quality(100):no_upscale():strip_exif()/';
+export const allowedScheduledSurfaces: string[] = [
+  'NEW_TAB_EN_US',
+  'NEW_TAB_DE_DE',
+];
 
 export type ScheduledCorpusCandidateFeatures = {
   rank: number & tags.Type<'int64'>; // rank is integer in Snowplow schema
