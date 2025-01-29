@@ -122,3 +122,12 @@ export const CREATE_SECTION_ITEM = gql`
   }
   ${SectionItemData}
 `;
+
+export const REMOVE_SECTION_ITEM = gql`
+    mutation removeSectionItem($externalId: String!) {
+        removeSectionItem(externalId: $externalId) {
+            ...SectionItemData
+        }
+    }
+    ${SectionItemData}
+`;

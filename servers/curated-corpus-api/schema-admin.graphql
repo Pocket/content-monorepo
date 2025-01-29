@@ -1356,6 +1356,11 @@ type Mutation {
   Creates a SectionItem within a Section.
   """
   createSectionItem(data: CreateSectionItemInput!): SectionItem!
+
+  """
+  Removes an active SectionItem from a Section.
+  """
+  removeSectionItem(externalId: String!): SectionItem!
 }
 
 """

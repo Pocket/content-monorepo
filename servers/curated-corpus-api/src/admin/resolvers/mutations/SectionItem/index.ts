@@ -1,12 +1,13 @@
 import { AuthenticationError, NotFoundError } from '@pocket-tools/apollo-utils';
 
-import { createSectionItem as dbCreateSectionItem } from '../../../../database/mutations';
+import { createSectionItem as dbCreateSectionItem, 
+         removeSectionItem as dbRemoveSectionItem, } from '../../../../database/mutations';
 import { SectionItem } from '../../../../database/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
 
 /**
- * Adds a SectionItem to a Section.
+ * Creates a SectionItem & adds it to a Section.
  *
  * @param parent
  * @param data
@@ -47,4 +48,35 @@ export async function createSectionItem(
   // on the best path forward for our data pipeline.
 
   return sectionItem;
+}
+
+/**
+ * Removes an active SectionItem from a Section.
+ *
+ * @param parent
+ * @param args
+ * @param context
+ */
+export async function removeSectionItem(
+  parent,
+  args,
+  context: IAdminContext,
+): Promise<SectionItem> {
+  // First check if the SectionItem exists & check if it is active
+  const sectionItemToRemove =  await context.db.sectionItem.findUnique({
+    where: { externalId: args.externalId, active: true}
+  });
+
+  if(sectionItemToRemove) {
+    // Check if the user can perform this mutation
+    if (!context.authenticatedUser.canWriteToCorpus()) {
+      throw new AuthenticationError(ACCESS_DENIED_ERROR);
+    }
+    
+    return await dbRemoveSectionItem(context.db, args.externalId);
+  }
+  // Check if SectionItem exists
+  else {
+    throw new NotFoundError(`Cannot remove a section item: Section item with id "${args.externalId}" does not exist.`)
+  }
 }
