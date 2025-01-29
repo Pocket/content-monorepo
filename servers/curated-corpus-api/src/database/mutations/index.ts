@@ -11,4 +11,4 @@ export {
 } from './ScheduledItem';
 export { createScheduleReview } from './ScheduleReview';
 export { createSection, updateSection } from './Section';
-export { createSectionItem } from './SectionItem';
+export { createSectionItem, removeSectionItem } from './SectionItem';

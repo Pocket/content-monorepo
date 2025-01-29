@@ -31,7 +31,7 @@ import { getOpenGraphFields } from './queries/OpenGraphFields';
 import { hasTrustedDomain } from './queries/ApprovedItem/hasTrustedDomain';
 import { getSectionsWithSectionItems } from './queries/Section';
 import { createOrUpdateSection } from './mutations/Section'
-import { createSectionItem } from './mutations/SectionItem';
+import { createSectionItem, removeSectionItem } from './mutations/SectionItem';
 
 export const resolvers = {
   // The custom scalars from GraphQL-Scalars that we find useful.
@@ -120,5 +120,6 @@ export const resolvers = {
     createScheduleReview: createScheduleReview,
     createOrUpdateSection: createOrUpdateSection,
     createSectionItem: createSectionItem,
+    removeSectionItem: removeSectionItem
   },
 };
