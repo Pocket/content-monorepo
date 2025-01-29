@@ -1,5 +1,5 @@
 import { gql } from 'graphql-tag';
-import { RejectedItemData } from '../../../shared/fragments.gql';
+import { RejectedItemData, SectionData } from '../../../shared/fragments.gql';
 import { AdminCuratedItemData, AdminScheduledItemData } from '../fragments.gql';
 
 /**
@@ -153,4 +153,13 @@ export const GET_OPEN_GRAPH_FIELDS = gql`
       description
     }
   }
+`;
+
+export const GET_SECTIONS_WITH_SECTION_ITEMS = gql`
+  query GetSectionsWithSectionItems($scheduledSurfaceGuid: ID!){
+      getSectionsWithSectionItems(scheduledSurfaceGuid: $scheduledSurfaceGuid) {
+        ...SectionData
+    }
+  }
+  ${SectionData}
 `;

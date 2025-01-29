@@ -60,19 +60,6 @@ export const ScheduledItemData = gql`
   ${CuratedItemData}
 `;
 
-export const SectionData = gql`
-  fragment SectionData on Section {
-      externalId
-      title
-      scheduledSurfaceGuid
-      sort
-      createSource
-      active
-      createdAt
-      updatedAt
-  }
-`;
-
 export const SectionItemData = gql`
   fragment SectionItemData on SectionItem {
     externalId
@@ -84,4 +71,21 @@ export const SectionItemData = gql`
     updatedAt
   }
   ${CuratedItemData}
+`;
+
+export const SectionData = gql`
+    fragment SectionData on Section {
+        externalId
+        title
+        scheduledSurfaceGuid
+        sort
+        createSource
+        active
+        sectionItems {
+            ...SectionItemData
+        }
+        createdAt
+        updatedAt
+    }
+    ${SectionItemData}
 `;
