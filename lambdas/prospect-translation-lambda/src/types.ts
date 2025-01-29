@@ -27,8 +27,15 @@ export interface SqsProspect {
 // source for all prospect types.
 export const ProspectTypesWithMlUrlMetadata: ProspectType[] = [
   ProspectType.QA_ENTERTAINMENT,
-  ProspectType.QA_GAMING,
-  ProspectType.QA_HISTORY,
-  ProspectType.QA_RELATIONSHIPS,
   ProspectType.QA_SPORTS,
+  ProspectType.QA_MUSIC,
+  ProspectType.QA_MOVIES,
+  ProspectType.QA_BOOKS,
+  ProspectType.QA_CELEBRITY,
+  ProspectType.QA_TELEVISION,
+  ProspectType.QA_MLB,
+  ProspectType.QA_NBA,
+  ProspectType.QA_NFL,
+  ProspectType.QA_NHL,
+  ProspectType.QA_SOCCER,
 ];
