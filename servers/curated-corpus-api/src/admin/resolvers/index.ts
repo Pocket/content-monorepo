@@ -1,5 +1,5 @@
 import { DateResolver, NonNegativeIntResolver } from 'graphql-scalars';
-import { UnixTimestampResolver } from './fields/UnixTimestamp';
+import { UnixTimestampResolver } from '../../shared/resolvers/fields/UnixTimestamp';
 import {
   getApprovedItems,
   getApprovedItemByExternalId,

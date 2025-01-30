@@ -170,20 +170,6 @@ enum CorpusItemSource {
 }
 
 """
-The source of en entity
-"""
-enum ActivitySource {
-  """
-  Manually entered through the curation admin tool
-  """
-  MANUAL
-  """
-  Created by ML
-  """
-  ML
-}
-
-"""
 The source of the Scheduled item
 """
 enum ScheduledItemSource {
@@ -554,46 +540,6 @@ type ScheduleReview {
   reviewedAt: Date!
 }
 
-type Section {
-  """
-  An alternative primary key in UUID format.
-  """
-  externalId: ID!
-  """
-  The title of the Section displayed to the users.
-  """
-  title: String!
-  """
-  The GUID of the Scheduled Surface. Example: 'NEW_TAB_EN_US'.
-  """
-  scheduledSurfaceGuid: ID!
-  """
-  Controls the display order of Sections.
-  """
-  sort: Int
-  """
-  The source which created the Section.
-  """
-  createSource: ActivitySource!
-  """
-  Indicates whether or not a Section is available for display.
-  """
-  active: Boolean!
-  """
-  An array of active and in-active SectionItems in a Section.
-  This field returns an empty array when creating a new Section or updating a Section.
-  """
-  sectionItems: [SectionItem!]!
-  """
-  A Unix timestamp of when the Section was created.
-  """
-  createdAt: Int!
-  """
-  A Unix timestamp of when the Section was last updated.
-  """
-  updatedAt: Int!
-}
-
 """
 Input data for creating a Section
 """
@@ -625,32 +571,11 @@ input CreateOrUpdateSectionInput {
 
 }
 
+extend type SectionItem {
 """
-An ApprovedItem belonging to a Section
+The associated Approved Corpus Item.
 """
-type SectionItem {
-  """
-  An alternative primary key in UUID format that is generated on creation.
-  """
-  externalId: ID!
-  """
-  The associated Approved Item.
-  """
-  approvedItem: ApprovedCorpusItem!
-  """
-  The initial rank of the SectionItem in relation to its siblings. Used as a
-  fallback in Merino when there is no engagement/click data available. May only apply to
-  ML-generated SectionItems.
-  """
-  rank: Int
-  """
-  A Unix timestamp of when the entity was created.
-  """
-  createdAt: Int!
-  """
-  A Unix timestamp of when the entity was last updated.
-  """
-  updatedAt: Int!
+approvedItem: ApprovedCorpusItem!
 }
 
 """

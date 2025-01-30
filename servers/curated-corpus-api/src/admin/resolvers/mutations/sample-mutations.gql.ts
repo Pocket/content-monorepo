@@ -1,13 +1,13 @@
 import { gql } from 'graphql-tag';
 import {
   RejectedItemData,
-  SectionData,
-  SectionItemData,
 } from '../../../shared/fragments.gql';
 import {
   AdminCuratedItemData,
   AdminScheduledItemData,
   AdminScheduleReviewData,
+  AdminSectionData,
+  AdminSectionItemData,
 } from '../fragments.gql';
 
 /**
@@ -108,26 +108,26 @@ export const CREATE_SCHEDULE_REVIEW = gql`
 export const CREATE_OR_UPDATE_SECTION = gql`
     mutation createOrUpdateSection($data: CreateOrUpdateSectionInput!) {
         createOrUpdateSection(data: $data) {
-            ...SectionData
+            ...AdminSectionData
         }
     }
-    ${SectionData}
+    ${AdminSectionData}
 `;
 
 export const CREATE_SECTION_ITEM = gql`
   mutation createSectionItem($data: CreateSectionItemInput!) {
     createSectionItem(data: $data) {
-      ...SectionItemData
+      ...AdminSectionItemData
     }
   }
-  ${SectionItemData}
+  ${AdminSectionItemData}
 `;
 
 export const REMOVE_SECTION_ITEM = gql`
     mutation removeSectionItem($externalId: String!) {
         removeSectionItem(externalId: $externalId) {
-            ...SectionItemData
+            ...AdminSectionItemData
         }
     }
-    ${SectionItemData}
+    ${AdminSectionItemData}
 `;

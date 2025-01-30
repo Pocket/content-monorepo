@@ -1,4 +1,4 @@
-import { CuratedItemData, ScheduledItemData } from '../../shared/fragments.gql';
+import { BaseSectionData, BaseSectionItemData, CuratedItemData, ScheduledItemData } from '../../shared/fragments.gql';
 import { gql } from 'graphql-tag';
 
 export const AdminCuratedItemData = gql`
@@ -27,4 +27,26 @@ export const AdminScheduleReviewData = gql`
     reviewedBy
     reviewedAt
   }
+`;
+
+export const AdminSectionItemData = gql`
+    fragment AdminSectionItemData on SectionItem {
+        ...BaseSectionItemData
+        approvedItem {
+            ...CuratedItemData
+        }
+    }
+    ${BaseSectionItemData}
+    ${CuratedItemData}
+`;
+
+export const AdminSectionData = gql`
+    fragment AdminSectionData on Section {
+        ...BaseSectionData
+        sectionItems {
+            ...AdminSectionItemData
+        }
+    }
+    ${BaseSectionData}
+    ${AdminSectionItemData}
 `;

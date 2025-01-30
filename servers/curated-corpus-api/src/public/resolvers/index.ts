@@ -1,7 +1,9 @@
 import { DateResolver } from 'graphql-scalars';
 import { getScheduledSurface } from './queries/ScheduledSurface';
 import { getItemsForScheduledSurface } from './queries/ScheduledSurfaceItem';
+import { getSectionsWithSectionItems } from './queries/Section';
 import { IPublicContext } from '../context';
+import { UnixTimestampResolver } from '../../shared/resolvers/fields/UnixTimestamp';
 
 export const resolvers = {
   // The Date resolver enforces the date to be in the YYYY-MM-DD format.
@@ -34,6 +36,17 @@ export const resolvers = {
       return corpusItem;
     },
   },
+  Section: {
+    createdAt: UnixTimestampResolver,
+    updatedAt: UnixTimestampResolver,
+  },
+  SectionItem: {
+    corpusItem: async (item) => {
+      return item.approvedItem;
+    },
+    createdAt: UnixTimestampResolver,
+    updatedAt: UnixTimestampResolver,
+  },
   // Allow the `Item` to resolve the corpus item
   Item: {
     corpusItem: async (item, args, context: IPublicContext) => {
@@ -59,5 +72,6 @@ export const resolvers = {
   Query: {
     // Gets the metadata for a Scheduled Surface (for example, New Tab).
     scheduledSurface: getScheduledSurface,
+    getSectionsWithSectionItems: getSectionsWithSectionItems,
   },
 };
