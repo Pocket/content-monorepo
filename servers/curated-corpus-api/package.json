@@ -4,9 +4,10 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "build": "rm -rf dist && tsc && npm run build-schema-admin && npm run build-schema-public",
+    "build": "rm -rf dist && tsc && npm run build-schema-admin && npm run build-schema-public && npm run build-glean",
     "build-schema-admin": "node dist/admin/buildSchema.js",
     "build-schema-public": "node dist/public/buildSchema.js",
+    "build-glean": "glean translate src/events/glean/backend-metrics.yaml -f typescript_server --option module_spec=es -o ./src/events/glean/generated",
     "watch": "tsc -w & nodemon",
     "start": "npm run migrate:prisma-deploy && node dist/main.js",
     "dev": "npm run migrate:prisma-deploy && npm run build && npm run watch",
@@ -38,6 +39,7 @@
     "@aws-sdk/client-s3": "3.529.1",
     "@aws-sdk/lib-storage": "3.529.1",
     "@devoxa/prisma-relay-cursor-connection": "3.1.0",
+    "@mozilla/glean": "^5.0.3",
     "@pocket-tools/apollo-utils": "3.5.0",
     "@pocket-tools/feature-flags-client": "1.0.0",
     "@pocket-tools/sentry": "1.0.0",
@@ -59,6 +61,7 @@
     "luxon": "3.4.4",
     "metadata-scraper": "^0.2.61",
     "mime-types": "2.1.35",
+    "mozlog": "^3.0.2",
     "prisma": "5.22.0",
     "tslib": "2.7.0",
     "uuid": "9.0.1"
