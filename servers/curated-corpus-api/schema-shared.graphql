@@ -97,14 +97,6 @@ type Section {
   This field returns an empty array when creating a new Section or updating a Section.
   """
   sectionItems: [SectionItem!]!
-  """
-  A Unix timestamp of when the Section was created.
-  """
-  createdAt: Int!
-  """
-  A Unix timestamp of when the Section was last updated.
-  """
-  updatedAt: Int!
 }
 
 """
@@ -121,14 +113,6 @@ type SectionItem {
   ML-generated SectionItems.
   """
   rank: Int
-  """
-  A Unix timestamp of when the entity was created.
-  """
-  createdAt: Int!
-  """
-  A Unix timestamp of when the entity was last updated.
-  """
-  updatedAt: Int!
 }
 
 """

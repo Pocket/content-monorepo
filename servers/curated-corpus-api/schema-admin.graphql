@@ -571,11 +571,30 @@ input CreateOrUpdateSectionInput {
 
 }
 
+extend type Section {
+  """
+  A Unix timestamp of when the Section was created.
+  """
+  createdAt: Int!
+  """
+  A Unix timestamp of when the Section was last updated.
+  """
+  updatedAt: Int!
+}
+
 extend type SectionItem {
-"""
-The associated Approved Corpus Item.
-"""
-approvedItem: ApprovedCorpusItem!
+  """
+  The associated Approved Corpus Item.
+  """
+  approvedItem: ApprovedCorpusItem!
+  """
+  A Unix timestamp of when the entity was created.
+  """
+  createdAt: Int!
+  """
+  A Unix timestamp of when the entity was last updated.
+  """
+  updatedAt: Int!
 }
 
 """

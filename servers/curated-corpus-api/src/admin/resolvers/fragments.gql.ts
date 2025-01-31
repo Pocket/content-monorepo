@@ -35,6 +35,8 @@ export const AdminSectionItemData = gql`
         approvedItem {
             ...CuratedItemData
         }
+        createdAt
+        updatedAt
     }
     ${BaseSectionItemData}
     ${CuratedItemData}
@@ -46,6 +48,8 @@ export const AdminSectionData = gql`
         sectionItems {
             ...AdminSectionItemData
         }
+        createdAt
+        updatedAt
     }
     ${BaseSectionData}
     ${AdminSectionItemData}

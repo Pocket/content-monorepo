@@ -17,8 +17,7 @@ import {
   createApprovedItemHelper,
 } from '../../../test/helpers';
 
-import { GET_SECTIONS_WITH_SECTION_ITEMS } from './sample-queries.gql';
-import { MozillaAccessGroup } from 'content-common';
+import { GET_SECTIONS } from './sample-queries.gql';
 import { startServer } from '../../../express';
 import { IPublicContext } from '../../context';
 
@@ -83,7 +82,7 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     const result = await request(app)
       .post(graphQLUrl)
       .send({
-        query: print(GET_SECTIONS_WITH_SECTION_ITEMS),
+        query: print(GET_SECTIONS),
         variables: {
           scheduledSurfaceGuid: "NEW_TAB_EN_US"
         },
@@ -91,13 +90,12 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
 
     expect(result.body.errors).toBeUndefined();
     expect(result.body.data).not.toBeNull();
-    console.log("result.body.data?.getSectionsWithSectionItems: ", result.body.data?.getSectionsWithSectionItems);
     // There should be 2 active Sections in the array, Section #3 is in-active
-    expect(result.body.data?.getSectionsWithSectionItems.length).toEqual(2);
+    expect(result.body.data?.getSections.length).toEqual(2);
 
     // Both active Sections should not have any SectionItems
-    expect(result.body.data?.getSectionsWithSectionItems[0].sectionItems).toEqual([]);
-    expect(result.body.data?.getSectionsWithSectionItems[1].sectionItems).toEqual([]);
+    expect(result.body.data?.getSections[0].sectionItems).toEqual([]);
+    expect(result.body.data?.getSections[1].sectionItems).toEqual([]);
   });
 
   it('should retrieve all active Sections with their corresponding active SectionItems', async () => {
@@ -135,7 +133,7 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     const result = await request(app)
       .post(graphQLUrl)
       .send({
-        query: print(GET_SECTIONS_WITH_SECTION_ITEMS),
+        query: print(GET_SECTIONS),
         variables: {
           scheduledSurfaceGuid: "NEW_TAB_EN_US"
         },
@@ -145,17 +143,17 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     expect(result.body.data).not.toBeNull();
 
     // All active Sections should be returned, Section #3 (abc-123) is in-active
-    expect(result.body.data?.getSectionsWithSectionItems.length).toEqual(2);
-    expect(result.body.data?.getSectionsWithSectionItems[0].externalId).toEqual('bcg-456');
-    expect(result.body.data?.getSectionsWithSectionItems[1].externalId).toEqual('xyz-123');
+    expect(result.body.data?.getSections.length).toEqual(2);
+    expect(result.body.data?.getSections[0].externalId).toEqual('bcg-456');
+    expect(result.body.data?.getSections[1].externalId).toEqual('xyz-123');
 
     // Each active Section should have an active SectionItem
     // Section #1 has 2 SectionItems but only the active (1) SectionItem is returned
-    expect(result.body.data?.getSectionsWithSectionItems[0].sectionItems.length).toEqual(1);
-    expect(result.body.data?.getSectionsWithSectionItems[0].sectionItems[0].externalId).toEqual(sectionItem1.externalId);
+    expect(result.body.data?.getSections[0].sectionItems.length).toEqual(1);
+    expect(result.body.data?.getSections[0].sectionItems[0].externalId).toEqual(sectionItem1.externalId);
 
-    expect(result.body.data?.getSectionsWithSectionItems[1].sectionItems.length).toEqual(1);
-    expect(result.body.data?.getSectionsWithSectionItems[1].sectionItems[0].externalId).toEqual(sectionItem2.externalId);
+    expect(result.body.data?.getSections[1].sectionItems.length).toEqual(1);
+    expect(result.body.data?.getSections[1].sectionItems[0].externalId).toEqual(sectionItem2.externalId);
   });
 
   it('should return an empty array if no Sections found', async () => {
@@ -165,13 +163,13 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     const result = await request(app)
       .post(graphQLUrl)
       .send({
-        query: print(GET_SECTIONS_WITH_SECTION_ITEMS),
+        query: print(GET_SECTIONS),
         variables: {
           scheduledSurfaceGuid: "NEW_TAB_EN_US"
         },
       });
 
     expect(result.body.errors).toBeUndefined();
-    expect(result.body.data?.getSectionsWithSectionItems).toEqual([]);
+    expect(result.body.data?.getSections).toEqual([]);
   });
 });

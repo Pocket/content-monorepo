@@ -10,7 +10,7 @@ import { Section } from '../../../database/types';
  * @param parent
  * @param args
  */
-export async function getSectionsWithSectionItems(
+export async function getSections(
   parent,
   args,
   { db }

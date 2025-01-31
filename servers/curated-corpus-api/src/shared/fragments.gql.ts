@@ -83,8 +83,6 @@ export const BaseSectionItemData = gql`
     fragment BaseSectionItemData on SectionItem {
         externalId
         rank
-        createdAt
-        updatedAt
     }
 `;
 
@@ -96,7 +94,5 @@ export const BaseSectionData = gql`
         sort
         createSource
         active
-        createdAt
-        updatedAt
     }
 `;
