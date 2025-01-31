@@ -149,7 +149,7 @@ type Query {
   """
   Retrieves a list of active Sections with their corresponding active SectionItems for a scheduled surface.
   """
-  getSections(scheduledSurfaceGuid: ID!): [Section!]!
+  getSections(filters: SectionFilters!): [Section!]!
 }
 
 type SavedItem @key(fields: "url") {

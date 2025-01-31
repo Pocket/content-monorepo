@@ -84,7 +84,9 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
       .send({
         query: print(GET_SECTIONS),
         variables: {
-          scheduledSurfaceGuid: "NEW_TAB_EN_US"
+          filters: {
+            scheduledSurfaceGuid: "NEW_TAB_EN_US"
+          }
         },
       });
 
@@ -135,7 +137,9 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
       .send({
         query: print(GET_SECTIONS),
         variables: {
-          scheduledSurfaceGuid: "NEW_TAB_EN_US"
+          filters: {
+            scheduledSurfaceGuid: "NEW_TAB_EN_US"
+          }
         },
       });
 
@@ -165,7 +169,9 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
       .send({
         query: print(GET_SECTIONS),
         variables: {
-          scheduledSurfaceGuid: "NEW_TAB_EN_US"
+          filters: {
+            scheduledSurfaceGuid: "NEW_TAB_EN_US"
+          }
         },
       });
 

@@ -15,5 +15,6 @@ export async function getSections(
   args,
   { db }
 ): Promise<Section[]> {
-  return await dbGetSectionsWithSectionItems(db, args.scheduledSurfaceGuid);
+  const { filters } = args;
+  return await dbGetSectionsWithSectionItems(db, filters.scheduledSurfaceGuid);
 }

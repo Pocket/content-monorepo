@@ -116,6 +116,16 @@ type SectionItem {
 }
 
 """
+Available fields for filtering Sections.
+"""
+input SectionFilters {
+  """
+  Required filter to retrieve Sections & SectionItems for a Scheduled Surface
+  """
+  scheduledSurfaceGuid: ID!
+}
+
+"""
 Information about pagination in a connection.
 """
 type PageInfo @shareable {

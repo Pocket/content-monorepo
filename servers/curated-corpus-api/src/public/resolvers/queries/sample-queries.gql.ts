@@ -45,8 +45,8 @@ export const GET_SCHEDULED_SURFACE_WITH_ITEMS = gql`
 `;
 
 export const GET_SECTIONS = gql`
-    query GetSections($scheduledSurfaceGuid: ID!){
-        getSections(scheduledSurfaceGuid: $scheduledSurfaceGuid) {
+    query GetSections($filters: SectionFilters!){
+        getSections(filters: $filters) {
             ...PublicSectionData
         }
     }
