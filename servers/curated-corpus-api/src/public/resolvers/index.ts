@@ -36,7 +36,7 @@ export const resolvers = {
     },
   },
   SectionItem: {
-    corpusItem: async (item) => {
+    corpusItem: (item) => {
       return item.approvedItem;
     }
   },
