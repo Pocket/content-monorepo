@@ -127,6 +127,13 @@ type ScheduledSurface {
   items(date: Date!): [ScheduledSurfaceItem!]!
 }
 
+extend type SectionItem {
+  """
+  The associated Corpus Item.
+  """
+  corpusItem: CorpusItem!
+}
+
 """
 Union type to reference a surface
 This is a future improvement, not needed now.
@@ -139,6 +146,10 @@ type Query {
   This is a future improvement, not needed now.
   """
   surface(id: ID!): Surface!
+  """
+  Retrieves a list of active Sections with their corresponding active SectionItems for a scheduled surface.
+  """
+  getSections(filters: SectionFilters!): [Section!]!
 }
 
 type SavedItem @key(fields: "url") {

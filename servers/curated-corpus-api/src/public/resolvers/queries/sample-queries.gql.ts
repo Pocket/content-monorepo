@@ -1,4 +1,5 @@
 import { gql } from 'graphql-tag';
+import { PublicSectionData } from '../fragments.gql';
 
 export const GET_SCHEDULED_SURFACE = gql`
   query scheduledSurface($id: ID!) {
@@ -41,6 +42,15 @@ export const GET_SCHEDULED_SURFACE_WITH_ITEMS = gql`
       }
     }
   }
+`;
+
+export const GET_SECTIONS = gql`
+    query GetSections($filters: SectionFilters!){
+        getSections(filters: $filters) {
+            ...PublicSectionData
+        }
+    }
+    ${PublicSectionData}
 `;
 
 export const CORPUS_ITEM_REFERENCE_RESOLVER = gql`

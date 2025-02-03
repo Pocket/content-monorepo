@@ -43,11 +43,86 @@ enum ApprovedItemGrade {
 }
 
 """
+The source of en entity
+"""
+enum ActivitySource {
+  """
+  Manually entered through the curation admin tool
+  """
+  MANUAL
+  """
+  Created by ML
+  """
+  ML
+}
+
+"""
 An author associated with a CorpusItem.
 """
 type CorpusItemAuthor {
   name: String!
   sortOrder: Int!
+}
+
+"""
+An entity containing Corpus Items.
+"""
+type Section {
+  """
+  An alternative primary key in UUID format.
+  """
+  externalId: ID!
+  """
+  The title of the Section displayed to the users.
+  """
+  title: String!
+  """
+  The GUID of the Scheduled Surface. Example: 'NEW_TAB_EN_US'.
+  """
+  scheduledSurfaceGuid: ID!
+  """
+  Controls the display order of Sections.
+  """
+  sort: Int
+  """
+  The source which created the Section.
+  """
+  createSource: ActivitySource!
+  """
+  Indicates whether or not a Section is available for display.
+  """
+  active: Boolean!
+  """
+  An array of active and in-active SectionItems in a Section.
+  This field returns an empty array when creating a new Section or updating a Section.
+  """
+  sectionItems: [SectionItem!]!
+}
+
+"""
+A CorpusItem belonging to a Section
+"""
+type SectionItem {
+  """
+  An alternative primary key in UUID format that is generated on creation.
+  """
+  externalId: ID!
+  """
+  The initial rank of the SectionItem in relation to its siblings. Used as a
+  fallback in Merino when there is no engagement/click data available. May only apply to
+  ML-generated SectionItems.
+  """
+  rank: Int
+}
+
+"""
+Available fields for filtering Sections.
+"""
+input SectionFilters {
+  """
+  Required filter to retrieve Sections & SectionItems for a Scheduled Surface
+  """
+  scheduledSurfaceGuid: ID!
 }
 
 """

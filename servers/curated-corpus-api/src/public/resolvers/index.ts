@@ -1,6 +1,7 @@
 import { DateResolver } from 'graphql-scalars';
 import { getScheduledSurface } from './queries/ScheduledSurface';
 import { getItemsForScheduledSurface } from './queries/ScheduledSurfaceItem';
+import { getSections } from './queries/Section';
 import { IPublicContext } from '../context';
 
 export const resolvers = {
@@ -34,6 +35,11 @@ export const resolvers = {
       return corpusItem;
     },
   },
+  SectionItem: {
+    corpusItem: (item) => {
+      return item.approvedItem;
+    }
+  },
   // Allow the `Item` to resolve the corpus item
   Item: {
     corpusItem: async (item, args, context: IPublicContext) => {
@@ -59,5 +65,6 @@ export const resolvers = {
   Query: {
     // Gets the metadata for a Scheduled Surface (for example, New Tab).
     scheduledSurface: getScheduledSurface,
+    getSections: getSections,
   },
 };

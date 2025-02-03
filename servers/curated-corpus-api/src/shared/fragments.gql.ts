@@ -29,6 +29,26 @@ export const CuratedItemData = gql`
   }
 `;
 
+export const CorpusItemData = gql `
+  fragment CorpusItemData on CorpusItem {
+      id
+      url
+      title
+      excerpt
+      language
+      authors {
+          name
+          sortOrder
+      }
+      publisher
+      datePublished
+      imageUrl
+      topic
+      grade
+      isTimeSensitive
+  }
+`;
+
 export const RejectedItemData = gql`
   fragment RejectedItemData on RejectedCorpusItem {
     externalId
@@ -59,33 +79,20 @@ export const ScheduledItemData = gql`
   }
   ${CuratedItemData}
 `;
-
-export const SectionItemData = gql`
-  fragment SectionItemData on SectionItem {
-    externalId
-    approvedItem {
-      ...CuratedItemData
+export const BaseSectionItemData = gql`
+    fragment BaseSectionItemData on SectionItem {
+        externalId
+        rank
     }
-    rank
-    createdAt
-    updatedAt
-  }
-  ${CuratedItemData}
 `;
 
-export const SectionData = gql`
-    fragment SectionData on Section {
+export const BaseSectionData = gql`
+    fragment BaseSectionData on Section {
         externalId
         title
         scheduledSurfaceGuid
         sort
         createSource
         active
-        sectionItems {
-            ...SectionItemData
-        }
-        createdAt
-        updatedAt
     }
-    ${SectionItemData}
 `;

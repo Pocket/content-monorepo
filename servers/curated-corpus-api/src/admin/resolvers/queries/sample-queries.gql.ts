@@ -1,6 +1,6 @@
 import { gql } from 'graphql-tag';
-import { RejectedItemData, SectionData } from '../../../shared/fragments.gql';
-import { AdminCuratedItemData, AdminScheduledItemData } from '../fragments.gql';
+import { RejectedItemData } from '../../../shared/fragments.gql';
+import { AdminCuratedItemData, AdminScheduledItemData, AdminSectionData } from '../fragments.gql';
 
 /**
  * Sample queries for Apollo Server integration tests as used in
@@ -158,8 +158,8 @@ export const GET_OPEN_GRAPH_FIELDS = gql`
 export const GET_SECTIONS_WITH_SECTION_ITEMS = gql`
   query GetSectionsWithSectionItems($scheduledSurfaceGuid: ID!){
       getSectionsWithSectionItems(scheduledSurfaceGuid: $scheduledSurfaceGuid) {
-        ...SectionData
+        ...AdminSectionData
     }
   }
-  ${SectionData}
+  ${AdminSectionData}
 `;

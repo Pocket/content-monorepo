@@ -13,7 +13,7 @@ import {
 } from '../../../../test/helpers';
 import { DELETE_SCHEDULED_ITEM } from '../sample-mutations.gql';
 import { DeleteScheduledItemInput } from '../../../../database/types';
-import { getUnixTimestamp } from '../../fields/UnixTimestamp';
+import { getUnixTimestamp } from '../../../../shared/resolvers/fields/UnixTimestamp';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../../events/init';
 import { ScheduledCorpusItemEventType } from '../../../../events/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
