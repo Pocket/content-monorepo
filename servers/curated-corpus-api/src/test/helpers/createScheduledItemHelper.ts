@@ -5,7 +5,7 @@ import {
   PrismaClient,
 } from '.prisma/client';
 import { faker } from '@faker-js/faker';
-import { ScheduledItemSource } from 'content-common';
+import { ActivitySource } from 'content-common';
 
 // the data required to create a scheduled item that goes onto a scheduled surface
 interface CreateScheduledItemHelperRequiredInput {
@@ -17,7 +17,7 @@ interface CreateScheduledItemHelperOptionalInput {
   createdBy: string;
   scheduledSurfaceGuid: string;
   scheduledDate: string;
-  source: ScheduledItemSource;
+  source: ActivitySource;
 }
 
 // the input type the helper function expects - a combo of required and optional parameters
@@ -44,7 +44,7 @@ export async function createScheduledItemHelper(
       faker.date.recent({ days: 7 }).toISOString(),
     ]),
     scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-    source: ScheduledItemSource.MANUAL,
+    source: ActivitySource.MANUAL,
   };
 
   const inputs: Prisma.ScheduledItemCreateInput = {

@@ -13,7 +13,7 @@ import { ApprovedItemGrade, Topics } from 'content-common';
 import {
   CorpusItemSource,
   CuratedStatus,
-  ScheduledItemSource,
+  ActivitySource,
 } from 'content-common';
 
 describe('CuratedCorpusEventEmitter', () => {
@@ -74,7 +74,7 @@ describe('CuratedCorpusEventEmitter', () => {
       updatedBy: null,
       scheduledDate: new Date(),
       approvedItem: approvedItem,
-      source: ScheduledItemSource.MANUAL,
+      source: ActivitySource.MANUAL,
     },
   };
 
