@@ -9,7 +9,9 @@ import config from './config';
 
 /**
  * calls a few common functions to procure a bearer token for including in
- * queries to the graph
+ * queries to the graph. this function also allows us to easily mock JWT
+ * functionality for tests, which is why it's not in the lambda-common
+ * package.
  *
  * @returns Promise that resolves a string
  */

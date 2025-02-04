@@ -1,4 +1,4 @@
-import { pocketImageCache } from './types';
+import { pocketImageCache } from './constants';
 
 /**
  * Validates the image_url through Pocket Image CDN (https://pocket-image-cache.com/)

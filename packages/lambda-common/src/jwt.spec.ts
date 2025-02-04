@@ -10,7 +10,8 @@ const jwt = require('jsonwebtoken');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwkToPem = require('jwk-to-pem');
 
-import { generateJwt, JwtConfig, getLambdaPrivateJwtKey } from './jwt';
+import { generateJwt, getLambdaPrivateJwtKey } from './jwt';
+import { JwtConfig } from './types';
 
 // Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
 describe('utils', function () {
