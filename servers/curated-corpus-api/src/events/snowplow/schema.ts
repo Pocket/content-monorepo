@@ -3,7 +3,7 @@ import { ScheduledCorpusItemStatus } from '../../shared/types';
 import {
   ActionScreen,
   CorpusItemSource,
-  ActivitySource,
+  ScheduledItemSource,
 } from 'content-common';
 
 export type RejectionReason = { reason: string };
@@ -219,7 +219,7 @@ export type ScheduledCorpusItem = {
   /**
    * The method by which this item was generated. Possible values include ML and MANUAL.
    */
-  generated_by?: ActivitySource;
+  generated_by?: ScheduledItemSource;
   /**
    * A guid that identifies the original schedule on which the curator action (removed or rescheduled) took place.
    */

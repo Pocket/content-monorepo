@@ -55,6 +55,11 @@ export enum ActivitySource {
   ML = 'ML', // created by ML
 }
 
+export enum ScheduledItemSource {
+  MANUAL = 'MANUAL', // manually entered through the curation admin tool
+  ML = 'ML', // created by ML
+}
+
 export enum ActionScreen {
   PROSPECTING = 'PROSPECTING',
   SCHEDULE = 'SCHEDULE',
@@ -102,7 +107,7 @@ export type CreateApprovedCorpusItemApiInput = ApprovedItemRequiredInput & {
   // Note that all three must be present to schedule the item.
   scheduledDate?: string;
   scheduledSurfaceGuid?: string;
-  scheduledSource?: ActivitySource;
+  scheduledSource?: ScheduledItemSource;
   // This is an optional property that may or may not be present at the time
   // a corpus item is saved in the datastore
   datePublished?: string;
@@ -115,7 +120,7 @@ export type CreateScheduledItemInput = {
   approvedItemExternalId: string;
   scheduledSurfaceGuid: string;
   scheduledDate: string;
-  source: ActivitySource;
+  source: ScheduledItemSource;
 };
 
 

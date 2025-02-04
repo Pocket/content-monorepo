@@ -13,6 +13,7 @@ import {
   ApprovedItemRequiredInput,
   CorpusItemSource,
   CorpusLanguage,
+  ScheduledItemSource,
 } from 'content-common';
 
 export type CreateApprovedItemInput = {
@@ -104,7 +105,7 @@ export type DeleteScheduledItemInput = {
 
 export type MoveScheduledItemToBottomInput = {
   externalId: string;
-  source: ActivitySource;
+  source: ScheduledItemSource;
 };
 
 export type CreateScheduleReviewInput = {
