@@ -170,6 +170,20 @@ enum CorpusItemSource {
 }
 
 """
+The source of the Scheduled item
+"""
+enum ScheduledItemSource {
+  """
+  Manually entered through the curation admin tool
+  """
+  MANUAL
+  """
+  Created by ML
+  """
+  ML
+}
+
+"""
 Indicates where in the Curation Tools UI the action took place
 """
 enum ActionScreen {
@@ -471,7 +485,7 @@ type ScheduledCorpusItem {
   """
   Source of the Scheduled Item. Could be one of: MANUAL or ML
   """
-  source: ActivitySource!
+  source: ScheduledItemSource!
 }
 
 """
@@ -812,7 +826,7 @@ input CreateApprovedCorpusItemInput {
   """
   Optionally, specify the source of the Scheduled Item. Could be one of: MANUAL or ML
   """
-  scheduledSource: ActivitySource
+  scheduledSource: ScheduledItemSource
   """
   The UI screen where the approved corpus item is being created from.
   """
@@ -901,7 +915,7 @@ input ImportApprovedCorpusItemInput {
 
   This field was added after this import mutation was created. We may need to expand the enum value list if this mutation is used in the future.
   """
-  scheduledSource: ActivitySource!
+  scheduledSource: ScheduledItemSource!
 }
 
 """
@@ -1056,7 +1070,7 @@ input CreateScheduledCorpusItemInput {
   """
   Source of the Scheduled Item. Could be one of: MANUAL or ML
   """
-  source: ActivitySource!
+  source: ScheduledItemSource!
   """
   A comma-separated list of reasons for manually scheduling an item. Helps ML improve models for sets of scheduled items.
   """
@@ -1087,7 +1101,7 @@ input RescheduleScheduledCorpusItemInput {
   """
   Source of the Scheduled Item. Could be one of: MANUAL or ML
   """
-  source: ActivitySource!
+  source: ScheduledItemSource!
   """
   The UI screen where the scheduled corpus item is being resceduled from.
   Can only be from the schedule screen.

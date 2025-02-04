@@ -4,7 +4,7 @@ import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
 import { client } from '../../../../database/client';
 
-import { ActivitySource } from 'content-common';
+import { ScheduledItemSource } from 'content-common';
 
 import {
   clearDb,
@@ -69,7 +69,7 @@ describe('queries: ScheduledCorpusItem (getScheduledCorpusItems)', () => {
         approvedItem,
         scheduledDate: new Date('2025-05-05').toISOString(),
         source:
-          i % 2 === 0 ? ActivitySource.MANUAL : ActivitySource.ML,
+          i % 2 === 0 ? ScheduledItemSource.MANUAL : ScheduledItemSource.ML,
       });
     }
   });
@@ -196,13 +196,13 @@ describe('queries: ScheduledCorpusItem (getScheduledCorpusItems)', () => {
 
     // filter out MANUAL items
     const manualScheduledItems = resultArray[0].items.filter(
-      (item) => item.source === ActivitySource.MANUAL,
+      (item) => item.source === ScheduledItemSource.MANUAL,
     );
     expect(manualScheduledItems.length).toEqual(5);
 
     // filter out ML items
     const mlScheduledItems = resultArray[0].items.filter(
-      (item) => item.source === ActivitySource.ML,
+      (item) => item.source === ScheduledItemSource.ML,
     );
     expect(mlScheduledItems.length).toEqual(5);
   });

@@ -13,7 +13,7 @@ import {
   CreateApprovedCorpusItemApiInput,
   CreateScheduledItemInput,
   CuratedCorpusApiErrorCodes,
-  ActivitySource,
+  ScheduledItemSource,
   UrlMetadata,
 } from 'content-common';
 import {
@@ -265,7 +265,7 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
         imageUrl: imageUrl,
         topic: topic,
         source: source, // source = Metaflow
-        scheduledSource: source as unknown as ActivitySource.ML,
+        scheduledSource: source as unknown as ScheduledItemSource.ML,
         isCollection: itemMetadata.isCollection as boolean, // source = Parser
         isSyndicated: itemMetadata.isSyndicated as boolean, // source = Parser
         isTimeSensitive: false,
@@ -311,7 +311,7 @@ export const createCreateScheduledItemInput = async (
         candidate.scheduled_corpus_item.scheduled_surface_guid,
       scheduledDate: candidate.scheduled_corpus_item.scheduled_date,
       source: candidate.scheduled_corpus_item
-        .source as unknown as ActivitySource,
+        .source as unknown as ScheduledItemSource,
     };
     // assert itemToSchedule against CreateScheduledItemInput before sending to mutation
     assert<CreateScheduledItemInput>(itemToSchedule);

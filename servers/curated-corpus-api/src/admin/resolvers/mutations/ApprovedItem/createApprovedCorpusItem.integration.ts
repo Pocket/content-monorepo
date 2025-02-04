@@ -10,7 +10,7 @@ import {
   CreateApprovedCorpusItemApiInput,
   CorpusItemSource,
   CuratedStatus,
-  ActivitySource,
+  ScheduledItemSource,
   Topics,
 } from 'content-common';
 
@@ -256,7 +256,7 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
     // extra inputs - all three must be set to create a scheduled item
     input.scheduledDate = '2100-01-01';
     input.scheduledSurfaceGuid = 'NEW_TAB_EN_US';
-    input.scheduledSource = ActivitySource.ML;
+    input.scheduledSource = ScheduledItemSource.ML;
 
     const result = await request(app)
       .post(graphQLUrl)
@@ -310,7 +310,7 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
     );
     expect(
       emitScheduledCorpusItemEventArgs.scheduledCorpusItem.generated_by,
-    ).toEqual(ActivitySource.ML);
+    ).toEqual(ScheduledItemSource.ML);
 
     // 3- Events have the right entities passed to it.
     expect(
@@ -329,7 +329,7 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
     // extra inputs - all three must be set to create a scheduled item
     input.scheduledDate = '2100-01-01';
     input.scheduledSurfaceGuid = 'NEW_TAB_EN_US';
-    input.scheduledSource = ActivitySource.ML;
+    input.scheduledSource = ScheduledItemSource.ML;
 
     const pastApprovedItem = await createApprovedItemHelper(db, {
       url: `${input.url}/old-article`,
@@ -451,7 +451,7 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
     // extra inputs
     input.scheduledDate = '2100-01-01';
     input.scheduledSurfaceGuid = 'RECSAPI';
-    input.scheduledSource = ActivitySource.ML;
+    input.scheduledSource = ScheduledItemSource.ML;
 
     const result = await request(app)
       .post(graphQLUrl)
