@@ -5,7 +5,7 @@ import {
   CorpusLanguage,
   CreateScheduledItemInput,
   CuratedStatus,
-  ScheduledItemSource,
+  ActivitySource,
 } from 'content-common';
 
 // this maps to the UpdateApprovedCorpusItemInput graph input
@@ -61,7 +61,7 @@ export type CreateRejectedCorpusItemApiInput = {
 export type RescheduleScheduledItemApiInput = {
   externalId: string;
   scheduledDate: string;
-  source: ScheduledItemSource;
+  source: ActivitySource;
   actionScreen?: ActionScreen;
 };
 

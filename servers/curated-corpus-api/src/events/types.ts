@@ -4,7 +4,7 @@ import {
 } from '.prisma/client';
 import { ScheduledItem, CorpusItem, ApprovedItem } from '../database/types';
 import { ScheduledCorpusItemStatus } from '../shared/types';
-import { ActionScreen, ScheduledItemSource } from 'content-common';
+import { ActionScreen, ActivitySource } from 'content-common';
 
 export enum ReviewedCorpusItemEventType {
   ADD_ITEM = 'ADD_ITEM',
@@ -56,7 +56,7 @@ export type ReviewedCorpusItemPayload = {
 export type ScheduledCorpusItemPayload = {
   scheduledCorpusItem: ScheduledItem & {
     // the method by which this item was generated (MANUAL or ML, for a scheduled item)
-    generated_by?: ScheduledItemSource;
+    generated_by?: ActivitySource;
     // optional field used when the status of a scheduled item is changed
     // (either rescheduled or deleted)
     original_scheduled_corpus_item_external_id?: string;
