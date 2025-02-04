@@ -1,7 +1,6 @@
 import * as Sentry from '@sentry/serverless';
 import { setupServer } from 'msw/node';
 import { processor } from './';
-import * as Utils from './utils';
 import { Callback, Context, SQSEvent } from 'aws-lambda';
 import {
   createApprovedCorpusItemBody,
@@ -13,7 +12,6 @@ import {
   mockCreateScheduledCorpusItemOnce,
   mockGetApprovedCorpusItemByUrl,
   mockGetUrlMetadata,
-  mockPocketImageCache,
 } from './testHelpers';
 import {
   CorpusLanguage,
@@ -21,7 +19,9 @@ import {
   resetSnowplowEvents,
   waitForSnowplowEvents,
 } from 'content-common';
+import { mockPocketImageCache } from 'lambda-common';
 import { extractScheduledCandidateEntity } from './events/testHelpers';
+import * as Jwt from './jwt';
 import config from './config';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 
@@ -55,11 +55,9 @@ describe('corpus scheduler lambda', () => {
     // The Lambda waits for 10 seconds to flush Snowplow events. During tests we don't want to wait that long.
     jest.replaceProperty(config.snowplow, 'emitterDelay', 500);
 
-    jest.spyOn(Utils, 'generateJwt').mockReturnValue('test-jwt');
-
     jest
-      .spyOn(Utils, 'getCorpusSchedulerLambdaPrivateKey')
-      .mockReturnValue(Promise.resolve('my_secret_value'));
+      .spyOn(Jwt, 'getJwtBearerToken')
+      .mockReturnValue(Promise.resolve('test-jwt'));
 
     // spy on Sentry captureException
     captureExceptionSpy = jest
@@ -68,6 +66,8 @@ describe('corpus scheduler lambda', () => {
 
     // spy on console.log
     consoleLogSpy = jest.spyOn(global.console, 'log');
+
+    mockPocketImageCache(200);
   });
 
   const scheduledCandidate = createScheduledCandidate({
@@ -88,7 +88,6 @@ describe('corpus scheduler lambda', () => {
 
   it('emits a Snowplow event if candidate is successfully processed', async () => {
     await resetSnowplowEvents();
-    mockPocketImageCache(200);
 
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
@@ -132,7 +131,6 @@ describe('corpus scheduler lambda', () => {
 
   it('emits a Snowplow event if a previously approved candidate is successfully processed', async () => {
     await resetSnowplowEvents();
-    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server);
     mockGetUrlMetadata(server);
@@ -203,7 +201,6 @@ describe('corpus scheduler lambda', () => {
   });
 
   it('sends a Sentry error if curated-corpus-api has error, with partial success', async () => {
-    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {
@@ -225,7 +222,6 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('sends a Sentry error if curated-corpus-api returns null data', async () => {
-    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {
@@ -241,7 +237,6 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('should not start scheduling if allowedToSchedule is false', async () => {
-    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {
@@ -329,7 +324,6 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (prod) (EN_US)', async () => {
-    mockPocketImageCache(200);
     // mock the config.app.isDev
     jest.replaceProperty(config, 'app', {
       name: 'Corpus-Scheduler-Lambda',
@@ -367,7 +361,6 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (prod) (DE_DE)', async () => {
-    mockPocketImageCache(200);
     // mock the config.app.isDev
     jest.replaceProperty(config, 'app', {
       name: 'Corpus-Scheduler-Lambda',
@@ -412,7 +405,6 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful & valid scheduled surface but not allowed for scheduling (approve & schedule candidate) (dev)', async () => {
-    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {
@@ -435,7 +427,6 @@ describe('corpus scheduler lambda', () => {
   }, 7000);
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (dev)', async () => {
-    mockPocketImageCache(200);
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(server, {
       data: {
