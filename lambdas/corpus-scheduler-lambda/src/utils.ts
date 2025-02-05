@@ -1,9 +1,5 @@
-import {
-  GetSecretValueCommand,
-  SecretsManagerClient,
-} from '@aws-sdk/client-secrets-manager';
 import config from './config';
-import { validateCandidate, validateImageUrl } from './validation';
+import { validateCandidate } from './validation';
 import {
   applyApTitleCase,
   formatQuotesEN,
@@ -16,6 +12,7 @@ import {
   ActivitySource,
   UrlMetadata,
 } from 'content-common';
+import { validateImageUrl } from 'lambda-common';
 import {
   allowedScheduledSurfaces,
   ScheduledCandidate,
@@ -39,72 +36,6 @@ import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
 import * as Sentry from '@sentry/serverless';
 import { Tracker } from '@snowplow/node-tracker';
 import { DateTime } from 'luxon';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const jwt = require('jsonwebtoken');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const jwkToPem = require('jwk-to-pem');
-
-// Secrets Manager Client
-const smClient = new SecretsManagerClient({ region: config.aws.region });
-
-// this is the required subset of properties required by the admin-api gateway
-// https://github.com/Pocket/admin-api/blob/a0bb468cece3ba5bc1a00e1098652a49d433a81d/src/jwtUtils.ts#L98
-// https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.ts
-type JwtPayload = {
-  iss: string;
-  aud: string;
-  iat: number; //timestamp
-  exp: number;
-  name: string;
-  'custom:groups': string; // json enconded string - array of groups
-  identities: { userId: string }[];
-};
-
-/**
- * Generates jwt token from the given private key.
- * @param privateKey
- * https://www.npmjs.com/package/jsonwebtoken
- * referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.ts
- */
-export function generateJwt(privateKey: any) {
-  const now = Math.round(Date.now() / 1000);
-
-  const payload: JwtPayload = {
-    iss: config.jwt.iss,
-    aud: config.jwt.aud,
-    iat: now,
-    exp: now + 60 * 10, //expires in 10 mins.
-    name: config.jwt.name,
-    identities: [{ userId: config.jwt.userId }],
-    // this group gives us full access in corpus API
-    'custom:groups': JSON.stringify(config.jwt.groups),
-  };
-
-  return jwt.sign(payload, jwkToPem(privateKey, { private: true }), {
-    algorithm: 'RS256',
-    // Required by admin-api to disambiguate from other key(s)
-    keyid: privateKey.kid,
-  });
-}
-
-/**
- * retrieves the JWT_KEY for CorpusLambdaScheduler from secrets manager
- * https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-secrets-manager/classes/getsecretvaluecommand.html
- * referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/secretManager.ts
- */
-export async function getCorpusSchedulerLambdaPrivateKey(secretId: string) {
-  try {
-    const secret = await smClient.send(
-      new GetSecretValueCommand({
-        SecretId: secretId,
-      }),
-    );
-    const privateKey = secret.SecretString as string;
-    return JSON.parse(privateKey);
-  } catch (e) {
-    throw new Error('unable to fetch private key' + e);
-  }
-}
 
 /**
  * Creates an array of ApprovedItemAuthor from a comma separated string of authors
@@ -300,10 +231,10 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
  * @param approvedItemExternalId external id for an already approved corpus item
  * @return CreateScheduledItemInput
  */
-export const createCreateScheduledItemInput = async (
+export const createCreateScheduledItemInput = (
   candidate: ScheduledCandidate,
   approvedItemExternalId: string,
-): Promise<CreateScheduledItemInput> => {
+): CreateScheduledItemInput => {
   try {
     const itemToSchedule: CreateScheduledItemInput = {
       approvedItemExternalId: approvedItemExternalId,
@@ -333,7 +264,7 @@ export const createAndScheduleCorpusItemHelper = async (
   candidate: ScheduledCandidate,
   bearerToken: string,
   tracker: Tracker,
-) => {
+): Promise<void> => {
   let approvedCorpusItemId, scheduledItemId;
 
   // 1. query getApprovedCorpusItemByUrl to check if item is already created & approved
@@ -375,7 +306,7 @@ export const createAndScheduleCorpusItemHelper = async (
   // item has already been created & approved, try scheduling item
   else {
     // 5. create CreateScheduledItem input obj
-    const createScheduledItemInput = await createCreateScheduledItemInput(
+    const createScheduledItemInput = createCreateScheduledItemInput(
       candidate,
       approvedCorpusItem.externalId,
     );
@@ -445,7 +376,7 @@ export const processAndScheduleCandidate = async (
   for (const candidate of parsedMessage.candidates) {
     try {
       // 1. validate scheduled candidate from Metaflow
-      await validateCandidate(candidate);
+      validateCandidate(candidate);
 
       // 2. if dev & scheduled surface exists in allowed scheduled surfaces, continue processing
       // TODO: schedule to production

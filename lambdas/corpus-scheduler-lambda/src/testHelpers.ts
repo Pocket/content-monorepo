@@ -17,63 +17,58 @@ import {
 import { DateTime } from 'luxon';
 import { graphql, http, HttpResponse } from 'msw';
 import { SetupServer } from 'msw/node';
-import config from "./config";
+import config from './config';
 
 // Saturday, December 30, 2023 14.00 EST
-export const currentMockTimeMondaySaturday  =
-  DateTime.fromObject(
-      {
-        year: 2023,
-        month: 12,
-        day: 30,
-        hour: 14,
-        minute: 0,
-        second: 0,
-      },
-      {zone: config.validation.EN_US.timeZone},
-  );
+export const currentMockTimeMondaySaturday = DateTime.fromObject(
+  {
+    year: 2023,
+    month: 12,
+    day: 30,
+    hour: 14,
+    minute: 0,
+    second: 0,
+  },
+  { zone: config.validation.EN_US.timeZone },
+);
 
 // Sunday, December 31, 2023 20.00 DE
-export const currentMockTimeTuesdaySaturday  =
-    DateTime.fromObject(
-      {
-        year: 2023,
-        month: 12,
-        day: 31,
-        hour: 20,
-        minute: 0,
-        second: 0,
-      },
-      {zone: config.validation.DE_DE.timeZone},
-  );
-
+export const currentMockTimeTuesdaySaturday = DateTime.fromObject(
+  {
+    year: 2023,
+    month: 12,
+    day: 31,
+    hour: 20,
+    minute: 0,
+    second: 0,
+  },
+  { zone: config.validation.DE_DE.timeZone },
+);
 
 // Sunday, December 31, 2023 3 AM EST
-export const scheduledDateSunday =
-    DateTime.fromObject(
-    {
-      year: 2023,
-      month: 12,
-      day: 31,
-      hour: 3,
-      minute: 0,
-      second: 0,
-    },
-    {zone: config.validation.EN_US.timeZone},
+export const scheduledDateSunday = DateTime.fromObject(
+  {
+    year: 2023,
+    month: 12,
+    day: 31,
+    hour: 3,
+    minute: 0,
+    second: 0,
+  },
+  { zone: config.validation.EN_US.timeZone },
 );
 
 // Monday, January 1, 2024 9 AM DE
-export const scheduledDateMonday =
-    DateTime.fromObject(
-    {
-      year: 2024,
-      month: 1,
-      day: 1,
-      hour: 9,
-      minute: 0,
-      second: 0,
-    },
-    {zone: config.validation.DE_DE.timeZone},
+export const scheduledDateMonday = DateTime.fromObject(
+  {
+    year: 2024,
+    month: 1,
+    day: 1,
+    hour: 9,
+    minute: 0,
+    second: 0,
+  },
+  { zone: config.validation.DE_DE.timeZone },
 );
 
 export const defaultScheduledDate = DateTime.fromObject(
@@ -134,46 +129,46 @@ export const createScheduledCandidate = (
   };
 };
 
-export const getCreateApprovedCorpusItemApiOutput = (
-): CreateApprovedCorpusItemApiInput => {
-  return {
-    url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
-    title: applyApTitleCase(
+export const getCreateApprovedCorpusItemApiOutput =
+  (): CreateApprovedCorpusItemApiInput => {
+    return {
+      url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
+      title: applyApTitleCase(
         'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-    ) as string,
-    excerpt:
+      ) as string,
+      excerpt:
         'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-    status: CuratedStatus.RECOMMENDATION,
-    language: 'EN',
-    publisher: 'POLITICO',
-    authors: [{ name: 'Rebecca Jennings', sortOrder: 1 }],
-    imageUrl: 'https://fake-image-url.com',
-    topic: Topics.SELF_IMPROVEMENT,
-    source: CorpusItemSource.ML,
-    scheduledSource: ActivitySource.ML,
-    isCollection: false,
-    isSyndicated: false,
-    isTimeSensitive: false,
-    scheduledDate: defaultScheduledDate as string,
-    scheduledSurfaceGuid: 'NEW_TAB_EN_US',
-  }
-};
+      status: CuratedStatus.RECOMMENDATION,
+      language: 'EN',
+      publisher: 'POLITICO',
+      authors: [{ name: 'Rebecca Jennings', sortOrder: 1 }],
+      imageUrl: 'https://fake-image-url.com',
+      topic: Topics.SELF_IMPROVEMENT,
+      source: CorpusItemSource.ML,
+      scheduledSource: ActivitySource.ML,
+      isCollection: false,
+      isSyndicated: false,
+      isTimeSensitive: false,
+      scheduledDate: defaultScheduledDate as string,
+      scheduledSurfaceGuid: 'NEW_TAB_EN_US',
+    };
+  };
 
 export const getParserItem = (): UrlMetadata => {
   return {
     url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
     title:
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+      'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
     excerpt:
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+      'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
     language: 'EN',
     publisher: 'POLITICO',
     authors: 'Rebecca Jennings',
     imageUrl: 'https://fake-image-url.com',
     isCollection: false,
     isSyndicated: false,
-  }
-}
+  };
+};
 
 export const getUrlMetadataBody = {
   data: {
@@ -341,19 +336,6 @@ export const mockSnowplow = (server: SetupServer) => {
       () => {},
     ),
   );
-};
-
-/**
- * Mocks fetch pocket image cache
- * @param statusCode
- */
-export const mockPocketImageCache = (statusCode: number) => {
-  global.fetch = jest.fn(
-    () =>
-      new HttpResponse(null, {
-        status: statusCode,
-      }),
-  ) as jest.Mock;
 };
 
 /**
