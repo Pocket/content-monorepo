@@ -69,6 +69,7 @@ export type RejectApprovedItemInput = {
   reason: string;
 };
 
+
 export type CreateRejectedItemInput = {
   prospectId?: string;
   url: string;
