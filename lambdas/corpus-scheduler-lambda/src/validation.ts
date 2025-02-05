@@ -1,4 +1,4 @@
-import { pocketImageCache, ScheduledCandidate } from './types';
+import { ScheduledCandidate } from './types';
 import { assert } from 'typia';
 import { DateTime, Interval } from 'luxon';
 import config from './config';
@@ -13,11 +13,11 @@ import { ScheduledSurfacesEnum } from 'content-common';
  * @param timeZone the time zone to do the validation in
  * @param publishHour the time when content gets published in specific time zone. Used in the base DateTime to calculate time diff.
  */
-export const validateScheduledDate = async (
+export const validateScheduledDate = (
   scheduledDate: string,
   timeZone: string,
   publishHour: number,
-): Promise<void> => {
+): void => {
   // get the DateTime from an ISO scheduled date string in 12 AM of specified timezone.
   // Convert to appropriate hour:
   // PST = 12 AM
@@ -79,39 +79,12 @@ export const validateScheduledDate = async (
     }
   }
 };
-/**
- * Validates the image_url through Pocket Image CDN (https://pocket-image-cache.com/)
- * @param imageUrl imageUrl to validate
- * @returs string or null
- */
-export async function validateImageUrl(
-  imageUrl: string,
-): Promise<string | null> {
-  if (!imageUrl) {
-    return null;
-  }
-  // construct the url to fetch (pocket_image_cache + image_url)
-  const url = `${pocketImageCache}${encodeURIComponent(imageUrl)}`;
-  // fetch the url
-  const response = await fetch(url, {
-    headers: {
-      'Content-Type': 'image/jpeg',
-    },
-  });
-  // if response is not ok, return null
-  if (!response.ok) {
-    return null;
-  }
-  return imageUrl;
-}
 
 /**
  * Validation wrapper. Calls the individual validation methods to validate the candidate.
  * @param candidate ScheduledCandidate received from Metaflow
  */
-export async function validateCandidate(
-  candidate: ScheduledCandidate,
-): Promise<void> {
+export function validateCandidate(candidate: ScheduledCandidate): void {
   // validate candidate input against ScheduledCandidate
   // this also validates if values are in enums
   assert<ScheduledCandidate>(candidate);
@@ -121,6 +94,7 @@ export async function validateCandidate(
     // default to EST timezone
     let timeZone = config.validation.EN_US.timeZone;
     let publishHour = config.validation.EN_US.publishHour;
+
     //  if candidate is for NEW_TAB_DE_DE, use Berlin time (CET) scheduled date validation
     if (
       candidate.scheduled_corpus_item.scheduled_surface_guid ===
@@ -129,7 +103,8 @@ export async function validateCandidate(
       timeZone = config.validation.DE_DE.timeZone;
       publishHour = config.validation.DE_DE.publishHour;
     }
-    await validateScheduledDate(
+
+    validateScheduledDate(
       candidate.scheduled_corpus_item.scheduled_date,
       timeZone,
       publishHour,

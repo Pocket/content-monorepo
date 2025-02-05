@@ -4,7 +4,7 @@ import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import {
   CorpusItemSource,
   Topics,
-  ActivitySource,
+  ScheduledItemSource,
   ApprovedItemGrade,
 } from 'content-common';
 import { ScheduledItem } from '../../database/types';
@@ -35,7 +35,7 @@ const scheduledCorpusItem: ScheduledItem = {
   createdBy: 'Amy',
   updatedAt: new Date(1648225373000),
   updatedBy: 'Amy',
-  source: ActivitySource.MANUAL,
+  source: ScheduledItemSource.MANUAL,
 
   approvedItem: {
     id: 123,

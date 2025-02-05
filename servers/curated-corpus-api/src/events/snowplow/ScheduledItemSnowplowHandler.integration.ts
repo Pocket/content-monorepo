@@ -22,7 +22,7 @@ import {
   ActionScreen,
   ApprovedItemGrade,
   CorpusItemSource,
-  ActivitySource,
+  ScheduledItemSource,
   Topics,
 } from 'content-common';
 import { getScheduledSurfaceByGuid } from '../../shared/utils';
@@ -42,7 +42,7 @@ const scheduledCorpusItem: ScheduledItem = {
   createdBy: 'Amy',
   updatedAt: new Date(),
   updatedBy: 'Amy',
-  source: ActivitySource.MANUAL,
+  source: ScheduledItemSource.MANUAL,
 
   approvedItem: {
     id: 123,
@@ -74,7 +74,7 @@ const scheduledCorpusItem: ScheduledItem = {
 const scheduledEventData: ScheduledCorpusItemPayload = {
   scheduledCorpusItem: {
     ...scheduledCorpusItem,
-    generated_by: ActivitySource.MANUAL,
+    generated_by: ScheduledItemSource.MANUAL,
     original_scheduled_corpus_item_external_id: 'original-id-123',
     // in the real world this should match the event type, but it's fine to
     // hard-code here just to ensure the value is making it to snowplow
@@ -101,7 +101,7 @@ const scheduledItemEventContextData = {
   created_by: scheduledCorpusItem.createdBy,
   updated_at: getUnixTimestamp(scheduledCorpusItem.updatedAt),
   updated_by: scheduledCorpusItem.updatedBy,
-  generated_by: ActivitySource.MANUAL,
+  generated_by: ScheduledItemSource.MANUAL,
   status: 'removed',
   status_reasons: ['TOPIC', 'PUBLISHER'],
   status_reason_comment: 'why did i rescheudle this? see above',
@@ -170,7 +170,7 @@ describe('ScheduledItemSnowplowHandler', () => {
       const scheduledItemWithMlData: ScheduledCorpusItemPayload = {
         scheduledCorpusItem: {
           ...scheduledCorpusItem,
-          generated_by: ActivitySource.ML,
+          generated_by: ScheduledItemSource.ML,
           status: ScheduledCorpusItemStatus.REMOVED,
           reasons: ['TOPIC', 'PUBLISHER'],
           reasonComment: 'why did i rescheudle this? see above',
@@ -199,7 +199,7 @@ describe('ScheduledItemSnowplowHandler', () => {
           schema: config.snowplow.schemas.scheduledCorpusItem,
           data: {
             ...scheduledItemEventContextData,
-            generated_by: ActivitySource.ML,
+            generated_by: ScheduledItemSource.ML,
           },
         },
       ]);
@@ -211,7 +211,7 @@ describe('ScheduledItemSnowplowHandler', () => {
       const scheduledItemWithMlData: ScheduledCorpusItemPayload = {
         scheduledCorpusItem: {
           ...scheduledCorpusItem,
-          generated_by: ActivitySource.ML,
+          generated_by: ScheduledItemSource.ML,
           status: ScheduledCorpusItemStatus.REMOVED,
           reasons: ['TOPIC', 'PUBLISHER'],
           reasonComment: 'why did i rescheudle this? see above',
@@ -244,7 +244,7 @@ describe('ScheduledItemSnowplowHandler', () => {
           schema: config.snowplow.schemas.scheduledCorpusItem,
           data: {
             ...scheduledItemEventContextData,
-            generated_by: ActivitySource.ML,
+            generated_by: ScheduledItemSource.ML,
             action_screen: ActionScreen.SCHEDULE,
           },
         },
@@ -255,7 +255,7 @@ describe('ScheduledItemSnowplowHandler', () => {
       const scheduledItemWithMlData: ScheduledCorpusItemPayload = {
         scheduledCorpusItem: {
           ...scheduledCorpusItem,
-          generated_by: ActivitySource.ML,
+          generated_by: ScheduledItemSource.ML,
           status: ScheduledCorpusItemStatus.REMOVED,
           reasons: ['TOPIC', 'PUBLISHER'],
           reasonComment: 'why did i rescheudle this? see above',
@@ -289,7 +289,7 @@ describe('ScheduledItemSnowplowHandler', () => {
           schema: config.snowplow.schemas.scheduledCorpusItem,
           data: {
             ...scheduledItemEventContextData,
-            generated_by: ActivitySource.ML,
+            generated_by: ScheduledItemSource.ML,
           },
         },
       ]);
@@ -299,7 +299,7 @@ describe('ScheduledItemSnowplowHandler', () => {
       const scheduledItemWithMlData: any = {
         scheduledCorpusItem: {
           ...scheduledCorpusItem,
-          generated_by: ActivitySource.ML,
+          generated_by: ScheduledItemSource.ML,
           status: ScheduledCorpusItemStatus.REMOVED,
           reasons: ['TOPIC', 'PUBLISHER'],
           reasonComment: 'why did i rescheudle this? see above',
@@ -328,7 +328,7 @@ describe('ScheduledItemSnowplowHandler', () => {
       const scheduledItem: ScheduledCorpusItemPayload = {
         scheduledCorpusItem: {
           ...scheduledCorpusItem,
-          generated_by: ActivitySource.ML,
+          generated_by: ScheduledItemSource.ML,
           status: ScheduledCorpusItemStatus.RESCHEDULED,
           reasons: ['TOPIC', 'PUBLISHER'],
           reasonComment: 'why did i rescheudle this? see above',
@@ -362,7 +362,7 @@ describe('ScheduledItemSnowplowHandler', () => {
           schema: config.snowplow.schemas.scheduledCorpusItem,
           data: {
             ...scheduledItemEventContextData,
-            generated_by: ActivitySource.ML,
+            generated_by: ScheduledItemSource.ML,
             status: ScheduledCorpusItemStatus.RESCHEDULED,
             action_screen: ActionScreen.SCHEDULE,
             original_scheduled_corpus_item_external_id: 'original-id-123',
@@ -375,7 +375,7 @@ describe('ScheduledItemSnowplowHandler', () => {
       const scheduledItem: ScheduledCorpusItemPayload = {
         scheduledCorpusItem: {
           ...scheduledCorpusItem,
-          generated_by: ActivitySource.ML,
+          generated_by: ScheduledItemSource.ML,
           status: ScheduledCorpusItemStatus.RESCHEDULED,
           reasons: ['TOPIC', 'PUBLISHER'],
           reasonComment: 'why did i rescheudle this? see above',
@@ -409,7 +409,7 @@ describe('ScheduledItemSnowplowHandler', () => {
           schema: config.snowplow.schemas.scheduledCorpusItem,
           data: {
             ...scheduledItemEventContextData,
-            generated_by: ActivitySource.ML,
+            generated_by: ScheduledItemSource.ML,
             status: ScheduledCorpusItemStatus.RESCHEDULED,
             action_screen: ActionScreen.SCHEDULE,
           },

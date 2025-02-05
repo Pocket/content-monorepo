@@ -12,7 +12,7 @@ import {
   CuratedCorpusApiErrorCodes,
   parseReasonsCsv,
   sanitizeText,
-  ActivitySource,
+  ScheduledItemSource,
 } from 'content-common';
 
 import config from '../../../../config';
@@ -88,7 +88,7 @@ export async function deleteScheduledItem(
     scheduledCorpusItem: {
       ...scheduledItem,
       action_screen: actionScreen,
-      generated_by: scheduledItem.source as ActivitySource,
+      generated_by: scheduledItem.source as ScheduledItemSource,
       // analytics requires a unique id per action on an existing scheduled
       // item. we create an ephemeral unique id for them here using the same
       // version of UUID that prisma uses. this service has no requirement to

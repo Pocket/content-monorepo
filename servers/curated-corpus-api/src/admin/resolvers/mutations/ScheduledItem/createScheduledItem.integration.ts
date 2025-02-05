@@ -3,7 +3,7 @@ import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
 
-import { ActionScreen, ActivitySource } from 'content-common';
+import { ActionScreen, ScheduledItemSource } from 'content-common';
 
 import { client } from '../../../../database/client';
 import {
@@ -67,7 +67,7 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       approvedItemExternalId: approvedItem.externalId,
       scheduledSurfaceGuid: 'RECSAPI',
       scheduledDate: '2100-01-01',
-      source: ActivitySource.MANUAL,
+      source: ScheduledItemSource.MANUAL,
     };
 
     const result = await request(app)
@@ -100,7 +100,7 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       approvedItemExternalId: 'not-a-valid-id-at-all',
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       scheduledDate: '2100-01-01',
-      source: ActivitySource.MANUAL,
+      source: ScheduledItemSource.MANUAL,
       reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
       reasonComment: 'i scheduled this because i thought it would be nice',
     };
@@ -160,7 +160,7 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       approvedItemExternalId: item.externalId,
       scheduledSurfaceGuid: existingScheduledEntry.scheduledSurfaceGuid,
       scheduledDate,
-      source: ActivitySource.MANUAL,
+      source: ScheduledItemSource.MANUAL,
       reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
       reasonComment: 'i scheduled this because i thought it would be nice',
     };
@@ -205,7 +205,7 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       approvedItemExternalId: approvedItem.externalId,
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       scheduledDate: '2100-01-01',
-      source: ActivitySource.MANUAL,
+      source: ScheduledItemSource.MANUAL,
       reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
       reasonComment: 'i scheduled this because i thought it would be nice',
       actionScreen: ActionScreen.SCHEDULE,
@@ -251,7 +251,7 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       approvedItemExternalId: approvedItem.externalId,
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       scheduledDate: '2100-01-01',
-      source: ActivitySource.MANUAL,
+      source: ScheduledItemSource.MANUAL,
       reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
       reasonComment: 'i scheduled this because i thought it would be nice',
     };
@@ -271,7 +271,7 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
     expect(scheduledItem.createdAt).not.toBeNull();
     expect(scheduledItem.updatedAt).not.toBeNull();
     expect(scheduledItem.createdBy).toEqual(headers.username);
-    expect(scheduledItem.source).toEqual(ActivitySource.MANUAL);
+    expect(scheduledItem.source).toEqual(ScheduledItemSource.MANUAL);
 
     // Expect these to match the input values
     expect(new Date(scheduledItem.scheduledDate)).toStrictEqual(
@@ -352,7 +352,7 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       approvedItemExternalId: newApprovedItem.externalId,
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       scheduledDate: toUtcDateString(new Date()),
-      source: ActivitySource.ML,
+      source: ScheduledItemSource.ML,
     };
 
     await request(app)
@@ -380,7 +380,7 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       approvedItemExternalId: approvedItem.externalId,
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       scheduledDate: toUtcDateString(new Date()),
-      source: ActivitySource.ML,
+      source: ScheduledItemSource.ML,
     };
 
     await request(app)
@@ -411,7 +411,7 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       approvedItemExternalId: approvedItem.externalId,
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       scheduledDate: toUtcDateString(new Date()),
-      source: ActivitySource.ML,
+      source: ScheduledItemSource.ML,
     };
 
     // Run the mutation
@@ -448,7 +448,7 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       approvedItemExternalId: approvedItem.externalId,
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       scheduledDate: '2100-01-01',
-      source: ActivitySource.MANUAL,
+      source: ScheduledItemSource.MANUAL,
       reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
       reasonComment: 'i scheduled this because i thought it would be nice',
     };
@@ -485,7 +485,7 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       approvedItemExternalId: approvedItem.externalId,
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       scheduledDate: '2100-01-01',
-      source: ActivitySource.MANUAL,
+      source: ScheduledItemSource.MANUAL,
       reasons: `${ManualScheduleReason.EVERGREEN},${ManualScheduleReason.PUBLISHER_DIVERSITY}`,
       reasonComment: 'i scheduled this because i thought it would be nice',
     };
@@ -522,7 +522,7 @@ describe('mutations: ScheduledItem (createScheduledItem)', () => {
       approvedItemExternalId: approvedItem.externalId,
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       scheduledDate: '2100-01-01',
-      source: ActivitySource.MANUAL,
+      source: ScheduledItemSource.MANUAL,
     };
 
     const result = await request(app)
