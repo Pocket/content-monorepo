@@ -3,7 +3,7 @@ import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
 
-import { ActionScreen, ScheduledItemSource } from 'content-common';
+import { ActionScreen, ActivitySource } from 'content-common';
 
 import { client } from '../../../../database/client';
 import {
@@ -59,7 +59,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
     const input: RescheduleScheduledItemApiInput = {
       externalId: 'not-a-valid-ID-string',
       scheduledDate: '2025-05-05',
-      source: ScheduledItemSource.MANUAL,
+      source: ActivitySource.MANUAL,
     };
 
     const result = await request(app)
@@ -97,7 +97,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       approvedItem,
       scheduledDate: new Date(2050, 4, 4).toISOString(),
-      source: ScheduledItemSource.ML,
+      source: ActivitySource.ML,
     });
 
     const result = await request(app)
@@ -109,7 +109,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
           data: {
             externalId: scheduledItem.externalId,
             scheduledDate: '2050-05-05',
-            source: ScheduledItemSource.MANUAL,
+            source: ActivitySource.MANUAL,
           },
         },
       });
@@ -127,7 +127,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
     // createdBy will be changed to the entity performing the reschedule
     expect(returnedItem.createdBy).toEqual(headers.username);
     // MANUAL was specified in the API call above
-    expect(returnedItem.source).toEqual(ScheduledItemSource.MANUAL);
+    expect(returnedItem.source).toEqual(ActivitySource.MANUAL);
 
     // as a new db row is created, the createdAt value on that row should be
     // *after* the createdAt of the originally scheduled item
@@ -204,7 +204,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
       approvedItem,
       // javascript uses 0-based month array, so this is really april 4th
       scheduledDate: new Date(2050, 3, 4).toISOString(),
-      source: ScheduledItemSource.ML,
+      source: ActivitySource.ML,
     });
 
     const result = await request(app)
@@ -217,7 +217,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
             externalId: scheduledItem.externalId,
             // rescheduled for the same date!
             scheduledDate: '2050-04-04',
-            source: ScheduledItemSource.MANUAL,
+            source: ActivitySource.MANUAL,
             actionScreen: ActionScreen.SCHEDULE,
           },
         },
@@ -249,7 +249,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       approvedItem,
       scheduledDate: new Date(2050, 4, 4).toISOString(),
-      source: ScheduledItemSource.ML,
+      source: ActivitySource.ML,
     });
 
     const result = await request(app)
@@ -261,7 +261,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
           data: {
             externalId: scheduledItem.externalId,
             scheduledDate: '2050-05-05',
-            source: ScheduledItemSource.MANUAL,
+            source: ActivitySource.MANUAL,
             actionScreen: ActionScreen.SCHEDULE,
           },
         },
@@ -289,7 +289,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
     );
 
     expect(rescheduleEventCall.scheduledCorpusItem.generated_by).toEqual(
-      ScheduledItemSource.MANUAL,
+      ActivitySource.MANUAL,
     );
 
     expect(rescheduleEventCall.scheduledCorpusItem.status).toEqual(
@@ -330,14 +330,14 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
       approvedItem: item,
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
       scheduledDate: new Date(2050, 4, 5).toISOString(),
-      source: ScheduledItemSource.MANUAL,
+      source: ActivitySource.MANUAL,
     });
 
     // try to reschedule the second entry for the same date as the first
     const input: RescheduleScheduledItemApiInput = {
       externalId: existingScheduledEntry2.externalId,
       scheduledDate: '2050-05-04',
-      source: ScheduledItemSource.MANUAL,
+      source: ActivitySource.MANUAL,
     };
 
     const result = await request(app)
@@ -384,7 +384,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
           data: {
             externalId: scheduledItem.externalId,
             scheduledDate: '2050-05-05',
-            source: ScheduledItemSource.MANUAL,
+            source: ActivitySource.MANUAL,
           },
         },
       });
@@ -424,7 +424,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
           data: {
             externalId: scheduledItem.externalId,
             scheduledDate: '2050-05-05',
-            source: ScheduledItemSource.MANUAL,
+            source: ActivitySource.MANUAL,
           },
         },
       });
@@ -464,7 +464,7 @@ describe('mutations: ScheduledItem (rescheduleScheduledCorpusItem)', () => {
           data: {
             externalId: scheduledItem.externalId,
             scheduledDate: '2050-05-05',
-            source: ScheduledItemSource.MANUAL,
+            source: ActivitySource.MANUAL,
           },
         },
       });
