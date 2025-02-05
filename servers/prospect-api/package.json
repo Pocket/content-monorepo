@@ -33,7 +33,7 @@
     "cors": "2.8.5",
     "graphql": "16.9.0",
     "graphql-tag": "2.12.6",
-    "@sentry/node": "8.37.1",
+    "@sentry/node": "8.49.0",
     "@snowplow/node-tracker": "3.5.0",
     "prospectapi-common": "workspace:*",
     "tslib": "2.7.0",
