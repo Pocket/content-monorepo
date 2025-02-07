@@ -1,3 +1,17 @@
+// data we expect back from calling getApprovedCorpusItemByUrl
+export interface ApprovedCorpusItemOutput {
+  externalId: string;
+  url: string;
+}
+
+// required with any call to the graph
+export type GraphQlApiCallHeaders = {
+  'apollographql-client-name': string;
+  'apollographql-client-version': string;
+  'Content-Type': 'application/json';
+  Authorization: string;
+};
+
 // config necessary to build payload for signing a JWT
 export type JwtConfig = {
   aud: string;

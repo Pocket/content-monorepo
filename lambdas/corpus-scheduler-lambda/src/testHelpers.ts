@@ -1,8 +1,7 @@
-import {
-  ScheduledCandidate,
-  ScheduledCandidates,
-  ScheduledCorpusItem,
-} from './types';
+import { DateTime } from 'luxon';
+import { http } from 'msw';
+import { SetupServer } from 'msw/node';
+
 import {
   applyApTitleCase,
   CorpusItemSource,
@@ -14,10 +13,14 @@ import {
   Topics,
   UrlMetadata,
 } from 'content-common';
-import { DateTime } from 'luxon';
-import { graphql, http, HttpResponse } from 'msw';
-import { SetupServer } from 'msw/node';
+
 import config from './config';
+import * as GraphQlApiCalls from './graphQlApiCalls';
+import {
+  ScheduledCandidate,
+  ScheduledCandidates,
+  ScheduledCorpusItem,
+} from './types';
 
 // Saturday, December 30, 2023 14.00 EST
 export const currentMockTimeMondaySaturday = DateTime.fromObject(
@@ -139,7 +142,7 @@ export const getCreateApprovedCorpusItemApiOutput =
       excerpt:
         'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
       status: CuratedStatus.RECOMMENDATION,
-      language: 'EN',
+      language: CorpusLanguage.EN,
       publisher: 'POLITICO',
       authors: [{ name: 'Rebecca Jennings', sortOrder: 1 }],
       imageUrl: 'https://fake-image-url.com',
@@ -171,158 +174,82 @@ export const getParserItem = (): UrlMetadata => {
 };
 
 export const getUrlMetadataBody = {
-  data: {
-    getUrlMetadata: {
-      url: 'https://fake-url.com',
-      title: 'Fake title',
-      excerpt: 'fake excerpt',
-      status: CuratedStatus.RECOMMENDATION,
-      language: 'EN',
-      publisher: 'POLITICO',
-      datePublished: '2024-01-01',
-      authors: 'Fake Author',
-      imageUrl: 'https://fake-image-url.com',
-      topic: Topics.SELF_IMPROVEMENT,
-      source: CorpusItemSource.ML,
-      isCollection: false,
-      isSyndicated: false,
-    },
-  },
+  url: 'https://getUrlMetadataBody-fake-url.com',
+  title: 'Fake title',
+  excerpt: 'fake excerpt',
+  status: CuratedStatus.RECOMMENDATION,
+  language: 'EN',
+  publisher: 'POLITICO',
+  datePublished: '2024-01-01',
+  authors: 'Fake Author',
+  imageUrl: 'https://fake-image-url.com',
+  topic: Topics.SELF_IMPROVEMENT,
+  source: CorpusItemSource.ML,
+  isCollection: false,
+  isSyndicated: false,
 };
 
 export const getApprovedCorpusItemByUrlBody = {
-  data: {
-    getApprovedCorpusItemByUrl: {
-      url: 'https://fake-url.com',
-      externalId: 'fake-external-id',
-    },
-  },
+  url: 'https://getApprovedCorpusItemByUrlBody-fake-url.com',
+  externalId: 'fake-external-id',
 };
 
 export const createApprovedCorpusItemBody = {
-  data: {
-    createApprovedCorpusItem: {
-      externalId: 'fake-external-id',
-      url: 'https://fake-url.com',
-      title: 'Fake title',
-      scheduledSurfaceHistory: [
-        {
-          externalId: '143b8de8-0dc9-4613-b9f0-0e8837a2df1c',
-        },
-      ],
+  externalId: 'fake-external-id',
+  url: 'https://createApprovedCorpusItemBody-fake-url.com',
+  title: 'Fake title',
+  scheduledSurfaceHistory: [
+    {
+      externalId: '143b8de8-0dc9-4613-b9f0-0e8837a2df1c',
     },
-  },
+  ],
 };
 
 export const createScheduledCorpusItemBody = {
-  data: {
-    createScheduledCorpusItem: {
-      externalId: 'fake-scheduled-external-id-2',
-      approvedItem: {
-        externalId: 'fake-external-id',
-        url: 'https://fake-url.com',
-        title: 'Fake title',
-      },
-    },
+  externalId: 'fake-scheduled-external-id-2',
+  approvedItem: {
+    externalId: 'fake-external-id',
+    url: 'https://createScheduledCorpusItemBody-fake-url.com',
+    title: 'Fake title',
   },
 };
 
-export const createScheduledCorpusItemUserErrorBody = {
-  errors: [
-    {
-      message:
-        'This story is already scheduled to appear on NEW_TAB_EN_US on Mar 27, 2024.',
-      path: ['createScheduledCorpusItem'],
-      extensions: {
-        code: 'ALREADY_SCHEDULED',
-        serviceName: 'curated-corpus',
-        exception: {
-          message:
-            'This story is already scheduled to appear on NEW_TAB_EN_US on Mar 27, 2024.',
-          locations: [
-            {
-              line: 1,
-              column: 94,
-            },
-          ],
-          path: ['createScheduledCorpusItem'],
-        },
-      },
-    },
-  ],
-  data: null,
-};
-
-/**
- * Set up the mock server to return responses for the getUrlMetadata query.
- * @param server
- * @param responseBody GraphQL response body.
- */
 export const mockGetUrlMetadata = (
-  server: SetupServer,
   responseBody: any = getUrlMetadataBody,
-) => {
-  server.use(
-    graphql.query('getUrlMetadata', () => {
-      return HttpResponse.json(responseBody);
-    }),
-  );
+): void => {
+  jest.spyOn(GraphQlApiCalls, 'getUrlMetadata').mockImplementation(async () => {
+    return responseBody;
+  });
 };
 
-/**
- * Set up the mock server to return responses for the getApprovedCorpusItemByUrl query.
- * @param server
- * @param responseBody GraphQL response body.
- */
 export const mockGetApprovedCorpusItemByUrl = (
-  server: SetupServer,
   responseBody: any = getApprovedCorpusItemByUrlBody,
-) => {
-  server.use(
-    graphql.query('getApprovedCorpusItemByUrl', () => {
-      return HttpResponse.json(responseBody);
-    }),
-  );
+): void => {
+  jest
+    .spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
+    .mockImplementation(async () => {
+      return responseBody;
+    });
 };
 
-/**
- * Set up the mock server to return responses for the createApprovedCorpusItem mutation.
- * @param server
- * @param body GraphQL response body.
- */
-export const mockCreateApprovedCorpusItemOnce = (
-  server: SetupServer,
+export const mockCreateApprovedCorpusItem = (
   body: any = createApprovedCorpusItemBody,
-) => {
-  server.use(
-    graphql.mutation(
-      'CreateApprovedCorpusItem',
-      () => {
-        return HttpResponse.json(body);
-      },
-      { once: true },
-    ),
-  );
+): void => {
+  jest
+    .spyOn(GraphQlApiCalls, 'createApprovedAndScheduledCorpusItem')
+    .mockImplementation(async () => {
+      return body;
+    });
 };
 
-/**
- * Set up the mock server to return responses for the createScheduledCorpusItem mutation.
- * @param server
- * @param body GraphQL response body.
- */
-export const mockCreateScheduledCorpusItemOnce = (
-  server: SetupServer,
+export const mockCreateScheduledCorpusItem = (
   body: any = createScheduledCorpusItemBody,
-) => {
-  server.use(
-    graphql.mutation(
-      'CreateScheduledCorpusItem',
-      () => {
-        return HttpResponse.json(body);
-      },
-      { once: true },
-    ),
-  );
+): void => {
+  jest
+    .spyOn(GraphQlApiCalls, 'createScheduledCorpusItem')
+    .mockImplementation(async () => {
+      return body;
+    });
 };
 
 /**

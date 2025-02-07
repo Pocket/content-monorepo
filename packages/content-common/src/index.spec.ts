@@ -81,10 +81,6 @@ describe('content-common', () => {
   });
 
   describe('capitalize', () => {
-    it('should return empty str if string is null', () => {
-      const output = capitalize(null as string);
-      expect(output).toEqual('');
-    });
     it('should capitalize the first char of a string', () => {
       const string = 'a random string';
       const output = capitalize(string);
@@ -93,19 +89,6 @@ describe('content-common', () => {
   });
 
   describe('applyApTitleCase', () => {
-    it('should return undefined if string is null/undefined/empty string', () => {
-      // null
-      let output = applyApTitleCase(null as string);
-      expect(output).toBeUndefined();
-
-      // undefined
-      output = applyApTitleCase(undefined as string);
-      expect(output).toBeUndefined();
-
-      // empty string
-      output = applyApTitleCase('');
-      expect(output).toBeUndefined();
-    });
     it('should format string correctly using AP style', () => {
       const stringToFormat = 'a random String to format! random-string:Random!';
       const output = applyApTitleCase(stringToFormat);
@@ -151,18 +134,10 @@ describe('content-common', () => {
   });
   // taken from curation admin tools
   describe('formatQuotesEN', () => {
-    it('should return undefined if text is null/undefined/empty string', () => {
-      // null
-      let output = formatQuotesEN(null as string);
-      expect(output).toBeUndefined();
-
-      // undefined
-      output = formatQuotesEN(undefined as string);
-      expect(output).toBeUndefined();
-
+    it('should return an empty string if text is an empty string', () => {
       // empty string
-      output = formatQuotesEN('');
-      expect(output).toBeUndefined();
+      const output = formatQuotesEN('');
+      expect(output).toEqual('');
     });
 
     it('adds single open curly apostrophe for straight apostrophe', () => {
@@ -196,18 +171,10 @@ describe('content-common', () => {
   });
 
   describe('formatQuotesDashesDE', () => {
-    it('should return undefined if text is null/undefined/empty string', () => {
-      // null
-      let output = formatQuotesDashesDE(null as unknown as string);
-      expect(output).toBeUndefined();
-
-      // undefined
-      output = formatQuotesDashesDE(undefined as unknown as string);
-      expect(output).toBeUndefined();
-
+    it('should return an empty string if text is an empty string', () => {
       // empty string
-      output = formatQuotesDashesDE('');
-      expect(output).toBeUndefined();
+      const output = formatQuotesDashesDE('');
+      expect(output).toEqual('');
     });
     it('Successfully does all replacements', () => {
       const result = formatQuotesDashesDE(

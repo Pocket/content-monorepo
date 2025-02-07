@@ -1,9 +1,8 @@
-import { SQSEvent, SQSHandler } from 'aws-lambda';
 import * as Sentry from '@sentry/serverless';
-
-import { getJwtBearerToken } from './jwt';
+import { SQSEvent, SQSHandler } from 'aws-lambda';
 
 import config from './config';
+import { getJwtBearerToken } from './jwt';
 import { processAndScheduleCandidate } from './utils';
 
 Sentry.AWSLambda.init({
