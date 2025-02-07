@@ -15,6 +15,7 @@ import {
   CorpusItemSource,
   CuratedStatus,
   Topics,
+  CorpusLanguage,
 } from 'content-common';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { MozillaAccessGroup } from 'content-common';
@@ -60,7 +61,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
     ],
     status: CuratedStatus.CORPUS,
     imageUrl: 'https://test.com/image.png',
-    language: 'DE',
+    language: CorpusLanguage.DE,
     publisher: 'Convective Cloud',
     datePublished: '2024-01-02',
     topic: Topics.TECHNOLOGY,
@@ -187,7 +188,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
         authors,
         status: CuratedStatus.CORPUS,
         imageUrl: 'https://test.com/image.png',
-        language: 'DE',
+        language: CorpusLanguage.DE,
         publisher: 'Cloud Factory',
         datePublished: '2024-02-22',
         topic: Topics.BUSINESS,

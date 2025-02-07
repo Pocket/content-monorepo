@@ -1,8 +1,10 @@
-import { ScheduledCandidate } from './types';
-import { assert } from 'typia';
 import { DateTime, Interval } from 'luxon';
-import config from './config';
+import { assert } from 'typia';
+
 import { ScheduledSurfacesEnum } from 'content-common';
+
+import config from './config';
+import { ScheduledCandidate } from './types';
 
 /**
  * Validates the scheduled date for a candidate in a specified time zone

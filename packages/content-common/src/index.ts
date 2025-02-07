@@ -84,11 +84,7 @@ export const capitalize = (value: string): string => {
  * @param {string} [value]
  * @returns {string}
  */
-export const applyApTitleCase = (value: string): string | undefined => {
-  if (!value) {
-    return undefined;
-  }
-
+export const applyApTitleCase = (value: string): string => {
   // Split and filter empty strings
   // Boolean here acts as a callback, evaluates each word:
   // If it's a non-empty string, keep the word in the array;
@@ -122,7 +118,6 @@ export const applyApTitleCase = (value: string): string | undefined => {
   return lowercaseAfterApostrophe(result);
 };
 
-
 /**
  * Helper to replace opening and closing curly single and double quotes for English
  * Curly quotes represented in unicode
@@ -131,11 +126,7 @@ export const applyApTitleCase = (value: string): string | undefined => {
  * @param text
  * @returns string
  */
-
-export const formatQuotesEN = (text: string): string | undefined => {
-  if (!text) {
-    return undefined;
-  }
+export const formatQuotesEN = (text: string): string => {
   return text
     .replace(/(^|[-\u2014/([{"\s])'/g, '$1\u2018') // Opening singles (replaces opening ' with ‘)
     .replace(/'/g, '\u2019') // Closing singles & apostrophes (replaces closing ' with ’)
@@ -150,11 +141,7 @@ export const formatQuotesEN = (text: string): string | undefined => {
  * @param text
  * @returns string
  */
-
-export const formatQuotesDashesDE = (text: string): string | undefined => {
-  if (!text) {
-    return undefined;
-  }
+export const formatQuotesDashesDE = (text: string): string => {
   return text
     .replace(/(^|[-\u2014/([{\u2018\s])\u00AB/g, '$1\u201E') // Replaces opening « with „
     .replace(/(^|[-\u2014/([{\u2018\s])\u00BB/g, '$1\u201E') // Replaces opening » with „
