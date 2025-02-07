@@ -1,32 +1,24 @@
-import {
-  createAndScheduleCorpusItemHelper,
-  createCreateScheduledItemInput,
-  mapAuthorToApprovedItemAuthor,
-  mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput,
-  validateDatePublished,
-} from './utils';
-import config from './config';
 import { setupServer } from 'msw/node';
+
 import {
-  ApprovedItemAuthor,
+  createCreateScheduledItemInput,
+  mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput,
+} from './utils';
+
+import {
   CorpusItemSource,
   CorpusLanguage,
   CreateApprovedCorpusItemApiInput,
   UrlMetadata,
 } from 'content-common';
+import { mockPocketImageCache } from 'lambda-common';
+
 import {
   createScheduledCandidate,
   defaultScheduledDate,
   getCreateApprovedCorpusItemApiOutput,
   getParserItem,
-  mockCreateApprovedCorpusItemOnce,
-  mockCreateScheduledCorpusItemOnce,
-  mockGetApprovedCorpusItemByUrl,
-  mockGetUrlMetadata,
-  mockSnowplow,
 } from './testHelpers';
-import { getEmitter, getTracker } from 'content-common';
-import * as LambdaCommon from 'lambda-common';
 
 // Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
 describe('utils', function () {
@@ -35,9 +27,6 @@ describe('utils', function () {
   let expectedCreateApprovedCorpusItemApiOutput: CreateApprovedCorpusItemApiInput;
   let parserItem: UrlMetadata;
   const now = new Date('2021-01-01 10:20:30');
-
-  const emitter = getEmitter();
-  const tracker = getTracker(emitter, config.snowplow.appId);
 
   beforeAll(() => {
     server.listen();
@@ -101,95 +90,13 @@ describe('utils', function () {
     });
   });
 
-  describe('createAndScheduleCorpusItemHelper', () => {
-    it('should schedule a previously approved item', async () => {
-      mockSnowplow(server);
-      // approvedCorpusItem should return a response, not null
-      mockGetApprovedCorpusItemByUrl(server);
-      mockGetUrlMetadata(server);
-      mockCreateScheduledCorpusItemOnce(server);
-      mockCreateApprovedCorpusItemOnce(server);
-
-      // spy on console.log
-      const consoleLogSpy = jest.spyOn(global.console, 'log');
-
-      const scheduledCandidate = createScheduledCandidate();
-
-      // no errors should be thrown from apis
-      await expect(
-        createAndScheduleCorpusItemHelper(
-          scheduledCandidate,
-          'fake-bearer-token',
-          tracker,
-        ),
-      ).resolves.not.toThrowError();
-
-      // we expect the createScheduledCorpusItem to run
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        'CreateScheduledCorpusItem MUTATION OUTPUT: {"data":{"createScheduledCorpusItem":{"externalId":"fake-scheduled-external-id-2","approvedItem":{"externalId":"fake-external-id","url":"https://fake-url.com","title":"Fake title"}}}}',
-      );
-    });
-
-    it('should create, approve & schedule a new candidate', async () => {
-      mockSnowplow(server);
-      // approvedCorpusItem should return a response, not null
-      mockGetApprovedCorpusItemByUrl(server, {
-        data: {
-          getApprovedCorpusItemByUrl: null,
-        },
-      });
-      mockGetUrlMetadata(server);
-      mockCreateScheduledCorpusItemOnce(server);
-      mockCreateApprovedCorpusItemOnce(server);
-      LambdaCommon.mockPocketImageCache(200);
-
-      // spy on console.log
-      const consoleLogSpy = jest.spyOn(global.console, 'log');
-
-      const scheduledCandidate = createScheduledCandidate();
-      // no errors should be thrown from apis
-      await expect(
-        createAndScheduleCorpusItemHelper(
-          scheduledCandidate,
-          'fake-bearer-token',
-          tracker,
-        ),
-      ).resolves.not.toThrowError();
-
-      // we expect the createScheduledCorpusItem to run
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        'CreateApprovedCorpusItem MUTATION OUTPUT: {"data":{"createApprovedCorpusItem":{"externalId":"fake-external-id","url":"https://fake-url.com","title":"Fake title","scheduledSurfaceHistory":[{"externalId":"143b8de8-0dc9-4613-b9f0-0e8837a2df1c"}]}}}',
-      );
-    });
-  });
-
-  describe('mapAuthorToApprovedItemAuthor', () => {
-    it('should create an ApprovedItemAuthor[] from a string array of author names', async () => {
-      const authors = mapAuthorToApprovedItemAuthor([
-        'Rose Essential',
-        'Floral Street',
-      ]);
-      const expectedAuthors: ApprovedItemAuthor[] = [
-        {
-          name: 'Rose Essential',
-          sortOrder: 1,
-        },
-        {
-          name: 'Floral Street',
-          sortOrder: 2,
-        },
-      ];
-      expect(authors).toEqual(expectedAuthors);
-    });
-  });
-
   describe('mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput', () => {
     afterAll(() => {
       jest.restoreAllMocks();
     });
 
     beforeAll(() => {
-      LambdaCommon.mockPocketImageCache(200);
+      mockPocketImageCache(200);
     });
 
     it('should throw Error on CreateApprovedItemInput if field types are wrong (imageUrl)', async () => {
@@ -418,39 +325,29 @@ describe('utils', function () {
         ),
       );
     });
-  });
 
-  describe('validateDatePublished', () => {
-    it('should return null if a date is not provided', () => {
-      const testDate = undefined;
+    it('should throw Error on CreateApprovedItemInput if field types are wrong (language)', async () => {
+      const scheduledCandidate: any = createScheduledCandidate();
 
-      const returnDate = validateDatePublished(testDate);
+      // ZH is not currently a valid CorpusLanguage
+      scheduledCandidate.scheduled_corpus_item.language = 'ZH';
 
-      expect(returnDate).toBeNull();
-    });
+      const invalidParserItem: any = {
+        ...parserItem,
+        language: 'zh',
+      };
 
-    it('should return null if an invalid date is provided', () => {
-      const testDate = 'BLIMP';
-
-      const returnDate = validateDatePublished(testDate);
-
-      expect(returnDate).toBeNull();
-    });
-
-    it('should return a formatted date if a Parser-style date is provided', () => {
-      const testDate = '2024-01-03 23:48:34';
-
-      const returnDate = validateDatePublished(testDate);
-
-      expect(returnDate).toEqual('2024-01-03');
-    });
-
-    it('should return a formatted date if a Collections-style date is provided', () => {
-      const testDate = '2024-04-11';
-
-      const returnDate = validateDatePublished(testDate);
-
-      expect(returnDate).toEqual('2024-04-11');
+      await expect(
+        mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
+          scheduledCandidate,
+          invalidParserItem,
+        ),
+      ).rejects.toThrow(
+        new Error(
+          `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedCorpusItemApiInput. ` +
+            `Reason: Error: Error on assert(): invalid type on $input.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT")`,
+        ),
+      );
     });
   });
 });

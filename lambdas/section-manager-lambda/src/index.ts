@@ -1,11 +1,11 @@
 import * as Sentry from '@sentry/serverless';
-
 import { SQSEvent, SQSHandler } from 'aws-lambda';
 
-import { SqsSectionWithSectionItems } from './types';
-import { validateSqsData } from './validators';
-
 import config from './config';
+import { getJwtBearerToken } from './jwt';
+import { SqsSectionWithSectionItems } from './types';
+import { processSqsSectionData } from './utils';
+import { validateSqsData } from './validators';
 
 Sentry.AWSLambda.init({
   dsn: config.app.sentry.dsn,
@@ -41,32 +41,9 @@ export const processor: SQSHandler = async (event: SQSEvent) => {
 
   validateSqsData(sqsSectionData);
 
-  // get the JWT bearer token for making graph API calls
-  /*
-  const jwtConfig: JwtConfig = {
-    aud: config.jwt.aud,
-    groups: config.jwt.groups,
-    iss: config.jwt.iss,
-    name: config.jwt.name,
-    userId: config.jwt.userId,
-  };
+  const jwtBearerToken = await getJwtBearerToken();
 
-  const bearerToken = getJwtBearerToken(jwtConfig, config.jwt.key);
-  */
-
-  // call createOrUpdate mutation for the section
-
-  // for each SectionItem, see if the URL already exists in the corpus
-
-  // if not, create the corpus item
-
-  //    get metadata from the parser
-
-  //    using parser metadata, create an ApprovedItem in the Corpus
-
-  // else if URL exists in the corpus
-
-  //    call mutation to create a new SectionItem
+  await processSqsSectionData(sqsSectionData, jwtBearerToken);
 };
 
 // the actual function has to be wrapped in order for sentry to work
