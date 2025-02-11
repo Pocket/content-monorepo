@@ -1,14 +1,16 @@
+import { GraphQLError } from 'graphql';
+import { ForbiddenError, UserInputError } from '@pocket-tools/apollo-utils';
 import { PrismaClient } from '.prisma/client';
+
 import {
   ApprovedItem,
   CreateApprovedItemInput,
   UpdateApprovedItemInput,
 } from '../types';
-import { ForbiddenError, UserInputError } from '@pocket-tools/apollo-utils';
 import { checkCorpusUrl } from '../helpers/checkCorpusUrl';
-import { GraphQLError } from 'graphql';
 import { getNormalizedDomainName } from '../../shared/utils';
 import { isExcludedDomain } from './ExcludedDomain';
+import { deleteSectionItemsByApprovedItemId } from './SectionItem';
 
 /**
  * This mutation creates an approved curated item.
@@ -92,10 +94,12 @@ export async function updateApprovedItem(
 }
 
 /**
- * This mutation deletes an approved item.
+ * This mutation deletes an approved item, as well as all associated
+ * SectionItems.
  *
  * @param db
  * @param externalId
+ * @returns ApprovedItem - the deleted ApprovedItem
  */
 export async function deleteApprovedItem(
   db: PrismaClient,
@@ -136,6 +140,9 @@ export async function deleteApprovedItem(
       approvedItemId: approvedItem.id,
     },
   });
+
+  // delete all SectionItems based on this ApprovedItem
+  await deleteSectionItemsByApprovedItemId(db, approvedItem.id);
 
   // Hard delete the Approved Item if we got to this point.
   await db.approvedItem.delete({

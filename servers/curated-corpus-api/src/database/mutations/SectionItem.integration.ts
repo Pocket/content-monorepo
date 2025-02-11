@@ -2,7 +2,11 @@ import { PrismaClient } from '.prisma/client';
 
 import { client } from '../client';
 import { clearDb, createSectionItemHelper } from '../../test/helpers';
-import { createSectionItem, removeSectionItem } from './SectionItem';
+import {
+  createSectionItem,
+  deleteSectionItemsByApprovedItemId,
+  removeSectionItem,
+} from './SectionItem';
 import { createApprovedItemHelper } from '../../test/helpers';
 import { createSectionHelper } from '../../test/helpers';
 import { ActivitySource } from 'content-common';
@@ -55,9 +59,8 @@ describe('SectionItem', () => {
         approvedItemId: approvedItem.id,
         sectionId: section.id,
         rank: 1,
-        active: true
+        active: true,
       });
-
 
       // control what `new Date()` returns in the update below so we can
       // strictly test the resulting values
@@ -70,11 +73,73 @@ describe('SectionItem', () => {
 
       // stop controlling `new Date()`
       jest.useRealTimers();
-      
+
       expect(result.externalId).toEqual(sectionItem.externalId);
       expect(result.active).toBeFalsy();
       expect(result.deactivateSource).toEqual(ActivitySource.MANUAL);
       expect(result.deactivatedAt).toEqual(newDateMock);
+    });
+  });
+
+  describe('deleteSectionItemsByApprovedItemId', () => {
+    it('should delete all SectionItems associated with the given approvedItemId', async () => {
+      // create two ApprovedItems
+      const approvedItem1 = await createApprovedItemHelper(db, {
+        title: 'Fake Item 1!',
+      });
+
+      const approvedItem2 = await createApprovedItemHelper(db, {
+        title: 'Fake Item 1!',
+      });
+
+      // create a couple Sections
+      const section1 = await createSectionHelper(db, {});
+      const section2 = await createSectionHelper(db, {});
+
+      // add two SectionItems to section1
+
+      // this SectionItem points to approvedItem1 and should be deleted in the db call below
+      await createSectionItemHelper(db, {
+        approvedItemId: approvedItem1.id,
+        sectionId: section1.id,
+        rank: 1,
+        active: true,
+      });
+
+      // this SectionItem points to approvedItem2 and should *NOT* be deleted in the db call below
+      await createSectionItemHelper(db, {
+        approvedItemId: approvedItem2.id,
+        sectionId: section1.id,
+        rank: 1,
+        active: true,
+      });
+
+      // add a SectionItems to section2
+
+      // this SectionItem points to approvedItem1 and should be deleted in the db call below
+      await createSectionItemHelper(db, {
+        approvedItemId: approvedItem1.id,
+        sectionId: section2.id,
+        rank: 1,
+        active: true,
+      });
+
+      await deleteSectionItemsByApprovedItemId(db, approvedItem1.id);
+
+      // to verify the call above, retrieve all SectionItems associated with either ApprovedItem
+      const sectionItems = await db.sectionItem.findMany({
+        where: {
+          approvedItemId: {
+            in: [approvedItem1.id, approvedItem2.id],
+          },
+        },
+      });
+
+      // there should only be one SectionItem left...
+      expect(sectionItems.length).toBe(1);
+
+      // ...and it should be associated to approvedItem2
+      expect(sectionItems[0].approvedItemId).toEqual(approvedItem2.id);
     });
   });
 });
