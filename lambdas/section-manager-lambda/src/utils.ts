@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/serverless';
 import { assert } from 'typia';
 
 import {
@@ -26,6 +25,16 @@ import {
   SqsSectionWithSectionItems,
 } from './types';
 
+/**
+ * orchestration function - calls functions to:
+ *  - create or update a section
+ *  - retrieve or create approved corpus items
+ *  - create sections items
+ *
+ * @param sqsSectionData SqsSectionWithSectionItems object
+ * @param jwtBearerToken string
+ * @returns Promise<void>
+ */
 export const processSqsSectionData = async (
   sqsSectionData: SqsSectionWithSectionItems,
   jwtBearerToken: string,
@@ -114,86 +123,76 @@ export const mapSqsSectionItemToCreateApprovedItemApiInput = async (
   sqsSectionItem: SqsSectionItem,
   parserMetadata: UrlMetadata,
 ): Promise<CreateApprovedCorpusItemApiInput> => {
-  try {
-    // source and topic are required from ML & have been validated upstream
-    const source = sqsSectionItem.source;
-    const topic = sqsSectionItem.topic;
+  // source and topic are required from ML & have been validated upstream
+  const source = sqsSectionItem.source;
+  const topic = sqsSectionItem.topic;
 
-    // for language, title, and excerpt, we prefer ML-supplied values, but
-    // will fall back to Parser-supplied values if ML values are missing
-    let language: string | undefined =
-      sqsSectionItem.language || parserMetadata.language;
+  // for language, title, and excerpt, we prefer ML-supplied values, but
+  // will fall back to Parser-supplied values if ML values are missing
+  let language: string | undefined =
+    sqsSectionItem.language || parserMetadata.language;
 
-    // the Parser returns a lowercase language value
-    language = language && language.toUpperCase();
+  // the Parser returns a lowercase language value
+  language = language && language.toUpperCase();
 
-    // title and excerpt have different formatting for different languages
-    let title: string | undefined =
-      sqsSectionItem.title || parserMetadata.title;
+  // title and excerpt have different formatting for different languages
+  let title: string | undefined = sqsSectionItem.title || parserMetadata.title;
 
-    let excerpt: string | undefined =
-      sqsSectionItem.excerpt || parserMetadata.excerpt;
+  let excerpt: string | undefined =
+    sqsSectionItem.excerpt || parserMetadata.excerpt;
 
-    if (language === CorpusLanguage.EN) {
-      // only apply formatting if title and excerpt are defined
-      title = title && formatQuotesEN(applyApTitleCase(title));
-      excerpt = excerpt && formatQuotesEN(excerpt);
-    } else if (language === CorpusLanguage.DE) {
-      title = title && formatQuotesDashesDE(title);
-      excerpt = excerpt && formatQuotesDashesDE(excerpt);
-    }
-
-    let imageUrl: string | undefined =
-      sqsSectionItem.image_url || parserMetadata.imageUrl;
-
-    // only validate the imageUrl if it's defined
-    imageUrl = imageUrl && (await validateImageUrl(imageUrl));
-
-    // the following fields are from primary source = Parser
-    const publisher = parserMetadata.publisher;
-
-    const datePublished = validateDatePublished(parserMetadata.datePublished);
-
-    // Metaflow only grabs the first author even if there are more than 1 author present, so grab authors from Parser
-    // if Parser cannot return authors, default to Metaflow then
-    let authors: ApprovedItemAuthor[] | undefined;
-
-    if (parserMetadata.authors) {
-      authors = mapAuthorToApprovedItemAuthor(
-        parserMetadata.authors.split(','),
-      );
-    } else if (sqsSectionItem.authors) {
-      authors = mapAuthorToApprovedItemAuthor(sqsSectionItem.authors);
-    }
-
-    const apiInput: any = {
-      authors,
-      excerpt,
-      imageUrl,
-      isCollection: parserMetadata.isCollection || false,
-      isSyndicated: parserMetadata.isSyndicated || false,
-      isTimeSensitive: false,
-      language,
-      publisher,
-      source,
-      status: sqsSectionItem.status,
-      title,
-      topic,
-      url: sqsSectionItem.url,
-    };
-
-    // Only add the publication date to the mutation input if the date is available
-    if (datePublished) {
-      apiInput.datePublished = datePublished;
-    }
-
-    assert<CreateApprovedCorpusItemApiInput>(apiInput);
-
-    return apiInput;
-  } catch (e) {
-    const err = `failed to map ${sqsSectionItem.url} to CreateApprovedCorpusItemApiInput. Reason: ${e}`;
-
-    Sentry.captureException(err);
-    throw new Error(err);
+  if (language === CorpusLanguage.EN) {
+    // only apply formatting if title and excerpt are defined
+    title = title && formatQuotesEN(applyApTitleCase(title));
+    excerpt = excerpt && formatQuotesEN(excerpt);
+  } else if (language === CorpusLanguage.DE) {
+    title = title && formatQuotesDashesDE(title);
+    excerpt = excerpt && formatQuotesDashesDE(excerpt);
   }
+
+  let imageUrl: string | undefined =
+    sqsSectionItem.image_url || parserMetadata.imageUrl;
+
+  // only validate the imageUrl if it's defined
+  imageUrl = imageUrl && (await validateImageUrl(imageUrl));
+
+  // the following fields are from primary source = Parser
+  const publisher = parserMetadata.publisher;
+
+  const datePublished = validateDatePublished(parserMetadata.datePublished);
+
+  // Metaflow only grabs the first author even if there are more than 1 author present, so grab authors from Parser
+  // if Parser cannot return authors, default to Metaflow then
+  let authors: ApprovedItemAuthor[] | undefined;
+
+  if (parserMetadata.authors) {
+    authors = mapAuthorToApprovedItemAuthor(parserMetadata.authors.split(','));
+  } else if (sqsSectionItem.authors) {
+    authors = mapAuthorToApprovedItemAuthor(sqsSectionItem.authors);
+  }
+
+  const apiInput: any = {
+    authors,
+    excerpt,
+    imageUrl,
+    isCollection: parserMetadata.isCollection || false,
+    isSyndicated: parserMetadata.isSyndicated || false,
+    isTimeSensitive: false,
+    language,
+    publisher,
+    source,
+    status: sqsSectionItem.status,
+    title,
+    topic,
+    url: sqsSectionItem.url,
+  };
+
+  // Only add the publication date to the mutation input if the date is available
+  if (datePublished) {
+    apiInput.datePublished = datePublished;
+  }
+
+  assert<CreateApprovedCorpusItemApiInput>(apiInput);
+
+  return apiInput;
 };

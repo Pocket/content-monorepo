@@ -1,9 +1,11 @@
-import * as Sentry from '@sentry/serverless';
-
 import {
+  applyApTitleCase,
   CorpusItemSource,
   CorpusLanguage,
   CuratedStatus,
+  formatQuotesEN,
+  formatQuotesDashesDE,
+  ScheduledSurfacesEnum,
   Topics,
   UrlMetadata,
 } from 'content-common';
@@ -13,13 +15,13 @@ import {
   validateDatePublished,
 } from 'lambda-common';
 
-import { SqsSectionItem } from './types';
-import { mapSqsSectionItemToCreateApprovedItemApiInput } from './utils';
+import { SqsSectionWithSectionItems, SqsSectionItem } from './types';
+import {
+  mapSqsSectionDataToCreateOrUpdateSectionApiInput,
+  mapSqsSectionItemToCreateApprovedItemApiInput,
+} from './utils';
 
 describe('utils', () => {
-  const sentryCaptureExceptionSpy = jest
-    .spyOn(Sentry, 'captureException')
-    .mockImplementation();
   const url = 'https://science-fiction-reads.com/octavia-and-ursula';
 
   let sqsSectionItem: SqsSectionItem;
@@ -61,6 +63,32 @@ describe('utils', () => {
 
   afterAll(() => {
     jest.restoreAllMocks();
+  });
+
+  describe('mapSqsSectionDataToCreateOrUpdateSectionApiInput', () => {
+    it('should map an SqsSectionWithSectionItems object to a CreateOrUpdateSectionApiInput object', () => {
+      const sqsData: SqsSectionWithSectionItems = {
+        active: true,
+        candidates: [],
+        id: 'test-id',
+        scheduled_surface_guid: ScheduledSurfacesEnum.NEW_TAB_DE_DE,
+        sort: 42,
+        source: CorpusItemSource.ML,
+        title: 'test title',
+      };
+
+      const apiInput =
+        mapSqsSectionDataToCreateOrUpdateSectionApiInput(sqsData);
+
+      expect(apiInput.active).toEqual(sqsData.active);
+      expect(apiInput.createSource).toEqual(sqsData.source);
+      expect(apiInput.externalId).toEqual(sqsData.id);
+      expect(apiInput.scheduledSurfaceGuid).toEqual(
+        sqsData.scheduled_surface_guid,
+      );
+      expect(apiInput.sort).toEqual(sqsData.sort);
+      expect(apiInput.title).toEqual(sqsData.title);
+    });
   });
 
   describe('mapSqsSectionItemToCreateApprovedItemApiInput', () => {
@@ -160,11 +188,9 @@ describe('utils', () => {
         ),
       ).rejects.toThrow(
         new Error(
-          `failed to map ${url} to CreateApprovedCorpusItemApiInput. Reason: Error: Error on assert(): invalid type on $input.title, expect to be string`,
+          `Error on assert(): invalid type on $input.title, expect to be string`,
         ),
       );
-
-      expect(sentryCaptureExceptionSpy).toHaveBeenCalledTimes(1);
     });
 
     /**
@@ -191,7 +217,7 @@ describe('utils', () => {
 
       // jest's way to wait for the async operation below - make sure it
       // knows how many assertions are in this test
-      expect.assertions(2);
+      expect.assertions(1);
 
       try {
         await mapSqsSectionItemToCreateApprovedItemApiInput(
@@ -203,56 +229,65 @@ describe('utils', () => {
         // error occurred, and not prior
         expect(error.message).toContain('Error on assert():');
       }
-
-      expect(sentryCaptureExceptionSpy).toHaveBeenCalledTimes(1);
     });
 
-    /**
-     * this test is meant to verify that different formatting is taking place
-     * based on the language value. we don't need to re-test the internal
-     * functions - just make sure that given different langauge values, we will
-     * receive different outputs.
-     */
-    it('format titles and excerpts for EN and DE only', async () => {
-      mockPocketImageCache(200);
+    describe('formatting titles and excerpts', () => {
+      beforeEach(() => {
+        mockPocketImageCache(200);
 
-      // make sure title and excerpt need formatting for both EN and DE.
+        // note - ideally we'd just spy on the internal functions, but there's
+        // no easy way (afaik) to do that when importing from an external
+        // module.
 
-      // note - ideally we'd just spy on the internal functions, but there's
-      // no easy way (afaik) to do that when importing from an external
-      // module.
-      sqsSectionItem.title =
-        '»a random String to format! random-string:Random!"';
-      sqsSectionItem.excerpt = '"»example«';
+        // make sure title and excerpt need formatting for both EN and DE.
+        sqsSectionItem.title =
+          '»a random String to format! random-string:Random!"';
+        sqsSectionItem.excerpt = '"»example«';
+      });
 
-      sqsSectionItem.language = CorpusLanguage.EN;
+      it('format titles and excerpts for EN', async () => {
+        sqsSectionItem.language = CorpusLanguage.EN;
 
-      const resultEN = await mapSqsSectionItemToCreateApprovedItemApiInput(
-        sqsSectionItem,
-        urlMetadata,
-      );
+        const result = await mapSqsSectionItemToCreateApprovedItemApiInput(
+          sqsSectionItem,
+          urlMetadata,
+        );
 
-      sqsSectionItem.language = CorpusLanguage.DE;
+        expect(result.title).toEqual(
+          formatQuotesEN(applyApTitleCase(sqsSectionItem.title as string)),
+        );
+        expect(result.excerpt).toEqual(
+          formatQuotesEN(sqsSectionItem.excerpt as string),
+        );
+      });
 
-      const resultDE = await mapSqsSectionItemToCreateApprovedItemApiInput(
-        sqsSectionItem,
-        urlMetadata,
-      );
+      it('format titles and excerpts for DE', async () => {
+        sqsSectionItem.language = CorpusLanguage.DE;
 
-      sqsSectionItem.language = CorpusLanguage.ES;
+        const result = await mapSqsSectionItemToCreateApprovedItemApiInput(
+          sqsSectionItem,
+          urlMetadata,
+        );
 
-      const resultES = await mapSqsSectionItemToCreateApprovedItemApiInput(
-        sqsSectionItem,
-        urlMetadata,
-      );
+        expect(result.title).toEqual(
+          formatQuotesDashesDE(sqsSectionItem.title as string),
+        );
+        expect(result.excerpt).toEqual(
+          formatQuotesDashesDE(sqsSectionItem.excerpt as string),
+        );
+      });
 
-      expect(resultEN.title).not.toEqual(sqsSectionItem.title);
-      expect(resultEN.title).not.toEqual(resultDE.title);
-      expect(resultEN.title).not.toEqual(resultES.title);
+      it('does not format titles and excerpts for languages other than EN and DE', async () => {
+        sqsSectionItem.language = CorpusLanguage.ES;
 
-      expect(resultEN.excerpt).not.toEqual(sqsSectionItem.excerpt);
-      expect(resultEN.excerpt).not.toEqual(resultDE.excerpt);
-      expect(resultEN.excerpt).not.toEqual(resultES.excerpt);
+        const result = await mapSqsSectionItemToCreateApprovedItemApiInput(
+          sqsSectionItem,
+          urlMetadata,
+        );
+
+        expect(result.title).toEqual(sqsSectionItem.title as string);
+        expect(result.excerpt).toEqual(sqsSectionItem.excerpt as string);
+      });
     });
 
     it('should fail if image validation fails', async () => {
@@ -265,11 +300,9 @@ describe('utils', () => {
         ),
       ).rejects.toThrow(
         new Error(
-          `failed to map ${url} to CreateApprovedCorpusItemApiInput. Reason: Error: Error on assert(): invalid type on $input.imageUrl, expect to be string`,
+          `Error on assert(): invalid type on $input.imageUrl, expect to be string`,
         ),
       );
-
-      expect(sentryCaptureExceptionSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

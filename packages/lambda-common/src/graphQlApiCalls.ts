@@ -3,6 +3,7 @@ import { ApprovedCorpusItemOutput, GraphQlApiCallHeaders } from './types';
 
 /**
  * creates a header object necessary for making API calls against the graph
+ *
  * @param clientName string
  * @param clientVersion string
  * @param jwtBearerToken string
@@ -23,9 +24,10 @@ export const generateGraphQlApiHeaders = (
 
 /**
  * Calls the getApprovedCorpusItemByUrl query to fetch and already approved corpus item.
+ *
  * @param url the url to get the approved item for
  * @param jwtBearerToken generated bearerToken for admin api
- * @returns { url, externalId } or null if url did not exist in the corpus
+ * @returns Promise<ApprovedCorpusItemOutput | null> - null is returned if the item is not found
  */
 export async function getApprovedCorpusItemByUrl(
   adminApiEndpoint: string,
@@ -61,8 +63,11 @@ export async function getApprovedCorpusItemByUrl(
 
 /**
  * Calls the getUrlMetadata query from prospect-api/parser.
- * @param url the url to get the metadata for
- * @param bearerToken generated bearerToken for admin api
+ *
+ * @param adminApiEndpoint string
+ * @param graphHeaders GraphQlApiHeaders object
+ * @param url string
+ * @returns Promise<UrlMetadata>
  */
 export async function getUrlMetadata(
   adminApiEndpoint: string,

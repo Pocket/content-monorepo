@@ -9,6 +9,14 @@ export const sleep = async (ms: number) => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+/**
+ * calls the createOrUpdateSection mutation to either create or update
+ * a section
+ *
+ * @param graphHeaders GraphQlApiCallHeaders object
+ * @param data CreateOrUpdateSectionApiInput object
+ * @returns Promise<string>
+ */
 export const createOrUpdateSection = async (
   graphHeaders: GraphQlApiCallHeaders,
   data: CreateOrUpdateSectionApiInput,
@@ -18,8 +26,6 @@ export const createOrUpdateSection = async (
 
   const variables = { data };
 
-  let result;
-
   const mutation = `
         mutation CreateOrUpdateSection($data: CreateOrUpdateSectionInput!) {
             createOrUpdateSection(data: $data) {
@@ -28,21 +34,17 @@ export const createOrUpdateSection = async (
         }
     `;
 
-  try {
-    const res = await fetch(config.adminApiEndpoint, {
-      method: 'post',
-      headers: graphHeaders,
-      body: JSON.stringify({ query: mutation, variables }),
-    });
+  const res = await fetch(config.adminApiEndpoint, {
+    method: 'post',
+    headers: graphHeaders,
+    body: JSON.stringify({ query: mutation, variables }),
+  });
 
-    result = await res.json();
+  const result = await res.json();
 
-    console.log(
-      `CreateOrUpdateSection MUTATION OUTPUT: ${JSON.stringify(result)}`,
-    );
-  } catch (ex) {
-    throw new Error(`createOrUpdateSection error: ${ex}`);
-  }
+  console.log(
+    `CreateOrUpdateSection MUTATION OUTPUT: ${JSON.stringify(result)}`,
+  );
 
   // check for any errors when running or returned by the mutation
   if (!result.data && result.errors.length > 0) {

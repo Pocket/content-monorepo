@@ -27,7 +27,7 @@ export const sleep = async (ms: number) => {
  * @param adminApiEndpoint string
  * @param graphHeaders GraphQlApiHeaders object
  * @param url string
- * @returns ApprovedCorpusItemOutput
+ * @returns Promise<ApprovedCorpusItemOutput>
  */
 export async function getApprovedCorpusItemByUrl(
   adminApiEndpoint: string,
@@ -47,7 +47,7 @@ export async function getApprovedCorpusItemByUrl(
  * @param adminApiEndpoint string
  * @param graphHeaders GraphQlApiHeaders object
  * @param url string
- * @returns UrlMetadata
+ * @returns Promise<UrlMetadata>
  */
 export async function getUrlMetadata(
   adminApiEndpoint: string,
@@ -60,8 +60,11 @@ export async function getUrlMetadata(
 /**
  * Calls the createApprovedCorpusItem mutation in curated-corpus-api.
  * Approves & schedules a candidate
- * @param data
- * @param bearerToken generated bearerToken for admin api
+ *
+ * @param adminApiEndpoint string
+ * @param graphHeaders GraphQlApiHeaders object
+ * @param data CreateApprovedCorpusItemApiInput
+ * @returns Promise<ApprovedCorpusItemWithScheduleHistoryOutput>
  */
 export async function createApprovedAndScheduledCorpusItem(
   adminApiEndpoint: string,
@@ -106,8 +109,11 @@ export async function createApprovedAndScheduledCorpusItem(
 
 /**
  * Calls the createScheduledCorpusItem mutation to schedule an already approved corpus item.
- * @param data
- * @param bearerToken generated bearerToken for admin api
+ *
+ * @param adminApiEndpoint string
+ * @param graphHeaders GraphQlApiHeaders object
+ * @param data CreateScheduledItemInput
+ * @returns Promise<ScheduledCorpusItemWithApprovedCorpusItemOutput>
  */
 export async function createScheduledCorpusItem(
   adminApiEndpoint: string,
