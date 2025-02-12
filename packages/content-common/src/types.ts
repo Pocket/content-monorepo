@@ -67,7 +67,7 @@ export type ApprovedItemRequiredInput = {
   excerpt: string;
   authors: ApprovedItemAuthor[];
   status: CuratedStatus;
-  language: string;
+  language: CorpusLanguage;
   publisher: string;
   imageUrl: string;
   topic: string;
@@ -82,7 +82,7 @@ export type CreateOrUpdateSectionApiInput = {
   sort?: number;
   createSource: ActivitySource;
   active: boolean;
-}
+};
 
 export type CreateSectionItemApiInput = {
   sectionExternalId: string;
@@ -118,7 +118,6 @@ export type CreateScheduledItemInput = {
   source: ActivitySource;
 };
 
-
 // these values will need to match those listed in the source of truth doc:
 // https://mozilla-hub.atlassian.net/wiki/spaces/PE/pages/390642851/Pocket+Shared+Data#Prospect-Types
 export enum ProspectType {
@@ -144,7 +143,7 @@ export enum ProspectType {
   QA_NBA = 'QA_NBA',
   QA_NFL = 'QA_NFL',
   QA_NHL = 'QA_NHL',
-  QA_SOCCER = 'QA_SOCCER' // placeholder for now
+  QA_SOCCER = 'QA_SOCCER', // placeholder for now
 }
 
 export enum ProspectReviewStatus {
@@ -266,7 +265,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.QA_NBA,
       ProspectType.QA_NFL,
       ProspectType.QA_NHL,
-      ProspectType.QA_SOCCER
+      ProspectType.QA_SOCCER,
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENUS,
   },

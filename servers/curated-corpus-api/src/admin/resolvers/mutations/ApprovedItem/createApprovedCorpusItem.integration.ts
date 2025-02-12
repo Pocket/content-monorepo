@@ -12,6 +12,7 @@ import {
   CuratedStatus,
   ActivitySource,
   Topics,
+  CorpusLanguage,
 } from 'content-common';
 
 import { client } from '../../../../database/client';
@@ -70,7 +71,7 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
       authors: [{ name: 'Mary Shelley', sortOrder: 1 }],
       status: CuratedStatus.CORPUS,
       imageUrl: 'https://test.com/image.png',
-      language: 'DE',
+      language: CorpusLanguage.DE,
       publisher: 'Convective Cloud',
       datePublished: '2024-02-29',
       topic: Topics.TECHNOLOGY,
@@ -544,7 +545,7 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
   });
 
   it('should fail if language code is outside of allowed values', async () => {
-    input.language = 'ZZ';
+    input.language = 'ZZ' as CorpusLanguage;
 
     const result = await request(app)
       .post(graphQLUrl)
@@ -564,7 +565,7 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
   });
 
   it('should fail if language code is correct but not in upper case', async () => {
-    input.language = 'de';
+    input.language = 'de' as CorpusLanguage;
 
     const result = await request(app)
       .post(graphQLUrl)

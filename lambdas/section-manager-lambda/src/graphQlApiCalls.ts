@@ -1,34 +1,30 @@
-import config from './config';
 import fetch from 'node-fetch';
+
+import { GraphQlApiCallHeaders } from 'lambda-common';
+
+import config from './config';
 import { CreateOrUpdateSectionApiInput } from './types';
 
 export const sleep = async (ms: number) => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export type GraphQlApiCallHeaders = {
-  'apollographql-client-name': string;
-  'apollographql-client-version': string;
-  'Content-Type': 'application/json';
-  Authorization: string;
-};
-
-export const generateGraphQlApiCallHeaders = (
-  bearerToken: string,
-): GraphQlApiCallHeaders => {
-  return {
-    'apollographql-client-name': config.app.name,
-    'apollographql-client-version': config.app.version,
-    'Content-Type': 'application/json',
-    Authorization: bearerToken,
-  };
-};
-
+/**
+ * calls the createOrUpdateSection mutation to either create or update
+ * a section
+ *
+ * @param graphHeaders GraphQlApiCallHeaders object
+ * @param data CreateOrUpdateSectionApiInput object
+ * @returns Promise<string>
+ */
 export const createOrUpdateSection = async (
+  graphHeaders: GraphQlApiCallHeaders,
   data: CreateOrUpdateSectionApiInput,
-  bearerToken: string,
-) => {
+): Promise<string> => {
+  // throttle calls to the admin graph
   await sleep(2000);
+
+  const variables = { data };
 
   const mutation = `
         mutation CreateOrUpdateSection($data: CreateOrUpdateSectionInput!) {
@@ -38,11 +34,9 @@ export const createOrUpdateSection = async (
         }
     `;
 
-  const variables = { data };
-
   const res = await fetch(config.adminApiEndpoint, {
     method: 'post',
-    headers: generateGraphQlApiCallHeaders(bearerToken),
+    headers: graphHeaders,
     body: JSON.stringify({ query: mutation, variables }),
   });
 
@@ -52,12 +46,12 @@ export const createOrUpdateSection = async (
     `CreateOrUpdateSection MUTATION OUTPUT: ${JSON.stringify(result)}`,
   );
 
-  // check for any errors returned by the mutation
+  // check for any errors when running or returned by the mutation
   if (!result.data && result.errors.length > 0) {
     throw new Error(
       `createOrUpdateSection mutation failed: ${result.errors[0].message}`,
     );
   }
 
-  return result.data.createOrUpdateSection;
+  return result.data.createOrUpdateSection.externalId;
 };

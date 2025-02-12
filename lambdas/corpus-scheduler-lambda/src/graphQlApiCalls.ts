@@ -1,5 +1,5 @@
-import config from './config';
 import fetch from 'node-fetch';
+
 import {
   CreateApprovedCorpusItemApiInput,
   CreateScheduledItemInput,
@@ -7,6 +7,12 @@ import {
 } from 'content-common';
 import {
   ApprovedCorpusItemOutput,
+  getApprovedCorpusItemByUrl as getApprovedCorpusItemByUrlCommon,
+  getUrlMetadata as getUrlMetadataCommon,
+  GraphQlApiCallHeaders,
+} from 'lambda-common';
+
+import {
   ApprovedCorpusItemWithScheduleHistoryOutput,
   ScheduledCorpusItemWithApprovedCorpusItemOutput,
 } from './types';
@@ -14,15 +20,56 @@ import {
 export const sleep = async (ms: number) => {
   await new Promise((resolve) => setTimeout(resolve, ms));
 };
+
+/**
+ * this function wraps the common function for the purposes of easily mocking in tests
+ *
+ * @param adminApiEndpoint string
+ * @param graphHeaders GraphQlApiHeaders object
+ * @param url string
+ * @returns Promise<ApprovedCorpusItemOutput>
+ */
+export async function getApprovedCorpusItemByUrl(
+  adminApiEndpoint: string,
+  graphHeaders: GraphQlApiCallHeaders,
+  url: string,
+): Promise<ApprovedCorpusItemOutput | null> {
+  return await getApprovedCorpusItemByUrlCommon(
+    adminApiEndpoint,
+    graphHeaders,
+    url,
+  );
+}
+
+/**
+ * this function wraps the common function for the purposes of easily mocking in tests
+ *
+ * @param adminApiEndpoint string
+ * @param graphHeaders GraphQlApiHeaders object
+ * @param url string
+ * @returns Promise<UrlMetadata>
+ */
+export async function getUrlMetadata(
+  adminApiEndpoint: string,
+  graphHeaders: GraphQlApiCallHeaders,
+  url: string,
+): Promise<UrlMetadata> {
+  return await getUrlMetadataCommon(adminApiEndpoint, graphHeaders, url);
+}
+
 /**
  * Calls the createApprovedCorpusItem mutation in curated-corpus-api.
  * Approves & schedules a candidate
- * @param data
- * @param bearerToken generated bearerToken for admin api
+ *
+ * @param adminApiEndpoint string
+ * @param graphHeaders GraphQlApiHeaders object
+ * @param data CreateApprovedCorpusItemApiInput
+ * @returns Promise<ApprovedCorpusItemWithScheduleHistoryOutput>
  */
 export async function createApprovedAndScheduledCorpusItem(
+  adminApiEndpoint: string,
+  graphHeaders: GraphQlApiCallHeaders,
   data: CreateApprovedCorpusItemApiInput,
-  bearerToken: string,
 ): Promise<ApprovedCorpusItemWithScheduleHistoryOutput> {
   // Wait, don't overwhelm the API
   await sleep(2000);
@@ -38,17 +85,15 @@ export async function createApprovedAndScheduledCorpusItem(
     }`;
 
   const variables = { data };
-  const res = await fetch(config.AdminApi, {
+
+  const res = await fetch(adminApiEndpoint, {
     method: 'post',
-    headers: {
-      'apollographql-client-name': config.app.name,
-      'apollographql-client-version': config.app.version,
-      'Content-Type': 'application/json',
-      Authorization: bearerToken,
-    },
+    headers: graphHeaders,
     body: JSON.stringify({ query: mutation, variables }),
   });
+
   const result = await res.json();
+
   console.log(
     `CreateApprovedCorpusItem MUTATION OUTPUT: ${JSON.stringify(result)}`,
   );
@@ -63,98 +108,17 @@ export async function createApprovedAndScheduledCorpusItem(
 }
 
 /**
- * Calls the getUrlMetadata query from prospect-api/parser.
- * @param url the url to get the metadata for
- * @param bearerToken generated bearerToken for admin api
- */
-export async function fetchUrlMetadata(
-  url: string,
-  bearerToken: string,
-): Promise<UrlMetadata> {
-  const query = `
-      query getUrlMetadata($url: String!) {
-        getUrlMetadata(url: $url) {
-            url
-            title
-            publisher
-            datePublished
-            language
-            isSyndicated
-            isCollection
-            imageUrl
-            excerpt
-            authors
-        }
-      }`;
-
-  const variables = { url };
-
-  const res = await fetch(config.AdminApi, {
-    method: 'post',
-    headers: {
-      'apollographql-client-name': config.app.name,
-      'apollographql-client-version': config.app.version,
-      'Content-Type': 'application/json',
-      Authorization: bearerToken,
-    },
-    body: JSON.stringify({ query, variables }),
-  });
-  const result = await res.json();
-  if (!result.data && result.errors.length > 0) {
-    throw new Error(`getUrlMetadata query failed: ${result.errors[0].message}`);
-  }
-
-  return result.data.getUrlMetadata;
-}
-
-/**
- * Calls the getApprovedCorpusItemByUrl query to fetch and already approved corpus item.
- * @param url the url to get the approved item for
- * @param bearerToken generated bearerToken for admin api
- * @returns { url, externalId } or null if url did not exist in the corpus
- */
-export async function getApprovedCorpusItemByUrl(
-  url: string,
-  bearerToken: string,
-): Promise<ApprovedCorpusItemOutput> {
-  const query = `
-    query getApprovedCorpusItemByUrl($url: String!) {
-      getApprovedCorpusItemByUrl(url: $url) {
-        url
-        externalId
-      }
-  }`;
-
-  const variables = { url };
-
-  const res = await fetch(config.AdminApi, {
-    method: 'post',
-    headers: {
-      'apollographql-client-name': config.app.name,
-      'apollographql-client-version': config.app.version,
-      'Content-Type': 'application/json',
-      Authorization: bearerToken,
-    },
-    body: JSON.stringify({ query, variables }),
-  });
-  const result = await res.json();
-  if (!result.data && result.errors.length > 0) {
-    throw new Error(
-      `getApprovedCorpusItemByUrl query failed: ${result.errors[0].message}`,
-    );
-  }
-
-  return result.data.getApprovedCorpusItemByUrl;
-}
-
-/**
  * Calls the createScheduledCorpusItem mutation to schedule an already approved corpus item.
- * @param data
- * @param bearerToken generated bearerToken for admin api
+ *
+ * @param adminApiEndpoint string
+ * @param graphHeaders GraphQlApiHeaders object
+ * @param data CreateScheduledItemInput
+ * @returns Promise<ScheduledCorpusItemWithApprovedCorpusItemOutput>
  */
 export async function createScheduledCorpusItem(
+  adminApiEndpoint: string,
+  graphHeaders: GraphQlApiCallHeaders,
   data: CreateScheduledItemInput,
-  bearerToken: string,
 ): Promise<ScheduledCorpusItemWithApprovedCorpusItemOutput> {
   const mutation = `
     mutation CreateScheduledCorpusItem($data: CreateScheduledCorpusItemInput!) {
@@ -168,20 +132,18 @@ export async function createScheduledCorpusItem(
   }`;
 
   const variables = { data };
-  const res = await fetch(config.AdminApi, {
+  const res = await fetch(adminApiEndpoint, {
     method: 'post',
-    headers: {
-      'apollographql-client-name': config.app.name,
-      'apollographql-client-version': config.app.version,
-      'Content-Type': 'application/json',
-      Authorization: bearerToken,
-    },
+    headers: graphHeaders,
     body: JSON.stringify({ query: mutation, variables }),
   });
+
   const result = await res.json();
+
   console.log(
     `CreateScheduledCorpusItem MUTATION OUTPUT: ${JSON.stringify(result)}`,
   );
+
   // check for any errors returned by the mutation
   if (!result.data && result.errors.length > 0) {
     const error = result.errors[0];
@@ -189,5 +151,6 @@ export async function createScheduledCorpusItem(
       `createScheduledCorpusItem mutation failed with ${error.extensions.code}: ${error.message}`,
     );
   }
+
   return result.data.createScheduledCorpusItem;
 }

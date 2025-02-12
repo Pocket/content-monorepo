@@ -1,29 +1,32 @@
 import * as Sentry from '@sentry/serverless';
-import { setupServer } from 'msw/node';
-import { processor } from './';
 import { Callback, Context, SQSEvent } from 'aws-lambda';
-import {
-  createApprovedCorpusItemBody,
-  createScheduledCandidate,
-  createScheduledCandidates,
-  createScheduledCorpusItemBody,
-  createScheduledCorpusItemUserErrorBody,
-  mockCreateApprovedCorpusItemOnce,
-  mockCreateScheduledCorpusItemOnce,
-  mockGetApprovedCorpusItemByUrl,
-  mockGetUrlMetadata,
-} from './testHelpers';
+import { setupServer } from 'msw/node';
+
 import {
   CorpusLanguage,
   ScheduledSurfacesEnum,
   resetSnowplowEvents,
   waitForSnowplowEvents,
+  CuratedCorpusApiErrorCodes,
 } from 'content-common';
 import { mockPocketImageCache } from 'lambda-common';
+
+import {
+  createApprovedCorpusItemBody,
+  createScheduledCandidate,
+  createScheduledCandidates,
+  createScheduledCorpusItemBody,
+  mockCreateApprovedCorpusItem,
+  mockCreateScheduledCorpusItem,
+  mockGetApprovedCorpusItemByUrl,
+  mockGetUrlMetadata,
+} from './testHelpers';
 import { extractScheduledCandidateEntity } from './events/testHelpers';
 import * as Jwt from './jwt';
 import config from './config';
 import { SnowplowScheduledCorpusCandidateErrorName } from './events/types';
+import { processor } from './';
+import * as GraphQlApiCalls from './graphQlApiCalls';
 
 describe('corpus scheduler lambda', () => {
   const server = setupServer();
@@ -76,7 +79,7 @@ describe('corpus scheduler lambda', () => {
     image_url: 'https://fake-image-url.com',
     language: CorpusLanguage.EN,
     authors: ['Fake Author'],
-    url: 'https://fake-url.com',
+    url: 'https://index.integration.ts-fake-url.com',
   });
 
   const record = createScheduledCandidates([scheduledCandidate]);
@@ -90,14 +93,9 @@ describe('corpus scheduler lambda', () => {
     await resetSnowplowEvents();
 
     // returns null as we are trying to create & schedule a new item
-    mockGetApprovedCorpusItemByUrl(server, {
-      data: {
-        getApprovedCorpusItemByUrl: null,
-      },
-    });
-
-    mockGetUrlMetadata(server);
-    mockCreateApprovedCorpusItemOnce(server);
+    mockGetApprovedCorpusItemByUrl(null);
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItem();
 
     await processor(fakeEvent, sqsContext, sqsCallback);
 
@@ -110,11 +108,10 @@ describe('corpus scheduler lambda', () => {
     // Check that the right Snowplow entity that was included with the event.
     const snowplowEntity = await extractScheduledCandidateEntity();
     expect(snowplowEntity.approved_corpus_item_external_id).toEqual(
-      createApprovedCorpusItemBody.data.createApprovedCorpusItem.externalId,
+      createApprovedCorpusItemBody.externalId,
     );
     expect(snowplowEntity.scheduled_corpus_item_external_id).toEqual(
-      createApprovedCorpusItemBody.data.createApprovedCorpusItem
-        .scheduledSurfaceHistory[0].externalId,
+      createApprovedCorpusItemBody.scheduledSurfaceHistory[0].externalId,
     );
     expect(snowplowEntity.scheduled_corpus_candidate_id).toEqual(
       record.candidates[0].scheduled_corpus_candidate_id,
@@ -131,10 +128,9 @@ describe('corpus scheduler lambda', () => {
 
   it('emits a Snowplow event if a previously approved candidate is successfully processed', async () => {
     await resetSnowplowEvents();
-    // returns null as we are trying to create & schedule a new item
-    mockGetApprovedCorpusItemByUrl(server);
-    mockGetUrlMetadata(server);
-    mockCreateScheduledCorpusItemOnce(server);
+
+    mockGetApprovedCorpusItemByUrl();
+    mockCreateScheduledCorpusItem();
 
     await processor(fakeEvent, sqsContext, sqsCallback);
 
@@ -145,13 +141,12 @@ describe('corpus scheduler lambda', () => {
 
     // Check that the right Snowplow entity that was included with the event.
     const snowplowEntity = await extractScheduledCandidateEntity();
-    const expectedScheduledItem =
-      createScheduledCorpusItemBody.data.createScheduledCorpusItem;
+
     expect(snowplowEntity.approved_corpus_item_external_id).toEqual(
-      expectedScheduledItem.approvedItem.externalId,
+      createScheduledCorpusItemBody.approvedItem.externalId,
     );
     expect(snowplowEntity.scheduled_corpus_item_external_id).toEqual(
-      expectedScheduledItem.externalId,
+      createScheduledCorpusItemBody.externalId,
     );
     expect(snowplowEntity.scheduled_corpus_candidate_id).toEqual(
       record.candidates[0].scheduled_corpus_candidate_id,
@@ -168,13 +163,15 @@ describe('corpus scheduler lambda', () => {
 
   it('emits a Snowplow event if the same item was already scheduled', async () => {
     await resetSnowplowEvents();
-    // returns null as we are trying to create & schedule a new item
-    mockGetApprovedCorpusItemByUrl(server);
-    mockGetUrlMetadata(server);
-    mockCreateScheduledCorpusItemOnce(
-      server,
-      createScheduledCorpusItemUserErrorBody,
-    );
+
+    mockGetApprovedCorpusItemByUrl();
+    jest
+      .spyOn(GraphQlApiCalls, 'createScheduledCorpusItem')
+      .mockImplementation(() => {
+        throw new Error(
+          `createScheduledCorpusItem mutation failed with ${CuratedCorpusApiErrorCodes.ALREADY_SCHEDULED}`,
+        );
+      });
 
     await processor(fakeEvent, sqsContext, sqsCallback);
 
@@ -202,15 +199,13 @@ describe('corpus scheduler lambda', () => {
 
   it('sends a Sentry error if curated-corpus-api has error, with partial success', async () => {
     // returns null as we are trying to create & schedule a new item
-    mockGetApprovedCorpusItemByUrl(server, {
-      data: {
-        getApprovedCorpusItemByUrl: null,
-      },
-    });
-    mockGetUrlMetadata(server);
-    mockCreateApprovedCorpusItemOnce(server, {
-      errors: [{ message: 'server bork' }],
-    });
+    mockGetApprovedCorpusItemByUrl(null);
+    mockGetUrlMetadata();
+    jest
+      .spyOn(GraphQlApiCalls, 'createApprovedAndScheduledCorpusItem')
+      .mockImplementation(() => {
+        throw new Error(`random server error`);
+      });
 
     const fakeEvent = {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
@@ -223,13 +218,9 @@ describe('corpus scheduler lambda', () => {
 
   it('sends a Sentry error if curated-corpus-api returns null data', async () => {
     // returns null as we are trying to create & schedule a new item
-    mockGetApprovedCorpusItemByUrl(server, {
-      data: {
-        getApprovedCorpusItemByUrl: null,
-      },
-    });
-    mockGetUrlMetadata(server);
-    mockCreateApprovedCorpusItemOnce(server, { data: null });
+    mockGetApprovedCorpusItemByUrl(null);
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItem(null);
 
     await processor(fakeEvent, sqsContext, sqsCallback);
 
@@ -238,13 +229,9 @@ describe('corpus scheduler lambda', () => {
 
   it('should not start scheduling if allowedToSchedule is false', async () => {
     // returns null as we are trying to create & schedule a new item
-    mockGetApprovedCorpusItemByUrl(server, {
-      data: {
-        getApprovedCorpusItemByUrl: null,
-      },
-    });
-    mockGetUrlMetadata(server);
-    mockCreateApprovedCorpusItemOnce(server, { data: null });
+    mockGetApprovedCorpusItemByUrl(null);
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItem(null);
 
     // mock the config.app.enableScheduledDateValidation
     jest.replaceProperty(config, 'app', {
@@ -266,11 +253,7 @@ describe('corpus scheduler lambda', () => {
     // null data should be returned, but enableScheduledDateValidation === false,
     // so should not schedule and print to console.log only
     await expect(
-      processor(
-        fakeEvent,
-        null as unknown as Context,
-        null as unknown as Callback,
-      ),
+      processor(fakeEvent, sqsContext, sqsCallback),
     ).resolves.not.toThrowError();
     // expect log to console Scheduler lambda not allowed to schedule...
     expect(consoleLogSpy).toHaveBeenCalledWith(
@@ -294,13 +277,9 @@ describe('corpus scheduler lambda', () => {
     });
 
     // returns null as we are trying to create & schedule a new item
-    mockGetApprovedCorpusItemByUrl(server, {
-      data: {
-        getApprovedCorpusItemByUrl: null,
-      },
-    });
-    mockGetUrlMetadata(server);
-    mockCreateApprovedCorpusItemOnce(server, { data: null });
+    mockGetApprovedCorpusItemByUrl(null);
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItem(null);
 
     // overwrite with NEW_TAB_EN_GB scheduled surface which is not allowed
     record.candidates[0].scheduled_corpus_item.scheduled_surface_guid =
@@ -311,11 +290,7 @@ describe('corpus scheduler lambda', () => {
     // null data should be returned, but enableScheduledDateValidation === false,
     // so should not schedule and print to console.log only
     await expect(
-      processor(
-        fakeEvent,
-        null as unknown as Context,
-        null as unknown as Callback,
-      ),
+      processor(fakeEvent, sqsContext, sqsCallback),
     ).resolves.not.toThrowError();
     // expect log to console Scheduler lambda not allowed to schedule...
     expect(consoleLogSpy).toHaveBeenCalledWith(
@@ -339,25 +314,13 @@ describe('corpus scheduler lambda', () => {
     });
 
     // returns null as we are trying to create & schedule a new item
-    mockGetApprovedCorpusItemByUrl(server, {
-      data: {
-        getApprovedCorpusItemByUrl: null,
-      },
-    });
-    mockGetUrlMetadata(server);
-    mockCreateApprovedCorpusItemOnce(server);
+    mockGetApprovedCorpusItemByUrl(null);
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItem();
 
-    await processor(
-      fakeEvent,
-      null as unknown as Context,
-      null as unknown as Callback,
-    );
+    await processor(fakeEvent, sqsContext, sqsCallback);
 
     expect(captureExceptionSpy).not.toHaveBeenCalled();
-    // expect console.log to log that item has been created & scheduled
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining('CreateApprovedCorpusItem MUTATION OUTPUT'),
-    );
   }, 7000);
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (prod) (DE_DE)', async () => {
@@ -376,13 +339,9 @@ describe('corpus scheduler lambda', () => {
     });
 
     // returns null as we are trying to create & schedule a new item
-    mockGetApprovedCorpusItemByUrl(server, {
-      data: {
-        getApprovedCorpusItemByUrl: null,
-      },
-    });
-    mockGetUrlMetadata(server);
-    mockCreateApprovedCorpusItemOnce(server);
+    mockGetApprovedCorpusItemByUrl(null);
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItem();
 
     // overwrite with NEW_TAB_DE_DE scheduled surface
     record.candidates[0].scheduled_corpus_item.scheduled_surface_guid =
@@ -391,70 +350,42 @@ describe('corpus scheduler lambda', () => {
       Records: [{ messageId: '1', body: JSON.stringify(record) }],
     } as unknown as SQSEvent;
 
-    await processor(
-      fakeEvent,
-      null as unknown as Context,
-      null as unknown as Callback,
-    );
+    await processor(fakeEvent, sqsContext, sqsCallback);
 
     expect(captureExceptionSpy).not.toHaveBeenCalled();
-    // expect console.log to log that item has been created & scheduled
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      expect.stringContaining('CreateApprovedCorpusItem MUTATION OUTPUT'),
-    );
   }, 7000);
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful & valid scheduled surface but not allowed for scheduling (approve & schedule candidate) (dev)', async () => {
     // returns null as we are trying to create & schedule a new item
-    mockGetApprovedCorpusItemByUrl(server, {
-      data: {
-        getApprovedCorpusItemByUrl: null,
-      },
-    });
-    mockGetUrlMetadata(server);
-    mockCreateApprovedCorpusItemOnce(server);
+    mockGetApprovedCorpusItemByUrl(null);
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItem();
 
     // overwrite with NEW_TAB_EN_GB scheduled surface which is not allowed (but dev, so should be scheduled)
     record.candidates[0].scheduled_corpus_item.scheduled_surface_guid =
       ScheduledSurfacesEnum.NEW_TAB_EN_GB;
-    await processor(
-      fakeEvent,
-      null as unknown as Context,
-      null as unknown as Callback,
-    );
+    await processor(fakeEvent, sqsContext, sqsCallback);
 
     expect(captureExceptionSpy).not.toHaveBeenCalled();
   }, 7000);
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (dev)', async () => {
     // returns null as we are trying to create & schedule a new item
-    mockGetApprovedCorpusItemByUrl(server, {
-      data: {
-        getApprovedCorpusItemByUrl: null,
-      },
-    });
-    mockGetUrlMetadata(server);
-    mockCreateApprovedCorpusItemOnce(server);
+    mockGetApprovedCorpusItemByUrl(null);
+    mockGetUrlMetadata();
+    mockCreateApprovedCorpusItem();
 
-    await processor(
-      fakeEvent,
-      null as unknown as Context,
-      null as unknown as Callback,
-    );
+    await processor(fakeEvent, sqsContext, sqsCallback);
 
     expect(captureExceptionSpy).not.toHaveBeenCalled();
   });
 
   it('does not emit Sentry exceptions if curated-corpus-api request is successful (schedule item only)', async () => {
     // returns an approved corpus item so only needs to be scheduled
-    mockGetApprovedCorpusItemByUrl(server);
-    mockCreateScheduledCorpusItemOnce(server);
+    mockGetApprovedCorpusItemByUrl();
+    mockCreateScheduledCorpusItem();
 
-    await processor(
-      fakeEvent,
-      null as unknown as Context,
-      null as unknown as Callback,
-    );
+    await processor(fakeEvent, sqsContext, sqsCallback);
 
     expect(captureExceptionSpy).not.toHaveBeenCalled();
   });
