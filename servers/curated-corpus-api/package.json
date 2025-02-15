@@ -4,10 +4,9 @@
   "description": "",
   "main": "dist/main.js",
   "scripts": {
-    "build": "rm -rf dist && tsc && npm run build-schema-admin && npm run build-schema-public && npm run build-glean",
+    "build": "rm -rf dist && tsc && npm run build-schema-admin && npm run build-schema-public",
     "build-schema-admin": "node dist/admin/buildSchema.js",
     "build-schema-public": "node dist/public/buildSchema.js",
-    "build-glean": "glean translate src/events/glean/backend-metrics.yaml -f typescript_server --option module_spec=es -o ./src/events/glean/generated",
     "watch": "tsc -w & nodemon",
     "start": "npm run migrate:prisma-deploy && node dist/main.js",
     "dev": "npm run migrate:prisma-deploy && npm run build && npm run watch",
@@ -22,8 +21,9 @@
     "migrate:prisma-dev": "prisma migrate dev",
     "migrate:prisma-deploy": "prisma migrate deploy",
     "migrate:prisma-reset": "prisma migrate reset --skip-seed --force",
-    "prebuild": "dotenv -e .env.ci -- prisma generate",
-    "pretest": "dotenv -e .env.ci -- prisma generate",
+    "generate-glean": "glean translate src/events/glean/backend-metrics.yaml -f typescript_server --option module_spec=es -o ./src/events/glean/generated",
+    "prebuild": "dotenv -e .env.ci -- prisma generate && npm run generate-glean",
+    "pretest": "dotenv -e .env.ci -- prisma generate && npm run generate-glean",
     "pretest-integrations": "dotenv -e .env.ci -- prisma migrate reset --skip-seed --force"
   },
   "prisma": {

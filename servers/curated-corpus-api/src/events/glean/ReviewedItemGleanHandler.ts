@@ -11,20 +11,31 @@ import {
 } from '../types';
 import { CuratedStatus } from '.prisma/client';
 import { getUnixTimestamp } from '../../shared/utils';
-import { CorpusItemSource } from 'content-common';
 import { CorpusReviewStatus } from '../snowplow/schema';
 
+// Create a custom stream that forwards messages to serverLogger.
+const customStream = {
+  write: (message: string) => {
+    // Forward the log message to the existing serverLogger.
+    serverLogger.info(message);
+  },
+};
+
+// We know that mozlog supports the `stream` property, so we assert our object to `any` to suppress TS error.
 const gleanLogger = createEventsServerEventLogger({
   applicationId: 'curated-corpus-api',
   appDisplayVersion: '1.0.0',
   channel: 'production',
-  logger_options: { app: 'glean-logger' },
+  logger_options: {
+    app: 'curated-corpus-api',
+    stream: customStream, // Use our custom stream for log output.
+  } as any, // generated Glean code does not define stream logger option that mozlog supports
 });
 
 export class ReviewedItemGleanHandler {
   constructor(
     protected emitter: CuratedCorpusEventEmitter,
-    events: string[]
+    events: string[],
   ) {
     events.forEach((eventName) => {
       this.emitter.on(eventName, (data) => this.process(data));
@@ -42,15 +53,20 @@ export class ReviewedItemGleanHandler {
         experimental_json: gleanExtras.experimental_json ?? '',
       });
     } catch (ex) {
-      serverLogger.error('ReviewedItemGleanHandler: failed to record Glean event', {
-        error: ex,
-        eventType: data.eventType,
-      });
+      serverLogger.error(
+        'ReviewedItemGleanHandler: failed to record Glean event',
+        {
+          error: ex,
+          eventType: data.eventType,
+        },
+      );
       Sentry.captureException(ex);
     }
   }
 
-  private static buildGleanExtras(data: ReviewedCorpusItemPayload & BaseEventData) {
+  private static buildGleanExtras(
+    data: ReviewedCorpusItemPayload & BaseEventData,
+  ) {
     const item = data.reviewedCorpusItem;
 
     let isApproved = false;
@@ -72,7 +88,7 @@ export class ReviewedItemGleanHandler {
       rejectedExternalId = (item as RejectedCorpusItemPayload).externalId;
       if ((item as RejectedCorpusItemPayload).reason) {
         rejectionReasons = JSON.stringify(
-          (item as RejectedCorpusItemPayload).reason.split(',')
+          (item as RejectedCorpusItemPayload).reason.split(','),
         );
       }
     }
@@ -88,23 +104,45 @@ export class ReviewedItemGleanHandler {
       rejection_reasons_json: rejectionReasons,
       action_screen: (item as any).action_screen ?? '',
       title: item.title ?? '',
-      excerpt: isApproved ? (item as ApprovedCorpusItemPayload).excerpt ?? '' : '',
-      image_url: isApproved ? (item as ApprovedCorpusItemPayload).imageUrl ?? '' : '',
+      excerpt: isApproved
+        ? (item as ApprovedCorpusItemPayload).excerpt ?? ''
+        : '',
+      image_url: isApproved
+        ? (item as ApprovedCorpusItemPayload).imageUrl ?? ''
+        : '',
       language: item.language ?? '',
       topic: item.topic ?? '',
-      is_collection: isApproved ? !!(item as ApprovedCorpusItemPayload).isCollection : false,
-      is_syndicated: isApproved ? !!(item as ApprovedCorpusItemPayload).isSyndicated : false,
-      is_time_sensitive: isApproved ? !!(item as ApprovedCorpusItemPayload).isTimeSensitive : false,
-      created_at: item.createdAt ? getUnixTimestamp(item.createdAt).toString() : '',
+      is_collection: isApproved
+        ? !!(item as ApprovedCorpusItemPayload).isCollection
+        : false,
+      is_syndicated: isApproved
+        ? !!(item as ApprovedCorpusItemPayload).isSyndicated
+        : false,
+      is_time_sensitive: isApproved
+        ? !!(item as ApprovedCorpusItemPayload).isTimeSensitive
+        : false,
+      created_at: item.createdAt
+        ? getUnixTimestamp(item.createdAt).toString()
+        : '',
       created_by: item.createdBy ?? '',
-      updated_at: isApproved && (item as ApprovedCorpusItemPayload).updatedAt
-        ? getUnixTimestamp((item as ApprovedCorpusItemPayload).updatedAt).toString()
+      updated_at:
+        isApproved && (item as ApprovedCorpusItemPayload).updatedAt
+          ? getUnixTimestamp(
+            (item as ApprovedCorpusItemPayload).updatedAt,
+          ).toString()
+          : '',
+      updated_by: isApproved
+        ? (item as ApprovedCorpusItemPayload).updatedBy ?? ''
         : '',
-      updated_by: isApproved ? (item as ApprovedCorpusItemPayload).updatedBy ?? '' : '',
-      authors_json: isApproved && (item as ApprovedCorpusItemPayload).authors
-        ? JSON.stringify((item as ApprovedCorpusItemPayload).authors.map((a) => a.name))
+      authors_json:
+        isApproved && (item as ApprovedCorpusItemPayload).authors
+          ? JSON.stringify(
+              (item as ApprovedCorpusItemPayload).authors.map((a) => a.name),
+            )
+          : '',
+      publisher: isApproved
+        ? (item as ApprovedCorpusItemPayload).publisher ?? ''
         : '',
-      publisher: isApproved ? (item as ApprovedCorpusItemPayload).publisher ?? '' : '',
       experimental_json: '',
     };
   }
