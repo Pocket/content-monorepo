@@ -20,8 +20,6 @@ Sentry.AWSLambda.init({
  *  Lambda batchSize is 1 to avoid retrying successfully processed records.
  */
 export const processor: SQSHandler = async (event: SQSEvent) => {
-  console.log('Section Manager Lambda invoked...');
-
   // due to SQS message size limit of 256kb, this lambda is expected to process
   // one Section per SQS message
 
@@ -39,10 +37,17 @@ export const processor: SQSHandler = async (event: SQSEvent) => {
     event.Records[0].body,
   );
 
+  // during testing, log the data coming in from SQS/ML
+  console.log(sqsSectionData);
+
   validateSqsData(sqsSectionData);
 
+  // retrieve JWT bearer token for use in graph calls
   const jwtBearerToken = await getJwtBearerToken();
 
+  // create or update section
+  // create approved items (if url doesn't already exist in the corpus)
+  // create section items
   await processSqsSectionData(sqsSectionData, jwtBearerToken);
 };
 

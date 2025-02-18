@@ -18,7 +18,13 @@ import {
 } from 'lambda-common';
 
 import config from './config';
-import { createOrUpdateSection } from './graphQlApiCalls';
+import {
+  createApprovedCorpusItem,
+  createOrUpdateSection,
+  createSectionItem,
+  getApprovedCorpusItemByUrl,
+  getUrlMetadata,
+} from './graphQlApiCalls';
 import {
   CreateOrUpdateSectionApiInput,
   SqsSectionItem,
@@ -50,10 +56,13 @@ export const processSqsSectionData = async (
     mapSqsSectionDataToCreateOrUpdateSectionApiInput(sqsSectionData);
 
   // create or update the Section
-  await createOrUpdateSection(graphHeaders, createOrUpdateSectionApiInput);
+  const sectionExternalId = await createOrUpdateSection(
+    graphHeaders,
+    createOrUpdateSectionApiInput,
+  );
 
-  /*
-  WIP below - will complete in MC-1645
+  let approvedItemExternalId: string;
+
   // for each SectionItem, see if the URL already exists in the corpus
   for (let i = 0; i < sqsSectionData.candidates.length; i++) {
     // convenience!
@@ -66,9 +75,16 @@ export const processSqsSectionData = async (
       sqsSectionItem.url,
     );
 
-    // if an ApprovedItem wasn't found based on the URL, create one
-    if (!approvedCorpusItem) {
-      // retrieve URL metadata from the Parser
+    // if an ApprovedItem with the given URL already exists in the corpus,
+    // grab its external id.
+    if (approvedCorpusItem) {
+      approvedItemExternalId = approvedCorpusItem.externalId;
+    } else {
+      // if an ApprovedItem wasn't found based on the URL, create one
+
+      // retrieve URL metadata from the Parser. this fills in some metadata ML
+      // doesn't send, and acts as a backup if optional ML data points are not
+      // available.
       const parserMetadata = await getUrlMetadata(
         config.adminApiEndpoint,
         graphHeaders,
@@ -76,19 +92,28 @@ export const processSqsSectionData = async (
       );
 
       // create input for the createApprovedItem mutation, favoring metadata
-      // from the parser (for now?)
-      const apiInput = mapSqsSectionItemToCreateApprovedItemApiInput(
+      // from ML (in most cases)
+      const apiInput = await mapSqsSectionItemToCreateApprovedItemApiInput(
         sqsSectionItem,
         parserMetadata,
       );
 
       // create the ApprovedItem
+      approvedItemExternalId = await createApprovedCorpusItem(
+        config.adminApiEndpoint,
+        graphHeaders,
+        apiInput,
+      );
     }
 
     // call the mutation to createSectionItem using the ApprovedItem either
     // created or retrieved above
+    await createSectionItem(config.adminApiEndpoint, graphHeaders, {
+      approvedItemExternalId,
+      sectionExternalId,
+      rank: sqsSectionItem.rank,
+    });
   }
-  */
 };
 
 /**

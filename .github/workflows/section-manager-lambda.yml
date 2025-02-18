@@ -19,14 +19,6 @@ on:
       - 'pnpm-lock.yaml'
       - '.github/workflows/section-manager-lambda.yml'
 jobs:
-  test-integrations:
-    if: github.event_name == 'pull_request'
-    # this will reference the file below on the main branch
-    uses: pocket/pocket-monorepo/.github/workflows/reuse-test-integrations.yml@main
-    with:
-      scope: section-manager-lambda
-    secrets: inherit
-
   infrastructure:
     # this will reference the file below on the main branch
     uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main

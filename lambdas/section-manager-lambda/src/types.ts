@@ -37,3 +37,9 @@ export type CreateOrUpdateSectionApiInput = {
   sort?: number;
   title: string;
 };
+
+export type CreateSectionItemApiInput = {
+  approvedItemExternalId: string;
+  sectionExternalId: string;
+  rank?: number;
+};

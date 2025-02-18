@@ -2,6 +2,7 @@ import {
   applyApTitleCase,
   CorpusItemSource,
   CorpusLanguage,
+  CreateApprovedCorpusItemApiInput,
   CuratedStatus,
   formatQuotesEN,
   formatQuotesDashesDE,
@@ -15,11 +16,14 @@ import {
   validateDatePublished,
 } from 'lambda-common';
 
-import { SqsSectionWithSectionItems, SqsSectionItem } from './types';
+import * as GraphQlApiCalls from './graphQlApiCalls';
+import { createSqsSectionWithSectionItems } from './testHelpers';
 import {
-  mapSqsSectionDataToCreateOrUpdateSectionApiInput,
-  mapSqsSectionItemToCreateApprovedItemApiInput,
-} from './utils';
+  CreateOrUpdateSectionApiInput,
+  SqsSectionWithSectionItems,
+  SqsSectionItem,
+} from './types';
+import * as Utils from './utils';
 
 describe('utils', () => {
   const url = 'https://science-fiction-reads.com/octavia-and-ursula';
@@ -58,10 +62,12 @@ describe('utils', () => {
   });
 
   afterEach(() => {
+    // clear all information/history about mocked functions
     jest.clearAllMocks();
   });
 
   afterAll(() => {
+    // restore original implementation of mocked functions
     jest.restoreAllMocks();
   });
 
@@ -78,7 +84,7 @@ describe('utils', () => {
       };
 
       const apiInput =
-        mapSqsSectionDataToCreateOrUpdateSectionApiInput(sqsData);
+        Utils.mapSqsSectionDataToCreateOrUpdateSectionApiInput(sqsData);
 
       expect(apiInput.active).toEqual(sqsData.active);
       expect(apiInput.createSource).toEqual(sqsData.source);
@@ -95,7 +101,7 @@ describe('utils', () => {
     it('should default to SQS values if they exist', async () => {
       mockPocketImageCache(200);
 
-      const result = await mapSqsSectionItemToCreateApprovedItemApiInput(
+      const result = await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
         sqsSectionItem,
         urlMetadata,
       );
@@ -138,7 +144,7 @@ describe('utils', () => {
       // remove preferred Parser values
       delete urlMetadata.authors;
 
-      const result = await mapSqsSectionItemToCreateApprovedItemApiInput(
+      const result = await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
         sqsSectionItem,
         urlMetadata,
       );
@@ -182,7 +188,7 @@ describe('utils', () => {
       delete urlMetadata.title;
 
       await expect(
-        mapSqsSectionItemToCreateApprovedItemApiInput(
+        Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
           sqsSectionItem,
           urlMetadata,
         ),
@@ -220,7 +226,7 @@ describe('utils', () => {
       expect.assertions(1);
 
       try {
-        await mapSqsSectionItemToCreateApprovedItemApiInput(
+        await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
           sqsSectionItem,
           urlMetadata,
         );
@@ -248,10 +254,11 @@ describe('utils', () => {
       it('format titles and excerpts for EN', async () => {
         sqsSectionItem.language = CorpusLanguage.EN;
 
-        const result = await mapSqsSectionItemToCreateApprovedItemApiInput(
-          sqsSectionItem,
-          urlMetadata,
-        );
+        const result =
+          await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
+            sqsSectionItem,
+            urlMetadata,
+          );
 
         expect(result.title).toEqual(
           formatQuotesEN(applyApTitleCase(sqsSectionItem.title as string)),
@@ -264,10 +271,11 @@ describe('utils', () => {
       it('format titles and excerpts for DE', async () => {
         sqsSectionItem.language = CorpusLanguage.DE;
 
-        const result = await mapSqsSectionItemToCreateApprovedItemApiInput(
-          sqsSectionItem,
-          urlMetadata,
-        );
+        const result =
+          await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
+            sqsSectionItem,
+            urlMetadata,
+          );
 
         expect(result.title).toEqual(
           formatQuotesDashesDE(sqsSectionItem.title as string),
@@ -280,10 +288,11 @@ describe('utils', () => {
       it('does not format titles and excerpts for languages other than EN and DE', async () => {
         sqsSectionItem.language = CorpusLanguage.ES;
 
-        const result = await mapSqsSectionItemToCreateApprovedItemApiInput(
-          sqsSectionItem,
-          urlMetadata,
-        );
+        const result =
+          await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
+            sqsSectionItem,
+            urlMetadata,
+          );
 
         expect(result.title).toEqual(sqsSectionItem.title as string);
         expect(result.excerpt).toEqual(sqsSectionItem.excerpt as string);
@@ -294,7 +303,7 @@ describe('utils', () => {
       mockPocketImageCache(500);
 
       await expect(
-        mapSqsSectionItemToCreateApprovedItemApiInput(
+        Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
           sqsSectionItem,
           urlMetadata,
         ),
@@ -303,6 +312,125 @@ describe('utils', () => {
           `Error on assert(): invalid type on $input.imageUrl, expect to be string`,
         ),
       );
+    });
+  });
+
+  describe('processSqsSectionData', () => {
+    const sectionItemCount = 3;
+    // create a payload with a section and 3 section items
+    const sqsSectionData = createSqsSectionWithSectionItems(
+      {},
+      sectionItemCount,
+    );
+    const jwtBearerToken = 'testJwtBearerToken';
+
+    // mock all the functions orchestrated by processSqsSectionData.
+    // this is just to test call count.
+    let mockMapSqsSectionDataToCreateOrUpdateSectionApiInput: any;
+    let mockCreateOrUpdateSection: any;
+    let mockGetUrlMetadata: any;
+    let mockMapSqsSectionItemToCreateApprovedItemApiInput: any;
+    let mockCreateApprovedCorpusItem: any;
+    let mockCreateSectionItem: any;
+
+    afterEach(() => {
+      // clear all information/history about mocked functions
+      jest.clearAllMocks();
+    });
+
+    afterAll(() => {
+      // restore original implementation of mocked functions
+      jest.restoreAllMocks();
+    });
+
+    beforeEach(() => {
+      mockMapSqsSectionDataToCreateOrUpdateSectionApiInput = jest
+        .spyOn(Utils, 'mapSqsSectionDataToCreateOrUpdateSectionApiInput')
+        .mockReturnValue({} as CreateOrUpdateSectionApiInput);
+
+      mockCreateOrUpdateSection = jest
+        .spyOn(GraphQlApiCalls, 'createOrUpdateSection')
+        .mockResolvedValue('sectionExternalId1');
+
+      mockGetUrlMetadata = jest
+        .spyOn(GraphQlApiCalls, 'getUrlMetadata')
+        .mockResolvedValue({} as UrlMetadata);
+
+      mockMapSqsSectionItemToCreateApprovedItemApiInput = jest
+        .spyOn(Utils, 'mapSqsSectionItemToCreateApprovedItemApiInput')
+        .mockResolvedValue({} as CreateApprovedCorpusItemApiInput);
+
+      mockCreateApprovedCorpusItem = jest
+        .spyOn(GraphQlApiCalls, 'createApprovedCorpusItem')
+        .mockResolvedValue('approvedItemExternalId2');
+
+      mockCreateSectionItem = jest
+        .spyOn(GraphQlApiCalls, 'createSectionItem')
+        .mockResolvedValue('sectionItemExternalId1');
+    });
+
+    it('calls the expected functions if the section items already exist in the corpus', async () => {
+      // make sure all the section items "exist" in the corpus
+      const mockGetApprovedCorpusItemByUrl = jest
+        .spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
+        .mockResolvedValue({
+          externalId: 'approvedItemExternalId1',
+          url: 'test.com',
+        });
+
+      await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
+
+      expect(
+        mockMapSqsSectionDataToCreateOrUpdateSectionApiInput,
+      ).toHaveBeenCalledTimes(1);
+      expect(mockCreateOrUpdateSection).toHaveBeenCalledTimes(1);
+
+      // this should be called once for each section item in the payload
+      expect(mockGetApprovedCorpusItemByUrl).toHaveBeenCalledTimes(
+        sectionItemCount,
+      );
+
+      // we are mocking getApprovedCorpusItemByUrl to return a value,
+      // meaning it already exists in the corpus, so we shouldn't be getting
+      // URL metadata from the parser or creating a new approved item.
+      expect(mockGetUrlMetadata).not.toHaveBeenCalled();
+      expect(
+        mockMapSqsSectionItemToCreateApprovedItemApiInput,
+      ).not.toHaveBeenCalled();
+      expect(mockCreateApprovedCorpusItem).not.toHaveBeenCalled();
+
+      expect(mockCreateSectionItem).toHaveBeenCalledTimes(sectionItemCount);
+    });
+
+    it('calls the expected functions if the section items do not exist in the corpus', async () => {
+      // make sure none of the section items "exist" in the corpus
+      const mockGetApprovedCorpusItemByUrl = jest
+        .spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
+        .mockResolvedValue(null);
+
+      await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
+
+      expect(
+        mockMapSqsSectionDataToCreateOrUpdateSectionApiInput,
+      ).toHaveBeenCalledTimes(1);
+      expect(mockCreateOrUpdateSection).toHaveBeenCalledTimes(1);
+
+      // this should be called once for each section item in the payload
+      expect(mockGetApprovedCorpusItemByUrl).toHaveBeenCalledTimes(
+        sectionItemCount,
+      );
+
+      // we are mocking getApprovedCorpusItemByUrl to return null, meaning
+      // meaning it doesn't exist in the corpus, so we should be getting
+      // URL metadata from the parser and creating a new approved item.
+      expect(mockGetUrlMetadata).toHaveBeenCalledTimes(sectionItemCount);
+      expect(
+        mockMapSqsSectionItemToCreateApprovedItemApiInput,
+      ).toHaveBeenCalledTimes(sectionItemCount);
+      expect(mockCreateApprovedCorpusItem).toHaveBeenCalledTimes(
+        sectionItemCount,
+      );
+      expect(mockCreateSectionItem).toHaveBeenCalledTimes(sectionItemCount);
     });
   });
 });
