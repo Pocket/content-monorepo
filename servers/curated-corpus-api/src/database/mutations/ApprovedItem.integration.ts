@@ -10,9 +10,10 @@ import {
 
 import { client } from '../client';
 
-import { clearDb } from '../../test/helpers';
+import { clearDb, createApprovedItemHelper } from '../../test/helpers';
 import { CreateApprovedItemInput } from '../types';
-import { createApprovedItem } from './ApprovedItem';
+import { createApprovedItem, deleteApprovedItem } from './ApprovedItem';
+import * as SectionItem from './SectionItem';
 
 describe('mutations: ApprovedItem', () => {
   let db: PrismaClient;
@@ -57,6 +58,25 @@ describe('mutations: ApprovedItem', () => {
       // Expect to see all the input data we supplied in the Approved Item
       expect(result).toMatchObject(input);
       expect(result.domainName).toStrictEqual('test.com');
+    });
+  });
+
+  describe('deleteApprovedItem db mutation', () => {
+    it('should call to delete all associated section items', async () => {
+      const deleteSectionItemSpy = jest.spyOn(
+        SectionItem,
+        'deleteSectionItemsByApprovedItemId',
+      );
+
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'testing!',
+      });
+
+      await deleteApprovedItem(db, approvedItem.externalId);
+
+      expect(deleteSectionItemSpy).toHaveBeenCalledTimes(1);
+
+      jest.restoreAllMocks();
     });
   });
 });

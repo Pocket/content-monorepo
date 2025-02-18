@@ -554,7 +554,6 @@ input CreateOrUpdateSectionInput {
   Indicates whether or not a Section is available for display.
   """
   active: Boolean!
-
 }
 
 extend type Section {
@@ -1232,6 +1231,7 @@ type Mutation {
 
   """
   Rejects an Approved Item: deletes it from the corpus and creates a Rejected Item instead.
+  Also deletes all associated SectionItems.
   """
   rejectApprovedCorpusItem(
     data: RejectApprovedCorpusItemInput!

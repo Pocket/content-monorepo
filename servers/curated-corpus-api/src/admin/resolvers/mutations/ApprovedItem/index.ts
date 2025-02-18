@@ -215,7 +215,7 @@ export async function updateApprovedItem(
 
 /**
  * Removes an approved item from the corpus and adds its data to the rejected item
- * table.
+ * table. Also deletes all related SectionItems.
  *
  * @param parent
  * @param data

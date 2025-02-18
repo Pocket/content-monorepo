@@ -65,9 +65,8 @@ export async function createSectionItem(
  */
 export async function removeSectionItem(
   db: PrismaClient,
-  externalId: string
+  externalId: string,
 ): Promise<SectionItem> {
-  
   // Construct the data to remove SectionItem
   const removeSectionItemData = {
     active: false,
@@ -78,7 +77,7 @@ export async function removeSectionItem(
   return await db.sectionItem.update({
     where: {
       externalId,
-      active: true
+      active: true,
     },
     data: removeSectionItemData,
     include: {
@@ -90,5 +89,26 @@ export async function removeSectionItem(
         },
       },
     },
-  })
+  });
+}
+
+/**
+ * Deletes all SectionItems associated with the given ApprovedItem.
+ * This mutation is called when an ApprovedItem is deleted from the system
+ * (when rejecting a previously approved item).
+ *
+ * @param db
+ * @param approvedItemId number
+ */
+export async function deleteSectionItemsByApprovedItemId(
+  db: PrismaClient,
+  approvedItemId: number,
+): Promise<void> {
+  // TODO: we may want to emit an alaytics event here, as this action destroys
+  // corpus-level history on SectionItems
+  await db.sectionItem.deleteMany({
+    where: {
+      approvedItemId,
+    },
+  });
 }
