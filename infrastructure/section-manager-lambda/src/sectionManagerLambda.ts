@@ -44,15 +44,11 @@ export class SectionManagerSQSLambda extends Construct {
           // only one instance of this function can be running at a given time
           reservedConcurrencyLimit: 1,
           environment: {
+            ENVIRONMENT: environment,
+            JWT_KEY: `${config.name}/${config.environment}/JWT_KEY`,
+            NODE_ENV: environment,
             REGION: this.vpc.region,
             SENTRY_DSN: this.getSentryDsn(),
-            // TODO: we will implement the JWT stuff in MC-1644
-            // JWT_KEY: `${config.name}/${config.environment}/JWT_KEY`,
-            ENVIRONMENT: environment,
-            NODE_ENV: environment,
-            // TODO: we are in limbo with our data pipeline strategy. keeping
-            // this here in case we stay with snowplow
-            // SNOWPLOW_ENDPOINT: config.envVars.snowplowEndpoint,
           },
           // why do we have `ignoreEnvironmentVars`?
           // 2025-01-15
