@@ -16,8 +16,9 @@ import { CorpusReviewStatus } from '../snowplow/schema';
 // Create a custom stream that forwards messages to serverLogger.
 const customStream = {
   write: (message: string) => {
-    // Forward the log message to the existing serverLogger.
-    serverLogger.info(message);
+    // Parse the incoming message to send a jsonPayload to Cloud Logging.
+    const parsedMessage = JSON.parse(message);
+    serverLogger.info(parsedMessage);
   },
 };
 
