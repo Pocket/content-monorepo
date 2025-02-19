@@ -28,7 +28,7 @@ ENV PNPM_HOME=/usr/local/bin
 RUN pnpm add -g turbo@2.1.0
 
 #----------------------------------------
-# Docker build step that prunes down to 
+# Docker build step that prunes down to
 # the active project.
 #----------------------------------------
 FROM base AS setup
@@ -44,9 +44,9 @@ RUN apk update
 # Set working directory
 WORKDIR /app
 COPY . .
-# Prune the structure to an optimized folder structure with just the `scopes` app dependencies. 
+# Prune the structure to an optimized folder structure with just the `scopes` app dependencies.
 RUN turbo prune --scope=$SCOPE --docker
-    
+
 #----------------------------------------
 # Docker build step that:
 # 1. Installs all the dependencies
@@ -65,6 +65,8 @@ ARG SENTRY_PROJECT
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 RUN apk update
+# Install Python for @mozilla/glean code generation
+RUN apk add --no-cache python3
 WORKDIR /app
     
 # First install the dependencies (as they change less often)
