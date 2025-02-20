@@ -4,6 +4,7 @@ import config from '../config';
 import { ReviewedItemSnowplowHandler } from './snowplow/ReviewedItemSnowplowHandler';
 import { ScheduledItemSnowplowHandler } from './snowplow/ScheduledItemSnowplowHandler';
 import { EventBusHandler } from './eventBus';
+import { ReviewedItemGleanHandler } from './glean/ReviewedItemGleanHandler';
 
 export type CuratedCorpusEventHandlerFn = (
   emitter: CuratedCorpusEventEmitter
@@ -41,4 +42,11 @@ export function corpusScheduleSnowplowEventHandler(
  */
 export function eventBusHandler(emitter: CuratedCorpusEventEmitter): void {
   new EventBusHandler(emitter);
+}
+
+export function corpusItemGleanEventHandler(emitter: CuratedCorpusEventEmitter): void {
+  const gleanEventsToListen = Object.values(
+    config.snowplow.corpusItemEvents
+  ) as string[];
+  new ReviewedItemGleanHandler(emitter, gleanEventsToListen);
 }
