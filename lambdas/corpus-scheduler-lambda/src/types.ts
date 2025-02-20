@@ -1,3 +1,5 @@
+import { tags } from 'typia';
+
 import {
   CorpusItemSource,
   CorpusLanguage,
@@ -5,7 +7,7 @@ import {
   Topics,
   ScheduledSurfacesEnum,
 } from 'content-common';
-import { tags } from 'typia';
+import { ApprovedCorpusItemOutput } from 'lambda-common';
 
 export interface ScheduledCandidates {
   candidates: ScheduledCandidate[];
@@ -52,11 +54,6 @@ export type ScheduledCorpusCandidateRunDetails = {
 
 interface ScheduledCorpusItemOutput {
   externalId: string;
-}
-
-export interface ApprovedCorpusItemOutput {
-  externalId: string;
-  url: string;
 }
 
 export interface ScheduledCorpusItemWithApprovedCorpusItemOutput

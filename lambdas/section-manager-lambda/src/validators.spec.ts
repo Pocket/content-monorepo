@@ -2,7 +2,6 @@ import { createSqsSectionWithSectionItems } from './testHelpers';
 import { CorpusItemSource, ScheduledSurfacesEnum } from 'content-common';
 import { validateSqsData } from './validators';
 
-// Referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.spec.ts
 describe('validation', function () {
   afterEach(() => {
     jest.clearAllMocks();
