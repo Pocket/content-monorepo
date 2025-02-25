@@ -59,6 +59,7 @@ export enum ActionScreen {
   PROSPECTING = 'PROSPECTING',
   SCHEDULE = 'SCHEDULE',
   CORPUS = 'CORPUS',
+  SECTIONS = 'SECTIONS'
 }
 
 export type ApprovedItemRequiredInput = {
