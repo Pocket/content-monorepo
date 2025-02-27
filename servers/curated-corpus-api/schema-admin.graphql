@@ -185,6 +185,10 @@ enum ActionScreen {
   This action took place from the corpus screen in the admin tool
   """
   CORPUS
+  """
+  This action took place from the sections screen in the admin tool
+  """
+  SECTIONS
 }
 
 """
