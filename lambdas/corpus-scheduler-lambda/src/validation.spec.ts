@@ -251,7 +251,7 @@ describe('validation', function () {
       expect(() => {
         validateCandidate(badScheduledCandidate);
       }).toThrow(
-        'Error on assert(): invalid type on $input.scheduled_corpus_item.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT" | undefined)',
+        'Error on assert(): invalid type on $input.scheduled_corpus_item.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT" | null)',
       );
     });
 
@@ -265,6 +265,55 @@ describe('validation', function () {
         validateCandidate(badScheduledCandidate);
       }).toThrow(
         'Error on assert(): invalid type on $input.scheduled_corpus_item.scheduled_surface_guid, expect to be ("NEW_TAB_DE_DE" | "NEW_TAB_EN_GB" | "NEW_TAB_EN_INT" | "NEW_TAB_EN_US" | "NEW_TAB_ES_ES" | "NEW_TAB_FR_FR" | "NEW_TAB_IT_IT" | "POCKET_HITS_DE_DE" | "POCKET_HITS_EN_US" | "SANDBOX")',
+      );
+    });
+
+    // unfortunately, typia's error messages are not consistent, so we need two
+    // tests to verify handling of optional properties
+    it.each([
+      ['excerpt', 'string'],
+      ['image_url', 'string'],
+      ['title', 'string'],
+    ])('should validate optional string properties', (field, type) => {
+      const badScheduledCandidate = createScheduledCandidate() as any;
+
+      // null is a valid value from ML
+      badScheduledCandidate.scheduled_corpus_item[field] = null;
+
+      expect(() => {
+        validateCandidate(badScheduledCandidate);
+      }).not.toThrow();
+
+      // undefined is NOT a valid value from ML
+      delete badScheduledCandidate.scheduled_corpus_item[field];
+
+      expect(() => {
+        validateCandidate(badScheduledCandidate);
+      }).toThrow(
+        `Error on assert(): invalid type on $input.scheduled_corpus_item.${field}, expect to be (null | ${type})`,
+      );
+    });
+
+    it.each([
+      ['authors', 'Array<string>'],
+      ['language', '"DE" | "EN" | "ES" | "FR" | "IT"'],
+    ])('should validate optional non-string properties', (field, type) => {
+      const badScheduledCandidate = createScheduledCandidate() as any;
+
+      // null is a valid value from ML
+      badScheduledCandidate.scheduled_corpus_item[field] = null;
+
+      expect(() => {
+        validateCandidate(badScheduledCandidate);
+      }).not.toThrow();
+
+      // undefined is NOT a valid value from ML
+      delete badScheduledCandidate.scheduled_corpus_item[field];
+
+      expect(() => {
+        validateCandidate(badScheduledCandidate);
+      }).toThrow(
+        `Error on assert(): invalid type on $input.scheduled_corpus_item.${field}, expect to be (${type} | null)`,
       );
     });
 

@@ -155,5 +155,50 @@ describe('validation', function () {
         );
       });
     });
+
+    // unfortunately, typia's error messages are not consistent, so we need two
+    // tests to verify handling of optional properties
+    it.each([
+      ['excerpt', 'string'],
+      ['image_url', 'string'],
+      ['title', 'string'],
+    ])('should validate optional string properties', (field, type) => {
+      // null is a valid value from ML
+      sqsData.candidates[0][field] = null;
+
+      expect(() => {
+        validateSqsData(sqsData);
+      }).not.toThrow();
+
+      // undefined is NOT a valid value from ML
+      delete sqsData.candidates[0][field];
+
+      expect(() => {
+        validateSqsData(sqsData);
+      }).toThrow(
+        `Error on assert(): invalid type on $input.candidates[0].${field}, expect to be (null | ${type})`,
+      );
+    });
+
+    it.each([
+      ['authors', 'Array<string>'],
+      ['language', '"DE" | "EN" | "ES" | "FR" | "IT"'],
+    ])('should validate optional non-string properties', (field, type) => {
+      // null is a valid value from ML
+      sqsData.candidates[0][field] = null;
+
+      expect(() => {
+        validateSqsData(sqsData);
+      }).not.toThrow();
+
+      // undefined is NOT a valid value from ML
+      delete sqsData.candidates[0][field];
+
+      expect(() => {
+        validateSqsData(sqsData);
+      }).toThrow(
+        `Error on assert(): invalid type on $input.candidates[0].${field}, expect to be (${type} | null)`,
+      );
+    });
   });
 });

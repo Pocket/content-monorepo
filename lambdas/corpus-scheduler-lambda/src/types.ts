@@ -26,11 +26,11 @@ export interface ScheduledCorpusItem {
   topic: Topics; // Empty string means unknown topic
   scheduled_date: string; // YYYY-MM-DD
   scheduled_surface_guid: ScheduledSurfacesEnum;
-  title?: string;
-  excerpt?: string;
-  language?: CorpusLanguage;
-  image_url?: string;
-  authors?: string[];
+  title: string | null;
+  excerpt: string | null;
+  language: CorpusLanguage | null;
+  image_url: string | null;
+  authors: string[] | null;
 }
 
 export const allowedScheduledSurfaces: string[] = [
