@@ -17,14 +17,14 @@ export interface SqsSectionWithSectionItems {
 }
 
 export interface SqsSectionItem {
-  authors?: string[];
-  excerpt?: string;
-  image_url?: string;
-  language?: CorpusLanguage;
+  authors: string[] | null;
+  excerpt: string | null;
+  image_url: string | null;
+  language: CorpusLanguage | null;
   rank: number;
   source: CorpusItemSource.ML;
   status: CuratedStatus;
-  title?: string;
+  title: string | null;
   topic: Topics;
   url: string;
 }

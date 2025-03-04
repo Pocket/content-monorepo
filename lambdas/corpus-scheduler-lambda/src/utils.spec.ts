@@ -289,7 +289,7 @@ describe('utils', function () {
 
     it('should throw Error on CreateApprovedItemInput if field types are wrong (title)', async () => {
       const scheduledCandidate = createScheduledCandidate();
-      scheduledCandidate.scheduled_corpus_item.title = undefined;
+      scheduledCandidate.scheduled_corpus_item.title = null;
       parserItem.title = undefined;
 
       await expect(

@@ -136,10 +136,10 @@ describe('utils', () => {
       mockPocketImageCache(200);
 
       // remove preferred SQS values
-      delete sqsSectionItem.excerpt;
-      delete sqsSectionItem.image_url;
-      delete sqsSectionItem.language;
-      delete sqsSectionItem.title;
+      sqsSectionItem.excerpt = null;
+      sqsSectionItem.image_url = null;
+      sqsSectionItem.language = null;
+      sqsSectionItem.title = null;
 
       // remove preferred Parser values
       delete urlMetadata.authors;
@@ -184,7 +184,7 @@ describe('utils', () => {
       mockPocketImageCache(200);
 
       // remove title from both sources
-      delete sqsSectionItem.title;
+      sqsSectionItem.title = null;
       delete urlMetadata.title;
 
       await expect(
@@ -207,11 +207,11 @@ describe('utils', () => {
       mockPocketImageCache(200);
 
       // remove all optional SQS data
-      delete sqsSectionItem.authors;
-      delete sqsSectionItem.excerpt;
-      delete sqsSectionItem.image_url;
-      delete sqsSectionItem.language;
-      delete sqsSectionItem.title;
+      sqsSectionItem.authors = null;
+      sqsSectionItem.excerpt = null;
+      sqsSectionItem.image_url = null;
+      sqsSectionItem.language = null;
+      sqsSectionItem.title = null;
 
       // remove all optional Parser data
       delete urlMetadata.authors;
