@@ -115,6 +115,8 @@ model Section {
   sort                  Int?
   // we will not delete Sections, instead deactivate them
   active                Boolean         @default(false)
+  // disables/enables sections. can only be set via the admin tool
+  disabled              Boolean         @default(false)
   // track who created the Section
   createSource          ActivitySource // (ML or MANUAL) 
   // track who deactivated the Section
