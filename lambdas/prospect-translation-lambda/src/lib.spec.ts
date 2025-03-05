@@ -562,6 +562,21 @@ describe('lib', () => {
         hydrateProspectMetadata(prospectToHydrate, urlMetadata),
       );
     });
+
+    it('should process a prospect with a language but without a title and excerpt', () => {
+      const expectedProspect: Prospect = {
+        ...expected,
+        excerpt: undefined,
+        title: undefined,
+      };
+
+      urlMetadata.title = undefined;
+      urlMetadata.excerpt = undefined;
+
+      expect(expectedProspect).toEqual(
+        hydrateProspectMetadata(prospectToHydrate, urlMetadata),
+      );
+    });
   });
 
   describe('getProspectRunDetailsFromMessageJson', () => {

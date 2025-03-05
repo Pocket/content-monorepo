@@ -480,11 +480,13 @@ export const hydrateProspectMetadata = (
 
   // apply title/excerpt formatting for EN & DE
   if (prospect.language?.toUpperCase() === CorpusLanguage.EN) {
-    prospect.title = formatQuotesEN(applyApTitleCase(prospect.title)) as string;
-    prospect.excerpt = formatQuotesEN(prospect.excerpt) as string;
+    prospect.title =
+      prospect.title && formatQuotesEN(applyApTitleCase(prospect.title));
+    prospect.excerpt = prospect.excerpt && formatQuotesEN(prospect.excerpt);
   } else if (prospect.language?.toUpperCase() === CorpusLanguage.DE) {
-    prospect.title = formatQuotesDashesDE(prospect.title) as string;
-    prospect.excerpt = formatQuotesDashesDE(prospect.excerpt) as string;
+    prospect.title = prospect.title && formatQuotesDashesDE(prospect.title);
+    prospect.excerpt =
+      prospect.excerpt && formatQuotesDashesDE(prospect.excerpt);
   }
 
   return prospect;
