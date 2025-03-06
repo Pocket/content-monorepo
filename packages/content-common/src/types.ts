@@ -18,13 +18,6 @@ export enum CorpusLanguage {
   IT = 'IT',
 }
 
-// quality grade associated with approved corpus items
-export enum ApprovedItemGrade {
-  A = 'A',
-  B = 'B',
-  C = 'C',
-}
-
 export enum Topics {
   BUSINESS = 'BUSINESS',
   CAREER = 'CAREER',
@@ -59,7 +52,7 @@ export enum ActionScreen {
   PROSPECTING = 'PROSPECTING',
   SCHEDULE = 'SCHEDULE',
   CORPUS = 'CORPUS',
-  SECTIONS = 'SECTIONS'
+  SECTIONS = 'SECTIONS',
 }
 
 export type ApprovedItemRequiredInput = {
@@ -109,7 +102,6 @@ export type CreateApprovedCorpusItemApiInput = ApprovedItemRequiredInput & {
   datePublished?: string;
   // Optional value specifying which admin screen the action originated from.
   actionScreen?: ActionScreen; // non-db, analytics only
-  grade?: ApprovedItemGrade; // quality grade of the approved item
 };
 
 export type CreateScheduledItemInput = {

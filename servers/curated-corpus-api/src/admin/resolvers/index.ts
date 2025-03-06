@@ -13,7 +13,6 @@ import {
   createApprovedItem,
   rejectApprovedItem,
   updateApprovedItem,
-  updateApprovedItemGrade,
   uploadApprovedItemImage,
 } from './mutations/ApprovedItem';
 import { createRejectedItem } from './mutations/RejectedItem';
@@ -30,7 +29,7 @@ import {
 import { getOpenGraphFields } from './queries/OpenGraphFields';
 import { hasTrustedDomain } from './queries/ApprovedItem/hasTrustedDomain';
 import { getSectionsWithSectionItems } from './queries/Section';
-import { createOrUpdateSection } from './mutations/Section'
+import { createOrUpdateSection } from './mutations/Section';
 import { createSectionItem, removeSectionItem } from './mutations/SectionItem';
 
 export const resolvers = {
@@ -116,10 +115,9 @@ export const resolvers = {
     deleteScheduledCorpusItem: deleteScheduledItem,
     rescheduleScheduledCorpusItem: rescheduleScheduledItem,
     uploadApprovedCorpusItemImage: uploadApprovedItemImage,
-    updateApprovedCorpusItemGrade: updateApprovedItemGrade,
     createScheduleReview: createScheduleReview,
     createOrUpdateSection: createOrUpdateSection,
     createSectionItem: createSectionItem,
-    removeSectionItem: removeSectionItem
+    removeSectionItem: removeSectionItem,
   },
 };

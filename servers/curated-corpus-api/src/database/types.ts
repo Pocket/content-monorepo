@@ -1,6 +1,5 @@
 import {
   ApprovedItem as ApprovedItemModel,
-  ApprovedItemGrade,
   CuratedStatus,
   ScheduledItem as ScheduledItemModel,
   ScheduleReview,
@@ -27,7 +26,6 @@ export type CreateApprovedItemInput = {
   datePublished?: string;
   imageUrl: string;
   topic: string;
-  grade?: ApprovedItemGrade;
   source: CorpusItemSource;
   isCollection: boolean;
   isTimeSensitive: boolean;
@@ -119,7 +117,7 @@ export type CreateSectionInput = {
   sort?: number;
   createSource: ActivitySource;
   active: boolean;
-}
+};
 
 export type CreateSectionItemInput = {
   sectionId: number;
@@ -165,7 +163,6 @@ export type CorpusItem = {
   imageUrl: string;
   image: Image;
   topic?: string;
-  grade?: ApprovedItemGrade;
   target?: CorpusTarget;
   isTimeSensitive: boolean;
 };
