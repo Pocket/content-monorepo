@@ -9,7 +9,7 @@ import config from '../config';
 import { getUnixTimestamp } from '../shared/utils';
 import { ApprovedItem } from '../database/types';
 import { RejectedCuratedCorpusItem } from '.prisma/client';
-import { ApprovedItemGrade, Topics } from 'content-common';
+import { Topics } from 'content-common';
 import {
   CorpusItemSource,
   CuratedStatus,
@@ -35,7 +35,6 @@ describe('CuratedCorpusEventEmitter', () => {
     prospectId: 'abc-123',
     url: 'https://test.com',
     domainName: 'test.com',
-    grade: ApprovedItemGrade.A,
     status: CuratedStatus.CORPUS,
     id: 123,
     title: 'Test title',

@@ -1,7 +1,6 @@
 import { PrismaClient } from '.prisma/client';
 
 import {
-  ApprovedItemGrade,
   CorpusItemSource,
   CorpusLanguage,
   CuratedStatus,
@@ -45,7 +44,6 @@ describe('mutations: ApprovedItem', () => {
       language: CorpusLanguage.DE,
       publisher: 'Convective Cloud',
       topic: Topics.TECHNOLOGY,
-      grade: ApprovedItemGrade.A,
       source: CorpusItemSource.PROSPECT,
       isCollection: false,
       isTimeSensitive: true,

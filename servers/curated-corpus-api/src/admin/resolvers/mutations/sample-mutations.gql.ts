@@ -1,7 +1,5 @@
 import { gql } from 'graphql-tag';
-import {
-  RejectedItemData,
-} from '../../../shared/fragments.gql';
+import { RejectedItemData } from '../../../shared/fragments.gql';
 import {
   AdminCuratedItemData,
   AdminScheduledItemData,
@@ -26,17 +24,6 @@ export const CREATE_APPROVED_ITEM = gql`
 export const UPDATE_APPROVED_ITEM = gql`
   mutation updateApprovedCorpusItem($data: UpdateApprovedCorpusItemInput!) {
     updateApprovedCorpusItem(data: $data) {
-      ...AdminCuratedItemData
-    }
-  }
-  ${AdminCuratedItemData}
-`;
-
-export const UPDATE_APPROVED_ITEM_GRADE = gql`
-  mutation updateApprovedCorpusItemGrade(
-    $data: UpdateApprovedCorpusItemGradeInput!
-  ) {
-    updateApprovedCorpusItemGrade(data: $data) {
       ...AdminCuratedItemData
     }
   }
@@ -106,12 +93,12 @@ export const CREATE_SCHEDULE_REVIEW = gql`
 `;
 
 export const CREATE_OR_UPDATE_SECTION = gql`
-    mutation createOrUpdateSection($data: CreateOrUpdateSectionInput!) {
-        createOrUpdateSection(data: $data) {
-            ...AdminSectionData
-        }
+  mutation createOrUpdateSection($data: CreateOrUpdateSectionInput!) {
+    createOrUpdateSection(data: $data) {
+      ...AdminSectionData
     }
-    ${AdminSectionData}
+  }
+  ${AdminSectionData}
 `;
 
 export const CREATE_SECTION_ITEM = gql`
@@ -124,10 +111,10 @@ export const CREATE_SECTION_ITEM = gql`
 `;
 
 export const REMOVE_SECTION_ITEM = gql`
-    mutation removeSectionItem($externalId: String!) {
-        removeSectionItem(externalId: $externalId) {
-            ...AdminSectionItemData
-        }
+  mutation removeSectionItem($externalId: String!) {
+    removeSectionItem(externalId: $externalId) {
+      ...AdminSectionItemData
     }
-    ${AdminSectionItemData}
+  }
+  ${AdminSectionItemData}
 `;

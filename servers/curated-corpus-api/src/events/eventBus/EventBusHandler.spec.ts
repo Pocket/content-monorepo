@@ -1,12 +1,7 @@
 import { CuratedStatus } from '.prisma/client';
 import { EventBusHandler } from './EventBusHandler';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
-import {
-  CorpusItemSource,
-  Topics,
-  ActivitySource,
-  ApprovedItemGrade,
-} from 'content-common';
+import { CorpusItemSource, Topics, ActivitySource } from 'content-common';
 import { ScheduledItem } from '../../database/types';
 import * as Sentry from '@sentry/node';
 import { EventBridgeClient } from '@aws-sdk/client-eventbridge';
@@ -43,7 +38,6 @@ const scheduledCorpusItem: ScheduledItem = {
     prospectId: '456-dfg',
     url: 'https://test.com/a-story',
     domainName: 'test.com',
-    grade: ApprovedItemGrade.A,
     status: CuratedStatus.RECOMMENDATION,
     title: 'Everything you need to know about React',
     excerpt: 'Something here',
@@ -262,7 +256,6 @@ describe('EventBusHandler', () => {
       imageUrl: 'https://test.com/image.png',
       language: 'EN',
       topic: 'EDUCATION',
-      grade: 'A',
       isSyndicated: false,
       isTimeSensitive: false,
       createdAt: new Date(1648225373000).toUTCString(),

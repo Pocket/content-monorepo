@@ -52,7 +52,6 @@ model ApprovedItem {
   authors         ApprovedItemAuthor[]
   scheduledItems  ScheduledItem[]
   domainName      String               @db.VarChar(255)
-  grade           ApprovedItemGrade?
   sectionItems    SectionItem[]
 
   @@index([domainName])
@@ -174,10 +173,4 @@ enum CuratedItemSource {
 enum ActivitySource {
   MANUAL
   ML
-}
-
-enum ApprovedItemGrade {
-  A
-  B
-  C
 }

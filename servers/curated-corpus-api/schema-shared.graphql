@@ -34,15 +34,6 @@ enum CorpusLanguage {
 }
 
 """
-Valid grade values for CorpusItem (public graph) and ApprovedItem (admin graph)
-"""
-enum ApprovedItemGrade {
-  A
-  B
-  C
-}
-
-"""
 The source of en entity
 """
 enum ActivitySource {

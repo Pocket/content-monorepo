@@ -3,7 +3,6 @@ import { faker } from '@faker-js/faker';
 
 import {
   ApprovedItemAuthor,
-  ApprovedItemGrade,
   CorpusItemSource,
   CuratedStatus,
 } from 'content-common';
@@ -27,7 +26,6 @@ interface CreateApprovedItemHelperOptionalInput {
   imageUrl?: string;
   createdBy?: string;
   topic?: string;
-  grade?: ApprovedItemGrade;
   source?: CorpusItemSource;
   isCollection?: boolean;
   isTimeSensitive?: boolean;

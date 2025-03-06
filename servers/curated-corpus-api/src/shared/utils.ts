@@ -96,13 +96,12 @@ export const getCorpusItemFromApprovedItem = (
     },
     // so the type definition in /src/database/types has topic as optional,
     // which typescript resolves as `string | undefined`. however, if the
-    // topic is missing in the db, prisma returns `null` - h
+    // topic is missing in the db, prisma returns `null` - hence the
     // nullish coalescing operator below.
     //
     // i wonder why typescript won't accept both. is there some deep dark
     // JS reason? or is it just better practice?
     topic: approvedItem.topic ?? undefined,
-    grade: approvedItem.grade ?? undefined,
     isTimeSensitive: approvedItem.isTimeSensitive,
     target: target?.key && {
       slug: target.key,
