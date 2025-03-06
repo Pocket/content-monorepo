@@ -93,6 +93,11 @@ type Section {
   """
   active: Boolean!
   """
+  Indicates whether or not a Section is fully disabled from display on NewTab. Can only  be controlled
+  in the admin tool.
+  """
+  disabled: Boolean!
+  """
   An array of active and in-active SectionItems in a Section.
   This field returns an empty array when creating a new Section or updating a Section.
   """

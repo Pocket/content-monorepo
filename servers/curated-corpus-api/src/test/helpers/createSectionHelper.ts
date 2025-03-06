@@ -11,6 +11,7 @@ export interface CreateSectionHelperOptionalInput {
   scheduledSurfaceGuid?: ScheduledSurfacesEnum;
   title?: string;
   active?: boolean;
+  disabled?: boolean;
 }
 
 // create an array of scheduled surface guids for random selection
@@ -34,7 +35,8 @@ export async function createSectionHelper(
     ]),
     scheduledSurfaceGuid: faker.helpers.arrayElement(scheduledSurfaceGuids),
     title: faker.lorem.sentence(10),
-    active: true
+    active: true,
+    disabled: false
   };
 
   const inputs: Prisma.SectionCreateInput = {
