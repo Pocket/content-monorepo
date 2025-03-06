@@ -13,8 +13,10 @@ import { Section } from '../../../database/types';
 export async function getSections(
   parent,
   args,
-  { db }
+  context
 ): Promise<Section[]> {
   const { filters } = args;
-  return await dbGetSectionsWithSectionItems(db, filters.scheduledSurfaceGuid);
+  const sections = await dbGetSectionsWithSectionItems(context.db, filters.scheduledSurfaceGuid);
+  // only return sections that are not disabled
+  return sections.filter(section => section.disabled === false);
 }

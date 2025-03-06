@@ -27,10 +27,12 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
   let db: PrismaClient;
   let graphQLUrl: string;
   let server: ApolloServer<IAdminContext>;
-  let section1: Section;
-  let section2: Section;
+  let activeSection1: Section;
+  let activeSection2: Section;
+  let activeDisabledSection: Section;
   let sectionItem1: SectionItem;
   let sectionItem2: SectionItem;
+  let sectionItem3: SectionItem;
   let approvedItem: ApprovedItem;
   let approvedItem2: ApprovedItem;
 
@@ -54,22 +56,32 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
 
   beforeEach(async () => {
     // Create active Sections
-    section1 = await createSectionHelper(db, {
-      externalId: 'bcg-456',
+    activeSection1 = await createSectionHelper(db, {
+      externalId: 'active-456',
       createSource: ActivitySource.ML,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
       active: true
     });
-    section2 = await createSectionHelper(db, {
-      externalId: 'xyz-123',
+    activeSection2 = await createSectionHelper(db, {
+      externalId: 'active-123',
       createSource: ActivitySource.ML,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
       active: true
     });
+    
+    //Create active but disabled Section
+    activeDisabledSection = await createSectionHelper(db, {
+      externalId: 'disabled-890',
+      createSource: ActivitySource.ML,
+      scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      active: true,
+      disabled: true
+    });
+    
 
     // Create in-active Section
     await createSectionHelper(db, {
-      externalId: 'abc-123',
+      externalId: 'inactive-123',
       createSource: ActivitySource.ML,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
       active: false
@@ -80,7 +92,7 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     await clearDb(db);
   });
 
-  it('should retrieve all active Sections with no SectionItems', async () => {
+  it('should retrieve all active+disabled Sections with no SectionItems', async () => {
     const result = await request(app)
       .post(graphQLUrl)
       .set(headers)
@@ -93,16 +105,22 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
 
     expect(result.body.errors).toBeUndefined();
     expect(result.body.data).not.toBeNull();
-    console.log("result.body.data?.getSectionsWithSectionItems: ", result.body.data?.getSectionsWithSectionItems);
-    // There should be 2 active Sections in the array, Section #3 is in-active
-    expect(result.body.data?.getSectionsWithSectionItems.length).toEqual(2);
+    // There should be 2 active, 1 active+disabled Sections in the array, Section #4 is in-active
+    expect(result.body.data?.getSectionsWithSectionItems.length).toEqual(3);
 
     // Both active Sections should not have any SectionItems
     expect(result.body.data?.getSectionsWithSectionItems[0].sectionItems).toEqual([]);
+    expect(result.body.data?.getSectionsWithSectionItems[0].disabled).toBeFalsy();
+
     expect(result.body.data?.getSectionsWithSectionItems[1].sectionItems).toEqual([]);
+    expect(result.body.data?.getSectionsWithSectionItems[1].disabled).toBeFalsy();
+    // The active + disabled section should also be returned in the admin response
+    expect(result.body.data?.getSectionsWithSectionItems[2].externalId).toEqual(activeDisabledSection.externalId);
+    expect(result.body.data?.getSectionsWithSectionItems[2].sectionItems).toEqual([]);
+    expect(result.body.data?.getSectionsWithSectionItems[2].disabled).toBeTruthy();
   });
 
-  it('should retrieve all active Sections with their corresponding active SectionItems', async () => {
+  it('should retrieve all active+disabled Sections with their corresponding active SectionItems', async () => {
     // Create a few active SectionItems
     approvedItem = await createApprovedItemHelper(db, {
       title: '10 Reasons You Should Quit Social Media',
@@ -110,14 +128,21 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
 
     sectionItem1 = await createSectionItemHelper(db, {
       approvedItemId: approvedItem.id,
-      sectionId: section1.id,
+      sectionId: activeSection1.id,
       rank: 1,
       active: true,
     });
 
     sectionItem2 = await createSectionItemHelper(db, {
       approvedItemId: approvedItem.id,
-      sectionId: section2.id,
+      sectionId: activeSection2.id,
+      rank: 2,
+      active: true,
+    });
+
+    sectionItem3 = await createSectionItemHelper(db, {
+      approvedItemId: approvedItem.id,
+      sectionId: activeDisabledSection.id,
       rank: 2,
       active: true,
     });
@@ -129,7 +154,7 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
 
     await createSectionItemHelper(db, {
       approvedItemId: approvedItem2.id,
-      sectionId: section1.id,
+      sectionId: activeSection1.id,
       rank: 1,
       active: false,
     });
@@ -147,10 +172,16 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     expect(result.body.errors).toBeUndefined();
     expect(result.body.data).not.toBeNull();
 
-    // All active Sections should be returned, Section #3 (abc-123) is in-active
-    expect(result.body.data?.getSectionsWithSectionItems.length).toEqual(2);
-    expect(result.body.data?.getSectionsWithSectionItems[0].externalId).toEqual('bcg-456');
-    expect(result.body.data?.getSectionsWithSectionItems[1].externalId).toEqual('xyz-123');
+    // All active+disabled Sections should be returned, Section #4 (inactive-123) is in-active
+    expect(result.body.data?.getSectionsWithSectionItems.length).toEqual(3);
+    expect(result.body.data?.getSectionsWithSectionItems[0].externalId).toEqual('active-456');
+    expect(result.body.data?.getSectionsWithSectionItems[0].disabled).toBeFalsy();
+
+    expect(result.body.data?.getSectionsWithSectionItems[1].externalId).toEqual('active-123');
+    expect(result.body.data?.getSectionsWithSectionItems[1].disabled).toBeFalsy();
+
+    expect(result.body.data?.getSectionsWithSectionItems[2].externalId).toEqual('disabled-890');
+    expect(result.body.data?.getSectionsWithSectionItems[2].disabled).toBeTruthy();
 
     // Each active Section should have an active SectionItem
     // Section #1 has 2 SectionItems but only the active (1) SectionItem is returned
@@ -159,6 +190,10 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
 
     expect(result.body.data?.getSectionsWithSectionItems[1].sectionItems.length).toEqual(1);
     expect(result.body.data?.getSectionsWithSectionItems[1].sectionItems[0].externalId).toEqual(sectionItem2.externalId);
+
+    // Active + disabled section should also return their section items
+    expect(result.body.data?.getSectionsWithSectionItems[2].sectionItems.length).toEqual(1);
+    expect(result.body.data?.getSectionsWithSectionItems[2].sectionItems[0].externalId).toEqual(sectionItem3.externalId);
   });
 
   it('should return an empty array if no Sections found', async () => {
