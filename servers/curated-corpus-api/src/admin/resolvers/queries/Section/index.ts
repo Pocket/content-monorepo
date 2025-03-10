@@ -8,7 +8,7 @@ import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
 
 /**
- * Retrieve all active Sections with their active SectionItems for a given ScheduledSurface.
+ * Retrieve all active & enabled/disabled Sections with their active SectionItems for a given ScheduledSurface.
  * Returns an empty array if no Sections found.
  *
  * @param parent
@@ -27,5 +27,5 @@ export async function getSectionsWithSectionItems(
   ) {
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
-  return await dbGetSectionsWithSectionItems(context.db, args.scheduledSurfaceGuid);
+  return await dbGetSectionsWithSectionItems(context, args.scheduledSurfaceGuid);
 }
