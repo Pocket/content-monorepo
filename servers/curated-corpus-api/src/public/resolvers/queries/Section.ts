@@ -2,9 +2,10 @@ import {
   getSectionsWithSectionItems as dbGetSectionsWithSectionItems
 } from '../../../database/queries';
 import { Section } from '../../../database/types';
+import { IPublicContext } from '../../context';
 
 /**
- * Retrieve all active Sections with their active SectionItems for a given ScheduledSurface.
+ * Retrieve all active & enabled Sections with their active SectionItems for a given ScheduledSurface.
  * Returns an empty array if no Sections found.
  *
  * @param parent
@@ -13,10 +14,8 @@ import { Section } from '../../../database/types';
 export async function getSections(
   parent,
   args,
-  context
+  context: IPublicContext,
 ): Promise<Section[]> {
   const { filters } = args;
-  const sections = await dbGetSectionsWithSectionItems(context.db, filters.scheduledSurfaceGuid);
-  // only return sections that are not disabled
-  return sections.filter(section => section.disabled === false);
+  return await dbGetSectionsWithSectionItems(context, filters.scheduledSurfaceGuid);
 }

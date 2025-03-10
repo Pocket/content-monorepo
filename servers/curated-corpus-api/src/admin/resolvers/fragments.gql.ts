@@ -48,6 +48,7 @@ export const AdminSectionData = gql`
         sectionItems {
             ...AdminSectionItemData
         }
+        disabled
         createdAt
         updatedAt
     }

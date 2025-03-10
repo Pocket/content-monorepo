@@ -27,8 +27,8 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
   let db: PrismaClient;
   let graphQLUrl: string;
   let server: ApolloServer<IAdminContext>;
-  let activeSection1: Section;
-  let activeSection2: Section;
+  let activeEnabledSection1: Section;
+  let activeEnabledSection2: Section;
   let activeDisabledSection: Section;
   let sectionItem1: SectionItem;
   let sectionItem2: SectionItem;
@@ -56,13 +56,13 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
 
   beforeEach(async () => {
     // Create active Sections
-    activeSection1 = await createSectionHelper(db, {
+    activeEnabledSection1 = await createSectionHelper(db, {
       externalId: 'active-456',
       createSource: ActivitySource.ML,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
       active: true
     });
-    activeSection2 = await createSectionHelper(db, {
+    activeEnabledSection2 = await createSectionHelper(db, {
       externalId: 'active-123',
       createSource: ActivitySource.ML,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
@@ -128,14 +128,14 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
 
     sectionItem1 = await createSectionItemHelper(db, {
       approvedItemId: approvedItem.id,
-      sectionId: activeSection1.id,
+      sectionId: activeEnabledSection1.id,
       rank: 1,
       active: true,
     });
 
     sectionItem2 = await createSectionItemHelper(db, {
       approvedItemId: approvedItem.id,
-      sectionId: activeSection2.id,
+      sectionId: activeEnabledSection2.id,
       rank: 2,
       active: true,
     });
@@ -154,7 +154,7 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
 
     await createSectionItemHelper(db, {
       approvedItemId: approvedItem2.id,
-      sectionId: activeSection1.id,
+      sectionId: activeEnabledSection1.id,
       rank: 1,
       active: false,
     });

@@ -147,7 +147,7 @@ type Query {
   """
   surface(id: ID!): Surface!
   """
-  Retrieves a list of active Sections with their corresponding active SectionItems for a scheduled surface.
+  Retrieves a list of active and enabled Sections with their corresponding active SectionItems for a scheduled surface.
   """
   getSections(filters: SectionFilters!): [Section!]!
 }
