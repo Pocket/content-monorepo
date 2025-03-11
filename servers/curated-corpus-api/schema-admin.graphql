@@ -558,6 +558,11 @@ input CreateOrUpdateSectionInput {
 
 extend type Section {
   """
+  Indicates whether or not a Section is fully disabled from display on NewTab. Can only  be controlled
+  in the admin tool.
+  """
+  disabled: Boolean!
+  """
   A Unix timestamp of when the Section was created.
   """
   createdAt: Int!
@@ -1168,7 +1173,7 @@ type Query {
   getOpenGraphFields(url: Url!): OpenGraphFields
 
   """
-  Retrieves a list of active Sections with their corresponding active SectionItems for a scheduled surface.
+  Retrieves a list of active and enabled/disabled Sections with their corresponding active SectionItems for a scheduled surface.
   """
   getSectionsWithSectionItems(scheduledSurfaceGuid: ID!): [Section!]!
 }
