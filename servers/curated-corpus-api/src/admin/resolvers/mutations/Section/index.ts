@@ -1,11 +1,13 @@
 import {
   AuthenticationError,
+  NotFoundError,
   UserInputError,
 } from '@pocket-tools/apollo-utils';
 
 import {
   createSection as dbCreateSection,
   updateSection as dbUpdateSection,
+  disableEnableSection as dbDisableEnableSection,
 } from '../../../../database/mutations';
 import { Section } from '../../../../database/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
@@ -47,6 +49,45 @@ export async function createOrUpdateSection(
   }
 
   return await dbCreateSection(context.db, data);
+
+  // TODO: emit creation event to a data pipeline
+  // as of this writing (2025-01-09), we are navigating the migration from
+  // snowplow & snowflake to glean & bigquery. we are awaiting a decision
+  // on the best path forward for our data pipeline.
+}
+
+
+/**
+ * Disables or enables a Section.
+ *
+ * @param parent
+ * @param data
+ * @param context
+ */
+export async function disableEnableSection(
+  parent,
+  { data },
+  context: IAdminContext,
+): Promise<Section> {
+  // Check if the user can execute this mutation.
+  if (!context.authenticatedUser.canWriteToSurface(data.scheduledSurfaceGuid)) {
+    throw new AuthenticationError(ACCESS_DENIED_ERROR);
+  }
+
+  // check if the Section with the passed externalId exists
+  const section = await context.db.section.findUnique({
+    where: { externalId: data.externalId },
+  });
+
+  // if Section does not exist, throw NotFoundError
+  if (!section) {
+    throw new NotFoundError(
+      `Cannot disable or enable the section: Section with id "${data.externalId}" does not exist.`,
+    );
+  }
+
+  // disable or enable a Section
+  return await dbDisableEnableSection(context.db, data);
 
   // TODO: emit creation event to a data pipeline
   // as of this writing (2025-01-09), we are navigating the migration from

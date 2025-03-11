@@ -125,6 +125,11 @@ export type CreateSectionItemInput = {
   rank?: number;
 };
 
+export type DisableEnableSectionInput = {
+  externalId: string;
+  disabled: boolean;
+}
+
 export type ApprovedItem = ApprovedItemModel & {
   authors: ApprovedItemAuthor[];
 };

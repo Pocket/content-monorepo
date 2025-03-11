@@ -556,6 +556,21 @@ input CreateOrUpdateSectionInput {
   active: Boolean!
 }
 
+"""
+Input data for disabling or enabling a Section
+"""
+input DisableEnableSectionInput {
+  """
+  An alternative primary key in UUID format supplied by ML.
+  """
+  externalId: ID!
+  """
+  Indicates whether or not a Section is fully disabled from display on NewTab. Can only  be controlled
+  in the admin tool.
+  """
+  disabled: Boolean!
+}
+
 extend type Section {
   """
   Indicates whether or not a Section is fully disabled from display on NewTab. Can only  be controlled
@@ -1263,6 +1278,11 @@ type Mutation {
   Removes an active SectionItem from a Section.
   """
   removeSectionItem(externalId: String!): SectionItem!
+
+  """
+  Disables or enables a Section. Can only be done from the admin tool.
+  """
+  disableEnableSection(data: DisableEnableSectionInput!): Section!
 }
 
 """

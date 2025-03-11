@@ -78,6 +78,11 @@ export type CreateOrUpdateSectionApiInput = {
   active: boolean;
 };
 
+export type DisableEnableSectionApiInput = {
+  externalId: string;
+  disabled: boolean;
+};
+
 export type CreateSectionItemApiInput = {
   sectionExternalId: string;
   approvedItemExternalId: string;
