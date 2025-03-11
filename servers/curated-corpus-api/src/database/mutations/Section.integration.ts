@@ -2,7 +2,7 @@ import { PrismaClient } from '.prisma/client';
 
 import { client } from '../client';
 import { clearDb, createApprovedItemHelper } from '../../test/helpers';
-import { createSection, updateSection } from './Section';
+import { createSection, disableEnableSection, updateSection } from './Section';
 import {
   createSectionHelper,
   createSectionItemHelper,
@@ -166,6 +166,41 @@ describe('Section', () => {
       expect(result.deactivateSource).toEqual(ActivitySource.ML);
       expect(result.deactivatedAt).toEqual(newDateMock);
       expect(result.sort).toEqual(3);
+    });
+  });
+
+  describe('disableEnableSection', () => {
+    it('should disable a Section', async () => {
+      await createSectionHelper(db, {
+        externalId: 'active-123',
+        title: 'New Title',
+      });
+
+      const input = {
+        externalId: 'active-123',
+        disabled: true
+      };
+
+      const result = await disableEnableSection(db, input);
+
+      expect(result.externalId).toEqual('active-123');
+      expect(result.disabled).toBeTruthy();
+    });
+    it('should enable a Section', async () => {
+      await createSectionHelper(db, {
+        externalId: 'active-890',
+        title: 'New Title',
+        disabled: true
+      });
+      const input = {
+        externalId: 'active-890',
+        disabled: false
+      };
+
+      const result = await disableEnableSection(db, input);
+
+      expect(result.externalId).toEqual('active-890');
+      expect(result.disabled).toBeFalsy();
     });
   });
 });

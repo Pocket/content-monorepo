@@ -1,5 +1,5 @@
 import { PrismaClient, Prisma } from '.prisma/client';
-import { CreateSectionInput, Section } from '../types';
+import { CreateSectionInput, DisableEnableSectionInput, Section } from '../types';
 import { ActivitySource } from 'content-common';
 
 /**
@@ -8,6 +8,7 @@ import { ActivitySource } from 'content-common';
  * @param db
  * @param data
  * @param username
+ * @returns Section
  */
 export async function createSection(
   db: PrismaClient,
@@ -47,7 +48,7 @@ export async function createSection(
  * @param db
  * @param data
  * @param sectionId
- * @returns
+ * @returns Section
  */
 export async function updateSection(
   db: PrismaClient,
@@ -94,4 +95,43 @@ export async function updateSection(
     ...updatedSection,
     sectionItems: []
   }
+}
+
+/**
+ * This mutation disables or enables a Section.
+ *
+ * @param db
+ * @param data
+ * @returns Section
+ */
+export async function disableEnableSection(
+  db: PrismaClient,
+  data: DisableEnableSectionInput
+): Promise<Section> {
+  const { externalId, disabled } = data;
+
+  const updatedSectionData: Prisma.SectionUpdateInput = {
+    disabled,
+  };
+
+  return await db.section.update({
+    where: { externalId: externalId },
+    data: updatedSectionData,
+    include: {
+      sectionItems: {
+        where: {
+          active: true
+        },
+        include: {
+          approvedItem: {
+            include: {
+              authors: {
+                orderBy: [{ sortOrder: 'asc' }],
+              },
+            },
+          }
+        }
+      }
+    }
+  });
 }

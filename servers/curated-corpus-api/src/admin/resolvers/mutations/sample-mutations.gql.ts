@@ -101,6 +101,15 @@ export const CREATE_OR_UPDATE_SECTION = gql`
   ${AdminSectionData}
 `;
 
+export const DISABLE_ENABLE_SECTION = gql`
+    mutation disableEnableSection($data: DisableEnableSectionInput!) {
+        disableEnableSection(data: $data) {
+            ...AdminSectionData
+        }
+    }
+    ${AdminSectionData}
+`;
+
 export const CREATE_SECTION_ITEM = gql`
   mutation createSectionItem($data: CreateSectionItemInput!) {
     createSectionItem(data: $data) {
