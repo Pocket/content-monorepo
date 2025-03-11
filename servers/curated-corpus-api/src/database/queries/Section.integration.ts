@@ -5,28 +5,16 @@ import { clearDb, createApprovedItemHelper } from '../../test/helpers';
 import { getSectionsWithSectionItems } from './Section';
 import { createSectionHelper, createSectionItemHelper } from '../../test/helpers';
 import { ScheduledSurfacesEnum } from 'content-common';
-import { PublicContextManager } from '../../public/context';
-import { AdminContextManager } from '../../admin/context';
 
 describe('Section', () => {
   let db: PrismaClient;
   let activeEnabledSection1: Section;
   let activeEnabledSection2: Section;
   let activeDisabledSection: Section;
-  let publicContext: PublicContextManager;
-  let adminContext: AdminContextManager;
 
   beforeAll(async () => {
     db = client();
     await clearDb(db);
-
-    publicContext = new PublicContextManager({ db: db });
-    adminContext = new AdminContextManager({
-      request: { headers: {} } as any,
-      db: db,
-      s3: {} as any,
-      eventEmitter: {} as any,
-    });
   });
 
   afterAll(async () => {
@@ -83,7 +71,7 @@ describe('Section', () => {
         // Expect 4 sections in DB
         expect (dbSections.length).toEqual(4);
         // Now get the result from getSectionsWithSectionItems (public context)
-        const result = await getSectionsWithSectionItems(publicContext, ScheduledSurfacesEnum.NEW_TAB_EN_US);
+        const result = await getSectionsWithSectionItems(db, true, ScheduledSurfacesEnum.NEW_TAB_EN_US);
         // 3 total active sections, but 1 Sectionis disabled
         // ONLY 2 enabled sections should be returned
         expect(result.length).toEqual(2);
@@ -101,7 +89,7 @@ describe('Section', () => {
         // clear db
         await clearDb(db);
 
-        const result = await getSectionsWithSectionItems(publicContext, 'NEW_TAB_EN_US');
+        const result = await getSectionsWithSectionItems(db, true, 'NEW_TAB_EN_US');
 
         expect(result).toEqual([]);
       });
@@ -151,7 +139,7 @@ describe('Section', () => {
         // Expect 4 sections in DB
         expect (dbSections.length).toEqual(4);
         // Now get the result from getSectionsWithSectionItems (admin context)
-        const result = await getSectionsWithSectionItems(adminContext, ScheduledSurfacesEnum.NEW_TAB_EN_US);
+        const result = await getSectionsWithSectionItems(db, false, ScheduledSurfacesEnum.NEW_TAB_EN_US);
         // 3 total active sections, 1 Sectionis disabled, 1 Sectionis in-active
         // ONLY 3 sections should be returned
         expect(result.length).toEqual(3);
@@ -172,7 +160,7 @@ describe('Section', () => {
         // clear db
         await clearDb(db);
 
-        const result = await getSectionsWithSectionItems(adminContext, 'NEW_TAB_EN_US');
+        const result = await getSectionsWithSectionItems(db, false, 'NEW_TAB_EN_US');
 
         expect(result).toEqual([]);
       });

@@ -1,23 +1,22 @@
+import { PrismaClient } from '.prisma/client';
 import { Section } from '../types';
-import { PublicContextManager } from '../../public/context';
 
 /**
  * This query retrieves all active Sections & their associated active SectionItems for a given ScheduledSurface.
  * If the context is public, only active & enabled Sections are retrieved.
- * If the context is public, all active & enabled/disabled Sections are retrieved.
+ * If the context is admin, all active & enabled/disabled Sections are retrieved.
  * Returns an empty array if no Sections are found.
  *
  * @param db
- * @param username
+ * @param isPublicContext
+ * @param scheduledSurfaceGuid
  */
 export async function getSectionsWithSectionItems(
-  context,
+  db: PrismaClient,
+  isPublicContext: boolean,
   scheduledSurfaceGuid: string
 ): Promise<Section[]> {
-  // check if public context
-  const isPublicContext = context instanceof PublicContextManager;
-
-  const sections = await context.db.section.findMany({
+  const sections = await db.section.findMany({
     where: {
       scheduledSurfaceGuid: scheduledSurfaceGuid,
       active: true,

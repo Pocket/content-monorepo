@@ -17,5 +17,5 @@ export async function getSections(
   context: IPublicContext,
 ): Promise<Section[]> {
   const { filters } = args;
-  return await dbGetSectionsWithSectionItems(context, filters.scheduledSurfaceGuid);
+  return await dbGetSectionsWithSectionItems(context.db, true, filters.scheduledSurfaceGuid);
 }
