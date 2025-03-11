@@ -6,7 +6,6 @@ import { PrismaClient } from '.prisma/client';
 
 import {
   ActionScreen,
-  ApprovedItemGrade,
   CreateApprovedCorpusItemApiInput,
   CorpusItemSource,
   CuratedStatus,
@@ -75,7 +74,6 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
       publisher: 'Convective Cloud',
       datePublished: '2024-02-29',
       topic: Topics.TECHNOLOGY,
-      grade: ApprovedItemGrade.A,
       source: CorpusItemSource.PROSPECT,
       isCollection: false,
       isTimeSensitive: true,
@@ -141,9 +139,6 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
 
     // delete the publication date (not all items will have this data)
     delete inputWithoutOptionalFields.datePublished;
-
-    // delete the grade (not all items will have this data)
-    delete inputWithoutOptionalFields.grade;
 
     const result = await request(app)
       .post(graphQLUrl)

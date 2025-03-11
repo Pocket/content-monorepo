@@ -10,7 +10,6 @@ import {
   CuratedStatus,
   CorpusLanguage,
   Topics,
-  ApprovedItemGrade,
 } from 'content-common';
 
 import { client } from '../../../../database/client';
@@ -59,7 +58,6 @@ describe('mutations: ApprovedItem (updateApprovedCorpusItem)', () => {
       title: "3 Things Everyone Knows About LEGO That You Don't",
       status: CuratedStatus.RECOMMENDATION,
       language: 'EN',
-      grade: ApprovedItemGrade.B,
     });
 
     // authors from `item` above do not go through graphql and therefore
@@ -85,7 +83,6 @@ describe('mutations: ApprovedItem (updateApprovedCorpusItem)', () => {
       publisher: 'Cloud Factory',
       datePublished: '2024-02-24',
       topic: Topics.BUSINESS,
-      grade: ApprovedItemGrade.A,
       isTimeSensitive: true,
     };
   });
@@ -141,9 +138,6 @@ describe('mutations: ApprovedItem (updateApprovedCorpusItem)', () => {
     // delete the publication date (not all items will have this data)
     delete inputWithoutOptionalFields.datePublished;
 
-    // delete grade (not all items will have this data)
-    delete inputWithoutOptionalFields.grade;
-
     const res = await request(app)
       .post(graphQLUrl)
       .set(headers)
@@ -167,9 +161,6 @@ describe('mutations: ApprovedItem (updateApprovedCorpusItem)', () => {
     // Publication date was not provided by the test helper and should
     // remain empty after this update
     expect(data?.updateApprovedCorpusItem.datePublished).toBeNull();
-
-    // grade value should be unchanged
-    expect(data?.updateApprovedCorpusItem.grade).toEqual(item.grade);
 
     // The `updatedBy` field should now be the SSO username of the user
     // who updated this record
@@ -196,9 +187,6 @@ describe('mutations: ApprovedItem (updateApprovedCorpusItem)', () => {
     // clone the input
     const inputUnsettingOptionalFields = { ...input };
 
-    // delete grade (not all items will have this data)
-    inputUnsettingOptionalFields.grade = null;
-
     const res = await request(app)
       .post(graphQLUrl)
       .set(headers)
@@ -218,9 +206,6 @@ describe('mutations: ApprovedItem (updateApprovedCorpusItem)', () => {
     expect(data?.updateApprovedCorpusItem).toMatchObject(
       inputUnsettingOptionalFields,
     );
-
-    // grade value should be unset
-    expect(data?.updateApprovedCorpusItem.grade).toBeNull();
 
     // The `updatedBy` field should now be the SSO username of the user
     // who updated this record

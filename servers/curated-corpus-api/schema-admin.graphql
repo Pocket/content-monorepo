@@ -272,10 +272,6 @@ type ApprovedCorpusItem @key(fields: "url") {
   """
   topic: String!
   """
-  The quality grade associated with this CorpusItem.
-  """
-  grade: ApprovedItemGrade
-  """
   The source of the corpus item.
   """
   source: CorpusItemSource!
@@ -784,10 +780,6 @@ input CreateApprovedCorpusItemInput {
   """
   topic: String!
   """
-  The quality grade associated with this CorpusItem.
-  """
-  grade: ApprovedItemGrade
-  """
   The source of the corpus item.
   """
   source: CorpusItemSource!
@@ -966,10 +958,6 @@ input UpdateApprovedCorpusItemInput {
   """
   topic: String!
   """
-  The quality grade associated with this CorpusItem.
-  """
-  grade: ApprovedItemGrade
-  """
   A flag to ML to not recommend this item long term after it is added to the corpus.
   Example: a story covering an election, or "The best of 202x" collection.
   """
@@ -1121,24 +1109,6 @@ input DeleteScheduledCorpusItemInput {
   actionScreen: ActionScreen
 }
 
-"""
-Input data for updating the grade of an Approved Item.
-"""
-input UpdateApprovedCorpusItemGradeInput {
-  """
-  Approved Item ID.
-  """
-  externalId: ID!
-  """
-  The quality grade associated with this CorpusItem.
-  """
-  grade: ApprovedItemGrade!
-  """
-  The UI screen where the approved corpus item is being graded from.
-  """
-  actionScreen: ActionScreen!
-}
-
 type Query {
   """
   Retrieves a paginated, filterable list of Approved Items.
@@ -1266,13 +1236,6 @@ type Mutation {
   Uploads an image to S3 for an Approved Item
   """
   uploadApprovedCorpusItemImage(data: Upload!): ApprovedCorpusImageUrl!
-
-  """
-  Updates the grade of an Approved Item
-  """
-  updateApprovedCorpusItemGrade(
-    data: UpdateApprovedCorpusItemGradeInput!
-  ): ApprovedCorpusItem!
 
   """
   Marks the given scheduled surface as reviewed by human curators for a given date.
