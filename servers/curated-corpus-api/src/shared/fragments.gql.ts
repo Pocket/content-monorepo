@@ -17,7 +17,6 @@ export const CuratedItemData = gql`
     }
     status
     topic
-    grade
     source
     isCollection
     isTimeSensitive
@@ -29,23 +28,22 @@ export const CuratedItemData = gql`
   }
 `;
 
-export const CorpusItemData = gql `
+export const CorpusItemData = gql`
   fragment CorpusItemData on CorpusItem {
-      id
-      url
-      title
-      excerpt
-      language
-      authors {
-          name
-          sortOrder
-      }
-      publisher
-      datePublished
-      imageUrl
-      topic
-      grade
-      isTimeSensitive
+    id
+    url
+    title
+    excerpt
+    language
+    authors {
+      name
+      sortOrder
+    }
+    publisher
+    datePublished
+    imageUrl
+    topic
+    isTimeSensitive
   }
 `;
 
@@ -80,19 +78,19 @@ export const ScheduledItemData = gql`
   ${CuratedItemData}
 `;
 export const BaseSectionItemData = gql`
-    fragment BaseSectionItemData on SectionItem {
-        externalId
-        rank
-    }
+  fragment BaseSectionItemData on SectionItem {
+    externalId
+    rank
+  }
 `;
 
 export const BaseSectionData = gql`
-    fragment BaseSectionData on Section {
-        externalId
-        title
-        scheduledSurfaceGuid
-        sort
-        createSource
-        active
-    }
+  fragment BaseSectionData on Section {
+    externalId
+    title
+    scheduledSurfaceGuid
+    sort
+    createSource
+    active
+  }
 `;
