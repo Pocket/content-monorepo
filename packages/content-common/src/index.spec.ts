@@ -119,6 +119,17 @@ describe('content-common', () => {
         expect(applyApTitleCase(swc.result)).toEqual(swc.expected);
       });
     });
+    it('should correctly format titles with curly apostrophes', () => {
+      const testCases = [
+        {
+          result: "every state\u2018S dream travel destination, mapped",
+          expected: "Every State\u2018s Dream Travel Destination, Mapped",
+        },
+      ];
+      testCases.forEach(({ result, expected }) => {
+        expect(applyApTitleCase(result)).toEqual(expected);
+      });
+    });
   });
   describe('lowercaseAfterApostrophe', () => {
     it('lowercase letter after apostrophe & return new string', () => {
@@ -130,6 +141,11 @@ describe('content-common', () => {
         "'Foo' foo'S DaY's You'Ll 'foo Bar foo'Ss'",
       );
       expect(result).toEqual("'Foo' foo's DaY's You'll 'foo Bar foo'ss'");
+    });
+    it('should lowercase the letter after a curly apostrophe', () => {
+      const input = "Every State\u2018S Dream Travel Destination, Mapped";
+      const expected = "Every State\u2018s Dream Travel Destination, Mapped";
+      expect(lowercaseAfterApostrophe(input)).toEqual(expected);
     });
   });
   // taken from curation admin tools
