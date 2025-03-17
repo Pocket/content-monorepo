@@ -54,13 +54,9 @@ export const sanitizeText = (input: string, maxLength: number): string => {
  * @returns {string}
  */
 export const lowercaseAfterApostrophe = (input: string): string => {
-  // matches an apostrophe followed by a char
-  // ensures only the first char after the apostrophe is converted to lowercase
-  const regex = /(?<=\w)(')(\w)/g;
-
-  return input.replace(regex, (match, p1, char) => {
-    return `'${char.toLowerCase()}`; // Lowercase the first char after the apostrophe
-  });
+  // Match either an ASCII or curly apostrophe followed by a letter, after a word character.
+  const regex = /(?<=\w)(['\u2018\u2019])(\w)/g;
+  return input.replace(regex, (_, apostrophe, letter) => `${apostrophe}${letter.toLowerCase()}`);
 };
 
 /**
