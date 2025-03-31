@@ -4,8 +4,8 @@ import { rejectApprovedCorpusItemsForDomain } from '../resolvers/mutations/Appro
 
 const adminRouter = Router();
 
-// expose admin REST endpoint reject-approved-corpus-item-for-domain
-adminRouter.post('/reject-approved-corpus-item-for-domain', async (req, res) => {
+// expose admin REST endpoint reject-approved-corpus-items-for-domain
+adminRouter.post('/reject-approved-corpus-items-for-domain', async (req, res) => {
   const { domainName, testing } = req.body;
   // get the admin context
   const context = await getAdminContext({ req });

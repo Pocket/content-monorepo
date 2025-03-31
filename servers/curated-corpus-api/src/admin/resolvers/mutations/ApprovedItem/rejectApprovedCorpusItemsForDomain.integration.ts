@@ -22,7 +22,7 @@ describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
   let app: Express.Application;
   let server: ApolloServer<IAdminContext>;
   let db: PrismaClient;
-  const rejectApprovedItemForDomainEndpoint = '/admin/reject-approved-corpus-item-for-domain';
+  const rejectApprovedItemForDomainEndpoint = '/admin/reject-approved-corpus-items-for-domain';
 
   beforeAll(async () => {
     // port 0 tells express to dynamically assign an available port
