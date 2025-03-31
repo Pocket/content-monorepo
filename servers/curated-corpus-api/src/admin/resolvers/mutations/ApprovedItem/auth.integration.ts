@@ -483,6 +483,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
       expect(result.body.data).not.toBeNull();
       expect(result.body.testing).toEqual(false);
       expect(result.body.domainName).toEqual('elpais.com');
+      expect(result.body.totalFoundApprovedCorpusItems).toEqual(2);
       expect(result.body.totalRejectedApprovedCorpusItems).toEqual(2);
     });
 

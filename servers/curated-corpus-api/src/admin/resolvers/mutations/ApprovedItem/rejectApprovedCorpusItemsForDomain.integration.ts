@@ -46,7 +46,7 @@ describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
     await clearDb(db);
   });
 
-  it('should reject all approved corpus items & unschedule items for a domain & return totalRejectedApprovedCorpusItems count when testing=false', async () => {
+  it('should reject all approved corpus items & unschedule items for a domain & return totalFoundApprovedCorpusItems & totalRejectedApprovedCorpusItems count when testing=false', async () => {
     // Set up event tracking
     const eventTracker = jest.fn();
     eventEmitter.on(ReviewedCorpusItemEventType.REMOVE_ITEM, eventTracker);
@@ -104,6 +104,7 @@ describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
     expect(res.body.testing).toEqual(false);
     expect(res.body.domainName).toEqual('elpais.com');
     expect(res.body.totalRejectedApprovedCorpusItems).toEqual(2);
+    expect(res.body.totalFoundApprovedCorpusItems).toEqual(2);
 
     // There should now be only 1 approved corpous item & 1 scheduled item
     // in db for other.domain.com
@@ -182,6 +183,7 @@ describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
       .set(headers);
 
     expect(res.status).toEqual(200);
+    expect(res.body.totalFoundApprovedCorpusItems).toEqual(0);
     expect(res.body.totalRejectedApprovedCorpusItems).toEqual(0);
   });
 });
