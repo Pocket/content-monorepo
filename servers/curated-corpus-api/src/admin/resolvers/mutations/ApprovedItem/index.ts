@@ -326,6 +326,7 @@ export async function rejectApprovedCorpusItemsForDomain(
   testing: boolean,
   context: IAdminContext,
 ): Promise<number> {
+  console.log('rejectApprovedCorpusItemsForDomain, context.authenticatedUser: ', context.authenticatedUser)
   // Check if the user can execute this endpoint
   if (!context.authenticatedUser.canWriteToCorpus()) {
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
