@@ -67,7 +67,7 @@ describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
       title: '16 Unheard Ways To Achieve Greater Terraform',
       status: CuratedStatus.RECOMMENDATION,
       language: 'EN',
-      url: "https://elpais.com/example-two/"
+      url: "http://www.elpais.com/example-two/"
     });
     // create a scheduled entry for item2
     await createScheduledItemHelper(db, {

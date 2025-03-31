@@ -37,6 +37,7 @@ import {
   getScheduledItemsForApprovedCorpusItem,
 } from '../../../../database/queries/ScheduledItem';
 import { deleteScheduledItem } from '../ScheduledItem';
+import { RejectApprovedCorpusItemsForDomainResponse } from '../../types';
 
 /**
  * Creates an approved curated item with data supplied. Optionally, schedules the freshly
@@ -325,8 +326,7 @@ export async function rejectApprovedCorpusItemsForDomain(
   domainName: string,
   testing: boolean,
   context: IAdminContext,
-): Promise<number> {
-  console.log('rejectApprovedCorpusItemsForDomain, context.authenticatedUser: ', context.authenticatedUser)
+): Promise<RejectApprovedCorpusItemsForDomainResponse> {
   // Check if the user can execute this endpoint
   if (!context.authenticatedUser.canWriteToCorpus()) {
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
@@ -334,7 +334,7 @@ export async function rejectApprovedCorpusItemsForDomain(
   // 1. Get approved corpus items for a domain name
   const approvedItems = await getApprovedItemsForDomain(context.db, domainName);
   if (testing ) {
-    return approvedItems.length;
+    return { totalFoundApprovedCorpusItems: approvedItems.length };
   }
   const rejectedItemExternalIds: (string | null)[] = [];
 
@@ -365,7 +365,11 @@ export async function rejectApprovedCorpusItemsForDomain(
     }
   }
   // Remove all "falsy" (null in this case) values
-  return rejectedItemExternalIds.filter(Boolean).length;
+  const rejectedItemsCount = rejectedItemExternalIds.filter(Boolean).length;
+  return {
+    totalFoundApprovedCorpusItems: approvedItems.length,
+    totalRejectedApprovedCorpusItems: rejectedItemsCount
+  }
 }
 
 /**

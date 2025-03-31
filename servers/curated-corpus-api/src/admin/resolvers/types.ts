@@ -60,3 +60,8 @@ export type CreateScheduleReviewInput = {
   scheduledSurfaceGuid: string;
   scheduledDate: string;
 };
+
+export type RejectApprovedCorpusItemsForDomainResponse = {
+  totalFoundApprovedCorpusItems: number;
+  totalRejectedApprovedCorpusItems?: number;
+}
