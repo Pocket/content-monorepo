@@ -9,6 +9,7 @@ adminRouter.post('/reject-approved-corpus-items-for-domain', async (req, res) =>
   const { domainName, testing } = req.body;
   // get the admin context
   const context = await getAdminContext({ req });
+  console.log('reject-approved-corpus-items-for-domain context: ', context);
 
   if (!domainName) {
     return res.status(400).json({ error: 'Missing domainName query param' });
