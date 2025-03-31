@@ -17,6 +17,7 @@ import { getAdminContext, IAdminContext } from './admin/context';
 import { getPublicContext, IPublicContext } from './public/context';
 import { startAdminServer } from './admin/server';
 import { startPublicServer } from './public/server';
+import adminRouter from './admin/routes/admin';
 
 export async function startServer(port: number): Promise<{
   app: Express.Application;
@@ -59,6 +60,9 @@ export async function startServer(port: number): Promise<{
   // set up admin server
   const adminServer = await startAdminServer(httpServer);
   const adminUrl = '/admin';
+
+  // Mount the custom admin REST router first
+  app.use(adminUrl, adminRouter);
 
   app.use(
     adminUrl,

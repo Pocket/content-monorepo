@@ -1,5 +1,6 @@
 import { PrismaClient } from '.prisma/client';
 import { DateTime } from 'luxon';
+import { ScheduledItem as ScheduledItemPrisma } from '.prisma/client';
 import {
   ScheduledItem,
   ScheduledItemFilterInput,
@@ -13,7 +14,23 @@ import {
 import { groupBy } from '../../shared/utils';
 import { UserInputError } from '@pocket-tools/apollo-utils';
 
+
 /**
+ * Gets a list of scheduled items for an ApprovedCorpusItem
+ * @param db
+ * @param approvedCorpusId
+ */
+export async function getScheduledItemsForApprovedCorpusItem(
+  db: PrismaClient,
+  approvedCorpusId: number
+): Promise<ScheduledItemPrisma[]> {
+  return await db.scheduledItem.findMany({
+    where: {approvedItemId: approvedCorpusId}
+  });
+}
+
+/**
+ * Gets a list of scheduled items based on filters.
  * @param db
  * @param filters
  */

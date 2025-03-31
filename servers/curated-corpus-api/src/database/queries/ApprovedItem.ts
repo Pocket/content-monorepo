@@ -29,6 +29,26 @@ type ApprovedItemCursor = {
 };
 
 /**
+ * Return ApprovedItems for a given domain name.
+ *
+ * @param db
+ * @param domainName
+ */
+export async function getApprovedItemsForDomain(
+  db: PrismaClient,
+  domainName: string
+): Promise<ApprovedItem[]> {
+  return db.approvedItem.findMany({
+    where: {url: { contains: domainName }},
+    include: {
+      authors: {
+        orderBy: [{ sortOrder: 'asc' }],
+      },
+    },
+  });
+}
+
+/**
  * Return a Relay-style paginated, optionally filtered list of approved items.
  *
  * @param db
