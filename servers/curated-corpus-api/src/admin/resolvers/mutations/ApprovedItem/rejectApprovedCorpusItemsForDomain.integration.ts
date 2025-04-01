@@ -46,7 +46,8 @@ describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
     await clearDb(db);
   });
 
-  it('should reject all approved corpus items & unschedule items for a domain & return totalFoundApprovedCorpusItems & totalRejectedApprovedCorpusItems count when testing=false', async () => {
+  it('should reject and unschedule all approved corpus items for a domain & return totalFoundApprovedCorpusItems ' +
+    '& totalRejectedApprovedCorpusItems count when testing=false', async () => {
     // Set up event tracking
     const eventTracker = jest.fn();
     eventEmitter.on(ReviewedCorpusItemEventType.REMOVE_ITEM, eventTracker);
@@ -137,6 +138,96 @@ describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
       ReviewedCorpusItemEventType.REMOVE_ITEM,
     );
     expect(rejectItemEvent2.eventType).toEqual(
+      ReviewedCorpusItemEventType.REJECT_ITEM,
+    );
+  });
+
+  it('should reject and unschedule all approved corpus items for the exact domain provided (e.g. "as.com"), without ' +
+    'matching domains that contain it as a substring (e.g. "newatlas.com"), and return totalFoundApprovedCorpusItems ' +
+    'and totalRejectedApprovedCorpusItems when testing=false', async () => {
+    // Set up event tracking
+    const eventTracker = jest.fn();
+    eventEmitter.on(ReviewedCorpusItemEventType.REMOVE_ITEM, eventTracker);
+    eventEmitter.on(ReviewedCorpusItemEventType.REJECT_ITEM, eventTracker);
+
+    const item1 = await createApprovedItemHelper(db, {
+      title: '15 Unheard Ways To Achieve Greater Terraform',
+      status: CuratedStatus.RECOMMENDATION,
+      language: 'EN',
+      url: "https://as.com/example-one/"
+    });
+    // create a scheduled entry for item1
+    await createScheduledItemHelper(db, {
+      approvedItem: item1
+    });
+
+    const item2 = await createApprovedItemHelper(db, {
+      title: '16 Unheard Ways To Achieve Greater Terraform',
+      status: CuratedStatus.RECOMMENDATION,
+      language: 'EN',
+      url: "http://www.newatlas.com/example-two/"
+    });
+    // create a scheduled entry for item2
+    const scheduledItem2 = await createScheduledItemHelper(db, {
+      approvedItem: item2
+    });
+
+    const item3 = await createApprovedItemHelper(db, {
+      title: 'Another item',
+      status: CuratedStatus.RECOMMENDATION,
+      language: 'EN',
+      url: "https://other.domain.com/example-one/"
+    });
+    // create a scheduled entry for item3
+    const scheduledItem3 = await createScheduledItemHelper(db, {
+      approvedItem: item3
+    });
+
+    // expect 3 approved corpus items
+    let approvedCorpusItems = await db.approvedItem.findMany();
+    expect(approvedCorpusItems.length).toEqual(3);
+
+    // // expect 3 scheduled items
+    let scheduledItems = await db.scheduledItem.findMany();
+    expect(scheduledItems.length).toEqual(3);
+
+    // reject corpus items for as.com domain
+    // there is only 1 approved corpus item and 1 scheduled item for as.com
+    const res = await request(app)
+      .post(rejectApprovedItemForDomainEndpoint)
+      .send({ domainName: 'as.com', testing: false })
+      .set(headers);
+
+    expect(res.status).toEqual(200);
+    expect(res.body.testing).toEqual(false);
+    expect(res.body.domainName).toEqual('as.com');
+    expect(res.body.totalRejectedApprovedCorpusItems).toEqual(1);
+    expect(res.body.totalFoundApprovedCorpusItems).toEqual(1);
+
+    // There should now be only 2 approved corpous items & 2 scheduled items
+    // in db for newatlas.com & other.domain.com
+    approvedCorpusItems = await db.approvedItem.findMany();
+    expect(approvedCorpusItems.length).toEqual(2);
+    expect(approvedCorpusItems[0].url).toEqual(item2.url)
+    expect(approvedCorpusItems[1].url).toEqual(item3.url)
+
+    scheduledItems = await db.scheduledItem.findMany();
+    expect(scheduledItems.length).toEqual(2);
+    expect(scheduledItems[0].externalId).toEqual(scheduledItem2.externalId);
+    expect(scheduledItems[1].externalId).toEqual(scheduledItem3.externalId);
+
+    // Check that there are 2 events sent to Snowplow
+    // 1 REMOVE_ITEM event1 (for removing scheduled item)
+    // 1 REJECT_ITEM event (for rejecting the corpus items)
+    // Check that the REMOVE_ITEM and REJECT_ITEM events were fired successfully.
+    expect(eventTracker).toHaveBeenCalledTimes(2);
+    const removeItemEvent1 = await eventTracker.mock.calls[0][0];
+    const rejectItemEvent1 = await eventTracker.mock.calls[1][0];
+
+    expect(removeItemEvent1.eventType).toEqual(
+      ReviewedCorpusItemEventType.REMOVE_ITEM,
+    );
+    expect(rejectItemEvent1.eventType).toEqual(
       ReviewedCorpusItemEventType.REJECT_ITEM,
     );
   });
