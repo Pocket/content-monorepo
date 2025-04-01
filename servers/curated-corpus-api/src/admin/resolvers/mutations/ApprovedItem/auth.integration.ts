@@ -19,7 +19,7 @@ import {
 } from 'content-common';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { MozillaAccessGroup } from 'content-common';
-import { clearDb, createApprovedItemHelper } from '../../../../test/helpers';
+import { clearDb, createApprovedItemHelper, createScheduledItemHelper } from '../../../../test/helpers';
 import {
   CREATE_APPROVED_ITEM,
   REJECT_APPROVED_ITEM,
@@ -36,6 +36,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
   let server: ApolloServer<IAdminContext>;
   let graphQLUrl: string;
   let db: PrismaClient;
+  const rejectApprovedItemForDomainEndpoint = '/admin/reject-approved-corpus-items-for-domain';
 
   beforeAll(async () => {
     // port 0 tells express to dynamically assign an available port
@@ -47,6 +48,10 @@ describe('mutations: ApprovedItem - authentication checks', () => {
   afterAll(async () => {
     await server.stop();
     await db.$disconnect();
+  });
+
+  beforeEach(async () => {
+    await clearDb(db);
   });
 
   // a standard set of inputs for this mutation
@@ -423,6 +428,116 @@ describe('mutations: ApprovedItem - authentication checks', () => {
       expect(result.body.data).toBeNull();
       expect(result.body.errors).not.toBeUndefined();
       expect(result.body.errors?.[0].message).toContain(ACCESS_DENIED_ERROR);
+    });
+  });
+
+  describe('rejectApprovedCorpusItem mutation', () => {
+    it('should successfully reject and unschedule approved item for a domain when the user has full access', async () => {
+      // Set up auth headers with full access
+      const headers = {
+        name: 'Test User',
+        username: 'test.user@test.com',
+        groups: `group1,group2,${MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL}`,
+      };
+
+      const item1 = await createApprovedItemHelper(db, {
+        title: '15 Unheard Ways To Achieve Greater Terraform',
+        status: CuratedStatus.RECOMMENDATION,
+        language: 'EN',
+        url: "https://elpais.com/example-one/"
+      });
+      // create a scheduled entry for item1
+      await createScheduledItemHelper(db, {
+        approvedItem: item1
+      });
+
+      const item2 = await createApprovedItemHelper(db, {
+        title: '16 Unheard Ways To Achieve Greater Terraform',
+        status: CuratedStatus.RECOMMENDATION,
+        language: 'EN',
+        url: "https://elpais.com/example-two/"
+      });
+      // create a scheduled entry for item2
+      await createScheduledItemHelper(db, {
+        approvedItem: item2
+      });
+
+      // expect 2 approved corpus items
+      let approvedCorpusItems = await db.approvedItem.findMany();
+      expect(approvedCorpusItems.length).toEqual(2);
+
+      // // expect 2 scheduled items
+      let scheduledItems = await db.scheduledItem.findMany();
+      expect(scheduledItems.length).toEqual(2);
+
+      // reject corpus items for elpais.com domain
+      // there are 2 approved corpus items & 2 scheduled items
+      const result = await request(app)
+        .post(rejectApprovedItemForDomainEndpoint)
+        .send({ domainName: 'elpais.com', testing: false })
+        .set(headers);
+
+      expect(result.status).toEqual(200);
+
+      expect(result.body.errors).toBeUndefined();
+      expect(result.body.data).not.toBeNull();
+      expect(result.body.testing).toEqual(false);
+      expect(result.body.domainName).toEqual('elpais.com');
+      expect(result.body.totalFoundApprovedCorpusItems).toEqual(2);
+      expect(result.body.totalRejectedApprovedCorpusItems).toEqual(2);
+    });
+
+    it('should throw an error when the user has no access any scheduled surface', async () => {
+      // Set up auth headers without access to any Scheduled Surface
+      const headers = {
+        name: 'Test User',
+        username: 'test.user@test.com',
+        groups: `group1,group2`,
+      };
+
+      const result = await request(app)
+        .post(rejectApprovedItemForDomainEndpoint)
+        .send({ domainName: 'elpais.com', testing: false })
+        .set(headers);
+
+      expect(result.error).not.toBeUndefined();
+      expect(result.body.data).toBeUndefined();
+
+      expect(result.error.text).toContain(ACCESS_DENIED_ERROR);
+    });
+
+    it('should throw an error when the user has only read-only access', async () => {
+      // Set up auth headers with read-only access
+      const headers = {
+        name: 'Test User',
+        username: 'test.user@test.com',
+        groups: `group1,${MozillaAccessGroup.READONLY}`,
+      };
+
+      const result = await request(app)
+        .post(rejectApprovedItemForDomainEndpoint)
+        .send({ domainName: 'elpais.com', testing: false })
+        .set(headers);
+
+      expect(result.error).not.toBeUndefined();
+      expect(result.body.data).toBeUndefined();
+
+      expect(result.error.text).toContain(ACCESS_DENIED_ERROR);
+    });
+
+    it('should throw an error when the request headers are undefined', async () => {
+      // pass in empty object for headers
+      const headers = {};
+
+      const result = await request(app)
+        .post(rejectApprovedItemForDomainEndpoint)
+        .send({ domainName: 'elpais.com', testing: false })
+        .set(headers);
+
+      expect(result.error).not.toBeUndefined();
+      expect(result.body.data).toBeUndefined();
+
+      expect(result.error.text).toContain(ACCESS_DENIED_ERROR);
     });
   });
 });

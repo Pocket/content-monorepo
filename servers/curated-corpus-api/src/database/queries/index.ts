@@ -1,5 +1,6 @@
 export {
   getApprovedItems,
+  getApprovedItemsForDomain,
   getApprovedItemByUrl,
   getApprovedItemByExternalId,
   getScheduledSurfaceHistory,

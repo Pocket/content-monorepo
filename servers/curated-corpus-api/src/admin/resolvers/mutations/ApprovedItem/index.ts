@@ -2,8 +2,7 @@ import {
   AuthenticationError,
   UserInputError,
 } from '@pocket-tools/apollo-utils';
-
-import { Topics } from 'content-common';
+import { ActionScreen, Topics } from 'content-common';
 
 import {
   createApprovedItem as dbCreateApprovedItem,
@@ -12,7 +11,7 @@ import {
   deleteApprovedItem as dbDeleteApprovedItem,
   updateApprovedItem as dbUpdateApprovedItem,
 } from '../../../../database/mutations';
-import { getApprovedItemByExternalId } from '../../../../database/queries';
+import { getApprovedItemByExternalId, getApprovedItemsForDomain } from '../../../../database/queries';
 import {
   ApprovedCorpusItemPayload,
   RejectedCorpusItemPayload,
@@ -34,6 +33,11 @@ import {
 } from '../../../../database/types';
 import { IAdminContext } from '../../../context';
 import { createTrustedDomainIfPastScheduledDateExists } from '../../../../database/mutations/TrustedDomain';
+import {
+  getScheduledItemsForApprovedCorpusItem,
+} from '../../../../database/queries/ScheduledItem';
+import { deleteScheduledItem } from '../ScheduledItem';
+import { RejectApprovedCorpusItemsForDomainResponse } from '../../types';
 
 /**
  * Creates an approved curated item with data supplied. Optionally, schedules the freshly
@@ -305,6 +309,67 @@ export async function rejectApprovedItem(
   approvedItem.updatedBy = context.authenticatedUser.username;
 
   return approvedItem;
+}
+
+/**
+ * Finds all ApprovedCorpusItems for a give domain name.
+ * Finds all ScheduledItems for ApprovedCorpus Items & unschedules the items.
+ * Rejects all found ApprovedCorpus Items.
+ *
+ * @param parent
+ * @param domainName
+ * @param testing
+ * @param context
+ */
+export async function rejectApprovedCorpusItemsForDomain(
+  parent,
+  domainName: string,
+  testing: boolean,
+  context: IAdminContext,
+): Promise<RejectApprovedCorpusItemsForDomainResponse> {
+  // Check if the user can execute this endpoint
+  if (!context.authenticatedUser.canWriteToCorpus()) {
+    throw new AuthenticationError(ACCESS_DENIED_ERROR);
+  }
+  // 1. Get approved corpus items for a domain name
+  const approvedItems = await getApprovedItemsForDomain(context.db, domainName);
+  if (testing ) {
+    return { totalFoundApprovedCorpusItems: approvedItems.length };
+  }
+  const rejectedItemExternalIds: (string | null)[] = [];
+
+  for (const approvedItem of approvedItems) {
+    try {
+      // 2. Get scheduled items
+      const scheduledItems = await getScheduledItemsForApprovedCorpusItem(context.db, approvedItem.id);
+
+      // 3. Unschedule all scheduled items
+      for (const scheduledItem of scheduledItems) {
+        await deleteScheduledItem(null, { data: { externalId: scheduledItem.externalId, actionScreen: ActionScreen.CORPUS } }, context);
+      }
+
+      // 4. Construct input for rejecting approvied Item
+      const rejectApprovedItemInput = {
+        externalId: approvedItem.externalId,
+        reason: "PUBLISHER_REQUEST",
+        actionScreen: ActionScreen.CORPUS,
+      };
+
+      // 5. Reject approved item
+      const rejectedItem = await rejectApprovedItem(null, { data: rejectApprovedItemInput }, context);
+      rejectedItemExternalIds.push(rejectedItem?.externalId || null);
+    } catch (error) {
+      console.error(`Error processing ApprovedCorpusItem ${approvedItem.id}:`, error);
+      // Silently continue even if error
+      rejectedItemExternalIds.push(null);
+    }
+  }
+  // Remove all "falsy" (null in this case) values
+  const rejectedItemsCount = rejectedItemExternalIds.filter(Boolean).length;
+  return {
+    totalFoundApprovedCorpusItems: approvedItems.length,
+    totalRejectedApprovedCorpusItems: rejectedItemsCount
+  }
 }
 
 /**
