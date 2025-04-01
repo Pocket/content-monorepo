@@ -431,7 +431,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
     });
   });
 
-  describe('rejectApprovedCorpusItem mutation', () => {
+  describe.skip('rejectApprovedCorpusItemsForDomain mutation', () => {
     it('should successfully reject and unschedule approved item for a domain when the user has full access', async () => {
       // Set up auth headers with full access
       const headers = {

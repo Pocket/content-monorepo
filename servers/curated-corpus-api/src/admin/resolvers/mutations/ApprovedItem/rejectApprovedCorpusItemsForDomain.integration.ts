@@ -18,7 +18,7 @@ import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 
-describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
+describe.skip('mutations: ApprovedItem (rejectApprovedCorpusItemsForDomain)', () => {
   let app: Express.Application;
   let server: ApolloServer<IAdminContext>;
   let db: PrismaClient;

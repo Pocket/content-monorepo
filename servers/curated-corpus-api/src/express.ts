@@ -17,7 +17,8 @@ import { getAdminContext, IAdminContext } from './admin/context';
 import { getPublicContext, IPublicContext } from './public/context';
 import { startAdminServer } from './admin/server';
 import { startPublicServer } from './public/server';
-import adminRouter from './admin/routes/admin';
+// Uncomment to expose the admin router where admin REST endpoints live
+// import adminRouter from './admin/routes/admin';
 
 export async function startServer(port: number): Promise<{
   app: Express.Application;
@@ -61,8 +62,10 @@ export async function startServer(port: number): Promise<{
   const adminServer = await startAdminServer(httpServer);
   const adminUrl = '/admin';
 
+  // Endpoint created for https://mozilla-hub.atlassian.net/browse/MC-1698
+  // Uncomment if endpoint needs to be mounted & deployed
   // Mount the custom admin REST router first
-  app.use(adminUrl, adminRouter);
+  // app.use(adminUrl, adminRouter);
 
   app.use(
     adminUrl,
