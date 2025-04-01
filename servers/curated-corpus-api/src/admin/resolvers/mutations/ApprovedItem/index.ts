@@ -345,7 +345,7 @@ export async function rejectApprovedCorpusItemsForDomain(
 
       // 3. Unschedule all scheduled items
       for (const scheduledItem of scheduledItems) {
-        await deleteScheduledItem(null, { data: { externalId: scheduledItem.externalId } }, context);
+        await deleteScheduledItem(null, { data: { externalId: scheduledItem.externalId, actionScreen: ActionScreen.CORPUS } }, context);
       }
 
       // 4. Construct input for rejecting approvied Item

@@ -13,7 +13,7 @@ import {
   createScheduledItemHelper,
 } from '../../../../test/helpers';
 import { curatedCorpusEventEmitter as eventEmitter } from '../../../../events/init';
-import { ReviewedCorpusItemEventType } from '../../../../events/types';
+import { ReviewedCorpusItemEventType, ScheduledCorpusItemEventType } from '../../../../events/types';
 import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
@@ -52,6 +52,7 @@ describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
     const eventTracker = jest.fn();
     eventEmitter.on(ReviewedCorpusItemEventType.REMOVE_ITEM, eventTracker);
     eventEmitter.on(ReviewedCorpusItemEventType.REJECT_ITEM, eventTracker);
+    eventEmitter.on(ScheduledCorpusItemEventType.REMOVE_SCHEDULE, eventTracker);
 
     const item1 = await createApprovedItemHelper(db, {
       title: '15 Unheard Ways To Achieve Greater Terraform',
@@ -117,16 +118,23 @@ describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
     expect(scheduledItems.length).toEqual(1);
     expect(scheduledItems[0].externalId).toEqual(scheduledItem3.externalId);
 
-    // Check that there are 4 events sent to Snowplow
-    // 2 REMOVE_ITEM events (for removing scheduled item)
+    // Check that there are 6 events sent to Snowplow
+    // 2 REMOVE_SCHEDULE events (for deleting scheduled item)
+    // 2 REMOVE_ITEM events (for removing corpus items from ApprovedCorpus)
     // 2 REJECT_ITEM events (for rejecting the 2 corpus items)
-    // Check that the REMOVE_ITEM and REJECT_ITEM events were fired successfully.
-    expect(eventTracker).toHaveBeenCalledTimes(4);
-    const removeItemEvent1 = await eventTracker.mock.calls[0][0];
-    const rejectItemEvent1 = await eventTracker.mock.calls[1][0];
-    const removeItemEvent2 = await eventTracker.mock.calls[2][0];
-    const rejectItemEvent2 = await eventTracker.mock.calls[3][0];
+    // Check that the REMOVE_ITEM, REJECT_ITEM, REMOVE_SCHEDULE events were fired successfully.
+    expect(eventTracker).toHaveBeenCalledTimes(6);
+    const removeScheduledItemEvent1 = await eventTracker.mock.calls[0][0];
+    const removeItemEvent1 = await eventTracker.mock.calls[1][0];
+    const rejectItemEvent1 = await eventTracker.mock.calls[2][0];
 
+    const removeScheduledItemEvent2 = await eventTracker.mock.calls[3][0];
+    const removeItemEvent2 = await eventTracker.mock.calls[4][0];
+    const rejectItemEvent2 = await eventTracker.mock.calls[5][0];
+
+    expect(removeScheduledItemEvent1.eventType).toEqual(
+      ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
+    );
     expect(removeItemEvent1.eventType).toEqual(
       ReviewedCorpusItemEventType.REMOVE_ITEM,
     );
@@ -134,6 +142,9 @@ describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
       ReviewedCorpusItemEventType.REJECT_ITEM,
     );
 
+    expect(removeScheduledItemEvent2.eventType).toEqual(
+      ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
+    );
     expect(removeItemEvent2.eventType).toEqual(
       ReviewedCorpusItemEventType.REMOVE_ITEM,
     );
@@ -149,6 +160,7 @@ describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
     const eventTracker = jest.fn();
     eventEmitter.on(ReviewedCorpusItemEventType.REMOVE_ITEM, eventTracker);
     eventEmitter.on(ReviewedCorpusItemEventType.REJECT_ITEM, eventTracker);
+    eventEmitter.on(ScheduledCorpusItemEventType.REMOVE_SCHEDULE, eventTracker);
 
     const item1 = await createApprovedItemHelper(db, {
       title: '15 Unheard Ways To Achieve Greater Terraform',
@@ -216,14 +228,19 @@ describe('mutations: ApprovedItem (rejectApprovedCorpusItem)', () => {
     expect(scheduledItems[0].externalId).toEqual(scheduledItem2.externalId);
     expect(scheduledItems[1].externalId).toEqual(scheduledItem3.externalId);
 
-    // Check that there are 2 events sent to Snowplow
-    // 1 REMOVE_ITEM event1 (for removing scheduled item)
+    // Check that there are 3 events sent to Snowplow
+    // 1 REMOVE_SCHEDULE event (for deleting scheduled item)
+    // 1 REMOVE_ITEM event (for removing corpus item from ApprovedCorpus)
     // 1 REJECT_ITEM event (for rejecting the corpus items)
-    // Check that the REMOVE_ITEM and REJECT_ITEM events were fired successfully.
-    expect(eventTracker).toHaveBeenCalledTimes(2);
-    const removeItemEvent1 = await eventTracker.mock.calls[0][0];
-    const rejectItemEvent1 = await eventTracker.mock.calls[1][0];
+    // Check that the REMOVE_ITEM, REJECT_ITEM, REMOVE_SCHEDULE events were fired successfully.
+    expect(eventTracker).toHaveBeenCalledTimes(3);
+    const removeScheduledItemEvent1 = await eventTracker.mock.calls[0][0];
+    const removeItemEvent1 = await eventTracker.mock.calls[1][0];
+    const rejectItemEvent1 = await eventTracker.mock.calls[2][0];
 
+    expect(removeScheduledItemEvent1.eventType).toEqual(
+      ScheduledCorpusItemEventType.REMOVE_SCHEDULE,
+    );
     expect(removeItemEvent1.eventType).toEqual(
       ReviewedCorpusItemEventType.REMOVE_ITEM,
     );
