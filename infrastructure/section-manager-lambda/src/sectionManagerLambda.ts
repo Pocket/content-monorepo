@@ -65,7 +65,10 @@ export class SectionManagerSQSLambda extends Construct {
           //
           // this PR may provide some context:
           // https://github.com/Pocket/pocket-monorepo/pull/324
-          ignoreEnvironmentVars: ['GIT_SHA'],
+
+          // removing this directive as it may be why JWT_KEY above was never
+          // added to the ENV vars in AWS
+          //ignoreEnvironmentVars: ['GIT_SHA'],
           vpcConfig: {
             securityGroupIds: this.vpc.defaultSecurityGroups.ids,
             subnetIds: this.vpc.privateSubnetIds,
