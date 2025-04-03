@@ -49,6 +49,7 @@ export class SectionManagerSQSLambda extends Construct {
             NODE_ENV: environment,
             REGION: this.vpc.region,
             SENTRY_DSN: this.getSentryDsn(),
+            TEST: 'test',
           },
           // why do we have `ignoreEnvironmentVars`?
           // 2025-01-15
