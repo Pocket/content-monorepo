@@ -66,7 +66,7 @@ export class SectionManagerSQSLambda extends Construct {
           //
           // this PR may provide some context:
           // https://github.com/Pocket/pocket-monorepo/pull/324
-          ignoreEnvironmentVars: ['GIT_SHA'],
+          //ignoreEnvironmentVars: ['GIT_SHA'],
           vpcConfig: {
             securityGroupIds: this.vpc.defaultSecurityGroups.ids,
             subnetIds: this.vpc.privateSubnetIds,
