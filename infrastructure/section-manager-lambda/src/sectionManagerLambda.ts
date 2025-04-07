@@ -50,22 +50,6 @@ export class SectionManagerSQSLambda extends Construct {
             REGION: this.vpc.region,
             SENTRY_DSN: this.getSentryDsn(),
           },
-          // why do we have `ignoreEnvironmentVars`?
-          // 2025-01-15
-          //
-          // we *think* this stops a lambda from updating any time the GIT_SHA
-          // updates. it should only update when files in the paths specified
-          // in ./github/workflows/section-manager-lambda.yml are changed.
-          //
-          // but where does GIT_SHA get set in the environment if it's not set
-          // in this file? great question, and i don't know the answer. perhaps
-          // it is a "free" env var that AWS gives you?
-          //
-          // it would be great if someone could confirm the above.
-          //
-          // this PR may provide some context:
-          // https://github.com/Pocket/pocket-monorepo/pull/324
-          ignoreEnvironmentVars: ['GIT_SHA'],
           vpcConfig: {
             securityGroupIds: this.vpc.defaultSecurityGroups.ids,
             subnetIds: this.vpc.privateSubnetIds,
