@@ -133,26 +133,28 @@ model Section {
 }
 
 model SectionItem {
-  id                Int             @id @default(autoincrement())
-  externalId        String          @unique @default(uuid()) @db.VarChar(255)
-  sectionId         Int
-  approvedItemId    Int
+  id                    Int             @id @default(autoincrement())
+  externalId            String          @unique @default(uuid()) @db.VarChar(255)
+  sectionId             Int
+  approvedItemId        Int
   // the initial rank of the SectionItem in relation to its siblings. used as a
   // fallback when there is no engagement/click data available. may only apply to
   // ML-generated SectionItems.
-  rank              Int?
+  rank                  Int?
   // we will not delete SectionItem history, instead will deactivate items
-  active            Boolean         @default(true)
+  active                Boolean         @default(true)
+  // client sends an array of string reasons, stored as JSON as mysql prisma does not support String[]
+  deactivateReasons    Json?
   // track who deactivated the SectionItem
-  deactivateSource  ActivitySource? // (ML or MANUAL)
+  deactivateSource      ActivitySource? // (ML or MANUAL)
   // track when the Section was deactivated
-  deactivatedAt     DateTime?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  deactivatedAt         DateTime?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
 
   // relations
-  section           Section         @relation(fields: [sectionId], references: [id])
-  approvedItem      ApprovedItem    @relation(fields: [approvedItemId], references: [id])
+  section               Section         @relation(fields: [sectionId], references: [id])
+  approvedItem          ApprovedItem    @relation(fields: [approvedItemId], references: [id])
 
   // access pattern for this table will be by section where active = true
   @@index([sectionId, active], name: "SectionIdActive")
