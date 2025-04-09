@@ -2,7 +2,7 @@ import { NotFoundError } from '@pocket-tools/apollo-utils';
 
 import { PrismaClient } from '.prisma/client';
 
-import { CreateSectionItemInput, SectionItem } from '../types';
+import { CreateSectionItemInput, RemoveSectionItemInput, SectionItem } from '../types';
 import { ActivitySource } from 'content-common';
 
 /**
@@ -56,27 +56,27 @@ export async function createSectionItem(
 }
 /**
  * This mutation removes a SectionItem from a Section.
- * The SectionItem is marked as in-active, `deactivatedBy` it set to MANUAL &
- * `deactivatedAt` Date is set.
+ * The SectionItem is marked as in-active, `deactivatedBy` it set to MANUAL,
+ * `deactivatedAt` Date is set & deactivateReasons is set.
  *
  * @param db
- * @param externalId
- * @param approvedItemId
+ * @param data
  */
 export async function removeSectionItem(
   db: PrismaClient,
-  externalId: string,
+  data: RemoveSectionItemInput,
 ): Promise<SectionItem> {
   // Construct the data to remove SectionItem
   const removeSectionItemData = {
     active: false,
+    deactivateReasons: data.deactivateReasons,
     deactivateSource: ActivitySource.MANUAL,
     deactivatedAt: new Date(),
   };
 
   return await db.sectionItem.update({
     where: {
-      externalId,
+      externalId: data.externalId,
       active: true,
     },
     data: removeSectionItemData,

@@ -102,6 +102,26 @@ enum RemovalReason {
 }
 
 """
+Reasons for removing SectionItems from ML Sections.
+
+This is used by ML downstream to improve their modeling.
+"""
+enum SectionItemRemovalReason {
+  ARTICLE_QUALITY
+  CONTROVERSIAL
+  DATED
+  HED_DEK_QUALITY
+  IMAGE_QUALITY
+  NO_IMAGE
+  OFF_TOPIC
+  ONE_SIDED
+  OTHER
+  PAYWALL
+  PUBLISHER_QUALITY
+  SET_DIVERSITY
+}
+
+"""
 Reasons for manually scheduling a corpus item.
 
 This is used by ML downstream to improve their modeling.
@@ -620,6 +640,20 @@ input CreateSectionItemInput {
   ML-generated SectionItems.
   """
   rank: Int
+}
+
+"""
+Input data for removing a SectionItem
+"""
+input RemoveSectionItemInput {
+  """
+  ID of the SectionItem. A string in UUID format.
+  """
+  externalId: ID!
+  """
+  Array of reasons for removing a SectionItem.
+  """
+  deactivateReasons: [SectionItemRemovalReason!]!
 }
 
 """
@@ -1277,7 +1311,7 @@ type Mutation {
   """
   Removes an active SectionItem from a Section.
   """
-  removeSectionItem(externalId: String!): SectionItem!
+  removeSectionItem(data: RemoveSectionItemInput!): SectionItem!
 
   """
   Disables or enables a Section. Can only be done from the admin tool.

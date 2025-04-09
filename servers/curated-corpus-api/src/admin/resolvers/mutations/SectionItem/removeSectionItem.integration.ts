@@ -4,7 +4,7 @@ import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient, Section, SectionItem } from '.prisma/client';
 
-import { ActivitySource } from 'content-common';
+import { ActivitySource, RemoveSectionItemApiInput, SectionItemRemovalReason } from 'content-common';
 
 import { client } from '../../../../database/client';
 import { ApprovedItem } from '../../../../database/types';
@@ -25,6 +25,7 @@ describe('mutations: SectionItem (removeSectionItem)', () => {
   let db: PrismaClient;
   let graphQLUrl: string;
   let server: ApolloServer<IAdminContext>;
+  let input: RemoveSectionItemApiInput;
   let section: Section;
   let sectionItem: SectionItem;
   let approvedItem: ApprovedItem;
@@ -77,12 +78,17 @@ describe('mutations: SectionItem (removeSectionItem)', () => {
       doNotFake: ['nextTick'],
     });
 
+    input = {
+      externalId: sectionItem.externalId,
+      deactivateReasons: [SectionItemRemovalReason.DATED, SectionItemRemovalReason.PAYWALL]
+    };
+
     const result = await request(app)
       .post(graphQLUrl)
       .set(headers)
       .send({
         query: print(REMOVE_SECTION_ITEM),
-        variables: { externalId: sectionItem.externalId },
+        variables: { data: input },
       });
 
     // stop controlling the result of `new Date()`
@@ -101,21 +107,27 @@ describe('mutations: SectionItem (removeSectionItem)', () => {
       approvedItem.externalId,
     );
 
-    // deactivatedAt & deactivateSource should be set
+    // deactivatedAt, deactivateSource & deactivateReasons should be set
     const inactiveSectionItem = await db.sectionItem.findUnique({
       where: {externalId: sectionItem.externalId}
     });
     expect(inactiveSectionItem.deactivateSource).toEqual(ActivitySource.MANUAL);
     expect(inactiveSectionItem.deactivatedAt).toEqual(rightNow);
+    expect(inactiveSectionItem.deactivateReasons).toEqual(input.deactivateReasons);
   });
 
   it('should fail to remove a SectionItem if SectionItem is not found', async () => {
+    input = {
+      externalId: 'fake-external-id',
+      deactivateReasons: [SectionItemRemovalReason.DATED, SectionItemRemovalReason.PAYWALL]
+    };
+
     const result = await request(app)
       .post(graphQLUrl)
       .set(headers)
       .send({
         query: print(REMOVE_SECTION_ITEM),
-        variables: { externalId: 'fake-external-id' },
+        variables: { data: input },
       });
 
     // we should have a NOT_FOUND error
@@ -136,12 +148,17 @@ describe('mutations: SectionItem (removeSectionItem)', () => {
       }
     });
 
+    input = {
+      externalId: updatedSectionItem.externalId,
+      deactivateReasons: [SectionItemRemovalReason.DATED, SectionItemRemovalReason.PAYWALL]
+    };
+
     const result = await request(app)
       .post(graphQLUrl)
       .set(headers)
       .send({
         query: print(REMOVE_SECTION_ITEM),
-        variables: { externalId: updatedSectionItem.externalId },
+        variables: { data: input },
       });
 
     // we should have a NOT_FOUND error

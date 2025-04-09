@@ -12,6 +12,7 @@ import {
   ApprovedItemRequiredInput,
   CorpusItemSource,
   CorpusLanguage,
+  SectionItemRemovalReason,
 } from 'content-common';
 
 export type CreateApprovedItemInput = {
@@ -123,6 +124,11 @@ export type CreateSectionItemInput = {
   sectionId: number;
   approvedItemExternalId: string;
   rank?: number;
+};
+
+export type RemoveSectionItemInput = {
+  externalId: string;
+  deactivateReasons: SectionItemRemovalReason[];
 };
 
 export type DisableEnableSectionInput = {
