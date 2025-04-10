@@ -9,7 +9,7 @@ import {
 } from './SectionItem';
 import { createApprovedItemHelper } from '../../test/helpers';
 import { createSectionHelper } from '../../test/helpers';
-import { ActivitySource } from 'content-common';
+import { ActivitySource, SectionItemRemovalReason } from 'content-common';
 
 describe('SectionItem', () => {
   let db: PrismaClient;
@@ -48,7 +48,7 @@ describe('SectionItem', () => {
   });
 
   describe('removeSectionItem', () => {
-    it('should remove a SectionItem from a Section - mark it in-active & set deactivatedAt & deactivateSource', async () => {
+    it('should remove a SectionItem from a Section - mark it in-active, set deactivatedAt, deactivateSource & deactivateReasons', async () => {
       const approvedItem = await createApprovedItemHelper(db, {
         title: 'Fake Item!',
       });
@@ -69,7 +69,12 @@ describe('SectionItem', () => {
         advanceTimers: false,
       });
 
-      const result = await removeSectionItem(db, sectionItem.externalId);
+      const input = {
+        externalId: sectionItem.externalId,
+        deactivateReasons: [SectionItemRemovalReason.DATED, SectionItemRemovalReason.CONTROVERSIAL]
+      };
+
+      const result = await removeSectionItem(db, input);
 
       // stop controlling `new Date()`
       jest.useRealTimers();
@@ -78,6 +83,7 @@ describe('SectionItem', () => {
       expect(result.active).toBeFalsy();
       expect(result.deactivateSource).toEqual(ActivitySource.MANUAL);
       expect(result.deactivatedAt).toEqual(newDateMock);
+      expect(result.deactivateReasons).toEqual(input.deactivateReasons);
     });
   });
 

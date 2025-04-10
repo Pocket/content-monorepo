@@ -59,12 +59,12 @@ export async function createSectionItem(
  */
 export async function removeSectionItem(
   parent,
-  args,
+  { data },
   context: IAdminContext,
 ): Promise<SectionItem> {
   // First check if the SectionItem exists & check if it is active
   const sectionItemToRemove =  await context.db.sectionItem.findUnique({
-    where: { externalId: args.externalId, active: true}
+    where: { externalId: data.externalId, active: true}
   });
 
   if(sectionItemToRemove) {
@@ -73,10 +73,10 @@ export async function removeSectionItem(
       throw new AuthenticationError(ACCESS_DENIED_ERROR);
     }
     
-    return await dbRemoveSectionItem(context.db, args.externalId);
+    return await dbRemoveSectionItem(context.db, {externalId: data.externalId, deactivateReasons: data.deactivateReasons});
   }
   // Check if SectionItem exists
   else {
-    throw new NotFoundError(`Cannot remove a section item: Section item with id "${args.externalId}" does not exist.`)
+    throw new NotFoundError(`Cannot remove a section item: Section item with id "${data.externalId}" does not exist.`)
   }
 }

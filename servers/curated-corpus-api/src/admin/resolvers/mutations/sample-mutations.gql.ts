@@ -120,8 +120,8 @@ export const CREATE_SECTION_ITEM = gql`
 `;
 
 export const REMOVE_SECTION_ITEM = gql`
-  mutation removeSectionItem($externalId: String!) {
-    removeSectionItem(externalId: $externalId) {
+  mutation removeSectionItem($data: RemoveSectionItemInput!) {
+    removeSectionItem(data: $data) {
       ...AdminSectionItemData
     }
   }

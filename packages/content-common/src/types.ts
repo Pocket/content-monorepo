@@ -55,6 +55,21 @@ export enum ActionScreen {
   SECTIONS = 'SECTIONS',
 }
 
+export enum SectionItemRemovalReason {
+  ARTICLE_QUALITY = 'ARTICLE_QUALITY',
+  CONTROVERSIAL = 'CONTROVERSIAL',
+  DATED = 'DATED',
+  HED_DEK_QUALITY = 'HED_DEK_QUALITY',
+  IMAGE_QUALITY = 'IMAGE_QUALITY',
+  NO_IMAGE = 'NO_IMAGE',
+  OFF_TOPIC = 'OFF_TOPIC',
+  ONE_SIDED = 'ONE_SIDED',
+  PAYWALL = 'PAYWALL',
+  PUBLISHER_QUALITY = 'PUBLISHER_QUALITY',
+  SET_DIVERSITY = 'SET_DIVERSITY',
+  OTHER = 'OTHER',
+}
+
 export type ApprovedItemRequiredInput = {
   prospectId?: string;
   title: string;
@@ -87,6 +102,11 @@ export type CreateSectionItemApiInput = {
   sectionExternalId: string;
   approvedItemExternalId: string;
   rank?: number;
+};
+
+export type RemoveSectionItemApiInput = {
+  externalId: string;
+  deactivateReasons: SectionItemRemovalReason[];
 };
 
 // maps to the CreateApprovedCorpusItemInput type in corpus API admin schema
