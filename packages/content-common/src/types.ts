@@ -64,10 +64,10 @@ export enum SectionItemRemovalReason {
   NO_IMAGE = 'NO_IMAGE',
   OFF_TOPIC = 'OFF_TOPIC',
   ONE_SIDED = 'ONE_SIDED',
-  OTHER = 'OTHER',
   PAYWALL = 'PAYWALL',
   PUBLISHER_QUALITY = 'PUBLISHER_QUALITY',
   SET_DIVERSITY = 'SET_DIVERSITY',
+  OTHER = 'OTHER',
 }
 
 export type ApprovedItemRequiredInput = {

@@ -115,10 +115,10 @@ enum SectionItemRemovalReason {
   NO_IMAGE
   OFF_TOPIC
   ONE_SIDED
-  OTHER
   PAYWALL
   PUBLISHER_QUALITY
   SET_DIVERSITY
+  OTHER
 }
 
 """
