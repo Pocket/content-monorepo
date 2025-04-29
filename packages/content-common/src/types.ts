@@ -145,8 +145,6 @@ export enum ProspectType {
   RSS_LOGISTIC = 'RSS_LOGISTIC',
   RSS_LOGISTIC_RECENT = 'RSS_LOGISTIC_RECENT',
   SLATE_SCHEDULER_V2 = 'SLATE_SCHEDULER_V2',
-  TITLE_URL_MODELED = 'TITLE_URL_MODELED',
-  TOP_SAVED = 'TOP_SAVED',
   QA_ENTERTAINMENT = 'QA_ENTERTAINMENT',
   QA_SPORTS = 'QA_SPORTS',
   QA_MUSIC = 'QA_MUSIC',
@@ -299,7 +297,6 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     ianaTimezone: 'Europe/London',
     prospectTypes: [
       ProspectType.RECOMMENDED,
-      ProspectType.TITLE_URL_MODELED,
       ProspectType.RSS_LOGISTIC,
       ProspectType.PUBLISHER_SUBMITTED,
     ],
@@ -344,7 +341,6 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     ianaTimezone: 'Asia/Kolkata',
     prospectTypes: [
       ProspectType.RECOMMENDED,
-      ProspectType.TITLE_URL_MODELED,
       ProspectType.RSS_LOGISTIC,
       ProspectType.PUBLISHER_SUBMITTED,
     ],
