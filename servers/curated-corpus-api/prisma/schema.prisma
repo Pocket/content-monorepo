@@ -109,6 +109,8 @@ model Section {
   externalId            String          @unique @default(uuid()) @db.VarChar(255)
   title                 String          @db.VarChar(255)
   scheduledSurfaceGuid  String          @db.VarChar(50)
+  // optional IAB info as as JSON blob: {taxonomy: 'IAB-3.0', categories: string[])
+  iab                   Json?
   // sort may only apply during initial experimentation with ML-generated Sections,
   // meaning this field may be dropped
   sort                  Int?
