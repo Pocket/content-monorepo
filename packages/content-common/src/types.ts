@@ -139,15 +139,12 @@ export type CreateScheduledItemInput = {
 // these values will need to match those listed in the source of truth doc:
 // https://mozilla-hub.atlassian.net/wiki/spaces/PE/pages/390642851/Pocket+Shared+Data#Prospect-Types
 export enum ProspectType {
-  COUNTS = 'COUNTS',
-  DISMISSED = 'DISMISSED',
   DOMAIN_ALLOWLIST = 'DOMAIN_ALLOWLIST',
   PUBLISHER_SUBMITTED = 'PUBLISHER_SUBMITTED',
   RECOMMENDED = 'RECOMMENDED',
   RSS_LOGISTIC = 'RSS_LOGISTIC',
   RSS_LOGISTIC_RECENT = 'RSS_LOGISTIC_RECENT',
   SLATE_SCHEDULER_V2 = 'SLATE_SCHEDULER_V2',
-  TIMESPENT = 'TIMESPENT',
   TITLE_URL_MODELED = 'TITLE_URL_MODELED',
   TOP_SAVED = 'TOP_SAVED',
   QA_ENTERTAINMENT = 'QA_ENTERTAINMENT',
@@ -264,12 +261,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     guid: 'NEW_TAB_EN_US',
     ianaTimezone: 'America/New_York',
     prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
-      ProspectType.TOP_SAVED,
       ProspectType.DOMAIN_ALLOWLIST,
-      ProspectType.DISMISSED,
-      ProspectType.TITLE_URL_MODELED,
       ProspectType.RSS_LOGISTIC,
       ProspectType.RSS_LOGISTIC_RECENT,
       ProspectType.SLATE_SCHEDULER_V2,
@@ -292,11 +284,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     guid: 'NEW_TAB_DE_DE',
     ianaTimezone: 'Europe/Berlin',
     prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
       ProspectType.DOMAIN_ALLOWLIST,
-      ProspectType.DISMISSED,
-      ProspectType.TITLE_URL_MODELED,
       ProspectType.RSS_LOGISTIC,
       ProspectType.SLATE_SCHEDULER_V2,
       ProspectType.PUBLISHER_SUBMITTED,
@@ -310,10 +298,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     guid: 'NEW_TAB_EN_GB',
     ianaTimezone: 'Europe/London',
     prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
       ProspectType.RECOMMENDED,
-      ProspectType.DISMISSED,
       ProspectType.TITLE_URL_MODELED,
       ProspectType.RSS_LOGISTIC,
       ProspectType.PUBLISHER_SUBMITTED,
@@ -358,10 +343,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     guid: 'NEW_TAB_EN_INTL',
     ianaTimezone: 'Asia/Kolkata',
     prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
       ProspectType.RECOMMENDED,
-      ProspectType.DISMISSED,
       ProspectType.TITLE_URL_MODELED,
       ProspectType.RSS_LOGISTIC,
       ProspectType.PUBLISHER_SUBMITTED,
