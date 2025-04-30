@@ -12,6 +12,7 @@ import {
   ApprovedItemRequiredInput,
   CorpusItemSource,
   CorpusLanguage,
+  IABMetadata,
   SectionItemRemovalReason,
 } from 'content-common';
 
@@ -115,6 +116,7 @@ export type CreateSectionInput = {
   externalId: string;
   title: string;
   scheduledSurfaceGuid: string;
+  iab?: IABMetadata,
   sort?: number;
   createSource: ActivitySource;
   active: boolean;

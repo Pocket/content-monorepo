@@ -56,6 +56,15 @@ type CorpusItemAuthor {
 }
 
 """
+Represents IAB metadata for a Section.
+Used by both admin input/output and public output.
+"""
+type IABMetadata {
+  taxonomy: String!
+  categories: [String!]!
+}
+
+"""
 An entity containing Corpus Items.
 """
 type Section {
@@ -71,6 +80,10 @@ type Section {
   The GUID of the Scheduled Surface. Example: 'NEW_TAB_EN_US'.
   """
   scheduledSurfaceGuid: ID!
+  """
+  Optional IAB metadata returned to the client (i.e. Merino->Firefox, Admin Tools)
+  """
+  iab: IABMetadata
   """
   Controls the display order of Sections.
   """

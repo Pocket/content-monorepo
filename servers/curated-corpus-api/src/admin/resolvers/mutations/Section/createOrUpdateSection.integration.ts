@@ -7,6 +7,7 @@ import { PrismaClient, Section, SectionItem } from '.prisma/client';
 import {
   ActivitySource,
   CreateOrUpdateSectionApiInput,
+  IABMetadata,
   ScheduledSurfacesEnum,
 } from 'content-common';
 
@@ -76,10 +77,15 @@ describe('mutations: Section (createOrUpdateSection)', () => {
   });
 
   it('should create a Section if user has full access', async () => {
+    const iabMetadata: IABMetadata = {
+      taxonomy: "IAB-3.0",
+      categories: ["488"]
+    }
     input = {
       externalId: '123-abc',
       title: 'Fake Section Title',
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      iab: iabMetadata,
       sort: 1,
       createSource: ActivitySource.ML,
       active: true,
@@ -106,6 +112,7 @@ describe('mutations: Section (createOrUpdateSection)', () => {
     expect(
       result.body.data?.createOrUpdateSection.scheduledSurfaceGuid,
     ).toEqual('NEW_TAB_EN_US');
+    expect(result.body.data?.createOrUpdateSection.iab).toEqual(iabMetadata);
     expect(result.body.data?.createOrUpdateSection.sort).toEqual(1);
     expect(result.body.data?.createOrUpdateSection.createSource).toEqual('ML');
     expect(result.body.data?.createOrUpdateSection.active).toBeTruthy();
@@ -150,10 +157,16 @@ describe('mutations: Section (createOrUpdateSection)', () => {
   });
 
   it('should update an existing Section & mark any associated active SectionItems in-active', async () => {
+    const iabMetadata: IABMetadata = {
+      taxonomy: "IAB-3.0",
+      categories: ["488"]
+    };
+
     input = {
       externalId: 'bcg-456',
       title: 'Updating Fake Section Title',
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      iab: iabMetadata,
       createSource: ActivitySource.ML,
       sort: 2,
       active: true,
@@ -194,6 +207,9 @@ describe('mutations: Section (createOrUpdateSection)', () => {
     expect(
       result.body.data?.createOrUpdateSection.scheduledSurfaceGuid,
     ).toEqual('NEW_TAB_EN_US');
+    expect(result.body.data?.createOrUpdateSection.iab).toEqual(
+      iabMetadata,
+    );
     expect(result.body.data?.createOrUpdateSection.sort).toEqual(2);
     expect(result.body.data?.createOrUpdateSection.createSource).toEqual('ML');
     expect(result.body.data?.createOrUpdateSection.active).toBeTruthy();
@@ -215,10 +231,16 @@ describe('mutations: Section (createOrUpdateSection)', () => {
   });
 
   it('should update an existing Section, set deactivateSource to ML if active is false & not update any associated in-active SectionItems.', async () => {
+    const iabMetadata: IABMetadata = {
+      taxonomy: "IAB-3.0",
+      categories: ["488"]
+    };
+
     input = {
       externalId: 'bcg-456',
       title: 'Updating Fake Section Title Again',
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      iab: iabMetadata,
       createSource: ActivitySource.ML,
       sort: 2,
       active: false,
@@ -259,6 +281,9 @@ describe('mutations: Section (createOrUpdateSection)', () => {
     expect(
       result.body.data?.createOrUpdateSection.scheduledSurfaceGuid,
     ).toEqual('NEW_TAB_EN_US');
+    expect(
+      result.body.data?.createOrUpdateSection.iab,
+    ).toEqual(iabMetadata);
     expect(result.body.data?.createOrUpdateSection.sort).toEqual(2);
     expect(result.body.data?.createOrUpdateSection.createSource).toEqual('ML');
     expect(result.body.data?.createOrUpdateSection.active).toBeFalsy();
@@ -282,10 +307,16 @@ describe('mutations: Section (createOrUpdateSection)', () => {
   });
 
   it('should fail to create a Section if createSource is not ML', async () => {
+    const iabMetadata: IABMetadata = {
+      taxonomy: "IAB-3.0",
+      categories: ["488"]
+    };
+
     input = {
       externalId: 'bcg-456',
       title: 'Updating Fake Section Title',
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      iab: iabMetadata,
       createSource: ActivitySource.MANUAL,
       sort: 2,
       active: true,
@@ -305,7 +336,73 @@ describe('mutations: Section (createOrUpdateSection)', () => {
 
     // check the error message
     expect(result.body.errors?.[0].message).toContain(
-      'Cannot create a Section: createSource must be ML',
+      'Cannot create or update a Section: createSource must be ML',
+    );
+  });
+
+  it('should fail to create a Section if IAB taxonomy is not supported', async () => {
+    const iabMetadata: IABMetadata = {
+      taxonomy: "IAB-Unsupported-Taxonomy", // unsupported taxonomy
+      categories: ["488"] // valid code
+    };
+
+    input = {
+      externalId: 'bcg-456',
+      title: 'Updating Fake Section Title',
+      scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      iab: iabMetadata,
+      createSource: ActivitySource.ML,
+      sort: 2,
+      active: true,
+    };
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(CREATE_OR_UPDATE_SECTION),
+        variables: { data: input },
+      });
+
+    // we should have a UserInputError
+    expect(result.body.errors).not.toBeUndefined();
+    expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
+    // check the error message
+    expect(result.body.errors?.[0].message).toContain(
+      `IAB taxonomy version ${iabMetadata.taxonomy} is not supported`,
+    );
+  });
+
+  it('should fail to create a Section if an IAB code is invalid', async () => {
+    const iabMetadata: IABMetadata = {
+      taxonomy: "IAB-3.0",
+      categories: ["488", "bad-code"]
+    };
+
+    input = {
+      externalId: 'bcg-456',
+      title: 'Updating Fake Section Title',
+      scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      iab: iabMetadata,
+      createSource: ActivitySource.ML,
+      sort: 2,
+      active: true,
+    };
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(CREATE_OR_UPDATE_SECTION),
+        variables: { data: input },
+      });
+
+    // we should have a UserInputError
+    expect(result.body.errors).not.toBeUndefined();
+    expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
+    // check the error message
+    expect(result.body.errors?.[0].message).toContain(
+      `IAB code(s) invalid: ${iabMetadata.categories[1]}`,
     );
   });
 });

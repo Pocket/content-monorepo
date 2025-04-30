@@ -89,6 +89,10 @@ export const BaseSectionData = gql`
     externalId
     title
     scheduledSurfaceGuid
+    iab {
+        taxonomy
+        categories
+    }
     sort
     createSource
     active
