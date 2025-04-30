@@ -8,6 +8,7 @@ import {
   createSectionItemHelper,
 } from '../../test/helpers';
 import { ActivitySource, ScheduledSurfacesEnum } from 'content-common';
+import { IABMetadata } from 'content-common';
 
 describe('Section', () => {
   let db: PrismaClient;
@@ -29,10 +30,16 @@ describe('Section', () => {
 
   describe('createSection', () => {
     it('should create a Section', async () => {
+      const iabMetadata: IABMetadata = {
+        taxonomy: "IAB-3.0",
+        categories: ["488"]
+      };
+
       const input = {
         externalId: 'njh-789',
         title: 'Fake Section Title',
         scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        iab: iabMetadata,
         createSource: ActivitySource.MANUAL,
         sort: 2,
         active: true,
@@ -134,6 +141,11 @@ describe('Section', () => {
     });
 
     it('should update a Section & set deactivateSource to ML and deactivatedAt if active is false', async () => {
+      const iabMetadata: IABMetadata = {
+        taxonomy: "IAB-3.0",
+        categories: ["488"]
+      };
+
       const section = await createSectionHelper(db, {
         externalId: 'yu3ruib-123',
         title: 'New Title',
@@ -143,6 +155,7 @@ describe('Section', () => {
         externalId: 'yu3ruib-123',
         title: 'Updating new title',
         scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        iab: iabMetadata,
         createSource: ActivitySource.MANUAL,
         sort: 3,
         active: false,
@@ -162,6 +175,7 @@ describe('Section', () => {
 
       expect(result.externalId).toEqual('yu3ruib-123');
       expect(result.title).toEqual('Updating new title');
+      expect(result.iab).toEqual(iabMetadata);
       // exepct deactivateSource to be set to ML, as active == false
       expect(result.deactivateSource).toEqual(ActivitySource.ML);
       expect(result.deactivatedAt).toEqual(newDateMock);

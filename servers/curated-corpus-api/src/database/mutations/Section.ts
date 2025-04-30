@@ -18,6 +18,7 @@ export async function createSection(
     externalId,
     title,
     scheduledSurfaceGuid,
+    iab,
     sort,
     createSource,
     active,
@@ -27,6 +28,7 @@ export async function createSection(
     externalId,
     title,
     scheduledSurfaceGuid,
+    iab,
     sort,
     createSource,
     active,
@@ -55,7 +57,7 @@ export async function updateSection(
   data: CreateSectionInput,
   sectionId: number,
 ): Promise<Section> {
-  const { externalId, title, scheduledSurfaceGuid, sort, active } = data;
+  const { externalId, title, scheduledSurfaceGuid, iab, sort, active } = data;
 
   const sectionItemUpdateData: Prisma.SectionItemUpdateManyMutationInput = {
     active: false,
@@ -75,6 +77,7 @@ export async function updateSection(
   const sectionUpdateData: Prisma.SectionUpdateInput = {
     title,
     scheduledSurfaceGuid,
+    iab,
     sort,
     active,
   };

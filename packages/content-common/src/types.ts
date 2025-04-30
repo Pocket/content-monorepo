@@ -70,6 +70,11 @@ export enum SectionItemRemovalReason {
   OTHER = 'OTHER',
 }
 
+export type IABMetadata = {
+  taxonomy: string;
+  categories: string[];
+}
+
 export type ApprovedItemRequiredInput = {
   prospectId?: string;
   title: string;
@@ -88,6 +93,7 @@ export type CreateOrUpdateSectionApiInput = {
   externalId: string;
   title: string;
   scheduledSurfaceGuid: string;
+  iab?: IABMetadata;
   sort?: number;
   createSource: ActivitySource;
   active: boolean;

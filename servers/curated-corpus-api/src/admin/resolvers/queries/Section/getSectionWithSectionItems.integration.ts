@@ -60,12 +60,20 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
       externalId: 'active-456',
       createSource: ActivitySource.ML,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      iab: {
+        taxonomy: "IAB-3.0",
+        categories: ["488"]
+      },
       active: true
     });
     activeEnabledSection2 = await createSectionHelper(db, {
       externalId: 'active-123',
       createSource: ActivitySource.ML,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      iab: {
+        taxonomy: "IAB-3.0",
+        categories: ["489"]
+      },
       active: true
     });
     
@@ -74,6 +82,10 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
       externalId: 'disabled-890',
       createSource: ActivitySource.ML,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      iab: {
+        taxonomy: "IAB-3.0",
+        categories: ["495"]
+      },
       active: true,
       disabled: true
     });
@@ -84,6 +96,10 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
       externalId: 'inactive-123',
       createSource: ActivitySource.ML,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      iab: {
+        taxonomy: "IAB-3.0",
+        categories: ["502"]
+      },
       active: false
     });
   });
@@ -111,13 +127,16 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     // Both active Sections should not have any SectionItems
     expect(result.body.data?.getSectionsWithSectionItems[0].sectionItems).toEqual([]);
     expect(result.body.data?.getSectionsWithSectionItems[0].disabled).toBeFalsy();
+    expect(result.body.data?.getSectionsWithSectionItems[0].iab).toEqual(activeEnabledSection1.iab);
 
     expect(result.body.data?.getSectionsWithSectionItems[1].sectionItems).toEqual([]);
     expect(result.body.data?.getSectionsWithSectionItems[1].disabled).toBeFalsy();
+    expect(result.body.data?.getSectionsWithSectionItems[1].iab).toEqual(activeEnabledSection2.iab);
     // The active + disabled section should also be returned in the admin response
     expect(result.body.data?.getSectionsWithSectionItems[2].externalId).toEqual(activeDisabledSection.externalId);
     expect(result.body.data?.getSectionsWithSectionItems[2].sectionItems).toEqual([]);
     expect(result.body.data?.getSectionsWithSectionItems[2].disabled).toBeTruthy();
+    expect(result.body.data?.getSectionsWithSectionItems[2].iab).toEqual(activeDisabledSection.iab);
   });
 
   it('should retrieve all active+disabled Sections with their corresponding active SectionItems', async () => {

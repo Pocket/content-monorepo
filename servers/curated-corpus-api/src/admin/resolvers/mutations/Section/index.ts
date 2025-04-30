@@ -13,6 +13,7 @@ import { Section } from '../../../../database/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
 import { ActivitySource } from 'content-common';
+import { IAB_CATEGORIES } from '../../iabCategories'
 
 /**
  * Create or update a Section.
@@ -34,8 +35,26 @@ export async function createOrUpdateSection(
   // Make sure createSource == ML for now for this mutation
   if (data.createSource !== ActivitySource.ML) {
     throw new UserInputError(
-      'Cannot create a Section: createSource must be ML',
+      'Cannot create or update a Section: createSource must be ML',
     );
+  }
+
+  // Check that the IAB taxonomy & code are valid
+  if(data.iab) {
+    const { taxonomy, categories } = data.iab;
+    // check that the taxonomy version is supported
+    if(!IAB_CATEGORIES[taxonomy]) {
+      throw new UserInputError(
+        `IAB taxonomy version ${taxonomy} is not supported`
+      )
+    }
+    // make sure there are no "bad" IAB codes present
+    const invalidIABCodes = categories.filter((code) => !IAB_CATEGORIES[taxonomy][code]);
+    if(invalidIABCodes.length > 0) {
+      throw new UserInputError(
+        `IAB code(s) invalid: ${invalidIABCodes}`
+      )
+    }
   }
 
   // check if the Section with the passed externalId already exists
