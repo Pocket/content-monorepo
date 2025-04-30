@@ -4,7 +4,7 @@ import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient, Section, SectionItem } from '.prisma/client';
 
-import { ActivitySource, IABMetadata, ScheduledSurfacesEnum } from 'content-common';
+import { ActivitySource, ScheduledSurfacesEnum } from 'content-common';
 
 
 import { client } from '../../../../database/client';
