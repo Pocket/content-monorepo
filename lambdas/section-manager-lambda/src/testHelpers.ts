@@ -2,6 +2,7 @@ import {
   CorpusItemSource,
   CorpusLanguage,
   CuratedStatus,
+  IABMetadata,
   ScheduledSurfacesEnum,
   Topics,
 } from 'content-common';
@@ -12,6 +13,11 @@ export const createSqsSectionWithSectionItems = (
   sqsSectionWithSectionItemsOverride: Partial<SqsSectionWithSectionItems> = {},
   candidateCount: number = 2,
 ): SqsSectionWithSectionItems => {
+  const iabMetadata: IABMetadata = {
+    taxonomy: "IAB-3.0",
+    categories: ["488"]
+  };
+
   const candidates: SqsSectionItem[] = [];
 
   for (let i = 0; i < candidateCount; i++) {
@@ -25,6 +31,7 @@ export const createSqsSectionWithSectionItems = (
     candidates,
     id: 'a4b5d99c-4c1b-4d35-bccf-6455c8df07b1',
     scheduled_surface_guid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+    iab: iabMetadata,
     sort: 1,
     source: CorpusItemSource.ML,
     title: 'The Reindeer Section',

@@ -131,6 +131,7 @@ export const mapSqsSectionDataToCreateOrUpdateSectionApiInput = (
     createSource: sqsSectionData.source,
     externalId: sqsSectionData.id,
     scheduledSurfaceGuid: sqsSectionData.scheduled_surface_guid,
+    iab: sqsSectionData.iab,
     sort: sqsSectionData.sort,
     title: sqsSectionData.title,
   };
