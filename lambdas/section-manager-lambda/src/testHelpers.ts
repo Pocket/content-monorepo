@@ -14,8 +14,8 @@ export const createSqsSectionWithSectionItems = (
   candidateCount: number = 2,
 ): SqsSectionWithSectionItems => {
   const iabMetadata: IABMetadata = {
-    taxonomy: "IAB-3.0",
-    categories: ["488"]
+    taxonomy: 'IAB-3.0',
+    categories: ['488']
   };
 
   const candidates: SqsSectionItem[] = [];
