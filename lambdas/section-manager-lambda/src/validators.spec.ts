@@ -92,6 +92,37 @@ describe('validation', function () {
           'Error on assert(): invalid type on $input.scheduled_surface_guid, expect to be ("NEW_TAB_DE_DE" | "NEW_TAB_EN_GB" | "NEW_TAB_EN_INT" | "NEW_TAB_EN_US" | "NEW_TAB_ES_ES" | "NEW_TAB_FR_FR" | "NEW_TAB_IT_IT" | "POCKET_HITS_DE_DE" | "POCKET_HITS_EN_US" | "SANDBOX")',
         );
       });
+
+      it('should validate iab property', () => {
+        // iab is valid & should not throw error
+        expect(() => {
+          validateSqsData(sqsData);
+        }).not.toThrow();
+
+        // iab is optional and not present in payload, should not throw error
+        delete sqsData.iab;
+        expect(() => {
+          validateSqsData(sqsData);
+        }).not.toThrow();
+
+        // iab present & no taxonomy, should throw error
+        sqsData.iab = { invalid: 'iab-taxonomy', categories: ['ABC'] };
+
+        expect(() => {
+          validateSqsData(sqsData);
+        }).toThrow(
+          'Error on assert(): invalid type on $input.iab.taxonomy, expect to be string',
+        );
+
+        // iab present & no categories, should throw error
+        sqsData.iab = { taxonomy: 'IAB-3.0', invalid: ['category'] };
+
+        expect(() => {
+          validateSqsData(sqsData);
+        }).toThrow(
+          'Error on assert(): invalid type on $input.iab.categories, expect to be Array<string>',
+        );
+      });
     });
 
     describe('validate SectionItem data', () => {

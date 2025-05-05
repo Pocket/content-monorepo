@@ -2,6 +2,7 @@ import {
   CorpusItemSource,
   CorpusLanguage,
   CuratedStatus,
+  IABMetadata,
   ScheduledSurfacesEnum,
   Topics,
 } from 'content-common';
@@ -11,6 +12,7 @@ export interface SqsSectionWithSectionItems {
   candidates: SqsSectionItem[];
   id: string;
   scheduled_surface_guid: ScheduledSurfacesEnum;
+  iab?: IABMetadata;
   sort: number;
   source: CorpusItemSource.ML;
   title: string;
@@ -34,6 +36,7 @@ export type CreateOrUpdateSectionApiInput = {
   createSource: CorpusItemSource;
   externalId: string;
   scheduledSurfaceGuid: string;
+  iab?: IABMetadata;
   sort?: number;
   title: string;
 };

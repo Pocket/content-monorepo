@@ -9,6 +9,7 @@ import {
   ScheduledSurfacesEnum,
   Topics,
   UrlMetadata,
+  IABMetadata,
 } from 'content-common';
 import {
   mapAuthorToApprovedItemAuthor,
@@ -73,11 +74,17 @@ describe('utils', () => {
 
   describe('mapSqsSectionDataToCreateOrUpdateSectionApiInput', () => {
     it('should map an SqsSectionWithSectionItems object to a CreateOrUpdateSectionApiInput object', () => {
+      const iabMetadata: IABMetadata = {
+        taxonomy: 'IAB-3.0',
+        categories: ['488']
+      };
+
       const sqsData: SqsSectionWithSectionItems = {
         active: true,
         candidates: [],
         id: 'test-id',
         scheduled_surface_guid: ScheduledSurfacesEnum.NEW_TAB_DE_DE,
+        iab: iabMetadata,
         sort: 42,
         source: CorpusItemSource.ML,
         title: 'test title',
@@ -92,6 +99,7 @@ describe('utils', () => {
       expect(apiInput.scheduledSurfaceGuid).toEqual(
         sqsData.scheduled_surface_guid,
       );
+      expect(apiInput.iab).toEqual(sqsData.iab);
       expect(apiInput.sort).toEqual(sqsData.sort);
       expect(apiInput.title).toEqual(sqsData.title);
     });
