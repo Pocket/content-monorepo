@@ -36,7 +36,7 @@ describe('checkCorpusUrl', () => {
   it('should throw UserInputError if url exists in rejected items', async () => {
     const url = 'https://test.com/rejected';
 
-    //create approved item
+    //create rejected item
     await createRejectedCuratedCorpusItemHelper(db, {
       title: 'test rejected item',
       url,
@@ -45,4 +45,13 @@ describe('checkCorpusUrl', () => {
     await expect(checkCorpusUrl(db, url)).rejects.toThrow(UserInputError);
 
   })
+
+  it('should not throw userInputError if url does not exist in either approved or rejected items', async () => {
+    const url = 'https://test.com/new';
+
+    // Expect the promise to resolve without throwing an error
+    await expect(checkCorpusUrl(db, url)).resolves.not.toThrow();
+  });
+
 });
+
