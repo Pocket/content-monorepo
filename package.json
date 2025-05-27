@@ -36,7 +36,7 @@
   },
   "resolutions": {
     "body-parser": "1.20.3",
-    "path-to-regexp": "0.1.12",
+    "express>path-to-regexp": "0.1.12",
     "cross-spawn": "7.0.5"
   }
 }
