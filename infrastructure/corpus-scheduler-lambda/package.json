@@ -15,7 +15,7 @@
     "format": "eslint --fix \"src/**/*.ts\""
   },
   "dependencies": {
-    "@pocket-tools/terraform-modules": "5.14.2",
+    "@pocket-tools/terraform-modules": "5.20.0",
     "@cdktf/provider-aws": "19.33.0",
     "@cdktf/provider-local": "10.1.0",
     "@cdktf/provider-null": "10.0.0",

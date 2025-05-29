@@ -35,6 +35,7 @@
     "turbo": "^2.1.1"
   },
   "resolutions": {
-    "cross-spawn": "~7.0.5"
+    "cross-spawn": "~7.0.5",
+    "constructs": "10.3.0"
   }
 }

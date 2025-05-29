@@ -20,7 +20,7 @@
     "@cdktf/provider-local": "10.1.0",
     "@cdktf/provider-null": "10.0.0",
     "@cdktf/provider-pagerduty": "13.11.6",
-    "@pocket-tools/terraform-modules": "5.14.2",
+    "@pocket-tools/terraform-modules": "5.20.0",
     "cdktf-cli": "0.20.8",
     "cdktf": "0.20.8",
     "constructs": "10.3.0",
