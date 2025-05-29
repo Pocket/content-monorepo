@@ -35,8 +35,6 @@
     "turbo": "^2.1.1"
   },
   "resolutions": {
-    "body-parser": "1.20.3",
-    "express>path-to-regexp": "0.1.12",
-    "cross-spawn": "7.0.5"
+    "cross-spawn": "~7.0.5"
   }
 }
