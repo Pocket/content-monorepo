@@ -3,6 +3,7 @@ import { getScheduledSurface } from './queries/ScheduledSurface';
 import { getItemsForScheduledSurface } from './queries/ScheduledSurfaceItem';
 import { getSections } from './queries/Section';
 import { IPublicContext } from '../context';
+import { getCorpusItemFromApprovedItem } from '../../shared/utils';
 
 export const resolvers = {
   // The Date resolver enforces the date to be in the YYYY-MM-DD format.
@@ -37,7 +38,7 @@ export const resolvers = {
   },
   SectionItem: {
     corpusItem: (item) => {
-      return item.approvedItem;
+      return getCorpusItemFromApprovedItem(item.approvedItem);
     }
   },
   // Allow the `Item` to resolve the corpus item
