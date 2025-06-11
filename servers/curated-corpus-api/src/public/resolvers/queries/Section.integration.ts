@@ -179,9 +179,11 @@ describe('queries: Section (getSections)', () => {
 
     // Check that corpusItem is present in the sectionItems
     expect(result.body.data?.getSections[0].sectionItems[0].corpusItem).toBeDefined();
+    expect(result.body.data?.getSections[0].sectionItems[0].corpusItem.id).toEqual(approvedItem.externalId);
     expect(result.body.data?.getSections[0].sectionItems[0].corpusItem.title).toEqual(approvedItem.title);
     expect(result.body.data?.getSections[1].sectionItems[0].corpusItem).toBeDefined();
     expect(result.body.data?.getSections[1].sectionItems[0].corpusItem.title).toEqual(approvedItem.title);
+    expect(result.body.data?.getSections[1].sectionItems[0].corpusItem.id).toEqual(approvedItem.externalId);
   });
 
   it('should return an empty array if no Sections found', async () => {
