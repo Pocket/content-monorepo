@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc",
     "test": "jest \"\\.spec\\.ts\"",
-    "watch": "tsc -w & nodemon",
+    "watch": "tsc -w & npx nodemon --watch src --ext ts,js --ignore dist --ignore node_modules dist/main.js",
     "dev": "npm run build && npm run watch",
     "test-integrations": "jest \"\\.integration\\.ts\" --runInBand",
     "lint": "eslint --fix-dry-run \"src/**/*.ts\"",
@@ -17,22 +17,23 @@
   "license": "ISC",
   "dependencies": {
     "@sentry/serverless": "7.112.2",
+    "@snowplow/node-tracker": "3.5.0",
     "content-common": "workspace:*",
     "lambda-common": "workspace:*",
     "luxon": "3.4.4",
     "node-fetch": "^2.6.7",
-    "typia": "^7.6.0",
     "tslib": "2.7.0",
-    "@snowplow/node-tracker": "3.5.0"
+    "typia": "^7.6.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.134",
-    "@types/luxon": "3.4.2",
     "@types/jest": "29.5.12",
+    "@types/luxon": "3.4.2",
     "@types/node-fetch": "^2.6.7",
     "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
     "msw": "2.4.7",
+    "nodemon": "3.0.1",
     "ts-jest": "29.1.2",
     "ts-patch": "^3.3.0",
     "tsconfig": "workspace:*",

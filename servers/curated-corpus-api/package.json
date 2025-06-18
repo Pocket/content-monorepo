@@ -7,7 +7,7 @@
     "build": "rm -rf dist && tsc && npm run build-schema-admin && npm run build-schema-public",
     "build-schema-admin": "node dist/admin/buildSchema.js",
     "build-schema-public": "node dist/public/buildSchema.js",
-    "watch": "tsc -w & nodemon",
+    "watch": "tsc -w & nodemon --watch src --ext ts,js --ignore dist --ignore node_modules dist/main.js",
     "start": "npm run migrate:prisma-deploy && node dist/main.js",
     "dev": "npm run migrate:prisma-deploy && npm run build && npm run watch",
     "test": "jest \"\\.spec\\.ts\"",

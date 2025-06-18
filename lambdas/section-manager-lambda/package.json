@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rm -rf dist && tsc",
     "test": "jest \"\\.spec\\.ts\"",
-    "watch": "tsc -w & nodemon",
+    "watch": "tsc -w & npx nodemon --watch src --ext ts,js --ignore dist --ignore node_modules dist/main.js",
     "dev": "npm run build && npm run watch",
     "lint": "eslint --fix-dry-run \"src/**/*.ts\"",
     "format": "eslint --fix \"src/**/*.ts\"",
@@ -30,6 +30,7 @@
     "@types/node-fetch": "^2.6.7",
     "eslint-config-custom": "workspace:*",
     "jest": "29.7.0",
+    "nodemon": "3.0.1",
     "ts-jest": "29.1.2",
     "ts-patch": "^3.3.0",
     "tsconfig": "workspace:*",
