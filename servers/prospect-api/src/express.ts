@@ -44,7 +44,15 @@ export async function startServer(port: number): Promise<{
   const url = '/';
 
   app.use(
+    url,
     cors<cors.CorsRequest>(),
+    express.json(),
+    (req, res, next) => {
+      if (!req.body) {
+        req.body = {};
+      }
+      next();
+    },
     expressMiddleware<AdminAPIUserContext>(apolloServer, {
       context: async ({ req }) => getContext({ req }),
     }),

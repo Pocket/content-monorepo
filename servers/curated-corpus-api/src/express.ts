@@ -70,6 +70,13 @@ export async function startServer(port: number): Promise<{
   app.use(
     adminUrl,
     cors<cors.CorsRequest>(),
+    express.json(),
+    (req, res, next) => {
+      if (!req.body) {
+        req.body = {};
+      }
+      next();
+    },
     expressMiddleware<IAdminContext>(adminServer, {
       context: getAdminContext,
     }),
@@ -82,6 +89,13 @@ export async function startServer(port: number): Promise<{
   app.use(
     publicUrl,
     cors<cors.CorsRequest>(),
+    express.json(),
+    (req, res, next) => {
+      if (!req.body) {
+        req.body = {};
+      }
+      next();
+    },
     expressMiddleware<IPublicContext>(publicServer, {
       context: getPublicContext,
     }),
