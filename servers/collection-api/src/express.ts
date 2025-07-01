@@ -43,6 +43,21 @@ export async function startServer(port: number): Promise<{
     }),
   );
 
+  // JSON parsing error handler
+  // This middleware catches errors thrown by express.json() when it encounters invalid JSON.
+  // Without this handler, malformed JSON in request bodies would cause unhandled exceptions.
+  // Must be defined as error-handling middleware (4 parameters) to catch errors from previous middleware.
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (err instanceof SyntaxError && 'body' in err) {
+      serverLogger.error('Invalid JSON in request body', { error: err.message });
+      return res.status(400).json({ 
+        error: 'Invalid JSON', 
+        message: 'The request body contains invalid JSON syntax' 
+      });
+    }
+    next(err);
+  });
+
   // expose a health check url that makes sure the express app is up and the db
   // is reachable
   app.get('/.well-known/apollo/server-health', async (req, res) => {
@@ -63,6 +78,13 @@ export async function startServer(port: number): Promise<{
   app.use(
     adminUrl,
     cors<cors.CorsRequest>(),
+    express.json(),
+    (req, res, next) => {
+      if (!req.body) {
+        req.body = {};
+      }
+      next();
+    },
     expressMiddleware<IAdminContext>(adminServer, {
       context: getAdminContext,
     }),
@@ -75,6 +97,13 @@ export async function startServer(port: number): Promise<{
   app.use(
     publicUrl,
     cors<cors.CorsRequest>(),
+    express.json(),
+    (req, res, next) => {
+      if (!req.body) {
+        req.body = {};
+      }
+      next();
+    },
     expressMiddleware<IPublicContext>(publicServer, {
       context: getPublicContext,
     }),
