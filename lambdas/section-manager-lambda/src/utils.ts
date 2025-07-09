@@ -1,4 +1,5 @@
 import { assert } from 'typia';
+import * as Sentry from '@sentry/serverless';
 
 import {
   applyApTitleCase,
@@ -61,59 +62,74 @@ export const processSqsSectionData = async (
     createOrUpdateSectionApiInput,
   );
 
-  let approvedItemExternalId: string;
-
+  // keep track of how many candidates succeeded, how many failed
+  let successfulCandidates = 0;
+  let failedCandidates = 0;
   // for each SectionItem, see if the URL already exists in the corpus
   for (let i = 0; i < sqsSectionData.candidates.length; i++) {
     // convenience!
     const sqsSectionItem: SqsSectionItem = sqsSectionData.candidates[i];
+    try {
+      let approvedItemExternalId: string;
 
-    // see if the Corpus has an ApprovedItem matching the SectionItem's URL
-    const approvedCorpusItem = await getApprovedCorpusItemByUrl(
-      config.adminApiEndpoint,
-      graphHeaders,
-      sqsSectionItem.url,
-    );
-
-    // if an ApprovedItem with the given URL already exists in the corpus,
-    // grab its external id.
-    if (approvedCorpusItem) {
-      approvedItemExternalId = approvedCorpusItem.externalId;
-    } else {
-      // if an ApprovedItem wasn't found based on the URL, create one
-
-      // retrieve URL metadata from the Parser. this fills in some metadata ML
-      // doesn't send, and acts as a backup if optional ML data points are not
-      // available.
-      const parserMetadata = await getUrlMetadata(
+      // see if the Corpus has an ApprovedItem matching the SectionItem's URL
+      const approvedCorpusItem = await getApprovedCorpusItemByUrl(
         config.adminApiEndpoint,
         graphHeaders,
         sqsSectionItem.url,
       );
 
-      // create input for the createApprovedItem mutation, favoring metadata
-      // from ML (in most cases)
-      const apiInput = await mapSqsSectionItemToCreateApprovedItemApiInput(
-        sqsSectionItem,
-        parserMetadata,
-      );
+      // if an ApprovedItem with the given URL already exists in the corpus,
+      // grab its external id.
+      if (approvedCorpusItem) {
+        approvedItemExternalId = approvedCorpusItem.externalId;
+      } else {
+        // if an ApprovedItem wasn't found based on the URL, create one
 
-      // create the ApprovedItem
-      approvedItemExternalId = await createApprovedCorpusItem(
-        config.adminApiEndpoint,
-        graphHeaders,
-        apiInput,
-      );
+        // retrieve URL metadata from the Parser. this fills in some metadata ML
+        // doesn't send, and acts as a backup if optional ML data points are not
+        // available.
+        const parserMetadata = await getUrlMetadata(
+          config.adminApiEndpoint,
+          graphHeaders,
+          sqsSectionItem.url,
+        );
+
+        // create input for the createApprovedItem mutation, favoring metadata
+        // from ML (in most cases)
+        const apiInput = await mapSqsSectionItemToCreateApprovedItemApiInput(
+          sqsSectionItem,
+          parserMetadata,
+        );
+
+        // create the ApprovedItem
+        approvedItemExternalId = await createApprovedCorpusItem(
+          config.adminApiEndpoint,
+          graphHeaders,
+          apiInput,
+        );
+      }
+
+      // call the mutation to createSectionItem using the ApprovedItem either
+      // created or retrieved above
+      await createSectionItem(config.adminApiEndpoint, graphHeaders, {
+        approvedItemExternalId,
+        sectionExternalId,
+        rank: sqsSectionItem.rank,
+      });
+      // update successful candidates count
+      successfulCandidates++;
+    } catch (e) {
+      // update failed candidates count
+      failedCandidates++;
+      const message = `Failed to process SectionItem candidate for URL ${sqsSectionItem.url}: `;
+      console.error(message, e);
+      Sentry.addBreadcrumb({ message });
+      Sentry.captureException(e);
+      // continue to next item
     }
-
-    // call the mutation to createSectionItem using the ApprovedItem either
-    // created or retrieved above
-    await createSectionItem(config.adminApiEndpoint, graphHeaders, {
-      approvedItemExternalId,
-      sectionExternalId,
-      rank: sqsSectionItem.rank,
-    });
   }
+  console.log(`processSqsSectionData result: ${successfulCandidates} succeeded, ${failedCandidates} failed`);
 };
 
 /**
