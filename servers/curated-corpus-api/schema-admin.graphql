@@ -881,105 +881,6 @@ input CreateApprovedCorpusItemInput {
 }
 
 """
-Input data for loading an Approved Item via an automated process and optionally scheduling
-this item to appear on a Scheduled Surface.
-"""
-input ImportApprovedCorpusItemInput {
-  """
-  The URL of the Approved Item.
-  """
-  url: Url!
-  """
-  The title of the Approved Item.
-  """
-  title: String!
-  """
-  The excerpt of the Approved Item.
-  """
-  excerpt: String!
-  """
-  The outcome of the curators' review of the Approved Item.
-  """
-  status: CuratedStatus!
-  """
-  What language this item is in. This is a two-letter capitalized code, for example, 'EN' for English.
-  """
-  language: CorpusLanguage!
-  """
-  The name of the online publication that published this story.
-  """
-  publisher: String!
-  """
-  The publication date for this story.
-  """
-  datePublished: Date
-  """
-  The image URL for this item's accompanying picture.
-  """
-  imageUrl: Url!
-  """
-  A topic this story best fits in. The value will be `null` for migrated items that don't have a topic set.
-  """
-  topic: String
-  """
-  The source of the corpus item.
-  """
-  source: CorpusItemSource!
-  """
-  Whether this story is a Pocket Collection.
-  """
-  isCollection: Boolean
-  """
-  Whether this item is a syndicated article.
-  """
-  isSyndicated: Boolean
-  """
-  A Unix timestamp of when the entity was created.
-  """
-  createdAt: Int!
-  """
-  A single sign-on user identifier of the user who created this entity.
-  """
-  createdBy: String!
-  """
-  A Unix timestamp of when the entity was last updated.
-  """
-  updatedAt: Int!
-  """
-  A single sign-on user identifier of the user who last updated this entity.
-  """
-  updatedBy: String!
-  """
-  The date this item should be appearing on a Scheduled Surface. Format: YYYY-MM-DD
-  """
-  scheduledDate: Date!
-  """
-  The GUID of the Scheduled Surface this item should be scheduled for.
-  """
-  scheduledSurfaceGuid: ID!
-  """
-  Source of the Scheduled Item. Could be one of: MANUAL or ML
-
-  This field was added after this import mutation was created. We may need to expand the enum value list if this mutation is used in the future.
-  """
-  scheduledSource: ActivitySource!
-}
-
-"""
-The data that the loadApprovedCuratedCorpusItem mutation returns on success.
-"""
-type ImportApprovedCorpusItemPayload {
-  """
-  The approved item, as created by an automated process.
-  """
-  approvedItem: ApprovedCorpusItem!
-  """
-  The scheduled entry that is created by an automated process at the same time.
-  """
-  scheduledItem: ScheduledCorpusItem!
-}
-
-"""
 Input data for updating an Approved Item.
 """
 input UpdateApprovedCorpusItemInput {
@@ -1246,14 +1147,6 @@ type Mutation {
   createApprovedCorpusItem(
     data: CreateApprovedCorpusItemInput!
   ): ApprovedCorpusItem!
-
-  """
-  Lets an automated process create an Approved Item and optionally schedule it to appear
-  on a Scheduled Surface.
-  """
-  importApprovedCorpusItem(
-    data: ImportApprovedCorpusItemInput!
-  ): ImportApprovedCorpusItemPayload!
 
   """
   Creates a Rejected Item.
