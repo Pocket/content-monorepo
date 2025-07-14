@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/serverless';
 import {
   applyApTitleCase,
   CorpusItemSource,
@@ -341,6 +342,13 @@ describe('utils', () => {
     let mockCreateApprovedCorpusItem: any;
     let mockCreateSectionItem: any;
 
+    const sentryStub: jest.SpyInstance = jest
+      .spyOn(Sentry, 'captureException')
+      .mockImplementation(() => '');
+
+    const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+
     afterEach(() => {
       // clear all information/history about mocked functions
       jest.clearAllMocks();
@@ -408,6 +416,14 @@ describe('utils', () => {
       expect(mockCreateApprovedCorpusItem).not.toHaveBeenCalled();
 
       expect(mockCreateSectionItem).toHaveBeenCalledTimes(sectionItemCount);
+
+      // Check that all 3 candidates processed, 0 failures
+      expect(sentryStub).toHaveBeenCalledTimes(0);
+      expect(mockConsoleError).toHaveBeenCalledTimes(0);
+      expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mockConsoleLog.mock.calls[0][0]).toContain(
+        'processSqsSectionData result: 3 succeeded, 0 failed',
+      );
     });
 
     it('calls the expected functions if the section items do not exist in the corpus', async () => {
@@ -439,6 +455,61 @@ describe('utils', () => {
         sectionItemCount,
       );
       expect(mockCreateSectionItem).toHaveBeenCalledTimes(sectionItemCount);
+
+      // Check that all 3 candidates processed, 0 failures
+      expect(sentryStub).toHaveBeenCalledTimes(0);
+      expect(mockConsoleError).toHaveBeenCalledTimes(0);
+      expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mockConsoleLog.mock.calls[0][0]).toContain(
+        'processSqsSectionData result: 3 succeeded, 0 failed',
+      );
+    });
+
+    it('continues processing other candidates even if one fails', async () => {
+      // Mock getApprovedCorpusItemByUrl
+      const mockGetApprovedCorpusItemByUrl = jest
+        .spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
+        .mockImplementation(async (_endpoint, _headers, url) => {
+          if (url.includes('fail-url')) {
+            throw new Error('Simulated candidate failure');
+          }
+          return { externalId: 'approvedItemExternalId1', url };
+        });
+
+      // Update sqsSectionData to include one "bad" URL
+      sqsSectionData.candidates[1].url = 'https://fail-url.com';
+
+      // 3 candidates total, one "bad" candidate
+      await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
+
+      // getApprovedCorpusItemByUrl is called once per candidate
+      expect(mockGetApprovedCorpusItemByUrl).toHaveBeenCalledTimes(
+        sectionItemCount,
+      );
+
+      // A sectionItem should be created for the two candidates that have succeeded
+      expect(mockCreateSectionItem).toHaveBeenCalledTimes(
+        sectionItemCount - 1,
+      );
+
+      // Check that console.error & Sentry were called
+      expect(sentryStub).toHaveBeenCalledTimes(1);
+      expect(sentryStub.mock.calls[0][0].message).toContain(
+        `Simulated candidate failure`,
+      );
+      expect(mockConsoleError).toHaveBeenCalledTimes(1);
+      expect(mockConsoleError.mock.calls[0][0]).toContain(
+        'Failed to process SectionItem candidate for URL https://fail-url.com: ',
+      );
+      expect(mockConsoleError.mock.calls[0][1].message).toContain(
+        'Simulated candidate failure',
+      );
+
+      // Check that 2 candidates were processed & 1 failed
+      expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mockConsoleLog.mock.calls[0][0]).toContain(
+        'processSqsSectionData result: 2 succeeded, 1 failed',
+      );
     });
   });
 });
