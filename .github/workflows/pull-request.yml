@@ -30,7 +30,6 @@ jobs:
 
   unit-test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,3 +40,11 @@ jobs:
       - name: Unit tests
         # Following uses a 2 concurrency because terraform modules seems to fail with an OOM error on CI if we do more.
         run: pnpm run test --concurrency=2
+
+  test-integrations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dummy placeholder
+        run: |
+          echo "Ensuring 'test‑integrations' status check is always present"
+          echo "so branch protection rules can reliably require it."
