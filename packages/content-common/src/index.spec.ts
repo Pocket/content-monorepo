@@ -130,6 +130,90 @@ describe('content-common', () => {
         expect(applyApTitleCase(result)).toEqual(expected);
       });
     });
+
+    it('should capitalize "a" and "the" after sentence-ending punctuation', () => {
+      const testCases = [
+        {
+          result: 'Nazi Persecution Scattered My Family. a Lost Archive Brought Us Together',
+          expected: 'Nazi Persecution Scattered My Family. A Lost Archive Brought Us Together',
+        },
+        {
+          result: 'This is the end! the beginning starts now',
+          expected: 'This Is the End! The Beginning Starts Now',
+        },
+        {
+          result: 'What happened? a miracle occurred',
+          expected: 'What Happened? A Miracle Occurred',
+        },
+        {
+          result: 'She said "Hello." the crowd cheered',
+          expected: 'She Said "Hello." The Crowd Cheered',
+        },
+      ];
+      testCases.forEach(({ result, expected }) => {
+        expect(applyApTitleCase(result)).toEqual(expected);
+      });
+    });
+
+    it('should always format iPhone correctly', () => {
+      const testCases = [
+        {
+          result: 'the new Iphone is amazing',
+          expected: 'The New iPhone Is Amazing',
+        },
+        {
+          result: 'IPHONE users love their devices',
+          expected: 'iPhone Users Love Their Devices',
+        },
+        {
+          result: 'my iphone broke yesterday',
+          expected: 'My iPhone Broke Yesterday',
+        },
+      ];
+      testCases.forEach(({ result, expected }) => {
+        expect(applyApTitleCase(result)).toEqual(expected);
+      });
+    });
+
+    it('should always lowercase "vs."', () => {
+      const testCases = [
+        {
+          result: 'Apple Vs. Samsung: the battle continues',
+          expected: 'Apple vs. Samsung: The Battle Continues',
+        },
+        {
+          result: 'Batman VS. Superman was a movie',
+          expected: 'Batman vs. Superman Was a Movie',
+        },
+        {
+          result: 'Good vs Evil: a timeless struggle',
+          expected: 'Good vs. Evil: A Timeless Struggle',
+        },
+      ];
+      testCases.forEach(({ result, expected }) => {
+        expect(applyApTitleCase(result)).toEqual(expected);
+      });
+    });
+
+    it('should not capitalize "as" in title case', () => {
+      const testCases = [
+        {
+          result: 'Working As a Team Is Important',
+          expected: 'Working as a Team Is Important',
+        },
+        {
+          result: 'As The Sun Sets',
+          expected: 'As the Sun Sets',
+        },
+        {
+          result: 'She Sees It As An Opportunity',
+          expected: 'She Sees It as an Opportunity',
+        },
+      ];
+      testCases.forEach(({ result, expected }) => {
+        expect(applyApTitleCase(result)).toEqual(expected);
+      });
+    });
   });
   describe('lowercaseAfterApostrophe', () => {
     it('lowercase letter after apostrophe & return new string', () => {
