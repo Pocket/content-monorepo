@@ -56,10 +56,7 @@ export const sanitizeText = (input: string, maxLength: number): string => {
 export const lowercaseAfterApostrophe = (input: string): string => {
   // Match either an ASCII or curly apostrophe followed by a letter, after a word character.
   const regex = /(?<=\w)(['\u2018\u2019])(\w)/g;
-  return input.replace(
-    regex,
-    (_, apostrophe, letter) => `${apostrophe}${letter.toLowerCase()}`,
-  );
+  return input.replace(regex, (_, apostrophe, letter) => `${apostrophe}${letter.toLowerCase()}`);
 };
 
 /**
@@ -92,65 +89,22 @@ export const applyApTitleCase = (value: string): string => {
 
   const result = allWords
     .map((word, index, all) => {
-      // Check if the previous non-empty element is a sentence-ending punctuation
-      const isAfterSentenceEnd =
-        index > 0 &&
-        (() => {
-          // Look for the previous non-empty element
-          for (let i = index - 1; i >= 0; i--) {
-            const prev = all[i].trim();
-            if (prev) {
-              // Check if it ends with sentence-ending punctuation
-              return (
-                /[.!?]$/.test(prev) ||
-                // Or if it's a closing quote after sentence-ending punctuation
-                (i > 0 &&
-                  (prev === '"' ||
-                    prev === '\u201D' ||
-                    prev === "'" ||
-                    prev === '\u2019') &&
-                  /[.!?]$/.test(all[i - 1].trim()))
-              );
-            }
-          }
-          return false;
-        })();
-
       const isAfterColon = index > 0 && all[index - 1].trim() === ':';
 
       const isAfterQuote =
         index > 0 &&
         (allWords[index - 1] === "'" ||
           allWords[index - 1] === '"' ||
-          allWords[index - 1] === '\u2018' || // Opening single quote '
-          allWords[index - 1] === '\u201C'); // Opening double quote "
+          allWords[index - 1] === '\u2018' || // Opening single quote ’
+          allWords[index - 1] === '\u201C'); // Opening double quote “
 
-      // Special case handling for specific words
-      const lowerWord = word.toLowerCase();
-
-      // Handle iPhone
-      if (lowerWord === 'iphone') {
-        return 'iPhone';
-      }
-
-      // Handle vs.
-      if (lowerWord === 'vs.' || lowerWord === 'vs') {
-        return 'vs.';
-      }
-
-      // Check if we should capitalize this word
       if (
         index === 0 || // first word
         index === all.length - 1 || // last word
         isAfterColon || // capitalize the first word after a colon
         isAfterQuote || // capitalize the first word after a quote
-        isAfterSentenceEnd || // capitalize after sentence-ending punctuation
-        (!stop.includes(lowerWord) && lowerWord !== 'as') // not a stop word and not 'as'
+        !stop.includes(word.toLowerCase()) // not a stop word
       ) {
-        // Special handling for 'a' and 'the' after sentence-ending punctuation
-        if (isAfterSentenceEnd && (lowerWord === 'a' || lowerWord === 'the')) {
-          return capitalize(word);
-        }
         return capitalize(word);
       }
 
