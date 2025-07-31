@@ -108,9 +108,6 @@ model Section {
   // note - for ML-generated Sections, externalId will be set by ML
   externalId            String          @unique @default(uuid()) @db.VarChar(255)
   title                 String          @db.VarChar(255)
-  description           String?         @db.VarChar(255)
-  heroTitle             String?         @db.VarChar(255)
-  heroDescription       String?         @db.VarChar(255)
   scheduledSurfaceGuid  String          @db.VarChar(50)
   // optional IAB info as as JSON blob: {taxonomy: 'IAB-3.0', categories: string[])
   iab                   Json?
@@ -132,8 +129,6 @@ model Section {
   deactivatedAt         DateTime?
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
-  startDate             DateTime?       @db.Date
-  endDate               DateTime?       @db.Date
 
   // relations
   sectionItems          SectionItem[]
