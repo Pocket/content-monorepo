@@ -101,6 +101,18 @@ type Section {
   This field returns an empty array when creating a new Section or updating a Section.
   """
   sectionItems: [SectionItem!]!
+  """
+  Optional description for the Section.
+  """
+  description: String
+  """
+  Optional hero title for the Section.
+  """
+  heroTitle: String
+  """
+  Optional hero description for the Section.
+  """
+  heroDescription: String
 }
 
 """
