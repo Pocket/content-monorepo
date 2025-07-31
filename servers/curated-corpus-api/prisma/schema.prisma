@@ -108,6 +108,9 @@ model Section {
   // note - for ML-generated Sections, externalId will be set by ML
   externalId            String          @unique @default(uuid()) @db.VarChar(255)
   title                 String          @db.VarChar(255)
+  description           String?         @db.VarChar(255)
+  heroTitle             String?         @db.VarChar(255)
+  heroDescription       String?         @db.VarChar(255)
   scheduledSurfaceGuid  String          @db.VarChar(50)
   // optional IAB info as as JSON blob: {taxonomy: 'IAB-3.0', categories: string[])
   iab                   Json?
@@ -119,7 +122,7 @@ model Section {
   // disables/enables sections. can only be set via the admin tool
   disabled              Boolean         @default(false)
   // track who created the Section
-  createSource          ActivitySource // (ML or MANUAL) 
+  createSource          ActivitySource // (ML or MANUAL)
   // track who deactivated the Section
   deactivateSource      ActivitySource? // (ML or MANUAL)
   // track who updated the Section
@@ -129,6 +132,10 @@ model Section {
   deactivatedAt         DateTime?
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
+  // For custom sections, indicates when a section goes "live"
+  startDate             DateTime?       @db.Date
+  // For custom sections, indicates when a section "expires"
+  endDate               DateTime?       @db.Date
 
   // relations
   sectionItems          SectionItem[]
