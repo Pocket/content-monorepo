@@ -122,6 +122,16 @@ enum SectionItemRemovalReason {
 }
 
 """
+Status of a Section
+"""
+enum SectionStatus {
+  SCHEDULED
+  DISABLED
+  LIVE
+  EXPIRED
+}
+
+"""
 Reasons for manually scheduling a corpus item.
 
 This is used by ML downstream to improve their modeling.
@@ -617,6 +627,18 @@ extend type Section {
   A Unix timestamp of when the Section was last updated.
   """
   updatedAt: Int!
+  """
+  The status of the Section.
+  """
+  status: SectionStatus
+  """
+  The start date for when the Section should be active.
+  """
+  startDate: Date
+  """
+  The end date for when the Section should no longer be active.
+  """
+  endDate: Date
 }
 
 extend type SectionItem {
