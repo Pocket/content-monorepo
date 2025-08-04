@@ -122,7 +122,7 @@ enum SectionItemRemovalReason {
 }
 
 """
-Status of a Section
+Represents the current Section status, computed dynamically.
 """
 enum SectionStatus {
   SCHEDULED
@@ -632,11 +632,11 @@ extend type Section {
   """
   status: SectionStatus
   """
-  The start date for when the Section should be active.
+  The start date for when the Section should be live.
   """
   startDate: Date
   """
-  The end date for when the Section should no longer be active.
+  The date when the Section is expired.
   """
   endDate: Date
 }
