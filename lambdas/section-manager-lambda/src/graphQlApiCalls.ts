@@ -85,6 +85,13 @@ export const createOrUpdateSection = async (
         mutation CreateOrUpdateSection($data: CreateOrUpdateSectionInput!) {
             createOrUpdateSection(data: $data) {
                 externalId
+                sectionItems {
+                  externalId
+                  approvedItem {
+                    externalId
+                    url
+                  }
+                }
             }
         }
     `;
@@ -109,7 +116,6 @@ export const createOrUpdateSection = async (
   }
   const section = result.data.createOrUpdateSection;
 
-  // Normalize/guard the items array
   const sectionItems = section.sectionItems || [];
 
   return {
