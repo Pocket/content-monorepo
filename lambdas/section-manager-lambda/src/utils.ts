@@ -30,6 +30,7 @@ import {
   removeSectionItem,
 } from './graphQlApiCalls';
 import {
+  ActiveSectionItem,
   CreateOrUpdateSectionApiInput,
   SqsSectionItem,
   SqsSectionWithSectionItems,
@@ -72,15 +73,9 @@ export const processSqsSectionData = async (
   let successfulCandidates = 0;
   let failedCandidates = 0;
 
-  // Get SectionItems URLs from ML SectionItem payload
-  const mlSectionItemUrls = sqsSectionData.candidates.map(item => item.url);
-  // Get SectionItems URLs from existing active SectionItems
-  const activeSectionItemsUrlsSet = new Set(activeSectionItems.map((item) => item.approvedItem.url));
+  // Get the currently active SectionItems URLs & SectionItems to remove
+  const { activeSectionItemsUrlsSet, sectionItemsToRemove } = computeSectionItemsDiff(sqsSectionData, activeSectionItems);
 
-  // Get the SectionItems to remove -- existing active SectionItems whose URL is not in the ML SectionItem payload
-  const sectionItemsToRemove = activeSectionItems.filter(
-    (item) => !mlSectionItemUrls.includes(item.approvedItem.url),
-  );
   // for each SectionItem, see if the URL already exists in the corpus
   for (let i = 0; i < sqsSectionData.candidates.length; i++) {
     // convenience!
@@ -136,9 +131,11 @@ export const processSqsSectionData = async (
         sectionExternalId,
         rank: sqsSectionItem.rank,
       });
-      // update successful candidates count
       // Mark URL as active to prevent duplicate creation
+      // ML should not be sending duplicate candidate URLs within a Section within the same run
+      // this is a safe guard
       activeSectionItemsUrlsSet.add(sqsSectionItem.url);
+      // update successful candidates count
       successfulCandidates++;
     } catch (e) {
       // update failed candidates count
@@ -170,6 +167,28 @@ export const processSqsSectionData = async (
 
   console.log(`processSqsSectionData result: ${successfulCandidates} succeeded, ${failedCandidates} failed`);
 };
+
+/**
+ * helper function to compute the diff between currently active SectionItems & SectionItems in ML payload.
+ *
+ * @param sqsSectionData
+ * @param currentActiveSectionItems
+ */
+export function computeSectionItemsDiff (
+  sqsSectionData: SqsSectionWithSectionItems,
+  currentActiveSectionItems: ActiveSectionItem[]
+){
+  // Get SectionItems URLs from ML SectionItem payload
+  const mlSectionItemUrls = sqsSectionData.candidates.map(item => item.url);
+  // Get SectionItems URLs from existing active SectionItems
+  const activeSectionItemsUrlsSet = new Set(currentActiveSectionItems.map((item) => item.approvedItem.url));
+
+  // Get the SectionItems to remove -- existing active SectionItems whose URL is not in the ML SectionItem payload
+  const sectionItemsToRemove = currentActiveSectionItems.filter(
+    (item) => !mlSectionItemUrls.includes(item.approvedItem.url),
+  );
+  return { activeSectionItemsUrlsSet, sectionItemsToRemove};
+}
 
 /**
  * helper function to map section data from SQS to the API input required to

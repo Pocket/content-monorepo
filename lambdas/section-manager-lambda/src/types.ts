@@ -30,7 +30,15 @@ export interface SqsSectionItem {
   title: string | null;
   topic: Topics;
   url: string;
-}
+};
+
+export interface ActiveSectionItem {
+  externalId: string;
+  approvedItem: {
+    externalId: string;
+    url: string;
+  };
+};
 
 export type CreateOrUpdateSectionApiInput = {
   active: boolean;

@@ -10,6 +10,7 @@ import {
 
 import config from './config';
 import {
+  ActiveSectionItem,
   CreateSectionItemApiInput,
   CreateOrUpdateSectionApiInput,
   RemoveSectionItemApiInput,
@@ -68,13 +69,7 @@ export const createOrUpdateSection = async (
   data: CreateOrUpdateSectionApiInput,
 ): Promise<{
   externalId: string;
-  sectionItems: {
-    externalId: string;
-    approvedItem: {
-      externalId: string;
-      url: string;
-    };
-  }[];
+  sectionItems: ActiveSectionItem[];
 }> => {
   // throttle calls to the admin graph
   await sleep(2000);
