@@ -4,6 +4,7 @@ import {
   CuratedStatus,
   IABMetadata,
   ScheduledSurfacesEnum,
+  SectionItemRemovalReason,
   Topics,
 } from 'content-common';
 
@@ -49,5 +50,6 @@ export type CreateSectionItemApiInput = {
 
 export type RemoveSectionItemApiInput = {
   externalId: string;
+  deactivateReasons: SectionItemRemovalReason[];
   deactivateSource: CorpusItemSource;
 };
