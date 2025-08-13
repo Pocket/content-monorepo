@@ -107,8 +107,21 @@ export const createOrUpdateSection = async (
       `createOrUpdateSection mutation failed: ${result.errors[0].message}`,
     );
   }
+  const section = result.data.createOrUpdateSection;
 
-  return result.data.createOrUpdateSection;
+  // Normalize/guard the items array
+  const sectionItems = section.sectionItems || [];
+
+  return {
+    externalId: section.externalId,
+    sectionItems: sectionItems.map((item: any) => ({
+      externalId: item.externalId,
+      approvedItem: {
+        externalId: item.approvedItem.externalId,
+        url: item.approvedItem.url,
+      },
+    })),
+  };
 };
 
 /**
