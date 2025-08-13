@@ -10,6 +10,7 @@ import {
   formatQuotesDashesDE,
   UrlMetadata,
   CorpusItemSource,
+  SectionItemRemovalReason,
 } from 'content-common';
 import {
   generateGraphQlApiHeaders,
@@ -155,6 +156,7 @@ export const processSqsSectionData = async (
       try {
         await removeSectionItem(config.adminApiEndpoint, graphHeaders, {
           externalId: item.externalId,
+          deactivateReasons: [SectionItemRemovalReason.OTHER],
           deactivateSource: CorpusItemSource.ML,
         });
       } catch (e) {
