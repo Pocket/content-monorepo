@@ -73,7 +73,7 @@ export async function removeSectionItem(
       throw new AuthenticationError(ACCESS_DENIED_ERROR);
     }
     
-    return await dbRemoveSectionItem(context.db, {externalId: data.externalId, deactivateReasons: data.deactivateReasons});
+    return await dbRemoveSectionItem(context.db, {externalId: data.externalId, deactivateReasons: data.deactivateReasons, deactivateSource: data.deactivateSource});
   }
   // Check if SectionItem exists
   else {

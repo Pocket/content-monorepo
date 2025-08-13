@@ -331,6 +331,11 @@ describe('utils', () => {
       {},
       sectionItemCount,
     );
+    // ensure each candidate URL is unique to test de-dupe logic
+    sqsSectionData.candidates = sqsSectionData.candidates.map((candidate, i) => ({
+      ...candidate,
+      url: `https://example-${i}.com`,
+    }));
     const jwtBearerToken = 'testJwtBearerToken';
 
     // mock all the functions orchestrated by processSqsSectionData.
@@ -366,7 +371,7 @@ describe('utils', () => {
 
       mockCreateOrUpdateSection = jest
         .spyOn(GraphQlApiCalls, 'createOrUpdateSection')
-        .mockResolvedValue('sectionExternalId1');
+        .mockResolvedValue({externalId: 'sectionExternalId1', sectionItems: []});
 
       mockGetUrlMetadata = jest
         .spyOn(GraphQlApiCalls, 'getUrlMetadata')
@@ -385,6 +390,39 @@ describe('utils', () => {
         .mockResolvedValue('sectionItemExternalId1');
     });
 
+    it('returns sectionItems from createOrUpdateSection when updating section', async () => {
+      const mockSectionItems = [
+        {
+          externalId: 'sectionItemExternalId1',
+          approvedItem: {
+            externalId: 'approvedItemExternalId1',
+            url: 'https://example-one.com',
+          },
+        },
+        {
+          externalId: 'sectionItemExternalId2',
+          approvedItem: {
+            externalId: 'approvedItemExternalId2',
+            url: 'https://example-two.com',
+          },
+        },
+      ];
+
+      mockCreateOrUpdateSection.mockResolvedValue({
+        externalId: 'sectionExternalId1',
+        sectionItems: mockSectionItems,
+      });
+
+      await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
+
+      expect(mockCreateOrUpdateSection).toHaveBeenCalledTimes(1);
+      const sectionResponse = await mockCreateOrUpdateSection.mock.results[0].value;
+
+      expect(sectionResponse.externalId).toEqual('sectionExternalId1')
+      // check sectionItems are returned in response
+      expect(sectionResponse.sectionItems).toEqual(mockSectionItems);
+    });
+
     it('calls the expected functions if the section items already exist in the corpus', async () => {
       // make sure all the section items "exist" in the corpus
       const mockGetApprovedCorpusItemByUrl = jest
@@ -393,6 +431,7 @@ describe('utils', () => {
           externalId: 'approvedItemExternalId1',
           url: 'test.com',
         });
+
 
       await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
 
@@ -420,8 +459,11 @@ describe('utils', () => {
       // Check that all 3 candidates processed, 0 failures
       expect(sentryStub).toHaveBeenCalledTimes(0);
       expect(mockConsoleError).toHaveBeenCalledTimes(0);
-      expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mockConsoleLog).toHaveBeenCalledTimes(2);
       expect(mockConsoleLog.mock.calls[0][0]).toContain(
+        `No SectionItems to remove for Section sectionExternalId1`,
+      );
+      expect(mockConsoleLog.mock.calls[1][0]).toContain(
         'processSqsSectionData result: 3 succeeded, 0 failed',
       );
     });
@@ -459,8 +501,11 @@ describe('utils', () => {
       // Check that all 3 candidates processed, 0 failures
       expect(sentryStub).toHaveBeenCalledTimes(0);
       expect(mockConsoleError).toHaveBeenCalledTimes(0);
-      expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mockConsoleLog).toHaveBeenCalledTimes(2);
       expect(mockConsoleLog.mock.calls[0][0]).toContain(
+        `No SectionItems to remove for Section sectionExternalId1`,
+      );
+      expect(mockConsoleLog.mock.calls[1][0]).toContain(
         'processSqsSectionData result: 3 succeeded, 0 failed',
       );
     });
@@ -506,9 +551,76 @@ describe('utils', () => {
       );
 
       // Check that 2 candidates were processed & 1 failed
-      expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mockConsoleLog).toHaveBeenCalledTimes(2);
       expect(mockConsoleLog.mock.calls[0][0]).toContain(
+        `No SectionItems to remove for Section sectionExternalId1`,
+      );
+      expect(mockConsoleLog.mock.calls[1][0]).toContain(
         'processSqsSectionData result: 2 succeeded, 1 failed',
+      );
+    });
+
+    it('calls the expected functions when creating ML SectionItems first, ignoring dupes, then removing old SectionItems, with deactivateSource=ML', async () => {
+      const url1 = 'https://example-one.com';
+      const url2 = 'https://example-two.com';
+      const url3 = 'https://example-three.com';
+
+      // Existing Section (to update) already has SectionItems with URLS 1 & 2
+      mockCreateOrUpdateSection.mockResolvedValue({
+        externalId: 'sectionExternalId1',
+        sectionItems: [
+          {
+            externalId: 'sectionItem1',
+            approvedItem: { externalId: 'approvedItem1', url: url1 },
+          },
+          {
+            externalId: 'sectionItem2',
+            approvedItem: { externalId: 'approvedItem2', url: url2 },
+          },
+        ],
+      });
+
+      // ML sends SectionItem payload with URL2 (already active) + URL3 (new)
+      const sqs = createSqsSectionWithSectionItems({}, 0);
+      sqs.candidates = [
+        { url: url2, rank: 1 } as any,
+        { url: url3, rank: 2 } as any,
+      ];
+
+      // Mock ApprovedItem lookup
+      jest.spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
+        .mockImplementation(async (_endpoint, _headers, url) => {
+          if (url === url2) return { externalId: 'approvedItem2', url: url2 };
+          if (url === url3) return { externalId: 'approvedItem3', url: url3 };
+          return null;
+        });
+
+      const mockRemoveSectionItem = jest
+        .spyOn(GraphQlApiCalls, 'removeSectionItem')
+        .mockResolvedValue('sectionItem1');
+
+      await Utils.processSqsSectionData(sqs, jwtBearerToken);
+
+      // Only create SectionItem with URL3 (SectionItem with URL2 is already active (dupe))
+      expect(mockCreateSectionItem).toHaveBeenCalledTimes(1);
+      expect(mockCreateSectionItem).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        expect.objectContaining({
+          approvedItemExternalId: 'approvedItem3',
+          rank: 2,
+        }),
+      );
+
+      // Only remove SectionItem with URL1
+      expect(mockRemoveSectionItem).toHaveBeenCalledTimes(1);
+      expect(mockRemoveSectionItem).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        expect.objectContaining({
+          externalId: 'sectionItem1',
+          deactivateSource: 'ML',
+        }),
       );
     });
   });
