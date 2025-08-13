@@ -69,13 +69,16 @@ export const processSqsSectionData = async (
   const sectionExternalId =  sectionResult.externalId;
   const activeSectionItems = sectionResult.sectionItems || [];
 
+  console.log('activeSectionItems: ', activeSectionItems)
+
   // keep track of how many candidates succeeded, how many failed
   let successfulCandidates = 0;
   let failedCandidates = 0;
 
   // Get the currently active SectionItems URLs & SectionItems to remove
   const { activeSectionItemsUrlsSet, sectionItemsToRemove } = computeSectionItemsDiff(sqsSectionData, activeSectionItems);
-
+  console.log('activeSectionItemsUrlsSet: ', activeSectionItemsUrlsSet)
+  console.log('sectionItemsToRemove: ', sectionItemsToRemove)
   // for each SectionItem, see if the URL already exists in the corpus
   for (let i = 0; i < sqsSectionData.candidates.length; i++) {
     // convenience!
@@ -84,6 +87,7 @@ export const processSqsSectionData = async (
       let approvedItemExternalId: string;
       // avoid creating SectionItem duplicates if the URL already exists
       if (activeSectionItemsUrlsSet.has(sqsSectionItem.url)) {
+        console.log('duplicate!: ', sqsSectionItem.url)
         continue;
       }
       // see if the Corpus has an ApprovedItem matching the SectionItem's URL
