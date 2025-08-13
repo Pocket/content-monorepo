@@ -185,7 +185,7 @@ describe('mutations: Section (createOrUpdateSection)', () => {
         query: print(CREATE_OR_UPDATE_SECTION),
         variables: { data: input },
       });
-    
+
     expect(result.body.errors).toBeUndefined();
     expect(result.body.data).not.toBeNull();
 
