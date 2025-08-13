@@ -156,7 +156,7 @@ describe('mutations: Section (createOrUpdateSection)', () => {
     expect(result.body.data?.createOrUpdateSection.active).toBeTruthy();
   });
 
-  it('should update an existing Section & mark any associated active SectionItems in-active', async () => {
+  it('should update a Section & leave any associated active SectionItems untouched.', async () => {
     const iabMetadata: IABMetadata = {
       taxonomy: "IAB-3.0",
       categories: ["488"]
@@ -172,16 +172,11 @@ describe('mutations: Section (createOrUpdateSection)', () => {
       active: true,
     };
 
-    const rightNow = new Date();
-
-    // control the result of `new Date()` so we can explicitly check values
-    // downstream of the graph request
-    jest.useFakeTimers({
-      now: rightNow,
-      advanceTimers: false,
-      // something in the graph request needs `nextTick` to explicitly not be faked
-      doNotFake: ['nextTick'],
+    // track the original date for SectionItem to assert no change
+    const originalActiveItem = await db.sectionItem.findUnique({
+      where: { externalId: sectionItem.externalId },
     });
+    const originalUpdatedAt = originalActiveItem.updatedAt;
 
     const result = await request(app)
       .post(graphQLUrl)
@@ -190,10 +185,7 @@ describe('mutations: Section (createOrUpdateSection)', () => {
         query: print(CREATE_OR_UPDATE_SECTION),
         variables: { data: input },
       });
-
-    // stop controlling the result of `new Date()`
-    jest.useRealTimers();
-
+    
     expect(result.body.errors).toBeUndefined();
     expect(result.body.data).not.toBeNull();
 
@@ -220,14 +212,15 @@ describe('mutations: Section (createOrUpdateSection)', () => {
     // Expect deactivateSource to be null
     expect(updatedSection.deactivateSource).toBeNull();
 
-    const inactiveSectionItem = await db.sectionItem.findUnique({
+    // Active item remains active and unchanged
+    const stillActive = await db.sectionItem.findUnique({
       where: { externalId: sectionItem.externalId },
     });
+    expect(stillActive.active).toBe(true);
+    expect(stillActive.deactivateSource).toBeNull();
+    expect(stillActive.deactivatedAt).toBeNull();
+    expect(stillActive.updatedAt).toEqual(originalUpdatedAt);
 
-    // Expect associated section item to be in-active now
-    expect(inactiveSectionItem.active).toBeFalsy();
-    expect(inactiveSectionItem.deactivateSource).toEqual(ActivitySource.ML);
-    expect(inactiveSectionItem.deactivatedAt).toEqual(rightNow);
   });
 
   it('should update an existing Section, set deactivateSource to ML if active is false & not update any associated in-active SectionItems.', async () => {

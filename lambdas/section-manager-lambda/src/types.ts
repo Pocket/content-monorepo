@@ -46,3 +46,8 @@ export type CreateSectionItemApiInput = {
   sectionExternalId: string;
   rank?: number;
 };
+
+export type RemoveSectionItemApiInput = {
+  externalId: string;
+  deactivateSource: CorpusItemSource;
+};

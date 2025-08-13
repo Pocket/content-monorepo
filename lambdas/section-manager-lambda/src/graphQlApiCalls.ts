@@ -12,6 +12,7 @@ import config from './config';
 import {
   CreateSectionItemApiInput,
   CreateOrUpdateSectionApiInput,
+  RemoveSectionItemApiInput,
 } from './types';
 
 export const sleep = async (ms: number) => {
@@ -56,7 +57,7 @@ export async function getUrlMetadata(
 
 /**
  * calls the createOrUpdateSection mutation to either create or update
- * a section
+ * a section, and return its active items
  *
  * @param graphHeaders GraphQlApiCallHeaders object
  * @param data CreateOrUpdateSectionApiInput object
@@ -65,7 +66,16 @@ export async function getUrlMetadata(
 export const createOrUpdateSection = async (
   graphHeaders: GraphQlApiCallHeaders,
   data: CreateOrUpdateSectionApiInput,
-): Promise<string> => {
+): Promise<{
+  externalId: string;
+  sectionItems: {
+    externalId: string;
+    approvedItem: {
+      externalId: string;
+      url: string;
+    };
+  }[];
+}> => {
   // throttle calls to the admin graph
   await sleep(2000);
 
@@ -98,7 +108,7 @@ export const createOrUpdateSection = async (
     );
   }
 
-  return result.data.createOrUpdateSection.externalId;
+  return result.data.createOrUpdateSection;
 };
 
 /**
@@ -193,3 +203,49 @@ export async function createSectionItem(
 
   return result.data.createSectionItem.externalId;
 }
+
+/**
+ * Calls the removeSectionItem mutation in curated-corpus-api.
+ * Removes "old" SectionItems from a Section when updating an existing Section.
+ *
+ * @param adminApiEndpoint  string
+ * @param graphHeaders GraphQlApiHeaders object
+ * @param data RemoceSectionItemApiInput
+ * @returns Promise<string> - externalId of the created SectionItem
+ */
+export async function removeSectionItem(
+  adminApiEndpoint: string,
+  graphHeaders: GraphQlApiCallHeaders,
+  data: RemoveSectionItemApiInput,
+): Promise<string> {
+  await sleep(2000);
+
+  const mutation = `
+    mutation RemoveSectionItem($data: RemoveSectionItemInput!) {
+      removeSectionItem(data: $data) {
+        externalId
+      }
+    }`;
+
+  const variables = { data };
+
+  const res = await fetch(adminApiEndpoint, {
+    method: 'post',
+    headers: graphHeaders,
+    body: JSON.stringify({ query: mutation, variables }),
+  });
+
+  const result = await res.json();
+
+  console.log(`RemoveSectionItem MUTATION OUTPUT: ${JSON.stringify(result)}`);
+
+  // check for any errors returned by the mutation
+  if (!result.data && result.errors.length > 0) {
+    throw new Error(
+      `removeSectionItem mutation failed: ${result.errors[0].message}`,
+    );
+  }
+
+  return result.data.removeSectionItem.externalId;
+}
+
