@@ -85,6 +85,13 @@ export const createOrUpdateSection = async (
         mutation CreateOrUpdateSection($data: CreateOrUpdateSectionInput!) {
             createOrUpdateSection(data: $data) {
                 externalId
+                sectionItems {
+                  externalId
+                  approvedItem {
+                    externalId
+                    url
+                  }
+                }
             }
         }
     `;
@@ -107,8 +114,20 @@ export const createOrUpdateSection = async (
       `createOrUpdateSection mutation failed: ${result.errors[0].message}`,
     );
   }
+  const section = result.data.createOrUpdateSection;
 
-  return result.data.createOrUpdateSection;
+  const sectionItems = section.sectionItems || [];
+
+  return {
+    externalId: section.externalId,
+    sectionItems: sectionItems.map((item: any) => ({
+      externalId: item.externalId,
+      approvedItem: {
+        externalId: item.approvedItem.externalId,
+        url: item.approvedItem.url,
+      },
+    })),
+  };
 };
 
 /**
@@ -248,4 +267,3 @@ export async function removeSectionItem(
 
   return result.data.removeSectionItem.externalId;
 }
-
