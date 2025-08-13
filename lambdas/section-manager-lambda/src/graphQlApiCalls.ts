@@ -267,4 +267,3 @@ export async function removeSectionItem(
 
   return result.data.removeSectionItem.externalId;
 }
-
