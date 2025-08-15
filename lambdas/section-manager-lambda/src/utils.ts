@@ -68,13 +68,15 @@ export const processSqsSectionData = async (
 
   const sectionExternalId =  sectionResult.externalId;
   const activeSectionItems = sectionResult.sectionItems || [];
+  // Get SectionItems URLs from existing active SectionItems
+  const activeSectionItemsUrlsSet = new Set(activeSectionItems.map((item) => item.approvedItem.url));
 
   // keep track of how many candidates succeeded, how many failed
   let successfulCandidates = 0;
   let failedCandidates = 0;
 
-  // Get the currently active SectionItems URLs & SectionItems to remove
-  const { activeSectionItemsUrlsSet, sectionItemsToRemove } = computeSectionItemsDiff(sqsSectionData, activeSectionItems);
+  // Get the existing SectionItems to remove from a Section
+  const sectionItemsToRemove = computeSectionItemsToRemove(sqsSectionData, activeSectionItems);
 
   // for each SectionItem, see if the URL already exists in the corpus
   for (let i = 0; i < sqsSectionData.candidates.length; i++) {
@@ -153,7 +155,7 @@ export const processSqsSectionData = async (
       try {
         await removeSectionItem(config.adminApiEndpoint, graphHeaders, {
           externalId: item.externalId,
-          deactivateReasons: [SectionItemRemovalReason.OTHER],
+          deactivateReasons: [SectionItemRemovalReason.ML],
           deactivateSource: CorpusItemSource.ML,
         });
       } catch (e) {
@@ -174,20 +176,18 @@ export const processSqsSectionData = async (
  * @param sqsSectionData
  * @param currentActiveSectionItems
  */
-export function computeSectionItemsDiff (
+export const computeSectionItemsToRemove = (
   sqsSectionData: SqsSectionWithSectionItems,
   currentActiveSectionItems: ActiveSectionItem[]
-){
+): ActiveSectionItem[] => {
   // Get SectionItems URLs from ML SectionItem payload
   const mlSectionItemUrls = sqsSectionData.candidates.map(item => item.url);
-  // Get SectionItems URLs from existing active SectionItems
-  const activeSectionItemsUrlsSet = new Set(currentActiveSectionItems.map((item) => item.approvedItem.url));
 
   // Get the SectionItems to remove -- existing active SectionItems whose URL is not in the ML SectionItem payload
   const sectionItemsToRemove = currentActiveSectionItems.filter(
     (item) => !mlSectionItemUrls.includes(item.approvedItem.url),
   );
-  return { activeSectionItemsUrlsSet, sectionItemsToRemove};
+  return sectionItemsToRemove;
 }
 
 /**

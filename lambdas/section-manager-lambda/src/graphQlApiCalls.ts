@@ -224,7 +224,7 @@ export async function createSectionItem(
  *
  * @param adminApiEndpoint  string
  * @param graphHeaders GraphQlApiHeaders object
- * @param data RemoceSectionItemApiInput
+ * @param data RemoveSectionItemApiInput
  * @returns Promise<string> - externalId of the created SectionItem
  */
 export async function removeSectionItem(

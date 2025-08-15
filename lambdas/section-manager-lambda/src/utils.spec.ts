@@ -324,38 +324,7 @@ describe('utils', () => {
     });
   });
 
-  describe('computeSectionItemsDiff', () => {
-    it('returns a Set of all current active SectionItem URLs', () => {
-      const sqsData: SqsSectionWithSectionItems = {
-        active: true,
-        candidates: [],
-        id: 'Section1',
-        scheduled_surface_guid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
-        source: CorpusItemSource.ML,
-        sort: 1,
-        title: 'Section1 Title',
-      };
-
-      const currentActiveSectionItems: any[] = [
-        {
-          externalId: 'sectionItem1',
-          approvedItem: { externalId: 'approvedItem1', url: 'https://example-one.com' },
-        },
-        {
-          externalId: 'sectionItem2',
-          approvedItem: { externalId: 'approvedItem2', url: 'https://example-two.com' },
-        },
-      ];
-
-      const { activeSectionItemsUrlsSet } =
-        Utils.computeSectionItemsDiff(sqsData, currentActiveSectionItems);
-
-      expect(activeSectionItemsUrlsSet).toBeInstanceOf(Set);
-      expect(activeSectionItemsUrlsSet.size).toBe(2);
-      expect(activeSectionItemsUrlsSet.has('https://example-one.com')).toBe(true);
-      expect(activeSectionItemsUrlsSet.has('https://example-two.com')).toBe(true);
-    });
-
+  describe('computeSectionItemsToRemove', () => {
     it('returns only active items not in ML payload in sectionItemsToRemove', () => {
       // ML Section payload with 1 SectionItem candidate
       const sqsData: SqsSectionWithSectionItems = {
@@ -382,8 +351,8 @@ describe('utils', () => {
         },
       ];
 
-      const { sectionItemsToRemove } =
-        Utils.computeSectionItemsDiff(sqsData, currentActiveSectionItems);
+      const sectionItemsToRemove  =
+        Utils.computeSectionItemsToRemove(sqsData, currentActiveSectionItems);
 
       expect(sectionItemsToRemove).toHaveLength(1);
       expect(sectionItemsToRemove[0].approvedItem.url).toBe('https://example-two-remove.com');

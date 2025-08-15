@@ -119,6 +119,7 @@ enum SectionItemRemovalReason {
   PUBLISHER_QUALITY
   SET_DIVERSITY
   OTHER
+  ML
 }
 
 """

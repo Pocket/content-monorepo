@@ -68,6 +68,7 @@ export enum SectionItemRemovalReason {
   PUBLISHER_QUALITY = 'PUBLISHER_QUALITY',
   SET_DIVERSITY = 'SET_DIVERSITY',
   OTHER = 'OTHER',
+  ML = 'ML'
 }
 
 export type IABMetadata = {
