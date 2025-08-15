@@ -14,6 +14,7 @@ const config = {
       release: process.env.GIT_SHA || '',
     },
     version: process.env.GIT_SHA || '',
+    graphQLSleep: 100 // 100 ms -> 0.1 seconds
   },
   aws: {
     localEndpoint: process.env.AWS_ENDPOINT,

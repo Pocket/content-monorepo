@@ -119,6 +119,7 @@ enum SectionItemRemovalReason {
   PUBLISHER_QUALITY
   SET_DIVERSITY
   OTHER
+  ML
 }
 
 """
@@ -688,6 +689,11 @@ input RemoveSectionItemInput {
   Array of reasons for removing a SectionItem.
   """
   deactivateReasons: [SectionItemRemovalReason!]!
+  """
+  Indicates which source deactivated the SectionItem.
+  Optional; MANUAL if omitted
+  """
+  deactivateSource: ActivitySource
 }
 
 """

@@ -68,6 +68,7 @@ export enum SectionItemRemovalReason {
   PUBLISHER_QUALITY = 'PUBLISHER_QUALITY',
   SET_DIVERSITY = 'SET_DIVERSITY',
   OTHER = 'OTHER',
+  ML = 'ML'
 }
 
 export type IABMetadata = {
@@ -113,6 +114,7 @@ export type CreateSectionItemApiInput = {
 export type RemoveSectionItemApiInput = {
   externalId: string;
   deactivateReasons: SectionItemRemovalReason[];
+  deactivateSource?: ActivitySource;
 };
 
 // maps to the CreateApprovedCorpusItemInput type in corpus API admin schema

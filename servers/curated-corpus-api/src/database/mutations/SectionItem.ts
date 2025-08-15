@@ -70,7 +70,7 @@ export async function removeSectionItem(
   const removeSectionItemData = {
     active: false,
     deactivateReasons: data.deactivateReasons,
-    deactivateSource: ActivitySource.MANUAL,
+    deactivateSource: data.deactivateSource ?? ActivitySource.MANUAL,
     deactivatedAt: new Date(),
   };
 

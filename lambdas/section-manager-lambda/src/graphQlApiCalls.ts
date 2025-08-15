@@ -10,8 +10,10 @@ import {
 
 import config from './config';
 import {
+  ActiveSectionItem,
   CreateSectionItemApiInput,
   CreateOrUpdateSectionApiInput,
+  RemoveSectionItemApiInput,
 } from './types';
 
 export const sleep = async (ms: number) => {
@@ -56,7 +58,7 @@ export async function getUrlMetadata(
 
 /**
  * calls the createOrUpdateSection mutation to either create or update
- * a section
+ * a section, and return its active items
  *
  * @param graphHeaders GraphQlApiCallHeaders object
  * @param data CreateOrUpdateSectionApiInput object
@@ -65,9 +67,12 @@ export async function getUrlMetadata(
 export const createOrUpdateSection = async (
   graphHeaders: GraphQlApiCallHeaders,
   data: CreateOrUpdateSectionApiInput,
-): Promise<string> => {
+): Promise<{
+  externalId: string;
+  sectionItems: ActiveSectionItem[];
+}> => {
   // throttle calls to the admin graph
-  await sleep(2000);
+  await sleep(config.app.graphQLSleep);
 
   const variables = { data };
 
@@ -75,6 +80,13 @@ export const createOrUpdateSection = async (
         mutation CreateOrUpdateSection($data: CreateOrUpdateSectionInput!) {
             createOrUpdateSection(data: $data) {
                 externalId
+                sectionItems {
+                  externalId
+                  approvedItem {
+                    externalId
+                    url
+                  }
+                }
             }
         }
     `;
@@ -97,8 +109,20 @@ export const createOrUpdateSection = async (
       `createOrUpdateSection mutation failed: ${result.errors[0].message}`,
     );
   }
+  const section = result.data.createOrUpdateSection;
 
-  return result.data.createOrUpdateSection.externalId;
+  const sectionItems = section.sectionItems || [];
+
+  return {
+    externalId: section.externalId,
+    sectionItems: sectionItems.map((item: any) => ({
+      externalId: item.externalId,
+      approvedItem: {
+        externalId: item.approvedItem.externalId,
+        url: item.approvedItem.url,
+      },
+    })),
+  };
 };
 
 /**
@@ -116,7 +140,7 @@ export async function createApprovedCorpusItem(
   data: CreateApprovedCorpusItemApiInput,
 ): Promise<string> {
   // Wait, don't overwhelm the API
-  await sleep(2000);
+  await sleep(config.app.graphQLSleep);
 
   const mutation = `
     mutation CreateApprovedCorpusItem($data: CreateApprovedCorpusItemInput!) {
@@ -163,7 +187,7 @@ export async function createSectionItem(
   graphHeaders: GraphQlApiCallHeaders,
   data: CreateSectionItemApiInput,
 ): Promise<string> {
-  await sleep(2000);
+  await sleep(config.app.graphQLSleep);
 
   const mutation = `
     mutation CreateSectionItem($data: CreateSectionItemInput!) {
@@ -192,4 +216,49 @@ export async function createSectionItem(
   }
 
   return result.data.createSectionItem.externalId;
+}
+
+/**
+ * Calls the removeSectionItem mutation in curated-corpus-api.
+ * Removes "old" SectionItems from a Section when updating an existing Section.
+ *
+ * @param adminApiEndpoint  string
+ * @param graphHeaders GraphQlApiHeaders object
+ * @param data RemoveSectionItemApiInput
+ * @returns Promise<string> - externalId of the created SectionItem
+ */
+export async function removeSectionItem(
+  adminApiEndpoint: string,
+  graphHeaders: GraphQlApiCallHeaders,
+  data: RemoveSectionItemApiInput,
+): Promise<string> {
+  await sleep(config.app.graphQLSleep);
+
+  const mutation = `
+    mutation RemoveSectionItem($data: RemoveSectionItemInput!) {
+      removeSectionItem(data: $data) {
+        externalId
+      }
+    }`;
+
+  const variables = { data };
+
+  const res = await fetch(adminApiEndpoint, {
+    method: 'post',
+    headers: graphHeaders,
+    body: JSON.stringify({ query: mutation, variables }),
+  });
+
+  const result = await res.json();
+
+  console.log(`RemoveSectionItem MUTATION OUTPUT: ${JSON.stringify(result)}`);
+
+  // check for any errors returned by the mutation
+  if (!result.data && result.errors.length > 0) {
+    throw new Error(
+      `removeSectionItem mutation failed: ${result.errors[0].message}`,
+    );
+  }
+
+  return result.data.removeSectionItem.externalId;
 }

@@ -131,6 +131,7 @@ export type CreateSectionItemInput = {
 export type RemoveSectionItemInput = {
   externalId: string;
   deactivateReasons: SectionItemRemovalReason[];
+  deactivateSource?: ActivitySource;
 };
 
 export type DisableEnableSectionInput = {

@@ -9,6 +9,8 @@ import {
   formatQuotesEN,
   formatQuotesDashesDE,
   UrlMetadata,
+  CorpusItemSource,
+  SectionItemRemovalReason,
 } from 'content-common';
 import {
   generateGraphQlApiHeaders,
@@ -25,8 +27,10 @@ import {
   createSectionItem,
   getApprovedCorpusItemByUrl,
   getUrlMetadata,
+  removeSectionItem,
 } from './graphQlApiCalls';
 import {
+  ActiveSectionItem,
   CreateOrUpdateSectionApiInput,
   SqsSectionItem,
   SqsSectionWithSectionItems,
@@ -57,21 +61,33 @@ export const processSqsSectionData = async (
     mapSqsSectionDataToCreateOrUpdateSectionApiInput(sqsSectionData);
 
   // create or update the Section
-  const sectionExternalId = await createOrUpdateSection(
+  const sectionResult = await createOrUpdateSection(
     graphHeaders,
     createOrUpdateSectionApiInput,
   );
 
+  const sectionExternalId =  sectionResult.externalId;
+  const activeSectionItems = sectionResult.sectionItems || [];
+  // Get SectionItems URLs from existing active SectionItems
+  const activeSectionItemsUrlsSet = new Set(activeSectionItems.map((item) => item.approvedItem.url));
+
   // keep track of how many candidates succeeded, how many failed
   let successfulCandidates = 0;
   let failedCandidates = 0;
+
+  // Get the existing SectionItems to remove from a Section
+  const sectionItemsToRemove = computeSectionItemsToRemove(sqsSectionData, activeSectionItems);
+
   // for each SectionItem, see if the URL already exists in the corpus
   for (let i = 0; i < sqsSectionData.candidates.length; i++) {
     // convenience!
     const sqsSectionItem: SqsSectionItem = sqsSectionData.candidates[i];
     try {
       let approvedItemExternalId: string;
-
+      // avoid creating SectionItem duplicates if the URL already exists
+      if (activeSectionItemsUrlsSet.has(sqsSectionItem.url)) {
+        continue;
+      }
       // see if the Corpus has an ApprovedItem matching the SectionItem's URL
       const approvedCorpusItem = await getApprovedCorpusItemByUrl(
         config.adminApiEndpoint,
@@ -117,6 +133,10 @@ export const processSqsSectionData = async (
         sectionExternalId,
         rank: sqsSectionItem.rank,
       });
+      // Mark URL as active to prevent duplicate creation
+      // ML should not be sending duplicate candidate URLs within a Section within the same run
+      // this is a safe guard
+      activeSectionItemsUrlsSet.add(sqsSectionItem.url);
       // update successful candidates count
       successfulCandidates++;
     } catch (e) {
@@ -129,8 +149,46 @@ export const processSqsSectionData = async (
       // continue to next item
     }
   }
+  // Remove "old" SectionItems not present in ML payload AFTER new ones are created
+  if (sectionItemsToRemove.length > 0) {
+    for (const item of sectionItemsToRemove) {
+      try {
+        await removeSectionItem(config.adminApiEndpoint, graphHeaders, {
+          externalId: item.externalId,
+          deactivateReasons: [SectionItemRemovalReason.ML],
+          deactivateSource: CorpusItemSource.ML,
+        });
+      } catch (e) {
+        console.error(`Failed to remove SectionItem ${item.externalId}`, e);
+        Sentry.captureException(e);
+      }
+    }
+  } else {
+    console.log(`No SectionItems to remove for Section ${sectionExternalId}`);
+  }
+
   console.log(`processSqsSectionData result: ${successfulCandidates} succeeded, ${failedCandidates} failed`);
 };
+
+/**
+ * helper function to compute the diff between currently active SectionItems & SectionItems in ML payload.
+ *
+ * @param sqsSectionData
+ * @param currentActiveSectionItems
+ */
+export const computeSectionItemsToRemove = (
+  sqsSectionData: SqsSectionWithSectionItems,
+  currentActiveSectionItems: ActiveSectionItem[]
+): ActiveSectionItem[] => {
+  // Get SectionItems URLs from ML SectionItem payload
+  const mlSectionItemUrls = sqsSectionData.candidates.map(item => item.url);
+
+  // Get the SectionItems to remove -- existing active SectionItems whose URL is not in the ML SectionItem payload
+  const sectionItemsToRemove = currentActiveSectionItems.filter(
+    (item) => !mlSectionItemUrls.includes(item.approvedItem.url),
+  );
+  return sectionItemsToRemove;
+}
 
 /**
  * helper function to map section data from SQS to the API input required to
