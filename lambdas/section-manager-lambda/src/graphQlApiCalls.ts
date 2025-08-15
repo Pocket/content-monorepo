@@ -72,7 +72,7 @@ export const createOrUpdateSection = async (
   sectionItems: ActiveSectionItem[];
 }> => {
   // throttle calls to the admin graph
-  await sleep(2000);
+  await sleep(config.app.graphQLSleep);
 
   const variables = { data };
 
@@ -140,7 +140,7 @@ export async function createApprovedCorpusItem(
   data: CreateApprovedCorpusItemApiInput,
 ): Promise<string> {
   // Wait, don't overwhelm the API
-  await sleep(2000);
+  await sleep(config.app.graphQLSleep);
 
   const mutation = `
     mutation CreateApprovedCorpusItem($data: CreateApprovedCorpusItemInput!) {
@@ -187,7 +187,7 @@ export async function createSectionItem(
   graphHeaders: GraphQlApiCallHeaders,
   data: CreateSectionItemApiInput,
 ): Promise<string> {
-  await sleep(2000);
+  await sleep(config.app.graphQLSleep);
 
   const mutation = `
     mutation CreateSectionItem($data: CreateSectionItemInput!) {
@@ -232,7 +232,7 @@ export async function removeSectionItem(
   graphHeaders: GraphQlApiCallHeaders,
   data: RemoveSectionItemApiInput,
 ): Promise<string> {
-  await sleep(2000);
+  await sleep(config.app.graphQLSleep);
 
   const mutation = `
     mutation RemoveSectionItem($data: RemoveSectionItemInput!) {
