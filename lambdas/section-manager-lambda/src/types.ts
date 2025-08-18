@@ -4,6 +4,7 @@ import {
   CuratedStatus,
   IABMetadata,
   ScheduledSurfacesEnum,
+  SectionItemRemovalReason,
   Topics,
 } from 'content-common';
 
@@ -29,7 +30,15 @@ export interface SqsSectionItem {
   title: string | null;
   topic: Topics;
   url: string;
-}
+};
+
+export interface ActiveSectionItem {
+  externalId: string;
+  approvedItem: {
+    externalId: string;
+    url: string;
+  };
+};
 
 export type CreateOrUpdateSectionApiInput = {
   active: boolean;
@@ -45,4 +54,10 @@ export type CreateSectionItemApiInput = {
   approvedItemExternalId: string;
   sectionExternalId: string;
   rank?: number;
+};
+
+export type RemoveSectionItemApiInput = {
+  externalId: string;
+  deactivateReasons: SectionItemRemovalReason[];
+  deactivateSource: CorpusItemSource;
 };
