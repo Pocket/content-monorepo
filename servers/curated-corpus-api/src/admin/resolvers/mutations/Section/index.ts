@@ -8,11 +8,12 @@ import {
   createSection as dbCreateSection,
   updateSection as dbUpdateSection,
   disableEnableSection as dbDisableEnableSection,
+  createCustomSection as dbCreateCustomSection,
 } from '../../../../database/mutations';
 import { Section } from '../../../../database/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
-import { ActivitySource } from 'content-common';
+import { ActivitySource, IABMetadata } from 'content-common';
 import { IAB_CATEGORIES } from '../../iabCategories'
 
 /**
@@ -40,21 +41,9 @@ export async function createOrUpdateSection(
   }
 
   // Check that the IAB taxonomy & code are valid
+  // Check that the IAB taxonomy & code are valid
   if(data.iab) {
-    const { taxonomy, categories } = data.iab;
-    // check that the taxonomy version is supported
-    if(!IAB_CATEGORIES[taxonomy]) {
-      throw new UserInputError(
-        `IAB taxonomy version ${taxonomy} is not supported`
-      )
-    }
-    // make sure there are no "bad" IAB codes present
-    const invalidIABCodes = categories.filter((code) => !IAB_CATEGORIES[taxonomy][code]);
-    if(invalidIABCodes.length > 0) {
-      throw new UserInputError(
-        `IAB code(s) invalid: ${invalidIABCodes}`
-      )
-    }
+    validateIAB(data.iab)
   }
 
   // check if the Section with the passed externalId already exists
@@ -112,4 +101,59 @@ export async function disableEnableSection(
   // as of this writing (2025-01-09), we are navigating the migration from
   // snowplow & snowflake to glean & bigquery. we are awaiting a decision
   // on the best path forward for our data pipeline.
+}
+
+/**
+ * Create a Custom Editorial Section.
+ *
+ * @param parent
+ * @param data
+ * @param context
+ */
+export async function createCustomSection(
+  parent,
+  { data },
+  context: IAdminContext,
+): Promise<Section> {
+  // Check if the user can execute this mutation.
+  if (!context.authenticatedUser.canWriteToSurface(data.scheduledSurfaceGuid)) {
+    throw new AuthenticationError(ACCESS_DENIED_ERROR);
+  }
+
+  // Make sure createSource == MANUAL for now for this mutation
+  if (data.createSource !== ActivitySource.MANUAL) {
+    throw new UserInputError(
+      'Cannot create a custom Section: createSource must be MANUAL',
+    );
+  }
+
+  // Check that the IAB taxonomy & code are valid
+  if(data.iab) {
+    validateIAB(data.iab)
+  }
+
+  return await dbCreateCustomSection(context.db, data);
+}
+
+/**
+ * Helper function validating IAB taxonomy & code
+ *
+ * @param iab
+ */
+function validateIAB(iab: IABMetadata) {
+  // Check that the IAB taxonomy & code are valid
+  const { taxonomy, categories } = iab;
+  // check that the taxonomy version is supported
+  if(!IAB_CATEGORIES[taxonomy]) {
+    throw new UserInputError(
+      `IAB taxonomy version ${taxonomy} is not supported`
+    )
+  }
+  // make sure there are no "bad" IAB codes present
+  const invalidIABCodes = categories.filter((code) => !IAB_CATEGORIES[taxonomy][code]);
+  if(invalidIABCodes.length > 0) {
+    throw new UserInputError(
+      `IAB code(s) invalid: ${invalidIABCodes}`
+    )
+  }
 }

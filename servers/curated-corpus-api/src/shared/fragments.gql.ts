@@ -88,6 +88,9 @@ export const BaseSectionData = gql`
   fragment BaseSectionData on Section {
     externalId
     title
+    description
+    heroTitle
+    heroDescription
     scheduledSurfaceGuid
     iab {
         taxonomy

@@ -1,5 +1,5 @@
 import { PrismaClient, Prisma } from '.prisma/client';
-import { CreateSectionInput, DisableEnableSectionInput, Section } from '../types';
+import { CreateCustomSectionInput, CreateSectionInput, DisableEnableSectionInput, Section } from '../types';
 import { ActivitySource } from 'content-common';
 
 /**
@@ -139,4 +139,54 @@ export async function disableEnableSection(
       }
     }
   });
+}
+
+/**
+ * This mutation creates a new Custom Editorial Section.
+ *
+ * @param db
+ * @param data
+ * @param username
+ * @returns Section
+ */
+export async function createCustomSection(
+  db: PrismaClient,
+  data: CreateCustomSectionInput,
+): Promise<Section> {
+  const {
+    title,
+    description,
+    heroTitle,
+    heroDescription,
+    startDate,
+    endDate,
+    scheduledSurfaceGuid,
+    iab,
+    sort,
+    createSource,
+    active,
+  } = data;
+
+  const createData = {
+    title,
+    description,
+    heroTitle,
+    heroDescription,
+    startDate: new Date(startDate),
+    endDate: data.endDate ? new Date(endDate) : undefined,
+    scheduledSurfaceGuid,
+    iab,
+    sort,
+    createSource,
+    active,
+  };
+
+  const newSection = await db.section.create({
+    data: createData,
+  });
+
+  return {
+    ...newSection,
+    sectionItems: []
+  }
 }
