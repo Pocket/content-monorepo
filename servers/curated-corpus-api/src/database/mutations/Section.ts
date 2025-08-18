@@ -59,21 +59,6 @@ export async function updateSection(
 ): Promise<Section> {
   const { externalId, title, scheduledSurfaceGuid, iab, sort, active } = data;
 
-  const sectionItemUpdateData: Prisma.SectionItemUpdateManyMutationInput = {
-    active: false,
-    deactivateSource: ActivitySource.ML,
-    deactivatedAt: new Date(),
-  };
-
-  // if a Section has any active SectionItems associted with it, mark those as in-active.
-  await db.sectionItem.updateMany({
-    where: {
-      sectionId: sectionId,
-      active: true,
-    },
-    data: sectionItemUpdateData,
-  });
-
   const sectionUpdateData: Prisma.SectionUpdateInput = {
     title,
     scheduledSurfaceGuid,
@@ -93,10 +78,27 @@ export async function updateSection(
     where: { externalId: externalId },
     data: sectionUpdateData,
   });
+
+  // Fetch active SectionItems
+  const activeSectionItems = await db.sectionItem.findMany({
+    where: {
+      sectionId,
+      active: true,
+    },
+    include: {
+      approvedItem: {
+        include: {
+          authors: {
+            orderBy: [{ sortOrder: 'asc' }],
+          },
+        },
+      }
+    },
+  });
   
   return {
     ...updatedSection,
-    sectionItems: []
+    sectionItems: activeSectionItems
   }
 }
 
