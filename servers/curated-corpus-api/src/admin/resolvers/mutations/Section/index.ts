@@ -41,7 +41,6 @@ export async function createOrUpdateSection(
   }
 
   // Check that the IAB taxonomy & code are valid
-  // Check that the IAB taxonomy & code are valid
   if(data.iab) {
     validateIAB(data.iab)
   }
@@ -140,7 +139,7 @@ export async function createCustomSection(
  *
  * @param iab
  */
-function validateIAB(iab: IABMetadata) {
+export function validateIAB(iab: IABMetadata) {
   // Check that the IAB taxonomy & code are valid
   const { taxonomy, categories } = iab;
   // check that the taxonomy version is supported
