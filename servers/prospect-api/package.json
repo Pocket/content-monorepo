@@ -21,7 +21,6 @@
     "@apollo/server": "4.12.1",
     "@apollo/subgraph": "2.9.0",
     "@aws-sdk/client-dynamodb": "3.529.1",
-    "@aws-sdk/client-eventbridge": "3.529.1",
     "@aws-sdk/lib-dynamodb": "3.529.1",
     "@pocket-tools/apollo-utils": "3.5.0",
     "@pocket-tools/feature-flags-client": "1.0.0",
