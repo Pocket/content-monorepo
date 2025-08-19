@@ -9,9 +9,6 @@ import {
   UpdateCollectionStorySortOrderInput,
   UpdateCollectionStoryImageUrlInput,
 } from '../types';
-import { sendEventBridgeEvent } from '../../events/events';
-import { sendEventBridgeEventUpdateFromInternalCollectionId } from '../../events/helpers';
-import { EventBridgeEventType } from '../../events/types';
 
 /**
  * @param db
@@ -52,12 +49,6 @@ export async function createCollectionStory(
       },
     },
   });
-
-  await sendEventBridgeEvent(
-    db,
-    EventBridgeEventType.COLLECTION_UPDATED,
-    collection,
-  );
 
   return story;
 }
@@ -112,12 +103,6 @@ export async function updateCollectionStory(
     },
   });
 
-  // Send to event bridge that the collection was updated
-  await sendEventBridgeEventUpdateFromInternalCollectionId(
-    db,
-    existingStory.collectionId,
-  );
-
   return story;
 }
 
@@ -143,11 +128,6 @@ export async function updateCollectionStorySortOrder(
     },
   });
 
-  // Send to event bridge that the collection was updated
-  await sendEventBridgeEventUpdateFromInternalCollectionId(
-    db,
-    story.collectionId,
-  );
   return story;
 }
 
@@ -172,11 +152,7 @@ export async function updateCollectionStoryImageUrl(
       },
     },
   });
-  // Send to event bridge that the collection was updated
-  await sendEventBridgeEventUpdateFromInternalCollectionId(
-    db,
-    story.collectionId,
-  );
+
   return story;
 }
 
@@ -196,7 +172,6 @@ export async function deleteCollectionStory(
       `Cannot delete a collection story with external ID "${externalId}"`,
     );
   }
-  const collectionId = existingStory.collectionId;
 
   // delete all associated collection story authors
   await db.collectionStoryAuthor.deleteMany({
@@ -209,9 +184,6 @@ export async function deleteCollectionStory(
   await db.collectionStory.delete({
     where: { externalId },
   });
-
-  // Send to event bridge that the collection was updated
-  await sendEventBridgeEventUpdateFromInternalCollectionId(db, collectionId);
 
   // to conform with the scheam, we need to return a CollectionStory with
   // authors, which can't be done in the `.delete` call above because we

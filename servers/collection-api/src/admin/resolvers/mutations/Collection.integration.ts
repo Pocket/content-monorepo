@@ -30,7 +30,6 @@ import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
 import { faker } from '@faker-js/faker';
 import config from '../../../config';
-import * as EventBridgeEvents from '../../../events/events';
 
 describe('mutations: Collection', () => {
   let app: Express.Application;
@@ -52,11 +51,6 @@ describe('mutations: Collection', () => {
     username: 'test.user@test.com',
     groups: `group1,group2,${COLLECTION_CURATOR_FULL}`,
   };
-
-  // create a stub for the sendEventBridgeEvent function and make it resolve to null.
-  const sendEventBridgeEventStub = jest
-    .spyOn(EventBridgeEvents, 'sendEventBridgeEvent')
-    .mockResolvedValue(null);
 
   beforeAll(async () => {
     // port 0 tells express to dynamically assign an available port
@@ -108,8 +102,6 @@ describe('mutations: Collection', () => {
       slug: 'walter-bowls',
       title: 'walter bowls',
     };
-
-    sendEventBridgeEventStub.mockClear();
   });
 
   describe('createCollection', () => {
@@ -357,39 +349,6 @@ describe('mutations: Collection', () => {
         });
 
       expect(result.body.data.createCollection.partnership).not.toBeTruthy();
-    });
-
-    it('should send event bridge event for collection_created event when collection status is PUBLISHED', async () => {
-      await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(CREATE_COLLECTION),
-          variables: {
-            data: { ...minimumData, status: CollectionStatus.PUBLISHED },
-          },
-        });
-
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub).toHaveBeenCalledTimes(1);
-    });
-
-    it('should send event bridge event for collection_created event when collection status is ARCHIVED', async () => {
-      await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(CREATE_COLLECTION),
-          variables: {
-            data: {
-              ...minimumData,
-              status: CollectionStatus.ARCHIVED,
-            },
-          },
-        });
-
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventStub).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1014,54 +973,6 @@ describe('mutations: Collection', () => {
       expect(result.body.errors[0].message).toEqual(
         'A collection with the slug "first-iteration" already exists',
       );
-    });
-
-    it('should send event bridge event for collection_updated event when collection status is PUBLISHED', async () => {
-      const input: UpdateCollectionInput = {
-        authorExternalId: author.externalId,
-        externalId: initial.externalId,
-        language: CollectionLanguage.EN,
-        slug: initial.slug,
-        status: CollectionStatus.PUBLISHED,
-        title: 'second iteration',
-        excerpt: 'once upon a time, the internet...',
-      };
-
-      await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(UPDATE_COLLECTION),
-          variables: {
-            data: input,
-          },
-        });
-
-      expect(sendEventBridgeEventStub).toHaveBeenCalledTimes(1);
-    });
-
-    it('should send event bridge event for collection_updated event when collection status is ARCHIVED', async () => {
-      const input: UpdateCollectionInput = {
-        authorExternalId: author.externalId,
-        externalId: initial.externalId,
-        language: CollectionLanguage.EN,
-        slug: initial.slug,
-        status: CollectionStatus.ARCHIVED,
-        title: 'second iteration',
-        excerpt: 'once upon a time, the internet...',
-      };
-
-      await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(UPDATE_COLLECTION),
-          variables: {
-            data: input,
-          },
-        });
-
-      expect(sendEventBridgeEventStub).toHaveBeenCalledTimes(1);
     });
   });
 

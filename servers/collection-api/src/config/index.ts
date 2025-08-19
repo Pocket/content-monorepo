@@ -38,11 +38,6 @@ export default {
       path: s3path,
     },
     region: process.env.AWS_DEFAULT_REGION || 'us-east-1',
-    eventBus: {
-      name:
-        process.env.EVENT_BUS_NAME || 'PocketEventBridge-Dev-Shared-Event-Bus',
-      eventBridge: { source: 'collection-events' },
-    },
   },
   slugify: { lower: true, remove: /[*+~.()'"!:@]/g },
   redis: {

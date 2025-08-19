@@ -712,9 +712,6 @@ importers:
       '@apollo/subgraph':
         specifier: 2.9.0
         version: 2.9.0(graphql@16.9.0)
-      '@aws-sdk/client-eventbridge':
-        specifier: 3.529.1
-        version: 3.529.1
       '@aws-sdk/client-s3':
         specifier: 3.529.1
         version: 3.529.1
