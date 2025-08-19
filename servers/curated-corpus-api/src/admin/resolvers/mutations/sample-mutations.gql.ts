@@ -127,3 +127,12 @@ export const REMOVE_SECTION_ITEM = gql`
   }
   ${AdminSectionItemData}
 `;
+
+export const CREATE_CUSTOM_SECTION = gql`
+    mutation createCustomSection($data: CreateCustomSectionInput!) {
+        createCustomSection(data: $data) {
+            ...AdminSectionData
+        }
+    }
+    ${AdminSectionData}
+`;

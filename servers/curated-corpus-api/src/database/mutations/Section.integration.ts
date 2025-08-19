@@ -2,13 +2,14 @@ import { PrismaClient } from '.prisma/client';
 
 import { client } from '../client';
 import { clearDb, createApprovedItemHelper } from '../../test/helpers';
-import { createSection, disableEnableSection, updateSection } from './Section';
+import { createCustomSection, createSection, disableEnableSection, updateSection } from './Section';
 import {
   createSectionHelper,
   createSectionItemHelper,
 } from '../../test/helpers';
 import { ActivitySource, ScheduledSurfacesEnum } from 'content-common';
 import { IABMetadata } from 'content-common';
+import { CreateCustomSectionInput } from '../types';
 
 describe('Section', () => {
   let db: PrismaClient;
@@ -201,6 +202,55 @@ describe('Section', () => {
 
       expect(result.externalId).toEqual('active-890');
       expect(result.disabled).toBeFalsy();
+    });
+  });
+
+  describe('createCustomSection', () => {
+    it('should create a Custom Editorial Section with all required + optional metadata', async () => {
+      const iabMetadata: IABMetadata = {
+        taxonomy: "IAB-3.0",
+        categories: ["488"]
+      };
+
+      const input: CreateCustomSectionInput = {
+        title: 'Fake Custom Section Title',
+        description: 'fake custom section description',
+        heroTitle: 'fake hero title',
+        heroDescription: 'hero description',
+        startDate: '2025-01-01',
+        endDate: '2025-01-15',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        iab: iabMetadata,
+        createSource: ActivitySource.MANUAL,
+        sort: 2,
+        active: true,
+        disabled: false
+      };
+
+      const result = await createCustomSection(db, input);
+
+      expect(result.title).toEqual('Fake Custom Section Title');
+      expect(result.description).toEqual('fake custom section description');
+      expect(result.heroTitle).toEqual('fake hero title');
+      expect(result.heroDescription).toEqual('hero description');
+      expect(result.startDate.toISOString()).toEqual(new Date('2025-01-01').toISOString());
+      expect(result.endDate.toISOString()).toEqual(new Date('2025-01-15').toISOString());
+    });
+
+    it('should create a Custom Editorial Section with only required metadata', async () => {
+      const input: CreateCustomSectionInput = {
+        title: 'Fake Custom Section Title',
+        description: 'fake custom section description',
+        startDate: '2025-01-01',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        createSource: ActivitySource.MANUAL,
+        active: true,
+        disabled: false
+      };
+
+      const result = await createCustomSection(db, input);
+
+      expect(result.title).toEqual('Fake Custom Section Title');
     });
   });
 });
