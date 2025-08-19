@@ -8,6 +8,7 @@ import {
   createSection as dbCreateSection,
   updateSection as dbUpdateSection,
   disableEnableSection as dbDisableEnableSection,
+  updateCustomSection as dbUpdateCustomSection,
 } from '../../../../database/mutations';
 import { Section } from '../../../../database/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
@@ -112,4 +113,58 @@ export async function disableEnableSection(
   // as of this writing (2025-01-09), we are navigating the migration from
   // snowplow & snowflake to glean & bigquery. we are awaiting a decision
   // on the best path forward for our data pipeline.
+}
+
+/**
+ * Update a Custom Editorial Section.
+ */
+export async function updateCustomSection(
+  parent,
+  { data },
+  context: IAdminContext,
+): Promise<Section> {
+  const { externalId } = data;
+
+  // Load current to perform permission + invariants
+  const existing = await context.db.section.findUnique({
+    where: { externalId },
+  });
+
+  if (!existing) {
+    throw new UserInputError(`Section not found for externalId: ${externalId}`);
+  }
+
+  // Only allow updating custom/manual sections created via this flow
+  if (existing.createSource !== ActivitySource.MANUAL) {
+    throw new UserInputError(
+      'Cannot update: target Section is not a custom (MANUAL) Section',
+    );
+  }
+
+  // Must be able to write to the *current* surface
+  if (!context.authenticatedUser.canWriteToSurface(existing.scheduledSurfaceGuid)) {
+    throw new AuthenticationError(ACCESS_DENIED_ERROR);
+  }
+
+  // If moving surfaces, must also be able to write to the *new* one
+  if (data.scheduledSurfaceGuid &&
+    !context.authenticatedUser.canWriteToSurface(data.scheduledSurfaceGuid)) {
+    throw new AuthenticationError(ACCESS_DENIED_ERROR);
+  }
+
+  // IAB validation (if present)
+  if (data.iab) {
+    validateIAB(data.iab);
+  }
+
+  // Do not allow switching away from MANUAL.
+  if (typeof data.createSource !== 'undefined' &&
+    data.createSource !== ActivitySource.MANUAL) {
+    throw new UserInputError(
+      'Cannot update a custom Section: createSource must remain MANUAL',
+    );
+  }
+
+  // Hand off to DB layer
+  return await dbUpdateCustomSection(context.db, data);
 }

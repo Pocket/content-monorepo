@@ -1,6 +1,7 @@
 import { PrismaClient, Prisma } from '.prisma/client';
-import { CreateSectionInput, DisableEnableSectionInput, Section } from '../types';
+import { CreateSectionInput, DisableEnableSectionInput, Section, UpdateCustomSectionInput } from '../types';
 import { ActivitySource } from 'content-common';
+
 
 /**
  * This mutation creates a new Section.
@@ -99,6 +100,60 @@ export async function updateSection(
     sectionItems: []
   }
 }
+/**
+ * Updates an existing Custom (Editorial) Section's editable fields.
+ * Assumes existence & auth are enforced in the resolver layer.
+ */
+export async function updateCustomSection(
+  db: PrismaClient,
+  data: UpdateCustomSectionInput,
+): Promise<Section> {
+  const {
+    externalId,
+    title,
+    description,
+    heroTitle,
+    heroDescription,
+    startDate,
+    endDate,
+    scheduledSurfaceGuid,
+    iab,
+    sort,
+    active,
+    disabled,
+  } = data;
+
+  const updateData: any = {
+    ...(typeof title !== 'undefined' && { title }),
+    ...(typeof description !== 'undefined' && { description }),
+    ...(typeof heroTitle !== 'undefined' && { heroTitle }),
+    ...(typeof heroDescription !== 'undefined' && { heroDescription }),
+    ...(typeof scheduledSurfaceGuid !== 'undefined' && { scheduledSurfaceGuid }),
+    ...(typeof iab !== 'undefined' && { iab }),
+    ...(typeof sort !== 'undefined' && { sort }),
+    ...(typeof active !== 'undefined' && { active }),
+    ...(typeof disabled !== 'undefined' && { disabled }),
+    ...(typeof startDate !== 'undefined' && { startDate: new Date(startDate) }),
+    ...(typeof endDate !== 'undefined' && {
+      endDate: endDate ? new Date(endDate) : null, // allow clearing by sending null/empty
+    }),
+  };
+
+  const updated = await db.section.update({
+    where: { externalId },
+    data: updateData,
+  });
+
+  // Keep parity
+  return {
+    ...updated,
+    sectionItems: await db.sectionItem.findMany({
+      where: { sectionExternalId: externalId },
+      orderBy: { sort: 'asc' },
+    }),
+  };
+}
+
 
 /**
  * This mutation disables or enables a Section.

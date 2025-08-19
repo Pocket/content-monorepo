@@ -30,6 +30,16 @@ export const UPDATE_APPROVED_ITEM = gql`
   ${AdminCuratedItemData}
 `;
 
+export const UPDATE_CUSTOM_SECTION = gql`
+    mutation updateCustomSection($data: UpdateCustomSectionInput!) {
+        updateCustomSection(data: $data) {
+            ...AdminSectionData
+        }
+    }
+    ${AdminSectionData}
+`;
+
+
 export const REJECT_APPROVED_ITEM = gql`
   mutation rejectApprovedItem($data: RejectApprovedCorpusItemInput!) {
     rejectApprovedCorpusItem(data: $data) {

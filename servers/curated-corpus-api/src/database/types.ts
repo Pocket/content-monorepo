@@ -128,6 +128,22 @@ export type CreateSectionItemInput = {
   rank?: number;
 };
 
+export type UpdateCustomSectionInput = {
+  externalId: string;
+  title?: string;
+  description?: string;
+  heroTitle?: string;
+  heroDescription?: string;
+  startDate?: string;      // YYYY-MM-DD
+  endDate?: string;        // YYYY-MM-DD
+  scheduledSurfaceGuid?: string;
+  iab?: IABMetadata;
+  sort?: number | null;
+  active?: boolean;
+  disabled?: boolean;
+  createSource?: ActivitySource; // will be ignored/validated in resolver
+};
+
 export type RemoveSectionItemInput = {
   externalId: string;
   deactivateReasons: SectionItemRemovalReason[];

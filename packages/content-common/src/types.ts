@@ -104,6 +104,24 @@ export type DisableEnableSectionApiInput = {
   disabled: boolean;
 };
 
+export type UpdateCustomSectionApiInput = {
+  externalId: string;           // identifier for the Section being updated
+  title?: string;
+  description?: string;
+  heroTitle?: string;
+  heroDescription?: string;
+  startDate?: string;           // YYYY-MM-DD
+  endDate?: string;             // YYYY-MM-DD
+  scheduledSurfaceGuid?: string;
+  iab?: IABMetadata;
+  sort?: number | null;         // allow null to clear
+  // createSource is intentionally NOT updatable for custom sections,
+  // but if present, enforce MANUAL (see resolver).
+  createSource?: ActivitySource;
+  active?: boolean;
+  disabled?: boolean;           // still admin-only; keep behavior consistent with disableEnableSection
+};
+
 export type CreateSectionItemApiInput = {
   sectionExternalId: string;
   approvedItemExternalId: string;

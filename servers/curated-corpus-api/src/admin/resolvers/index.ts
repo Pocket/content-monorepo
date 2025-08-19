@@ -29,7 +29,7 @@ import {
 import { getOpenGraphFields } from './queries/OpenGraphFields';
 import { hasTrustedDomain } from './queries/ApprovedItem/hasTrustedDomain';
 import { getSectionsWithSectionItems } from './queries/Section';
-import { createOrUpdateSection, disableEnableSection } from './mutations/Section';
+import { createOrUpdateSection, disableEnableSection, updateCustomSection } from './mutations/Section';
 import { createSectionItem, removeSectionItem } from './mutations/SectionItem';
 
 export const resolvers = {
@@ -117,6 +117,7 @@ export const resolvers = {
     uploadApprovedCorpusItemImage: uploadApprovedItemImage,
     createScheduleReview: createScheduleReview,
     createOrUpdateSection: createOrUpdateSection,
+    updateCustomSection: updateCustomSection,
     createSectionItem: createSectionItem,
     removeSectionItem: removeSectionItem,
     disableEnableSection: disableEnableSection,
