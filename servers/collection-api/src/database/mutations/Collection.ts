@@ -11,8 +11,6 @@ import {
 import { checkCollectionLabelLimit } from '../utils';
 import { NotFoundError } from '@pocket-tools/apollo-utils';
 import { AdminAPIUser } from '../../admin/context';
-import { sendEventBridgeEvent } from '../../events/events';
-import { EventBridgeEventType } from '../../events/types';
 
 /**
  * @param db
@@ -126,12 +124,6 @@ export async function createCollection(
       },
     },
   });
-
-  await sendEventBridgeEvent(
-    db,
-    EventBridgeEventType.COLLECTION_CREATED,
-    collection,
-  );
 
   return collection;
 }
@@ -309,13 +301,6 @@ export async function updateCollection(
     },
   });
 
-  // send event bridge event for collection_updated event type
-  await sendEventBridgeEvent(
-    db,
-    EventBridgeEventType.COLLECTION_UPDATED,
-    collection,
-  );
-
   return collection;
 }
 
@@ -354,11 +339,5 @@ export async function updateCollectionImageUrl(
     },
   });
 
-  // send event bridge event for collection_updated event type
-  await sendEventBridgeEvent(
-    db,
-    EventBridgeEventType.COLLECTION_UPDATED,
-    collection,
-  );
   return collection;
 }

@@ -8,7 +8,6 @@ import {
   UpdateCollectionPartnerAssociationInput,
 } from '../types';
 import { getCollectionPartnerAssociation } from '../queries';
-import { sendEventBridgeEventUpdateFromInternalCollectionId } from '../../events/helpers';
 
 /**
  * @param db
@@ -41,12 +40,7 @@ export async function createCollectionPartnerAssociation(
       collection: true,
     },
   });
-  // Send to event bridge. We use the internal id, because prisma won't return
-  // the joined authors data from the above call, so we let the eventBridge function grab what it needs
-  await sendEventBridgeEventUpdateFromInternalCollectionId(
-    db,
-    partnership.collection.id,
-  );
+
   return partnership;
 }
 
@@ -80,12 +74,7 @@ export async function updateCollectionPartnerAssociation(
       collection: true,
     },
   });
-  // Send to event bridge. We use the internal id, because prisma won't return
-  // the joined authors data from the above call, so we let the eventBridge function grab what it needs
-  await sendEventBridgeEventUpdateFromInternalCollectionId(
-    db,
-    partnership.collection.id,
-  );
+
   return partnership;
 }
 
@@ -109,12 +98,7 @@ export async function updateCollectionPartnerAssociationImageUrl(
       collection: true,
     },
   });
-  // Send to event bridge. We use the internal id, because prisma won't return
-  // the joined authors data from the above call, so we let the eventBridge function grab what it needs
-  await sendEventBridgeEventUpdateFromInternalCollectionId(
-    db,
-    partnership.collection.id,
-  );
+
   return partnership;
 }
 
@@ -152,13 +136,6 @@ export async function deleteCollectionPartnerAssociation(
     where: { collectionId: association.collectionId, fromPartner: true },
     data: { fromPartner: false },
   });
-
-  // Send to event bridge. We use the internal id, because prisma won't return
-  // the joined authors data from the above call, so we let the eventBridge function grab what it needs
-  await sendEventBridgeEventUpdateFromInternalCollectionId(
-    db,
-    association.collectionId,
-  );
 
   // to conform with the schema, we return the association
   // as it was before we deleted it

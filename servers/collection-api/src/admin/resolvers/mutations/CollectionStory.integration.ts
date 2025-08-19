@@ -25,7 +25,6 @@ import {
 import { createCollectionStory } from '../../../database/mutations/CollectionStory';
 import { startServer } from '../../../express';
 import { IAdminContext } from '../../context';
-import * as EventBridgeEvents from '../../../events/events';
 
 describe('mutations: CollectionStory', () => {
   let app: Express.Application;
@@ -42,11 +41,6 @@ describe('mutations: CollectionStory', () => {
   let author;
   let collection;
 
-  // create a stub for the sendEventBridgeEvent function and make it resolve to null.
-  const sendEventBridgeEventSpy = jest
-    .spyOn(EventBridgeEvents, 'sendEventBridgeEvent')
-    .mockReturnValue(null);
-
   beforeAll(async () => {
     // port 0 tells express to dynamically assign an available port
     ({ app, adminServer: server, adminUrl: graphQLUrl } = await startServer(0));
@@ -56,7 +50,6 @@ describe('mutations: CollectionStory', () => {
   afterAll(async () => {
     await db.$disconnect();
     await server.stop();
-    sendEventBridgeEventSpy.mockRestore();
   });
 
   beforeEach(async () => {
@@ -68,8 +61,6 @@ describe('mutations: CollectionStory', () => {
       title: 'a collection: by maude',
       author,
     });
-
-    sendEventBridgeEventSpy.mockClear();
   });
 
   describe('createCollectionStory', () => {
@@ -110,9 +101,6 @@ describe('mutations: CollectionStory', () => {
 
       // default sort order of 0 should be there
       expect(result.body.data.createCollectionStory.sortOrder).toEqual(0);
-
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should create a collection story with a default sort order', async () => {
@@ -126,8 +114,6 @@ describe('mutations: CollectionStory', () => {
 
       // default sort order of 0 should be there
       expect(result.body.data.createCollectionStory.sortOrder).toEqual(0);
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should create a collection story with a default `fromPartner` value', async () => {
@@ -141,8 +127,6 @@ describe('mutations: CollectionStory', () => {
 
       // default 'fromPartner' value of 'false' should be present
       expect(result.body.data.createCollectionStory.fromPartner).toEqual(false);
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should return story authors sorted correctly', async () => {
@@ -162,8 +146,6 @@ describe('mutations: CollectionStory', () => {
 
       // default sort order of 0 should be there
       expect(story.sortOrder).toEqual(0);
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should create a collection story with a sort order', async () => {
@@ -180,8 +162,6 @@ describe('mutations: CollectionStory', () => {
       const story = result.body.data.createCollectionStory;
 
       expect(story.sortOrder).toEqual(4);
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should create a collection story with no authors', async () => {
@@ -199,8 +179,6 @@ describe('mutations: CollectionStory', () => {
 
       expect(story).toBeTruthy();
       expect(story.authors.length).toEqual(0);
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should fail adding the same url to the same collection', async () => {
@@ -211,9 +189,7 @@ describe('mutations: CollectionStory', () => {
           query: print(CREATE_COLLECTION_STORY),
           variables: { data: input },
         });
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
-      sendEventBridgeEventSpy.mockClear();
+
       const result = await request(app)
         .post(graphQLUrl)
         .set(headers)
@@ -226,8 +202,6 @@ describe('mutations: CollectionStory', () => {
       expect(result.body.errors[0].message).toEqual(
         `A story with the url "${input.url}" already exists in this collection`,
       );
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).not.toHaveBeenCalled();
     });
 
     it('should add a url that already exists in a different collection', async () => {
@@ -240,9 +214,6 @@ describe('mutations: CollectionStory', () => {
           variables: { data: input },
         });
       const dataStory1 = result1.body.data;
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
-      sendEventBridgeEventSpy.mockClear();
 
       // create a second collection
       const collection2 = await createCollectionHelper(db, {
@@ -267,8 +238,6 @@ describe('mutations: CollectionStory', () => {
       expect(dataStory2.createCollectionStory.url).toEqual(
         dataStory1.createCollectionStory.url,
       );
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -292,9 +261,6 @@ describe('mutations: CollectionStory', () => {
       };
 
       story = await createCollectionStory(db, data);
-
-      // we don't want this beforeEach impacting the number of calls we expect in tests
-      sendEventBridgeEventSpy.mockClear();
     });
 
     it('should update a collection story', async () => {
@@ -329,8 +295,6 @@ describe('mutations: CollectionStory', () => {
       expect(updated.imageUrl).toEqual(input.imageUrl);
       expect(updated.publisher).toEqual(input.publisher);
       expect(updated.sortOrder).toEqual(input.sortOrder);
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should update the collection story authors and return them properly sorted', async () => {
@@ -365,8 +329,6 @@ describe('mutations: CollectionStory', () => {
       expect(updated.authors[0].name).toEqual('brandt');
       expect(updated.authors[1].name).toEqual('karl');
       expect(updated.authors[2].name).toEqual('maude');
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should update a collection story with no authors', async () => {
@@ -391,8 +353,6 @@ describe('mutations: CollectionStory', () => {
         });
 
       expect(result.body.data.updateCollectionStory.authors.length).toEqual(0);
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should update a collection story URL as long as it does not already exist', async () => {
@@ -420,9 +380,6 @@ describe('mutations: CollectionStory', () => {
         });
 
       expect(result.body.data.updateCollectionStory.url).toEqual(input.url);
-
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should fail updating to a url that already exists in the same collection', async () => {
@@ -475,9 +432,6 @@ describe('mutations: CollectionStory', () => {
       expect(result.body.errors[0].message).toEqual(
         `A story with the url "${input.url}" already exists in this collection`,
       );
-
-      // assert that the event emitter function is called once - only for the story creation!
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should update to a url that already exists in a different collection', async () => {
@@ -530,8 +484,6 @@ describe('mutations: CollectionStory', () => {
         });
 
       expect(result.body.data.updateCollectionStory.url).toEqual(input.url);
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(2);
     });
 
     it('should allow updates with optional fields omitted in input data', async () => {
@@ -560,8 +512,6 @@ describe('mutations: CollectionStory', () => {
       expect(result.body.data.updateCollectionStory.fromPartner).toEqual(
         story.fromPartner,
       );
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -585,8 +535,6 @@ describe('mutations: CollectionStory', () => {
       };
 
       story = await createCollectionStory(db, data);
-
-      sendEventBridgeEventSpy.mockClear();
     });
 
     it('should update the sortOrder of a collection story', async () => {
@@ -606,8 +554,6 @@ describe('mutations: CollectionStory', () => {
       expect(result.body.data.updateCollectionStorySortOrder.sortOrder).toEqual(
         story.sortOrder + 1,
       );
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should not update any other properties when updating sortOrder', async () => {
@@ -632,8 +578,6 @@ describe('mutations: CollectionStory', () => {
       expect(updated.imageUrl).toEqual(story.imageUrl);
       expect(updated.authors.length).toEqual(story.authors.length);
       expect(updated.publisher).toEqual(story.publisher);
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -657,8 +601,6 @@ describe('mutations: CollectionStory', () => {
       };
 
       story = await createCollectionStory(db, data);
-
-      sendEventBridgeEventSpy.mockClear();
     });
 
     it('should update the imageUrl of a collection story', async () => {
@@ -680,8 +622,6 @@ describe('mutations: CollectionStory', () => {
       expect(result.body.data.updateCollectionStoryImageUrl.imageUrl).toEqual(
         randomKitten,
       );
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should not update any other properties when updating sortOrder', async () => {
@@ -716,8 +656,6 @@ describe('mutations: CollectionStory', () => {
       expect(result.body.data.updateCollectionStoryImageUrl.publisher).toEqual(
         story.publisher,
       );
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -741,8 +679,6 @@ describe('mutations: CollectionStory', () => {
       };
 
       story = await createCollectionStory(db, data);
-
-      sendEventBridgeEventSpy.mockClear();
     });
 
     it('should delete a collection story and return the deleted data', async () => {
@@ -768,8 +704,6 @@ describe('mutations: CollectionStory', () => {
       const found = await getCollectionStory(db, story.externalId);
 
       expect(found).toBeNull();
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should delete a collection story and return the story authors sorted correctly', async () => {
@@ -790,8 +724,6 @@ describe('mutations: CollectionStory', () => {
       expect(result.body.data.deleteCollectionStory.authors[1].name).toEqual(
         'walter',
       );
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should delete all related collection story authors', async () => {
@@ -812,8 +744,6 @@ describe('mutations: CollectionStory', () => {
       });
 
       expect((await relatedAuthors).length).toEqual(0);
-      // assert that the event emitter function is called once
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should fail to delete a collection story if the externalId cannot be found', async () => {
@@ -832,9 +762,6 @@ describe('mutations: CollectionStory', () => {
       expect(result.body.errors[0].message).toEqual(
         `Cannot delete a collection story with external ID "${story.externalId}typo"`,
       );
-
-      // assert that the event emitter function was not called (as the above operation errors first)
-      expect(sendEventBridgeEventSpy).toHaveBeenCalledTimes(0);
     });
   });
 });
