@@ -10,5 +10,5 @@ export {
   moveScheduledItemToBottom,
 } from './ScheduledItem';
 export { createScheduleReview } from './ScheduleReview';
-export { createSection, disableEnableSection, updateSection, createCustomSection } from './Section';
+export { createSection, disableEnableSection, updateSection, createCustomSection, updateCustomSection } from './Section';
 export { createSectionItem, removeSectionItem } from './SectionItem';

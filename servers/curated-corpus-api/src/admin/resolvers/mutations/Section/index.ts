@@ -9,11 +9,16 @@ import {
   updateSection as dbUpdateSection,
   disableEnableSection as dbDisableEnableSection,
   createCustomSection as dbCreateCustomSection,
+  updateCustomSection as dbUpdateCustomSection,
 } from '../../../../database/mutations';
 import { Section } from '../../../../database/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
-import { ActivitySource, IABMetadata } from 'content-common';
+import { 
+  ActivitySource, 
+  IABMetadata,
+  UpdateCustomSectionApiInput 
+} from 'content-common';
 import { IAB_CATEGORIES } from '../../iabCategories'
 
 /**
@@ -132,6 +137,73 @@ export async function createCustomSection(
   }
 
   return await dbCreateCustomSection(context.db, data);
+}
+
+/**
+ * Updates an existing custom editorial section.
+ * 
+ * This mutation allows curators to modify sections created with MANUAL source.
+ * It performs comprehensive validation including:
+ * - Existence check for the section
+ * - Source type validation (must be MANUAL)
+ * - Permission validation for both current and target surfaces
+ * - IAB metadata validation if provided
+ * 
+ * @param parent - GraphQL parent resolver
+ * @param data - UpdateCustomSectionInput containing section updates
+ * @param context - Admin context with auth and database access
+ * @returns Updated Section with associated SectionItems
+ * @throws UserInputError - If section not found, invalid source, or validation fails
+ * @throws AuthenticationError - If user lacks required permissions
+ */
+export async function updateCustomSection(
+  parent: unknown,
+  { data }: { data: UpdateCustomSectionApiInput },
+  context: IAdminContext,
+): Promise<Section> {
+  const { externalId } = data;
+
+  // Find the existing section
+  const existingSection = await context.db.section.findUnique({
+    where: { externalId },
+  });
+
+  if (!existingSection) {
+    throw new UserInputError(`Section not found for externalId: ${externalId}`);
+  }
+
+  // Check if the existing section is not a custom section
+  if (existingSection.createSource !== ActivitySource.MANUAL) {
+    throw new UserInputError(
+      `Section with externalId ${externalId} is not a custom (MANUAL) Section and cannot be updated using this mutation`,
+    );
+  }
+
+  // Check permissions for both surfaces if updating the surface
+  const surfacesToCheck = [existingSection.scheduledSurfaceGuid];
+  if (data.scheduledSurfaceGuid && data.scheduledSurfaceGuid !== existingSection.scheduledSurfaceGuid) {
+    surfacesToCheck.push(data.scheduledSurfaceGuid);
+  }
+
+  for (const surfaceGuid of surfacesToCheck) {
+    if (!context.authenticatedUser.canWriteToSurface(surfaceGuid)) {
+      throw new AuthenticationError(ACCESS_DENIED_ERROR);
+    }
+  }
+
+  // createSource must be MANUAL
+  if (data.createSource !== ActivitySource.MANUAL) {
+    throw new UserInputError(
+      'Cannot update a custom Section: createSource must be MANUAL',
+    );
+  }
+
+  // Check that the IAB taxonomy & code are valid
+  if (data.iab) {
+    validateIAB(data.iab);
+  }
+
+  return await dbUpdateCustomSection(context.db, data);
 }
 
 /**

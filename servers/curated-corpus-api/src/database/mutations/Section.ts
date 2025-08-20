@@ -1,5 +1,5 @@
 import { PrismaClient, Prisma } from '.prisma/client';
-import { CreateCustomSectionInput, CreateSectionInput, DisableEnableSectionInput, Section } from '../types';
+import { CreateCustomSectionInput, CreateSectionInput, DisableEnableSectionInput, UpdateCustomSectionInput, Section } from '../types';
 import { ActivitySource } from 'content-common';
 
 /**
@@ -189,4 +189,66 @@ export async function createCustomSection(
     ...newSection,
     sectionItems: []
   }
+}
+
+/**
+ * Updates an existing Custom Editorial Section in the database.
+ * 
+ * Performs a partial update, only modifying fields that are provided.
+ * Handles special cases like:
+ * - Setting deactivation fields when marking inactive
+ * - Converting date strings to Date objects
+ * - Clearing fields when null is provided
+ * 
+ * @param db - Prisma client instance
+ * @param data - UpdateCustomSectionInput with fields to update
+ * @returns Updated Section with associated active SectionItems
+ */
+export async function updateCustomSection(
+  db: PrismaClient,
+  data: UpdateCustomSectionInput,
+): Promise<Section> {
+  const { externalId, ...updateFields } = data;
+
+  const updateData: Prisma.SectionUpdateInput = {};
+
+  // Only include fields that are provided
+  if (updateFields.title !== undefined) updateData.title = updateFields.title;
+  if (updateFields.description !== undefined) updateData.description = updateFields.description;
+  if (updateFields.heroTitle !== undefined) updateData.heroTitle = updateFields.heroTitle;
+  if (updateFields.heroDescription !== undefined) updateData.heroDescription = updateFields.heroDescription;
+  if (updateFields.startDate !== undefined) updateData.startDate = new Date(updateFields.startDate);
+  if (updateFields.endDate !== undefined) updateData.endDate = updateFields.endDate ? new Date(updateFields.endDate) : null;
+  if (updateFields.scheduledSurfaceGuid !== undefined) updateData.scheduledSurfaceGuid = updateFields.scheduledSurfaceGuid;
+  if (updateFields.iab !== undefined) updateData.iab = updateFields.iab;
+  if (updateFields.sort !== undefined) updateData.sort = updateFields.sort;
+  if (updateFields.active !== undefined) updateData.active = updateFields.active;
+  if (updateFields.disabled !== undefined) updateData.disabled = updateFields.disabled;
+
+  // If Section is marked as inactive, set the deactivateSource and time
+  if (updateFields.active === false) {
+    updateData.deactivateSource = ActivitySource.MANUAL;
+    updateData.deactivatedAt = new Date();
+  }
+
+  const updated = await db.section.update({
+    where: { externalId },
+    data: updateData,
+    include: {
+      sectionItems: {
+        where: { active: true },
+        include: {
+          approvedItem: {
+            include: {
+              authors: {
+                orderBy: [{ sortOrder: 'asc' }],
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return updated;
 }

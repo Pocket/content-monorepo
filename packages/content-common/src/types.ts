@@ -115,6 +115,22 @@ export type CreateCustomSectionApiInput = {
   disabled: boolean;
 };
 
+export type UpdateCustomSectionApiInput = {
+  externalId: string;
+  title?: string;
+  description?: string;
+  heroTitle?: string;
+  heroDescription?: string;
+  startDate?: string;
+  endDate?: string;
+  scheduledSurfaceGuid?: string;
+  iab?: IABMetadata;
+  sort?: number | null;
+  createSource: ActivitySource;
+  active?: boolean;
+  disabled?: boolean;
+};
+
 export type DisableEnableSectionApiInput = {
   externalId: string;
   disabled: boolean;
