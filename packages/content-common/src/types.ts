@@ -68,6 +68,7 @@ export enum SectionItemRemovalReason {
   PUBLISHER_QUALITY = 'PUBLISHER_QUALITY',
   SET_DIVERSITY = 'SET_DIVERSITY',
   OTHER = 'OTHER',
+  ML = 'ML'
 }
 
 export type IABMetadata = {
@@ -97,6 +98,21 @@ export type CreateOrUpdateSectionApiInput = {
   sort?: number;
   createSource: ActivitySource;
   active: boolean;
+};
+
+export type CreateCustomSectionApiInput = {
+  title: string;
+  description: string;
+  heroTitle?: string;
+  heroDescription?: string;
+  startDate: string;
+  endDate?: string;
+  scheduledSurfaceGuid: string;
+  iab?: IABMetadata,
+  sort?: number;
+  createSource: ActivitySource;
+  active: boolean;
+  disabled: boolean;
 };
 
 export type DisableEnableSectionApiInput = {
@@ -130,6 +146,7 @@ export type CreateSectionItemApiInput = {
 export type RemoveSectionItemApiInput = {
   externalId: string;
   deactivateReasons: SectionItemRemovalReason[];
+  deactivateSource?: ActivitySource;
 };
 
 // maps to the CreateApprovedCorpusItemInput type in corpus API admin schema

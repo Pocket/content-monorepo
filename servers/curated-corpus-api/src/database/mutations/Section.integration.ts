@@ -2,13 +2,14 @@ import { PrismaClient } from '.prisma/client';
 
 import { client } from '../client';
 import { clearDb, createApprovedItemHelper } from '../../test/helpers';
-import { createSection, disableEnableSection, updateSection } from './Section';
+import { createCustomSection, createSection, disableEnableSection, updateSection } from './Section';
 import {
   createSectionHelper,
   createSectionItemHelper,
 } from '../../test/helpers';
 import { ActivitySource, ScheduledSurfacesEnum } from 'content-common';
 import { IABMetadata } from 'content-common';
+import { CreateCustomSectionInput } from '../types';
 
 describe('Section', () => {
   let db: PrismaClient;
@@ -52,7 +53,7 @@ describe('Section', () => {
   });
 
   describe('updateSection', () => {
-    it('should update a Section & mark any associated active SectionItems in-active. Existing in-active SectionItems should not be updated.', async () => {
+    it('should update a Section & leave any associated active SectionItems untouched. Existing in-active SectionItems should not be updated.', async () => {
       const approvedItem = await createApprovedItemHelper(db, {
         title: 'Fake Item!',
       });
@@ -99,17 +100,7 @@ describe('Section', () => {
         active: true,
       };
 
-      // control what `new Date()` returns in the update below so we can
-      // strictly test the resulting values
-      jest.useFakeTimers({
-        now: newDateMock,
-        advanceTimers: false,
-      });
-
       const result = await updateSection(db, input, section.id);
-
-      // stop controlling `new Date()`
-      jest.useRealTimers();
 
       expect(result.externalId).toEqual('oiueh-123');
       expect(result.title).toEqual('Updating new title');
@@ -117,18 +108,14 @@ describe('Section', () => {
       expect(result.deactivateSource).toBeNull();
       expect(result.sort).toEqual(3);
 
-      const inactiveSectioinItem = await db.sectionItem.findUnique({
-        where: { externalId: sectionItem.externalId },
-      });
-
-      // Expect associated  active section item to be in-active now
-      expect(inactiveSectioinItem.active).toBeFalsy();
-      // Should be a different updatedAt Date
-      expect(inactiveSectioinItem.updatedAt).not.toEqual(sectionItemUpdatedAt1);
-      // deactivateSource should also be set on newly in-active SectionItems
-      expect(inactiveSectioinItem.deactivateSource).toEqual(ActivitySource.ML);
-      // deactivatedAt should be set as expected
-      expect(inactiveSectioinItem.deactivatedAt).toEqual(newDateMock);
+      // Active item remains active and unchanged
+      const stillActive = result.sectionItems.find(
+        item => item.externalId === sectionItem.externalId
+      );
+      expect(stillActive.active).toBe(true);
+      expect(stillActive.updatedAt).toEqual(sectionItemUpdatedAt1);
+      expect(stillActive.deactivateSource).toBeNull();
+      expect(stillActive.deactivatedAt).toBeNull();
 
       // Expect alredy in-active section item to not be updated
       const inactiveSectioinItem2 = await db.sectionItem.findUnique({
@@ -215,6 +202,55 @@ describe('Section', () => {
 
       expect(result.externalId).toEqual('active-890');
       expect(result.disabled).toBeFalsy();
+    });
+  });
+
+  describe('createCustomSection', () => {
+    it('should create a Custom Editorial Section with all required + optional metadata', async () => {
+      const iabMetadata: IABMetadata = {
+        taxonomy: "IAB-3.0",
+        categories: ["488"]
+      };
+
+      const input: CreateCustomSectionInput = {
+        title: 'Fake Custom Section Title',
+        description: 'fake custom section description',
+        heroTitle: 'fake hero title',
+        heroDescription: 'hero description',
+        startDate: '2025-01-01',
+        endDate: '2025-01-15',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        iab: iabMetadata,
+        createSource: ActivitySource.MANUAL,
+        sort: 2,
+        active: true,
+        disabled: false
+      };
+
+      const result = await createCustomSection(db, input);
+
+      expect(result.title).toEqual('Fake Custom Section Title');
+      expect(result.description).toEqual('fake custom section description');
+      expect(result.heroTitle).toEqual('fake hero title');
+      expect(result.heroDescription).toEqual('hero description');
+      expect(result.startDate.toISOString()).toEqual(new Date('2025-01-01').toISOString());
+      expect(result.endDate.toISOString()).toEqual(new Date('2025-01-15').toISOString());
+    });
+
+    it('should create a Custom Editorial Section with only required metadata', async () => {
+      const input: CreateCustomSectionInput = {
+        title: 'Fake Custom Section Title',
+        description: 'fake custom section description',
+        startDate: '2025-01-01',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        createSource: ActivitySource.MANUAL,
+        active: true,
+        disabled: false
+      };
+
+      const result = await createCustomSection(db, input);
+
+      expect(result.title).toEqual('Fake Custom Section Title');
     });
   });
 });

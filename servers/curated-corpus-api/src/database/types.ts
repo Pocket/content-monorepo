@@ -147,12 +147,28 @@ export type UpdateCustomSectionInput = {
 export type RemoveSectionItemInput = {
   externalId: string;
   deactivateReasons: SectionItemRemovalReason[];
+  deactivateSource?: ActivitySource;
 };
 
 export type DisableEnableSectionInput = {
   externalId: string;
   disabled: boolean;
 }
+
+export type CreateCustomSectionInput = {
+  title: string;
+  description: string;
+  heroTitle?: string;
+  heroDescription?: string;
+  startDate: string;
+  endDate?: string;
+  scheduledSurfaceGuid: string;
+  iab?: IABMetadata,
+  sort?: number;
+  createSource: ActivitySource;
+  active: boolean;
+  disabled: boolean;
+};
 
 export type ApprovedItem = ApprovedItemModel & {
   authors: ApprovedItemAuthor[];

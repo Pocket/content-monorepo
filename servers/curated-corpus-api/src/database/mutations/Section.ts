@@ -1,5 +1,5 @@
 import { PrismaClient, Prisma } from '.prisma/client';
-import { CreateSectionInput, DisableEnableSectionInput, Section, UpdateCustomSectionInput } from '../types';
+import { CreateCustomSectionInput, CreateSectionInput, DisableEnableSectionInput, Section, UpdateCustomSectionInput } from '../types';
 import { ActivitySource } from 'content-common';
 
 
@@ -60,21 +60,6 @@ export async function updateSection(
 ): Promise<Section> {
   const { externalId, title, scheduledSurfaceGuid, iab, sort, active } = data;
 
-  const sectionItemUpdateData: Prisma.SectionItemUpdateManyMutationInput = {
-    active: false,
-    deactivateSource: ActivitySource.ML,
-    deactivatedAt: new Date(),
-  };
-
-  // if a Section has any active SectionItems associted with it, mark those as in-active.
-  await db.sectionItem.updateMany({
-    where: {
-      sectionId: sectionId,
-      active: true,
-    },
-    data: sectionItemUpdateData,
-  });
-
   const sectionUpdateData: Prisma.SectionUpdateInput = {
     title,
     scheduledSurfaceGuid,
@@ -94,10 +79,27 @@ export async function updateSection(
     where: { externalId: externalId },
     data: sectionUpdateData,
   });
+
+  // Fetch active SectionItems
+  const activeSectionItems = await db.sectionItem.findMany({
+    where: {
+      sectionId,
+      active: true,
+    },
+    include: {
+      approvedItem: {
+        include: {
+          authors: {
+            orderBy: [{ sortOrder: 'asc' }],
+          },
+        },
+      }
+    },
+  });
   
   return {
     ...updatedSection,
-    sectionItems: []
+    sectionItems: activeSectionItems
   }
 }
 /**
@@ -201,4 +203,54 @@ export async function disableEnableSection(
       }
     }
   });
+}
+
+/**
+ * This mutation creates a new Custom Editorial Section.
+ *
+ * @param db
+ * @param data
+ * @param username
+ * @returns Section
+ */
+export async function createCustomSection(
+  db: PrismaClient,
+  data: CreateCustomSectionInput,
+): Promise<Section> {
+  const {
+    title,
+    description,
+    heroTitle,
+    heroDescription,
+    startDate,
+    endDate,
+    scheduledSurfaceGuid,
+    iab,
+    sort,
+    createSource,
+    active,
+  } = data;
+
+  const createData = {
+    title,
+    description,
+    heroTitle,
+    heroDescription,
+    startDate: new Date(startDate),
+    endDate: data.endDate ? new Date(endDate) : undefined,
+    scheduledSurfaceGuid,
+    iab,
+    sort,
+    createSource,
+    active,
+  };
+
+  const newSection = await db.section.create({
+    data: createData,
+  });
+
+  return {
+    ...newSection,
+    sectionItems: []
+  }
 }

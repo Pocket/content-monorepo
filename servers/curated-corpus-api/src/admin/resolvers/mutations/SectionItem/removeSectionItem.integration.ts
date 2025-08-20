@@ -66,7 +66,7 @@ describe('mutations: SectionItem (removeSectionItem)', () => {
     });
   });
 
-  it('should remove a SectionItem if user has full access', async () => {
+  it('should remove a SectionItem if user has full access & deactivateSource not provided', async () => {
     const rightNow = new Date();
 
     // control the result of `new Date()` so we can explicitly check values
@@ -111,7 +111,60 @@ describe('mutations: SectionItem (removeSectionItem)', () => {
     const inactiveSectionItem = await db.sectionItem.findUnique({
       where: {externalId: sectionItem.externalId}
     });
+    // deactivateSource not provided, should default to MANUAL
     expect(inactiveSectionItem.deactivateSource).toEqual(ActivitySource.MANUAL);
+    expect(inactiveSectionItem.deactivatedAt).toEqual(rightNow);
+    expect(inactiveSectionItem.deactivateReasons).toEqual(input.deactivateReasons);
+  });
+
+  it('should remove a SectionItem if user has full access & deactivateSource is provided', async () => {
+    const rightNow = new Date();
+
+    // control the result of `new Date()` so we can explicitly check values
+    // downstream of the graph request
+    jest.useFakeTimers({
+      now: rightNow,
+      advanceTimers: false,
+      // something in the graph request needs `nextTick` to explicitly not be faked
+      doNotFake: ['nextTick'],
+    });
+
+    input = {
+      externalId: sectionItem.externalId,
+      deactivateReasons: [SectionItemRemovalReason.DATED, SectionItemRemovalReason.OTHER],
+      deactivateSource: ActivitySource.ML
+    };
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(REMOVE_SECTION_ITEM),
+        variables: { data: input },
+      });
+
+    // stop controlling the result of `new Date()`
+    jest.useRealTimers();
+
+    expect(result.body.errors).toBeUndefined();
+    expect(result.body.data).not.toBeNull();
+
+    expect(result.body.data?.removeSectionItem.externalId).toEqual(sectionItem.externalId);
+    // SectionItem should be in-active
+    expect(result.body.data?.removeSectionItem.active).toBeFalsy();
+    // the associated approvedItem should be there...
+    expect(result.body.data?.removeSectionItem.approvedItem).not.toBeNull();
+    // ...and should match the approvedItem from the input
+    expect(result.body.data?.removeSectionItem.approvedItem.externalId).toEqual(
+      approvedItem.externalId,
+    );
+
+    // deactivatedAt, deactivateSource & deactivateReasons should be set
+    const inactiveSectionItem = await db.sectionItem.findUnique({
+      where: {externalId: sectionItem.externalId}
+    });
+    // deactivateSource provided
+    expect(inactiveSectionItem.deactivateSource).toEqual(ActivitySource.ML);
     expect(inactiveSectionItem.deactivatedAt).toEqual(rightNow);
     expect(inactiveSectionItem.deactivateReasons).toEqual(input.deactivateReasons);
   });
