@@ -142,16 +142,25 @@ export async function updateCustomSection(
   const updated = await db.section.update({
     where: { externalId },
     data: updateData,
+    include: {
+      sectionItems: {
+        where: {
+          active: true
+        },
+        include: {
+          approvedItem: {
+            include: {
+              authors: {
+                orderBy: [{ sortOrder: 'asc' }],
+              },
+            },
+          }
+        }
+      }
+    }
   });
 
-  // Keep parity
-  return {
-    ...updated,
-    sectionItems: await db.sectionItem.findMany({
-      where: { sectionExternalId: externalId },
-      orderBy: { sort: 'asc' },
-    }),
-  };
+  return updated;
 }
 
 

@@ -1238,11 +1238,11 @@ input UpdateCustomSectionInput {
   """
   The title of the custom section displayed to the users.
   """
-  title: String!
+  title: String
   """
   The description of the custom section displayed to the users.
   """
-  description: String!
+  description: String
   """
   An optional title used in hero modules.
   """
@@ -1256,7 +1256,7 @@ input UpdateCustomSectionInput {
   Current & future dates allowed.
   Format: YYYY-MM-DD.
   """
-  startDate: Date!
+  startDate: Date
   """
   An optional date of when the Section should stop being displayed.
   Format: YYYY-MM-DD.
@@ -1265,13 +1265,13 @@ input UpdateCustomSectionInput {
   """
   The GUID of the Scheduled Surface. Example: 'NEW_TAB_EN_US'.
   """
-  scheduledSurfaceGuid: ID!
+  scheduledSurfaceGuid: ID
   """
   Optional IAB metadata input
   """
   iab: IABMetadataInput
   """
-  The source which created the Section.
+  The source which created the Section. Must be MANUAL for custom sections.
   """
   createSource: ActivitySource!
   """
@@ -1281,12 +1281,12 @@ input UpdateCustomSectionInput {
   """
   Indicates whether or not a Section is available for display.
   """
-  active: Boolean!
+  active: Boolean
   """
-  Indicates whether or not a Section is fully disabled from display on NewTab. Can only  be controlled
+  Indicates whether or not a Section is fully disabled from display on NewTab. Can only be controlled
   in the admin tool.
   """
-  disabled: Boolean!
+  disabled: Boolean
 }
 
 """

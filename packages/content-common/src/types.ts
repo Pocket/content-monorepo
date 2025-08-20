@@ -115,9 +115,8 @@ export type UpdateCustomSectionApiInput = {
   scheduledSurfaceGuid?: string;
   iab?: IABMetadata;
   sort?: number | null;         // allow null to clear
-  // createSource is intentionally NOT updatable for custom sections,
-  // but if present, enforce MANUAL (see resolver).
-  createSource?: ActivitySource;
+  // createSource must be MANUAL for custom sections
+  createSource: ActivitySource;
   active?: boolean;
   disabled?: boolean;           // still admin-only; keep behavior consistent with disableEnableSection
 };

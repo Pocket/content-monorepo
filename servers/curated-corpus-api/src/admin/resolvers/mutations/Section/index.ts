@@ -126,42 +126,55 @@ export async function updateCustomSection(
   const { externalId } = data;
 
   // Load current to perform permission + invariants
-  const existing = await context.db.section.findUnique({
+  const existingSection = await context.db.section.findUnique({
     where: { externalId },
   });
 
-  if (!existing) {
+  if (!existingSection) {
     throw new UserInputError(`Section not found for externalId: ${externalId}`);
   }
 
   // Only allow updating custom/manual sections created via this flow
-  if (existing.createSource !== ActivitySource.MANUAL) {
+  if (existingSection.createSource !== ActivitySource.MANUAL) {
     throw new UserInputError(
       'Cannot update: target Section is not a custom (MANUAL) Section',
     );
   }
 
-  // Must be able to write to the *current* surface
-  if (!context.authenticatedUser.canWriteToSurface(existing.scheduledSurfaceGuid)) {
-    throw new AuthenticationError(ACCESS_DENIED_ERROR);
+  // Check write permissions for both current and new surface (if changing)
+  const surfacesToCheck = [existingSection.scheduledSurfaceGuid];
+  if (data.scheduledSurfaceGuid && data.scheduledSurfaceGuid !== existingSection.scheduledSurfaceGuid) {
+    surfacesToCheck.push(data.scheduledSurfaceGuid);
+  }
+  
+  for (const surfaceGuid of surfacesToCheck) {
+    if (!context.authenticatedUser.canWriteToSurface(surfaceGuid)) {
+      throw new AuthenticationError(ACCESS_DENIED_ERROR);
+    }
   }
 
-  // If moving surfaces, must also be able to write to the *new* one
-  if (data.scheduledSurfaceGuid &&
-    !context.authenticatedUser.canWriteToSurface(data.scheduledSurfaceGuid)) {
-    throw new AuthenticationError(ACCESS_DENIED_ERROR);
-  }
-
-  // IAB validation (if present)
+  // Check that the IAB taxonomy & code are valid
   if (data.iab) {
-    validateIAB(data.iab);
+    const { taxonomy, categories } = data.iab;
+    // check that the taxonomy version is supported
+    if (!IAB_CATEGORIES[taxonomy]) {
+      throw new UserInputError(
+        `IAB taxonomy version ${taxonomy} is not supported`
+      );
+    }
+    // make sure there are no "bad" IAB codes present
+    const invalidIABCodes = categories.filter((code) => !IAB_CATEGORIES[taxonomy][code]);
+    if (invalidIABCodes.length > 0) {
+      throw new UserInputError(
+        `IAB code(s) invalid: ${invalidIABCodes}`
+      );
+    }
   }
 
-  // Do not allow switching away from MANUAL.
-  if (typeof data.createSource !== 'undefined' &&
-    data.createSource !== ActivitySource.MANUAL) {
+  // createSource must be MANUAL for custom sections
+  if (data.createSource !== ActivitySource.MANUAL) {
     throw new UserInputError(
-      'Cannot update a custom Section: createSource must remain MANUAL',
+      'Cannot update a custom Section: createSource must be MANUAL',
     );
   }
 
