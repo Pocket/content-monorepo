@@ -399,7 +399,6 @@ describe('mutations: CollectionStory', () => {
         fromPartner: false,
       };
 
-      // this results in an event bridge call
       await createCollectionStory(db, createData);
 
       // Update the test story with the newly added story's URL
@@ -418,7 +417,6 @@ describe('mutations: CollectionStory', () => {
         fromPartner: false,
       };
 
-      // this is expected to fail, so should not result in an event bridge call
       const result = await request(app)
         .post(graphQLUrl)
         .set(headers)

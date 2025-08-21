@@ -38,10 +38,6 @@ export const config = {
     component_code: `content-${name.toLowerCase()}`,
     env_code: isDev ? 'dev' : 'prod',
   },
-  // The name of the Event Bus to publish events to (per account)
-  eventBus: {
-    name: 'default',
-  },
   envVars: {
     snowplowEndpoint,
   },

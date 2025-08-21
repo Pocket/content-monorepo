@@ -38,9 +38,6 @@ export default {
   },
   aws: {
     endpoint: localEndpoint,
-    eventBus: {
-      name: process.env.EVENT_BUS_NAME || 'default',
-    },
     region: process.env.AWS_REGION || 'us-east-1',
     s3: {
       localEndpoint,
@@ -51,15 +48,6 @@ export default {
   events: {
     source: 'curated-corpus-api',
     version: '0.0.2',
-  },
-  eventBridge: {
-    addApprovedItemEventType: 'add-approved-item',
-    addScheduledItemEventType: 'add-scheduled-item',
-    removeApprovedItemEventType: 'remove-approved-item',
-    removeScheduledItemEventType: 'remove-scheduled-item',
-    source: 'curation-migration-datasync',
-    updateApprovedItemEventType: 'update-approved-item',
-    updateScheduledItemEventType: 'update-scheduled-item',
   },
   sentry: {
     dsn: process.env.SENTRY_DSN || '',

@@ -486,22 +486,22 @@ importers:
         version: link:../eslint-config-custom
       jest:
         specifier: 29.7.0
-        version: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819))
+        version: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821))
       msw:
         specifier: 2.4.7
-        version: 2.4.7(typescript@6.0.0-dev.20250819)
+        version: 2.4.7(typescript@6.0.0-dev.20250821)
       node-fetch:
         specifier: ^2.6.7
         version: 2.7.0(encoding@0.1.13)
       ts-jest:
         specifier: 29.1.2
-        version: 29.1.2(@babel/core@7.27.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.7))(esbuild@0.23.1)(jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819)))(typescript@6.0.0-dev.20250819)
+        version: 29.1.2(@babel/core@7.27.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.7))(esbuild@0.23.1)(jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821)))(typescript@6.0.0-dev.20250821)
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
       tsup:
         specifier: 8.2.4
-        version: 8.2.4(typescript@6.0.0-dev.20250819)
+        version: 8.2.4(typescript@6.0.0-dev.20250821)
 
   packages/eslint-config-custom:
     devDependencies:
@@ -669,19 +669,19 @@ importers:
         version: link:../eslint-config-custom
       jest:
         specifier: 29.7.0
-        version: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819))
+        version: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821))
       msw:
         specifier: 2.4.7
-        version: 2.4.7(typescript@6.0.0-dev.20250819)
+        version: 2.4.7(typescript@6.0.0-dev.20250821)
       ts-jest:
         specifier: 29.1.2
-        version: 29.1.2(@babel/core@7.27.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.7))(esbuild@0.23.1)(jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819)))(typescript@6.0.0-dev.20250819)
+        version: 29.1.2(@babel/core@7.27.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.7))(esbuild@0.23.1)(jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821)))(typescript@6.0.0-dev.20250821)
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
       tsup:
         specifier: 8.2.4
-        version: 8.2.4(typescript@6.0.0-dev.20250819)
+        version: 8.2.4(typescript@6.0.0-dev.20250821)
 
   packages/tsconfig:
     dependencies:
@@ -833,9 +833,6 @@ importers:
       '@apollo/subgraph':
         specifier: 2.9.0
         version: 2.9.0(graphql@16.9.0)
-      '@aws-sdk/client-eventbridge':
-        specifier: 3.529.1
-        version: 3.529.1
       '@aws-sdk/client-s3':
         specifier: 3.529.1
         version: 3.529.1
@@ -1215,10 +1212,6 @@ packages:
 
   '@aws-sdk/client-dynamodb@3.529.1':
     resolution: {integrity: sha512-oyMCMu4JUGUIwuLYm2WAI/wUbw3RwWwgPTPTxJdus79NVgQ0lGCZnS4cOd2LtzufRglShr5LZUvueVdyn8Hrjw==}
-    engines: {node: '>=14.0.0'}
-
-  '@aws-sdk/client-eventbridge@3.529.1':
-    resolution: {integrity: sha512-VUQd+IkNXt6fJTr9R199avvlFoKW0zDDsA2Nvi0PeF5m17SKS92dgDnFRHjyAKFG2gG9bHOht+YMTcamRjd2ug==}
     engines: {node: '>=14.0.0'}
 
   '@aws-sdk/client-s3@3.529.1':
@@ -7841,8 +7834,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typescript@6.0.0-dev.20250819:
-    resolution: {integrity: sha512-GEasq8VlCMmxmydjEsX8RghmnsEg1mbxYfDGHjqQC6W58Se1bsqk8nD6uJ79GqkspHFB28UMN17+gnPtG/UPNQ==}
+  typescript@6.0.0-dev.20250821:
+    resolution: {integrity: sha512-4B2H967bp4c82zijkiceubORkNKERib0P/IsqUS9INWgP8BlxiMpP0FlQK7jFjHZxAprAl0HMMTNAnKga1s3Yg==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -8396,51 +8389,6 @@ snapshots:
       '@smithy/util-waiter': 2.2.0
       tslib: 2.7.0
       uuid: 9.0.1
-    transitivePeerDependencies:
-      - aws-crt
-
-  '@aws-sdk/client-eventbridge@3.529.1':
-    dependencies:
-      '@aws-crypto/sha256-browser': 3.0.0
-      '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sts': 3.529.1(@aws-sdk/credential-provider-node@3.529.1)
-      '@aws-sdk/core': 3.529.1
-      '@aws-sdk/credential-provider-node': 3.529.1
-      '@aws-sdk/middleware-host-header': 3.523.0
-      '@aws-sdk/middleware-logger': 3.523.0
-      '@aws-sdk/middleware-recursion-detection': 3.523.0
-      '@aws-sdk/middleware-signing': 3.523.0
-      '@aws-sdk/middleware-user-agent': 3.525.0
-      '@aws-sdk/region-config-resolver': 3.525.0
-      '@aws-sdk/signature-v4-multi-region': 3.525.0
-      '@aws-sdk/types': 3.523.0
-      '@aws-sdk/util-endpoints': 3.525.0
-      '@aws-sdk/util-user-agent-browser': 3.523.0
-      '@aws-sdk/util-user-agent-node': 3.525.0
-      '@smithy/config-resolver': 2.2.0
-      '@smithy/fetch-http-handler': 2.5.0
-      '@smithy/hash-node': 2.2.0
-      '@smithy/invalid-dependency': 2.2.0
-      '@smithy/middleware-content-length': 2.2.0
-      '@smithy/middleware-endpoint': 2.5.1
-      '@smithy/middleware-retry': 2.3.1
-      '@smithy/middleware-serde': 2.3.0
-      '@smithy/middleware-stack': 2.2.0
-      '@smithy/node-config-provider': 2.3.0
-      '@smithy/node-http-handler': 2.5.0
-      '@smithy/protocol-http': 3.3.0
-      '@smithy/smithy-client': 2.5.1
-      '@smithy/types': 2.12.0
-      '@smithy/url-parser': 2.2.0
-      '@smithy/util-base64': 2.3.0
-      '@smithy/util-body-length-browser': 2.2.0
-      '@smithy/util-body-length-node': 2.3.0
-      '@smithy/util-defaults-mode-browser': 2.2.1
-      '@smithy/util-defaults-mode-node': 2.3.1
-      '@smithy/util-endpoints': 1.2.0
-      '@smithy/util-retry': 2.2.0
-      '@smithy/util-utf8': 2.3.0
-      tslib: 2.7.0
     transitivePeerDependencies:
       - aws-crt
 
@@ -9794,7 +9742,7 @@ snapshots:
       - supports-color
       - ts-node
 
-  '@jest/core@29.7.0(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819))':
+  '@jest/core@29.7.0(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821))':
     dependencies:
       '@jest/console': 29.7.0
       '@jest/reporters': 29.7.0
@@ -9808,7 +9756,7 @@ snapshots:
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-changed-files: 29.7.0
-      jest-config: 29.7.0(@types/node@20.12.14)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819))
+      jest-config: 29.7.0(@types/node@20.12.14)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821))
       jest-haste-map: 29.7.0
       jest-message-util: 29.7.0
       jest-regex-util: 29.6.3
@@ -13034,13 +12982,13 @@ snapshots:
       - supports-color
       - ts-node
 
-  create-jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819)):
+  create-jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821)):
     dependencies:
       '@jest/types': 29.6.3
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
-      jest-config: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819))
+      jest-config: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821))
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -13238,7 +13186,7 @@ snapshots:
     dependencies:
       semver: 7.7.2
       shelljs: 0.8.5
-      typescript: 6.0.0-dev.20250819
+      typescript: 6.0.0-dev.20250821
 
   drange@1.1.1: {}
 
@@ -14787,16 +14735,16 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest-cli@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819)):
+  jest-cli@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821)):
     dependencies:
-      '@jest/core': 29.7.0(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819))
+      '@jest/core': 29.7.0(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821))
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
       chalk: 4.1.2
-      create-jest: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819))
+      create-jest: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821))
       exit: 0.1.2
       import-local: 3.2.0
-      jest-config: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819))
+      jest-config: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821))
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -14868,7 +14816,7 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-config@29.7.0(@types/node@20.12.14)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819)):
+  jest-config@29.7.0(@types/node@20.12.14)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821)):
     dependencies:
       '@babel/core': 7.27.7
       '@jest/test-sequencer': 29.7.0
@@ -14894,7 +14842,7 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       '@types/node': 20.12.14
-      ts-node: 10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819)
+      ts-node: 10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -14930,7 +14878,7 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-config@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819)):
+  jest-config@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821)):
     dependencies:
       '@babel/core': 7.27.7
       '@jest/test-sequencer': 29.7.0
@@ -14956,7 +14904,7 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       '@types/node': 22.15.33
-      ts-node: 10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819)
+      ts-node: 10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -15200,12 +15148,12 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819)):
+  jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821)):
     dependencies:
-      '@jest/core': 29.7.0(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819))
+      '@jest/core': 29.7.0(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821))
       '@jest/types': 29.6.3
       import-local: 3.2.0
-      jest-cli: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819))
+      jest-cli: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821))
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -15706,7 +15654,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.6.2
 
-  msw@2.4.7(typescript@6.0.0-dev.20250819):
+  msw@2.4.7(typescript@6.0.0-dev.20250821):
     dependencies:
       '@bundled-es-modules/cookie': 2.0.1
       '@bundled-es-modules/statuses': 1.0.1
@@ -15726,7 +15674,7 @@ snapshots:
       type-fest: 4.41.0
       yargs: 17.7.2
     optionalDependencies:
-      typescript: 6.0.0-dev.20250819
+      typescript: 6.0.0-dev.20250821
 
   murmurhash3js@3.0.1: {}
 
@@ -17099,17 +17047,17 @@ snapshots:
     dependencies:
       tslib: 2.7.0
 
-  ts-jest@29.1.2(@babel/core@7.27.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.7))(esbuild@0.23.1)(jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819)))(typescript@6.0.0-dev.20250819):
+  ts-jest@29.1.2(@babel/core@7.27.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.7))(esbuild@0.23.1)(jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821)))(typescript@6.0.0-dev.20250821):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
-      jest: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819))
+      jest: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821))
       jest-util: 29.7.0
       json5: 2.2.3
       lodash.memoize: 4.1.2
       make-error: 1.3.6
       semver: 7.7.2
-      typescript: 6.0.0-dev.20250819
+      typescript: 6.0.0-dev.20250821
       yargs-parser: 21.1.1
     optionalDependencies:
       '@babel/core': 7.27.7
@@ -17188,7 +17136,7 @@ snapshots:
       yn: 3.1.1
     optional: true
 
-  ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250819):
+  ts-node@10.9.2(@types/node@22.15.33)(typescript@6.0.0-dev.20250821):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -17202,7 +17150,7 @@ snapshots:
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 6.0.0-dev.20250819
+      typescript: 6.0.0-dev.20250821
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     optional: true
@@ -17259,7 +17207,7 @@ snapshots:
       - tsx
       - yaml
 
-  tsup@8.2.4(typescript@6.0.0-dev.20250819):
+  tsup@8.2.4(typescript@6.0.0-dev.20250821):
     dependencies:
       bundle-require: 5.1.0(esbuild@0.23.1)
       cac: 6.7.14
@@ -17278,7 +17226,7 @@ snapshots:
       sucrase: 3.35.0
       tree-kill: 1.2.2
     optionalDependencies:
-      typescript: 6.0.0-dev.20250819
+      typescript: 6.0.0-dev.20250821
     transitivePeerDependencies:
       - jiti
       - supports-color
@@ -17389,7 +17337,7 @@ snapshots:
 
   typescript@5.6.2: {}
 
-  typescript@6.0.0-dev.20250819: {}
+  typescript@6.0.0-dev.20250821: {}
 
   typia@7.6.4(@samchon/openapi@2.5.3)(typescript@5.6.2):
     dependencies:

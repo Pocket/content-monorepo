@@ -16,7 +16,6 @@ const rds = {
   minCapacity: isDev ? 1 : 4,
   maxCapacity: isDev ? 1 : 128,
 };
-const eventBusName = `PocketEventBridge-${environment}-Shared-Event-Bus`;
 
 export const config = {
   name,
@@ -41,5 +40,4 @@ export const config = {
       ? 'https://otel-collector.getpocket.dev:443'
       : 'https://otel-collector.readitlater.com:443',
   },
-  eventBusName,
 };

@@ -41,7 +41,6 @@ import {
 import {
   corpusItemSnowplowEventHandler,
   corpusScheduleSnowplowEventHandler,
-  eventBusHandler,
 } from './events/eventHandlers';
 
 // Initialize event handlers, this is outside server setup as tests
@@ -49,5 +48,4 @@ import {
 initItemEventHandlers(curatedCorpusEventEmitter, [
   corpusItemSnowplowEventHandler,
   corpusScheduleSnowplowEventHandler,
-  eventBusHandler,
 ]);
