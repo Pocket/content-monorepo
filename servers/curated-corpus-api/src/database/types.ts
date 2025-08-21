@@ -156,17 +156,16 @@ export type CreateCustomSectionInput = {
 
 export type UpdateCustomSectionInput = {
   externalId: string;
-  title?: string;
-  description?: string;
+  title: string;
+  description: string;
   heroTitle?: string;
   heroDescription?: string;
-  startDate?: string;
+  startDate: string;
   endDate?: string;
   scheduledSurfaceGuid?: string;
   iab?: IABMetadata;
-  sort?: number | null;
-  createSource: ActivitySource;
-  active?: boolean;
+  sort?: number;
+  updateSource: ActivitySource;
   disabled?: boolean;
 };
 

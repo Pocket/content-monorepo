@@ -157,9 +157,10 @@ export async function createCustomSection(
  * @throws AuthenticationError - If user lacks required permissions
  */
 export async function updateCustomSection(
-  parent: unknown,
-  { data }: { data: UpdateCustomSectionApiInput },
+  parent,
+  { data },
   context: IAdminContext,
+
 ): Promise<Section> {
   const { externalId } = data;
 
@@ -169,7 +170,7 @@ export async function updateCustomSection(
   });
 
   if (!existingSection) {
-    throw new UserInputError(`Section not found for externalId: ${externalId}`);
+    throw new NotFoundError(`Cannot update section: Section with id "${externalId}" does not exist.`);
   }
 
   // Check if the existing section is not a custom section
@@ -179,10 +180,9 @@ export async function updateCustomSection(
     );
   }
 
-  // Check permissions for both surfaces if updating the surface
-  const surfacesToCheck = [existingSection.scheduledSurfaceGuid];
-  if (data.scheduledSurfaceGuid && data.scheduledSurfaceGuid !== existingSection.scheduledSurfaceGuid) {
-    surfacesToCheck.push(data.scheduledSurfaceGuid);
+  // Check if the user can perform this mutation
+  if (!context.authenticatedUser.canWriteToCorpus()) {
+    throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
 
   for (const surfaceGuid of surfacesToCheck) {
@@ -191,10 +191,10 @@ export async function updateCustomSection(
     }
   }
 
-  // createSource must be MANUAL
-  if (data.createSource !== ActivitySource.MANUAL) {
+  // Make sure updateSource == MANUAL for now for this mutation
+  if (data.updateSource !== ActivitySource.MANUAL) {
     throw new UserInputError(
-      'Cannot update a custom Section: createSource must be MANUAL',
+      'Cannot update a Section: updateSource must be MANUAL',
     );
   }
 

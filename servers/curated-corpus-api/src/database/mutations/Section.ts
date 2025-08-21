@@ -219,17 +219,9 @@ export async function updateCustomSection(
   if (updateFields.heroDescription !== undefined) updateData.heroDescription = updateFields.heroDescription;
   if (updateFields.startDate !== undefined) updateData.startDate = new Date(updateFields.startDate);
   if (updateFields.endDate !== undefined) updateData.endDate = updateFields.endDate ? new Date(updateFields.endDate) : null;
-  if (updateFields.scheduledSurfaceGuid !== undefined) updateData.scheduledSurfaceGuid = updateFields.scheduledSurfaceGuid;
   if (updateFields.iab !== undefined) updateData.iab = updateFields.iab;
   if (updateFields.sort !== undefined) updateData.sort = updateFields.sort;
-  if (updateFields.active !== undefined) updateData.active = updateFields.active;
-  if (updateFields.disabled !== undefined) updateData.disabled = updateFields.disabled;
 
-  // If Section is marked as inactive, set the deactivateSource and time
-  if (updateFields.active === false) {
-    updateData.deactivateSource = ActivitySource.MANUAL;
-    updateData.deactivatedAt = new Date();
-  }
 
   const updated = await db.section.update({
     where: { externalId },
