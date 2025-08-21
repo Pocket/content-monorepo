@@ -106,9 +106,7 @@ describe('mutations: Section (updateCustomSection)', () => {
           heroDescription: 'Updated Hero Description',
           startDate: '2025-02-01',
           endDate: '2025-12-31',
-          createSource: 'MANUAL',
-          active: true,
-          disabled: false,
+          updateSource: 'MANUAL',
           sort: 42,
           iab: {
             taxonomy: 'IAB-3.0',
@@ -138,8 +136,6 @@ describe('mutations: Section (updateCustomSection)', () => {
       expect(section.startDate).toEqual('2025-02-01');
       expect(section.endDate).toEqual('2025-12-31');
       expect(section.createSource).toEqual('MANUAL');
-      expect(section.active).toBe(true);
-      expect(section.disabled).toBe(false);
       expect(section.sort).toEqual(42);
       expect(Array.isArray(section.sectionItems)).toBe(true);
     });
@@ -148,7 +144,10 @@ describe('mutations: Section (updateCustomSection)', () => {
       const variables = {
         data: {
           externalId: SECTION_EXTERNAL_ID,
-          createSource: 'MANUAL',
+          title: 'Required Title',
+          description: 'Required Description',
+          startDate: '2025-01-15',
+          updateSource: 'MANUAL',
         },
       };
 
@@ -165,8 +164,10 @@ describe('mutations: Section (updateCustomSection)', () => {
 
       const section = res.body.data?.updateCustomSection;
       expect(section).toBeTruthy();
-      // Should preserve the previous title
-      expect(section.title).toEqual('Fully Updated Title');
+      // Should have the new required title
+      expect(section.title).toEqual('Required Title');
+      expect(section.description).toEqual('Required Description');
+      expect(section.startDate).toEqual('2025-01-15');
     });
 
     it('preserves existing fields when doing partial update', async () => {
@@ -180,7 +181,9 @@ describe('mutations: Section (updateCustomSection)', () => {
             data: {
               externalId: SECTION_WITH_METADATA,
               title: 'Partial Update Title',
-              createSource: 'MANUAL',
+              description: 'Original Description', // Required field
+              startDate: '2025-01-01', // Required field
+              updateSource: 'MANUAL',
             },
           },
         });
@@ -200,10 +203,13 @@ describe('mutations: Section (updateCustomSection)', () => {
       const variables = {
         data: {
           externalId: SECTION_WITH_METADATA,
+          title: 'Partial Update Title', // Required field
+          description: 'Original Description', // Required field
+          startDate: '2025-01-01', // Required field
           endDate: null,
           heroTitle: null,
           heroDescription: null,
-          createSource: 'MANUAL',
+          updateSource: 'MANUAL',
         },
       };
 
@@ -227,76 +233,8 @@ describe('mutations: Section (updateCustomSection)', () => {
       expect(section.description).toEqual('Original Description');
     });
 
-    it('properly sets deactivation fields when marking inactive', async () => {
-      const variables = {
-        data: {
-          externalId: SECTION_EXTERNAL_ID,
-          active: false,
-          createSource: 'MANUAL',
-        },
-      };
-
-      const res = await request(app)
-        .post('/admin')
-        .set(headers)
-        .send({
-          query: print(UPDATE_CUSTOM_SECTION),
-          variables,
-        });
-
-      expect(res.status).toBe(200);
-      expect(res.body.errors).toBeUndefined();
-
-      const section = res.body.data?.updateCustomSection;
-      expect(section.active).toBe(false);
-      
-      // Verify in database that deactivation fields were set
-      const dbSection = await prisma.section.findUnique({
-        where: { externalId: SECTION_EXTERNAL_ID },
-      });
-      expect(dbSection?.deactivateSource).toEqual('MANUAL');
-      expect(dbSection?.deactivatedAt).toBeTruthy();
-    });
-
-    it('can disable and enable a section', async () => {
-      // First disable
-      let res = await request(app)
-        .post('/admin')
-        .set(headers)
-        .send({
-          query: print(UPDATE_CUSTOM_SECTION),
-          variables: {
-            data: {
-              externalId: SECTION_WITH_METADATA,
-              disabled: true,
-              createSource: 'MANUAL',
-            },
-          },
-        });
-
-      expect(res.status).toBe(200);
-      let section = res.body.data?.updateCustomSection;
-      expect(section.disabled).toBe(true);
-
-      // Then enable
-      res = await request(app)
-        .post('/admin')
-        .set(headers)
-        .send({
-          query: print(UPDATE_CUSTOM_SECTION),
-          variables: {
-            data: {
-              externalId: SECTION_WITH_METADATA,
-              disabled: false,
-              createSource: 'MANUAL',
-            },
-          },
-        });
-
-      expect(res.status).toBe(200);
-      section = res.body.data?.updateCustomSection;
-      expect(section.disabled).toBe(false);
-    });
+    // Test removed: active field is no longer part of updateCustomSection mutation
+    // Test removed: disabled field is no longer part of updateCustomSection mutation
   });
 
   describe('validation errors', () => {
@@ -310,7 +248,9 @@ describe('mutations: Section (updateCustomSection)', () => {
             data: {
               externalId: 'DOES-NOT-EXIST',
               title: 'Should Fail',
-              createSource: 'MANUAL',
+              description: 'Description',
+              startDate: '2025-01-01',
+              updateSource: 'MANUAL',
             },
           },
         });
@@ -318,7 +258,7 @@ describe('mutations: Section (updateCustomSection)', () => {
       expect(res.status).toBe(200);
       expect(res.body.data).toBeNull();
       const [err] = res.body.errors;
-      expect(err.message).toMatch(/Section not found for externalId: DOES-NOT-EXIST/);
+      expect(err.message).toMatch(/Cannot update section: Section with id "DOES-NOT-EXIST" does not exist/);
     });
 
     it('returns error when trying to update non-MANUAL section', async () => {
@@ -331,7 +271,9 @@ describe('mutations: Section (updateCustomSection)', () => {
             data: {
               externalId: SECTION_EXTERNAL_ID_ML,
               title: 'Cannot Update ML Section',
-              createSource: 'MANUAL',
+              description: 'Description',
+              startDate: '2025-01-01',
+              updateSource: 'MANUAL',
             },
           },
         });
@@ -342,7 +284,7 @@ describe('mutations: Section (updateCustomSection)', () => {
       expect(err.message).toMatch(/not a custom \(MANUAL\) Section/);
     });
 
-    it('returns error when createSource is not MANUAL', async () => {
+    it('returns error when updateSource is not MANUAL', async () => {
       const res = await request(app)
         .post('/admin')
         .set(headers)
@@ -352,7 +294,9 @@ describe('mutations: Section (updateCustomSection)', () => {
             data: {
               externalId: SECTION_EXTERNAL_ID,
               title: 'Should Fail',
-              createSource: 'ML',
+              description: 'Description',
+              startDate: '2025-01-01',
+              updateSource: 'ML',
             },
           },
         });
@@ -360,10 +304,10 @@ describe('mutations: Section (updateCustomSection)', () => {
       expect(res.status).toBe(200);
       expect(res.body.data).toBeNull();
       const [err] = res.body.errors;
-      expect(err.message).toMatch(/createSource must be MANUAL/);
+      expect(err.message).toMatch(/updateSource must be MANUAL/);
     });
 
-    it('returns error when createSource is missing', async () => {
+    it('returns error when updateSource is missing', async () => {
       const res = await request(app)
         .post('/admin')
         .set(headers)
@@ -373,13 +317,15 @@ describe('mutations: Section (updateCustomSection)', () => {
             data: {
               externalId: SECTION_EXTERNAL_ID,
               title: 'Should Fail',
+              description: 'Description',
+              startDate: '2025-01-01',
             },
           },
         });
 
       expect(res.status).toBe(200);
       const [err] = res.body.errors;
-      expect(err.message).toMatch(/Field "createSource" of required type/);
+      expect(err.message).toMatch(/Field "updateSource" of required type/);
     });
   });
 
@@ -393,7 +339,10 @@ describe('mutations: Section (updateCustomSection)', () => {
           variables: {
             data: {
               externalId: SECTION_EXTERNAL_ID,
-              createSource: 'MANUAL',
+              title: 'Title',
+              description: 'Description',
+              startDate: '2025-01-01',
+              updateSource: 'MANUAL',
               iab: {
                 taxonomy: 'IAB-3.0',
                 categories: ['INVALID_CODE', 'ANOTHER_INVALID'],
@@ -417,7 +366,10 @@ describe('mutations: Section (updateCustomSection)', () => {
           variables: {
             data: {
               externalId: SECTION_EXTERNAL_ID,
-              createSource: 'MANUAL',
+              title: 'Title',
+              description: 'Description',
+              startDate: '2025-01-01',
+              updateSource: 'MANUAL',
               iab: {
                 taxonomy: 'INVALID_TAXONOMY',
                 categories: ['1'],
@@ -441,7 +393,10 @@ describe('mutations: Section (updateCustomSection)', () => {
           variables: {
             data: {
               externalId: SECTION_EXTERNAL_ID,
-              createSource: 'MANUAL',
+              title: 'Title',
+              description: 'Description',
+              startDate: '2025-01-01',
+              updateSource: 'MANUAL',
               iab: {
                 taxonomy: 'IAB-3.0',
                 categories: ['1', '2', '39'],
@@ -471,9 +426,11 @@ describe('mutations: Section (updateCustomSection)', () => {
           variables: {
             data: {
               externalId: SECTION_EXTERNAL_ID,
+              title: 'Title',
+              description: 'Description',
               startDate: '2025-03-15',
               endDate: '2025-09-30',
-              createSource: 'MANUAL',
+              updateSource: 'MANUAL',
             },
           },
         });
@@ -495,8 +452,11 @@ describe('mutations: Section (updateCustomSection)', () => {
           variables: {
             data: {
               externalId: SECTION_EXTERNAL_ID,
+              title: 'Title',
+              description: 'Description',
+              startDate: '2025-01-01',
               endDate: null,
-              createSource: 'MANUAL',
+              updateSource: 'MANUAL',
             },
           },
         });

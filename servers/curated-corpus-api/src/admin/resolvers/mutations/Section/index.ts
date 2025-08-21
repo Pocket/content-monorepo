@@ -16,8 +16,7 @@ import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
 import { 
   ActivitySource, 
-  IABMetadata,
-  UpdateCustomSectionApiInput 
+  IABMetadata
 } from 'content-common';
 import { IAB_CATEGORIES } from '../../iabCategories'
 
@@ -183,12 +182,6 @@ export async function updateCustomSection(
   // Check if the user can perform this mutation
   if (!context.authenticatedUser.canWriteToCorpus()) {
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
-  }
-
-  for (const surfaceGuid of surfacesToCheck) {
-    if (!context.authenticatedUser.canWriteToSurface(surfaceGuid)) {
-      throw new AuthenticationError(ACCESS_DENIED_ERROR);
-    }
   }
 
   // Make sure updateSource == MANUAL for now for this mutation
