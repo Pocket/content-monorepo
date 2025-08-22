@@ -101,6 +101,19 @@ type Section {
   This field returns an empty array when creating a new Section or updating a Section.
   """
   sectionItems: [SectionItem!]!
+  """
+  A short description of the Section. Relevant for custom sections.
+  """
+  description: String
+  """
+  An optional title used in hero modules. Relevant for custom sections.
+  """
+  heroTitle: String
+  """
+  An optional description or supporting text for use in hero modules.
+  Relevant for custom sections.
+  """
+  heroDescription: String
 }
 
 """
