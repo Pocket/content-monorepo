@@ -32,7 +32,6 @@ import {
 } from './lib';
 
 import { GetProspectsFilters, Context } from './types';
-//import { sendEventBridgeEvent } from './events/events';
 import { getEmitter, getTracker } from 'content-common';
 import { queueSnowplowEvent } from './events/snowplow';
 
@@ -150,15 +149,6 @@ export const resolvers = {
         throw new AuthenticationError('Not authorized for action');
       }
 
-      // 2024-01-24: keeping the below comment for if/when we send these events
-      // to event bridge instead of snowplow.
-
-      // 2022-11-10: event bridge on pause while system stability is improved.
-      // will go back to this code/send when event bridge is ready.
-      // Send the 'Dismiss' event to Pocket event bridge
-      // await sendEventBridgeEvent(prospect, userAuth);
-
-      // in the mean time, send the dismiss event directly to snowplow
       // initialize snowplow tracker
       const snowplowEmitter = getEmitter((error: object) => {
         Sentry.addBreadcrumb({ message: 'Emitter Data', data: error });
