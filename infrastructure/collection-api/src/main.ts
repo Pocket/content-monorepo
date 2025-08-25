@@ -223,10 +223,6 @@ class CollectionAPI extends TerraformStack {
               value: s3.id,
             },
             {
-              name: 'EVENT_BUS_NAME',
-              value: config.eventBusName,
-            },
-            {
               name: 'OTLP_COLLECTOR_URL',
               value: config.tracing.url,
             },
@@ -308,13 +304,6 @@ class CollectionAPI extends TerraformStack {
           {
             actions: ['s3:*'],
             resources: [`arn:aws:s3:::${s3.id}`, `arn:aws:s3:::${s3.id}/*`],
-            effect: 'Allow',
-          },
-          {
-            actions: ['events:PutEvents'],
-            resources: [
-              `arn:aws:events:${region.name}:${caller.accountId}:event-bus/${config.eventBusName}`,
-            ],
             effect: 'Allow',
           },
           {
