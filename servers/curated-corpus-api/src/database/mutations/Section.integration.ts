@@ -426,7 +426,7 @@ describe('Section', () => {
         active: true,
       });
 
-      const inactiveItem = await createSectionItemHelper(db, {
+      await createSectionItemHelper(db, {
         approvedItemId: approvedItem2.id,
         sectionId: createdSection.id,
         rank: 2,
