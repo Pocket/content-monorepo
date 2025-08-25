@@ -2,14 +2,14 @@ import { PrismaClient } from '.prisma/client';
 
 import { client } from '../client';
 import { clearDb, createApprovedItemHelper } from '../../test/helpers';
-import { createCustomSection, createSection, disableEnableSection, updateSection } from './Section';
+import { createCustomSection, createSection, disableEnableSection, updateSection, updateCustomSection } from './Section';
 import {
   createSectionHelper,
   createSectionItemHelper,
 } from '../../test/helpers';
 import { ActivitySource, ScheduledSurfacesEnum } from 'content-common';
 import { IABMetadata } from 'content-common';
-import { CreateCustomSectionInput } from '../types';
+import { CreateCustomSectionInput, UpdateCustomSectionInput } from '../types';
 
 describe('Section', () => {
   let db: PrismaClient;
@@ -251,6 +251,236 @@ describe('Section', () => {
       const result = await createCustomSection(db, input);
 
       expect(result.title).toEqual('Fake Custom Section Title');
+    });
+  });
+
+  describe('updateCustomSection', () => {
+    it('should update a Custom Editorial Section with all fields', async () => {
+      // First create a custom section
+      const createInput: CreateCustomSectionInput = {
+        title: 'Original Title',
+        description: 'Original Description',
+        heroTitle: 'Original Hero Title',
+        heroDescription: 'Original Hero Description',
+        startDate: '2025-01-01',
+        endDate: '2025-06-30',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        iab: {
+          taxonomy: 'IAB-3.0',
+          categories: ['1'],
+        },
+        createSource: ActivitySource.MANUAL,
+        sort: 10,
+        active: true,
+        disabled: false,
+      };
+
+      const createdSection = await createCustomSection(db, createInput);
+
+      // Now update it with all fields
+      const updateInput: UpdateCustomSectionInput = {
+        externalId: createdSection.externalId,
+        title: 'Updated Title',
+        description: 'Updated Description',
+        heroTitle: 'Updated Hero Title',
+        heroDescription: 'Updated Hero Description',
+        startDate: '2025-02-01',
+        endDate: '2025-12-31',
+        iab: {
+          taxonomy: 'IAB-3.0',
+          categories: ['2', '3'],
+        },
+        sort: 20,
+        updateSource: ActivitySource.MANUAL,
+      };
+
+      const result = await updateCustomSection(db, updateInput);
+
+      expect(result.externalId).toEqual(createdSection.externalId);
+      expect(result.title).toEqual('Updated Title');
+      expect(result.description).toEqual('Updated Description');
+      expect(result.heroTitle).toEqual('Updated Hero Title');
+      expect(result.heroDescription).toEqual('Updated Hero Description');
+      expect(result.startDate.toISOString()).toEqual(new Date('2025-02-01').toISOString());
+      expect(result.endDate.toISOString()).toEqual(new Date('2025-12-31').toISOString());
+      expect(result.iab).toEqual({
+        taxonomy: 'IAB-3.0',
+        categories: ['2', '3'],
+      });
+      expect(result.sort).toEqual(20);
+      expect(result.createSource).toEqual(ActivitySource.MANUAL); // Should not change
+    });
+
+    it('should update a Custom Editorial Section with partial fields', async () => {
+      // First create a custom section with all fields
+      const createInput: CreateCustomSectionInput = {
+        title: 'Original Title',
+        description: 'Original Description',
+        heroTitle: 'Original Hero Title',
+        heroDescription: 'Original Hero Description',
+        startDate: '2025-01-01',
+        endDate: '2025-06-30',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        iab: {
+          taxonomy: 'IAB-3.0',
+          categories: ['1'],
+        },
+        createSource: ActivitySource.MANUAL,
+        sort: 10,
+        active: true,
+        disabled: false,
+      };
+
+      const createdSection = await createCustomSection(db, createInput);
+
+      // Update with only required fields
+      const updateInput: UpdateCustomSectionInput = {
+        externalId: createdSection.externalId,
+        title: 'Partially Updated Title',
+        description: 'Partially Updated Description',
+        startDate: '2025-03-01',
+        updateSource: ActivitySource.MANUAL,
+      };
+
+      const result = await updateCustomSection(db, updateInput);
+
+      expect(result.externalId).toEqual(createdSection.externalId);
+      expect(result.title).toEqual('Partially Updated Title');
+      expect(result.description).toEqual('Partially Updated Description');
+      expect(result.startDate.toISOString()).toEqual(new Date('2025-03-01').toISOString());
+      // These should remain unchanged
+      expect(result.heroTitle).toEqual('Original Hero Title');
+      expect(result.heroDescription).toEqual('Original Hero Description');
+      expect(result.endDate.toISOString()).toEqual(new Date('2025-06-30').toISOString());
+      expect(result.sort).toEqual(10);
+      expect(result.iab).toEqual({
+        taxonomy: 'IAB-3.0',
+        categories: ['1'],
+      });
+    });
+
+    it('should clear optional fields when set to null', async () => {
+      // First create a custom section with optional fields
+      const createInput: CreateCustomSectionInput = {
+        title: 'Original Title',
+        description: 'Original Description',
+        heroTitle: 'Original Hero Title',
+        heroDescription: 'Original Hero Description',
+        startDate: '2025-01-01',
+        endDate: '2025-06-30',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        createSource: ActivitySource.MANUAL,
+        active: true,
+        disabled: false,
+      };
+
+      const createdSection = await createCustomSection(db, createInput);
+
+      // Update with null values for optional fields
+      const updateInput: UpdateCustomSectionInput = {
+        externalId: createdSection.externalId,
+        title: 'Title with nulls',
+        description: 'Description',
+        startDate: '2025-01-01',
+        endDate: null,
+        heroTitle: null,
+        heroDescription: null,
+        updateSource: ActivitySource.MANUAL,
+      };
+
+      const result = await updateCustomSection(db, updateInput);
+
+      expect(result.externalId).toEqual(createdSection.externalId);
+      expect(result.title).toEqual('Title with nulls');
+      expect(result.endDate).toBeNull();
+      expect(result.heroTitle).toBeNull();
+      expect(result.heroDescription).toBeNull();
+    });
+
+    it('should include active SectionItems in the response', async () => {
+      // Create a custom section
+      const createInput: CreateCustomSectionInput = {
+        title: 'Section with Items',
+        description: 'Description',
+        startDate: '2025-01-01',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        createSource: ActivitySource.MANUAL,
+        active: true,
+        disabled: false,
+      };
+
+      const createdSection = await createCustomSection(db, createInput);
+
+      // Create approved items and section items
+      const approvedItem1 = await createApprovedItemHelper(db, {
+        title: 'Item 1',
+      });
+      const approvedItem2 = await createApprovedItemHelper(db, {
+        title: 'Item 2',
+      });
+
+      await createSectionItemHelper(db, {
+        approvedItemId: approvedItem1.id,
+        sectionId: createdSection.id,
+        rank: 1,
+        active: true,
+      });
+
+      const inactiveItem = await createSectionItemHelper(db, {
+        approvedItemId: approvedItem2.id,
+        sectionId: createdSection.id,
+        rank: 2,
+        active: false,
+      });
+
+      // Update the section
+      const updateInput: UpdateCustomSectionInput = {
+        externalId: createdSection.externalId,
+        title: 'Updated Section with Items',
+        description: 'Updated Description',
+        startDate: '2025-02-01',
+        updateSource: ActivitySource.MANUAL,
+      };
+
+      const result = await updateCustomSection(db, updateInput);
+
+      expect(result.title).toEqual('Updated Section with Items');
+      expect(result.sectionItems).toHaveLength(1); // Only active items
+      expect(result.sectionItems[0].active).toBe(true);
+      expect(result.sectionItems[0].approvedItem.title).toEqual('Item 1');
+    });
+
+    it('should preserve fields not included in the update', async () => {
+      // Create a section with specific values
+      const createInput: CreateCustomSectionInput = {
+        title: 'Original Title',
+        description: 'Original Description',
+        startDate: '2025-01-01',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        createSource: ActivitySource.MANUAL,
+        sort: 42,
+        active: true,
+        disabled: false,
+      };
+
+      const createdSection = await createCustomSection(db, createInput);
+
+      // Update only the title
+      const updateInput: UpdateCustomSectionInput = {
+        externalId: createdSection.externalId,
+        title: 'New Title Only',
+        description: 'Original Description',
+        startDate: '2025-01-01',
+        updateSource: ActivitySource.MANUAL,
+      };
+
+      const result = await updateCustomSection(db, updateInput);
+
+      expect(result.title).toEqual('New Title Only');
+      expect(result.sort).toEqual(42); // Should remain unchanged
+      expect(result.active).toBe(true); // Should remain unchanged
+      expect(result.disabled).toBe(false); // Should remain unchanged
+      expect(result.scheduledSurfaceGuid).toEqual(ScheduledSurfacesEnum.NEW_TAB_EN_US); // Should remain unchanged
     });
   });
 });

@@ -8,6 +8,7 @@ import {
   ActivitySource,
   ScheduledSurfacesEnum,
   MozillaAccessGroup,
+  UpdateCustomSectionApiInput,
 } from 'content-common';
 
 import { client } from '../../../../database/client';
@@ -97,23 +98,23 @@ describe('mutations: Section (updateCustomSection)', () => {
 
   describe('successful updates', () => {
     it('updates a custom section with all fields', async () => {
-      const variables = {
-        data: {
-          externalId: SECTION_EXTERNAL_ID,
-          title: 'Fully Updated Title',
-          description: 'Fully Updated Description',
-          heroTitle: 'Updated Hero Title',
-          heroDescription: 'Updated Hero Description',
-          startDate: '2025-02-01',
-          endDate: '2025-12-31',
-          updateSource: 'MANUAL',
-          sort: 42,
-          iab: {
-            taxonomy: 'IAB-3.0',
-            categories: ['1', '2'],
-          },
+      const data: UpdateCustomSectionApiInput = {
+        externalId: SECTION_EXTERNAL_ID,
+        title: 'Fully Updated Title',
+        description: 'Fully Updated Description',
+        heroTitle: 'Updated Hero Title',
+        heroDescription: 'Updated Hero Description',
+        startDate: '2025-02-01',
+        endDate: '2025-12-31',
+        updateSource: ActivitySource.MANUAL,
+        sort: 42,
+        iab: {
+          taxonomy: 'IAB-3.0',
+          categories: ['1', '2'],
         },
       };
+      
+      const variables = { data };
 
       const res = await request(app)
         .post('/admin')
@@ -141,15 +142,15 @@ describe('mutations: Section (updateCustomSection)', () => {
     });
 
     it('updates with minimal fields (only required)', async () => {
-      const variables = {
-        data: {
-          externalId: SECTION_EXTERNAL_ID,
-          title: 'Required Title',
-          description: 'Required Description',
-          startDate: '2025-01-15',
-          updateSource: 'MANUAL',
-        },
+      const data: UpdateCustomSectionApiInput = {
+        externalId: SECTION_EXTERNAL_ID,
+        title: 'Required Title',
+        description: 'Required Description',
+        startDate: '2025-01-15',
+        updateSource: ActivitySource.MANUAL,
       };
+      
+      const variables = { data };
 
       const res = await request(app)
         .post('/admin')
@@ -172,20 +173,20 @@ describe('mutations: Section (updateCustomSection)', () => {
 
     it('preserves existing fields when doing partial update', async () => {
       // First, get the current state
+      const data: UpdateCustomSectionApiInput = {
+        externalId: SECTION_WITH_METADATA,
+        title: 'Partial Update Title',
+        description: 'Original Description', // Required field
+        startDate: '2025-01-01', // Required field
+        updateSource: ActivitySource.MANUAL,
+      };
+      
       const initialRes = await request(app)
         .post('/admin')
         .set(headers)
         .send({
           query: print(UPDATE_CUSTOM_SECTION),
-          variables: {
-            data: {
-              externalId: SECTION_WITH_METADATA,
-              title: 'Partial Update Title',
-              description: 'Original Description', // Required field
-              startDate: '2025-01-01', // Required field
-              updateSource: 'MANUAL',
-            },
-          },
+          variables: { data },
         });
 
       expect(initialRes.status).toBe(200);
@@ -200,18 +201,18 @@ describe('mutations: Section (updateCustomSection)', () => {
     });
 
     it('can clear optional fields by setting to null', async () => {
-      const variables = {
-        data: {
-          externalId: SECTION_WITH_METADATA,
-          title: 'Partial Update Title', // Required field
-          description: 'Original Description', // Required field
-          startDate: '2025-01-01', // Required field
-          endDate: null,
-          heroTitle: null,
-          heroDescription: null,
-          updateSource: 'MANUAL',
-        },
+      const data: UpdateCustomSectionApiInput = {
+        externalId: SECTION_WITH_METADATA,
+        title: 'Partial Update Title', // Required field
+        description: 'Original Description', // Required field
+        startDate: '2025-01-01', // Required field
+        endDate: null,
+        heroTitle: null,
+        heroDescription: null,
+        updateSource: ActivitySource.MANUAL,
       };
+      
+      const variables = { data };
 
       const res = await request(app)
         .post('/admin')
@@ -239,20 +240,20 @@ describe('mutations: Section (updateCustomSection)', () => {
 
   describe('validation errors', () => {
     it('returns error when section does not exist', async () => {
+      const data: UpdateCustomSectionApiInput = {
+        externalId: 'DOES-NOT-EXIST',
+        title: 'Should Fail',
+        description: 'Description',
+        startDate: '2025-01-01',
+        updateSource: ActivitySource.MANUAL,
+      };
+      
       const res = await request(app)
         .post('/admin')
         .set(headers)
         .send({
           query: print(UPDATE_CUSTOM_SECTION),
-          variables: {
-            data: {
-              externalId: 'DOES-NOT-EXIST',
-              title: 'Should Fail',
-              description: 'Description',
-              startDate: '2025-01-01',
-              updateSource: 'MANUAL',
-            },
-          },
+          variables: { data },
         });
 
       expect(res.status).toBe(200);
@@ -262,20 +263,20 @@ describe('mutations: Section (updateCustomSection)', () => {
     });
 
     it('returns error when trying to update non-MANUAL section', async () => {
+      const data: UpdateCustomSectionApiInput = {
+        externalId: SECTION_EXTERNAL_ID_ML,
+        title: 'Cannot Update ML Section',
+        description: 'Description',
+        startDate: '2025-01-01',
+        updateSource: ActivitySource.MANUAL,
+      };
+      
       const res = await request(app)
         .post('/admin')
         .set(headers)
         .send({
           query: print(UPDATE_CUSTOM_SECTION),
-          variables: {
-            data: {
-              externalId: SECTION_EXTERNAL_ID_ML,
-              title: 'Cannot Update ML Section',
-              description: 'Description',
-              startDate: '2025-01-01',
-              updateSource: 'MANUAL',
-            },
-          },
+          variables: { data },
         });
 
       expect(res.status).toBe(200);
@@ -285,20 +286,20 @@ describe('mutations: Section (updateCustomSection)', () => {
     });
 
     it('returns error when updateSource is not MANUAL', async () => {
+      const data: UpdateCustomSectionApiInput = {
+        externalId: SECTION_EXTERNAL_ID,
+        title: 'Should Fail',
+        description: 'Description',
+        startDate: '2025-01-01',
+        updateSource: ActivitySource.ML,
+      };
+      
       const res = await request(app)
         .post('/admin')
         .set(headers)
         .send({
           query: print(UPDATE_CUSTOM_SECTION),
-          variables: {
-            data: {
-              externalId: SECTION_EXTERNAL_ID,
-              title: 'Should Fail',
-              description: 'Description',
-              startDate: '2025-01-01',
-              updateSource: 'ML',
-            },
-          },
+          variables: { data },
         });
 
       expect(res.status).toBe(200);
@@ -331,24 +332,24 @@ describe('mutations: Section (updateCustomSection)', () => {
 
   describe('IAB validation', () => {
     it('validates IAB categories are correct', async () => {
+      const data: UpdateCustomSectionApiInput = {
+        externalId: SECTION_EXTERNAL_ID,
+        title: 'Title',
+        description: 'Description',
+        startDate: '2025-01-01',
+        updateSource: ActivitySource.MANUAL,
+        iab: {
+          taxonomy: 'IAB-3.0',
+          categories: ['INVALID_CODE', 'ANOTHER_INVALID'],
+        },
+      };
+      
       const res = await request(app)
         .post('/admin')
         .set(headers)
         .send({
           query: print(UPDATE_CUSTOM_SECTION),
-          variables: {
-            data: {
-              externalId: SECTION_EXTERNAL_ID,
-              title: 'Title',
-              description: 'Description',
-              startDate: '2025-01-01',
-              updateSource: 'MANUAL',
-              iab: {
-                taxonomy: 'IAB-3.0',
-                categories: ['INVALID_CODE', 'ANOTHER_INVALID'],
-              },
-            },
-          },
+          variables: { data },
         });
 
       expect(res.status).toBe(200);
@@ -358,24 +359,24 @@ describe('mutations: Section (updateCustomSection)', () => {
     });
 
     it('validates IAB taxonomy version is supported', async () => {
+      const data: UpdateCustomSectionApiInput = {
+        externalId: SECTION_EXTERNAL_ID,
+        title: 'Title',
+        description: 'Description',
+        startDate: '2025-01-01',
+        updateSource: ActivitySource.MANUAL,
+        iab: {
+          taxonomy: 'INVALID_TAXONOMY',
+          categories: ['1'],
+        },
+      };
+      
       const res = await request(app)
         .post('/admin')
         .set(headers)
         .send({
           query: print(UPDATE_CUSTOM_SECTION),
-          variables: {
-            data: {
-              externalId: SECTION_EXTERNAL_ID,
-              title: 'Title',
-              description: 'Description',
-              startDate: '2025-01-01',
-              updateSource: 'MANUAL',
-              iab: {
-                taxonomy: 'INVALID_TAXONOMY',
-                categories: ['1'],
-              },
-            },
-          },
+          variables: { data },
         });
 
       expect(res.status).toBe(200);
@@ -385,24 +386,24 @@ describe('mutations: Section (updateCustomSection)', () => {
     });
 
     it('accepts valid IAB metadata', async () => {
+      const data: UpdateCustomSectionApiInput = {
+        externalId: SECTION_EXTERNAL_ID,
+        title: 'Title',
+        description: 'Description',
+        startDate: '2025-01-01',
+        updateSource: ActivitySource.MANUAL,
+        iab: {
+          taxonomy: 'IAB-3.0',
+          categories: ['1', '2', '39'],
+        },
+      };
+      
       const res = await request(app)
         .post('/admin')
         .set(headers)
         .send({
           query: print(UPDATE_CUSTOM_SECTION),
-          variables: {
-            data: {
-              externalId: SECTION_EXTERNAL_ID,
-              title: 'Title',
-              description: 'Description',
-              startDate: '2025-01-01',
-              updateSource: 'MANUAL',
-              iab: {
-                taxonomy: 'IAB-3.0',
-                categories: ['1', '2', '39'],
-              },
-            },
-          },
+          variables: { data },
         });
 
       expect(res.status).toBe(200);
@@ -418,21 +419,21 @@ describe('mutations: Section (updateCustomSection)', () => {
 
   describe('date validation', () => {
     it('accepts valid date formats', async () => {
+      const data: UpdateCustomSectionApiInput = {
+        externalId: SECTION_EXTERNAL_ID,
+        title: 'Title',
+        description: 'Description',
+        startDate: '2025-03-15',
+        endDate: '2025-09-30',
+        updateSource: ActivitySource.MANUAL,
+      };
+      
       const res = await request(app)
         .post('/admin')
         .set(headers)
         .send({
           query: print(UPDATE_CUSTOM_SECTION),
-          variables: {
-            data: {
-              externalId: SECTION_EXTERNAL_ID,
-              title: 'Title',
-              description: 'Description',
-              startDate: '2025-03-15',
-              endDate: '2025-09-30',
-              updateSource: 'MANUAL',
-            },
-          },
+          variables: { data },
         });
 
       expect(res.status).toBe(200);
@@ -444,21 +445,21 @@ describe('mutations: Section (updateCustomSection)', () => {
     });
 
     it('can set endDate to null to make section permanent', async () => {
+      const data: UpdateCustomSectionApiInput = {
+        externalId: SECTION_EXTERNAL_ID,
+        title: 'Title',
+        description: 'Description',
+        startDate: '2025-01-01',
+        endDate: null,
+        updateSource: ActivitySource.MANUAL,
+      };
+      
       const res = await request(app)
         .post('/admin')
         .set(headers)
         .send({
           query: print(UPDATE_CUSTOM_SECTION),
-          variables: {
-            data: {
-              externalId: SECTION_EXTERNAL_ID,
-              title: 'Title',
-              description: 'Description',
-              startDate: '2025-01-01',
-              endDate: null,
-              updateSource: 'MANUAL',
-            },
-          },
+          variables: { data },
         });
 
       expect(res.status).toBe(200);

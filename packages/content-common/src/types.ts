@@ -125,7 +125,7 @@ export type UpdateCustomSectionApiInput = {
   endDate?: string;
   iab?: IABMetadata;
   sort?: number;
-  createSource: ActivitySource;
+  updateSource: ActivitySource;
 };
 
 export type DisableEnableSectionApiInput = {
