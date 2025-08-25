@@ -235,7 +235,7 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
 
   it('should filter sections by createSource when provided', async () => {
     // Create a MANUAL section
-    const manualSection = await createSectionHelper(db, {
+    await createSectionHelper(db, {
       externalId: 'manual-section-1',
       createSource: ActivitySource.MANUAL,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
@@ -289,7 +289,7 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     dayAfterTomorrow.setDate(today.getDate() + 2);
 
     // Create custom sections with different statuses
-    const scheduledSection = await createSectionHelper(db, {
+    await createSectionHelper(db, {
       externalId: 'scheduled-section',
       createSource: ActivitySource.MANUAL,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
@@ -298,7 +298,7 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
       startDate: tomorrow,
     });
 
-    const liveSection = await createSectionHelper(db, {
+    await createSectionHelper(db, {
       externalId: 'live-section',
       createSource: ActivitySource.MANUAL,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
@@ -307,7 +307,7 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
       startDate: yesterday,
     });
 
-    const expiredSection = await createSectionHelper(db, {
+    await createSectionHelper(db, {
       externalId: 'expired-section',
       createSource: ActivitySource.MANUAL,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
@@ -345,7 +345,7 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
 
   it('should return custom section fields', async () => {
     // Create a custom section with description, heroTitle, and heroDescription
-    const customSection = await createSectionHelper(db, {
+    await createSectionHelper(db, {
       externalId: 'custom-section-with-metadata',
       createSource: ActivitySource.MANUAL,
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
