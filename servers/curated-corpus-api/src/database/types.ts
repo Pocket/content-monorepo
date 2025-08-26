@@ -162,7 +162,6 @@ export type UpdateCustomSectionInput = {
   heroDescription?: string;
   startDate: string;
   endDate?: string;
-  scheduledSurfaceGuid?: string;
   iab?: IABMetadata;
   sort?: number;
   updateSource: ActivitySource;
