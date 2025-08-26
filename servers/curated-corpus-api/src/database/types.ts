@@ -166,7 +166,6 @@ export type UpdateCustomSectionInput = {
   iab?: IABMetadata;
   sort?: number;
   updateSource: ActivitySource;
-  disabled?: boolean;
 };
 
 export type ApprovedItem = ApprovedItemModel & {

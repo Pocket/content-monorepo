@@ -234,8 +234,6 @@ describe('mutations: Section (updateCustomSection)', () => {
       expect(section.description).toEqual('Original Description');
     });
 
-    // Test removed: active field is no longer part of updateCustomSection mutation
-    // Test removed: disabled field is no longer part of updateCustomSection mutation
   });
 
   describe('validation errors', () => {
