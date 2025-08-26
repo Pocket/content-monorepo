@@ -13,21 +13,12 @@ export default {
       table:
         process.env.PROSPECT_API_PROSPECTS_TABLE || 'PROAPI-local-Prospects',
     },
-    eventBus: {
-      name:
-        process.env.EVENT_BUS_NAME || 'PocketEventBridge-Dev-Shared-Event-Bus',
-      eventBridge: { source: 'prospect-events' },
-    },
   },
   // environment variables below are set in .aws/src/main.ts
   sentry: {
     dsn: process.env.SENTRY_DSN || '',
     release: process.env.GIT_SHA || '',
     environment: process.env.NODE_ENV || 'development',
-  },
-  // The App ID value is used to let the Analytics team know the origin of this event.
-  eventBridge: {
-    appId: 'pocket-prospect-api',
   },
   snowplow: {
     // appId should end in '-dev' outside of production such that Dbt can filter events:

@@ -1,8 +1,5 @@
-import {
-  RejectedCuratedCorpusItem,
-  ScheduledItem as ScheduledItemModel,
-} from '.prisma/client';
-import { ScheduledItem, CorpusItem, ApprovedItem } from '../database/types';
+import { RejectedCuratedCorpusItem } from '.prisma/client';
+import { ScheduledItem, ApprovedItem } from '../database/types';
 import { ScheduledCorpusItemStatus } from '../shared/types';
 import { ActionScreen, ActivitySource } from 'content-common';
 
@@ -72,48 +69,3 @@ export type ScheduledCorpusItemPayload = {
     action_screen?: ActionScreen;
   };
 };
-
-// Base interface for events sent to event bus
-export interface BaseEventBusPayload {
-  eventType: string;
-}
-
-// Data for events sent to event bus for Scheduled Surface schedule
-export type ScheduledItemEventBusPayload = BaseEventBusPayload &
-  Pick<ScheduledItemModel, 'createdBy' | 'scheduledSurfaceGuid' | 'source'> &
-  Pick<
-    ApprovedItem,
-    'topic' | 'isSyndicated' | keyof Omit<CorpusItem, 'id' | 'image' | 'target'>
-  > & {
-    scheduledItemExternalId: string; // externalId of ScheduledItem
-    approvedItemExternalId: string; // externalId of ApprovedItem
-    scheduledDate: string; // UTC Date string YYYY-MM-DD
-    createdAt: string; // UTC timestamp string
-    updatedAt: string; // UTC timestamp string
-  };
-
-export type ApprovedItemEventBusPayload = BaseEventBusPayload &
-  Partial<
-    Pick<
-      ApprovedItem,
-      | 'url'
-      | 'title'
-      | 'excerpt'
-      | 'language'
-      | 'publisher'
-      | 'imageUrl'
-      | 'topic'
-      | 'isSyndicated'
-      | 'createdBy'
-      | 'authors'
-      | 'isCollection'
-      | 'domainName'
-      | 'isTimeSensitive'
-      | 'source'
-    >
-  > & {
-    approvedItemExternalId: string; // externalId of ApprovedItem
-    createdAt?: string; // UTC timestamp string
-    updatedAt: string; // UTC timestamp string;
-    datePublished?: string; // UTC timestamp string;
-  };

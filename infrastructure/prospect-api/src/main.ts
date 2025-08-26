@@ -270,13 +270,6 @@ class ProspectAPI extends TerraformStack {
             effect: 'Allow',
           },
           {
-            actions: ['events:PutEvents'],
-            resources: [
-              `arn:aws:events:${region.name}:${caller.accountId}:event-bus/${config.envVars.eventBusName}`,
-            ],
-            effect: 'Allow',
-          },
-          {
             actions: [
               'logs:PutLogEvents',
               'logs:CreateLogGroup',

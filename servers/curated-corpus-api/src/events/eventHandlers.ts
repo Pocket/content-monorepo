@@ -3,10 +3,9 @@ import { tracker } from './snowplow/tracker';
 import config from '../config';
 import { ReviewedItemSnowplowHandler } from './snowplow/ReviewedItemSnowplowHandler';
 import { ScheduledItemSnowplowHandler } from './snowplow/ScheduledItemSnowplowHandler';
-import { EventBusHandler } from './eventBus';
 
 export type CuratedCorpusEventHandlerFn = (
-  emitter: CuratedCorpusEventEmitter
+  emitter: CuratedCorpusEventEmitter,
 ) => void;
 
 /**
@@ -15,10 +14,10 @@ export type CuratedCorpusEventHandlerFn = (
  * @param emitter
  */
 export function corpusItemSnowplowEventHandler(
-  emitter: CuratedCorpusEventEmitter
+  emitter: CuratedCorpusEventEmitter,
 ): void {
   const snowplowEventsToListen = Object.values(
-    config.snowplow.corpusItemEvents
+    config.snowplow.corpusItemEvents,
   ) as string[];
   new ReviewedItemSnowplowHandler(emitter, tracker, snowplowEventsToListen);
 }
@@ -27,18 +26,10 @@ export function corpusItemSnowplowEventHandler(
  * @param emitter
  */
 export function corpusScheduleSnowplowEventHandler(
-  emitter: CuratedCorpusEventEmitter
+  emitter: CuratedCorpusEventEmitter,
 ): void {
   const snowplowEventsToListen = Object.values(
-    config.snowplow.corpusScheduleEvents
+    config.snowplow.corpusScheduleEvents,
   ) as string[];
   new ScheduledItemSnowplowHandler(emitter, tracker, snowplowEventsToListen);
-}
-
-/**
- * Register listeners for events to forward to Event Bus
- * @param emitter
- */
-export function eventBusHandler(emitter: CuratedCorpusEventEmitter): void {
-  new EventBusHandler(emitter);
 }

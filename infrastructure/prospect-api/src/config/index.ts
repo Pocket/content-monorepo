@@ -46,7 +46,6 @@ export const config = {
     startPeriod: 0,
   },
   envVars: {
-    eventBusName: `PocketEventBridge-${environment}-Shared-Event-Bus`,
     snowplowEndpoint,
   },
   pagerduty: infraConfig.pagerduty,
