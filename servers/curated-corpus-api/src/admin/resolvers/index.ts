@@ -29,7 +29,12 @@ import {
 import { getOpenGraphFields } from './queries/OpenGraphFields';
 import { hasTrustedDomain } from './queries/ApprovedItem/hasTrustedDomain';
 import { getSectionsWithSectionItems } from './queries/Section';
-import { createOrUpdateSection, disableEnableSection, createCustomSection } from './mutations/Section';
+import {
+  createOrUpdateSection,
+  disableEnableSection,
+  createCustomSection,
+  deleteCustomSection
+} from './mutations/Section';
 import { createSectionItem, removeSectionItem } from './mutations/SectionItem';
 
 export const resolvers = {
@@ -121,5 +126,6 @@ export const resolvers = {
     removeSectionItem: removeSectionItem,
     disableEnableSection: disableEnableSection,
     createCustomSection: createCustomSection,
+    deleteCustomSection: deleteCustomSection,
   },
 };

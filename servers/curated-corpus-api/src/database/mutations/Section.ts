@@ -190,3 +190,51 @@ export async function createCustomSection(
     sectionItems: []
   }
 }
+
+/**
+* This mutation soft-deletes a Custom Section.
+ * The Section is marked as in-active, `deactivatedBy` it set to MANUAL,
+ * & `deactivatedAt` Date is set
+ * @param sectionExternalId
+ * @param sectionId
+*/
+export async function deleteCustomSection(
+  db: PrismaClient,
+  sectionId:number,
+  sectionExternalId: string
+): Promise<Section> {
+  const sectionItemUpdateData: Prisma.SectionItemUpdateManyMutationInput = {
+    active: false,
+    deactivateSource: ActivitySource.MANUAL,
+    deactivatedAt: new Date(),
+  };
+
+  // If a Section has any active SectionItems associted with it, mark those as in-active.
+  await db.sectionItem.updateMany({
+    where: {
+      sectionId: sectionId,
+      active: true,
+    },
+    data: sectionItemUpdateData,
+  });
+
+  // Construct the data to delete the Custom Section
+  const deleteCustomSectionData: Prisma.SectionUpdateInput = {
+    active: false,
+    deactivateSource: ActivitySource.MANUAL,
+    deactivatedAt: new Date(),
+  };
+
+  const deletedSection = await db.section.update({
+    where: {
+      externalId: sectionExternalId,
+      active: true,
+    },
+    data: deleteCustomSectionData,
+  });
+
+  return {
+    ...deletedSection,
+    sectionItems: []
+  }
+}

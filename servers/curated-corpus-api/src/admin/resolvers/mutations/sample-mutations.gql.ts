@@ -136,3 +136,12 @@ export const CREATE_CUSTOM_SECTION = gql`
     }
     ${AdminSectionData}
 `;
+
+export const DELETE_CUSTOM_SECTION = gql`
+    mutation DeleteCustomSection($externalId: ID!) {
+        deleteCustomSection(externalId: $externalId) {
+            ...AdminSectionData
+        }
+    }
+    ${AdminSectionData}
+`;

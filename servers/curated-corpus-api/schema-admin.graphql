@@ -1314,6 +1314,18 @@ type Mutation {
   This mutation is to be used by curators via admin tool.
   """
   createCustomSection(data: CreateCustomSectionInput!): Section!
+
+  """
+  Deletes a custom section. This is a soft-delete & the Section
+  and it's SectionItems are marked as in-active.
+  This mutation is to be used by curators via admin tool.
+  """
+  deleteCustomSection(
+    """
+    UUID of the custom section.
+    """
+    externalId: ID!
+  ): Section!
 }
 
 """

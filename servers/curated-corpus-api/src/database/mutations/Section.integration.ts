@@ -2,7 +2,7 @@ import { PrismaClient } from '.prisma/client';
 
 import { client } from '../client';
 import { clearDb, createApprovedItemHelper } from '../../test/helpers';
-import { createCustomSection, createSection, disableEnableSection, updateSection } from './Section';
+import { createCustomSection, createSection, deleteCustomSection, disableEnableSection, updateSection } from './Section';
 import {
   createSectionHelper,
   createSectionItemHelper,
@@ -251,6 +251,47 @@ describe('Section', () => {
       const result = await createCustomSection(db, input);
 
       expect(result.title).toEqual('Fake Custom Section Title');
+    });
+  });
+
+  describe('deleteCustomSection', () => {
+    it('should safe-delete a Section - mark it in-active, set deactivatedAt & deactivateSource', async () => {
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'Fake Item!',
+      });
+
+      const section = await createSectionHelper(db, {});
+
+      const sectionItem = await createSectionItemHelper(db, {
+        approvedItemId: approvedItem.id,
+        sectionId: section.id,
+        rank: 1,
+        active: true,
+      });
+
+      // control what `new Date()` returns in the update below so we can
+      // strictly test the resulting values
+      jest.useFakeTimers({
+        now: newDateMock,
+        advanceTimers: false,
+      });
+
+      const result = await deleteCustomSection(db, section.id, section.externalId);
+
+      // stop controlling `new Date()`
+      jest.useRealTimers();
+
+      // Lookup in-active sectionItem
+      const inactiveSectioinItem = await db.sectionItem.findUnique({
+        where: { externalId: sectionItem.externalId },
+      });
+
+      expect(result.externalId).toEqual(section.externalId);
+      expect(result.active).toBeFalsy();
+      expect(inactiveSectioinItem.externalId).toEqual(sectionItem.externalId);
+      expect(inactiveSectioinItem.active).toBeFalsy();
+      expect(result.deactivateSource).toEqual(ActivitySource.MANUAL);
+      expect(result.deactivatedAt).toEqual(newDateMock);
     });
   });
 });
