@@ -89,6 +89,49 @@ export const resolvers = {
   Section: {
     createdAt: UnixTimestampResolver,
     updatedAt: UnixTimestampResolver,
+    /**
+     * Compute the status of a Section dynamically based on:
+     * - disabled flag
+     * - startDate
+     * - endDate
+     */
+    status: (section) => {
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0); // Set to start of day for date comparison
+
+      // DISABLED: disabled flag is true
+      if (section.disabled) {
+        return 'DISABLED';
+      }
+
+      // For sections with startDate (custom sections)
+      if (section.startDate) {
+        const startDate = new Date(section.startDate);
+        startDate.setHours(0, 0, 0, 0);
+
+        // SCHEDULED: disabled flag is false AND startDate is in the future
+        if (startDate > currentDate) {
+          return 'SCHEDULED';
+        }
+
+        // EXPIRED: disabled is false AND currentDate >= endDate
+        if (section.endDate) {
+          const endDate = new Date(section.endDate);
+          endDate.setHours(0, 0, 0, 0);
+          if (currentDate >= endDate) {
+            return 'EXPIRED';
+          }
+        }
+
+        // LIVE: disabled is false AND startDate <= currentDate AND (endDate is null OR currentDate < endDate)
+        if (startDate <= currentDate && (!section.endDate || currentDate < new Date(section.endDate))) {
+          return 'LIVE';
+        }
+      }
+
+      // For ML sections or sections without dates, if not disabled, they are LIVE
+      return 'LIVE';
+    },
   },
   SectionItem: {
     createdAt: UnixTimestampResolver,

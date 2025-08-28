@@ -629,15 +629,17 @@ extend type Section {
   """
   updatedAt: Int!
   """
-  The status of the Section.
+  Computed status for the Section, based on startDate, endDate, and disabled.
   """
   status: SectionStatus
   """
-  The start date for when the Section should be live.
+  The date when the Section becomes eligible for display.
+  Format: YYYY-MM-DD.
   """
   startDate: Date
   """
-  The date when the Section is expired.
+  An optional date of when the Section should stop being displayed.
+  Format: YYYY-MM-DD.
   """
   endDate: Date
 }
@@ -1223,7 +1225,7 @@ type Query {
   """
   Retrieves a list of active and enabled/disabled Sections with their corresponding active SectionItems for a scheduled surface.
   """
-  getSectionsWithSectionItems(scheduledSurfaceGuid: ID!): [Section!]!
+  getSectionsWithSectionItems(scheduledSurfaceGuid: ID!, createSource: ActivitySource): [Section!]!
 }
 
 type Mutation {
