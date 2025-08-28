@@ -260,6 +260,51 @@ describe('mutations: Section (updateCustomSection)', () => {
       expect(err.message).toMatch(/Cannot update section: Section with id "DOES-NOT-EXIST" does not exist/);
     });
 
+    it('returns error when curator does not have access to the section surface', async () => {
+      // Create a section on a different surface (NEW_TAB_EN_US)
+      await prisma.section.create({
+        data: {
+          externalId: 'SECTION-DIFFERENT-SURFACE',
+          title: 'Different Surface Section',
+          description: 'Section on a different surface',
+          scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+          iab: null,
+          sort: 1,
+          createSource: ActivitySource.MANUAL,
+          active: true,
+          disabled: false,
+        },
+      });
+
+      // Headers for a curator with only SANDBOX access
+      const limitedHeaders = {
+        name: 'Limited User',
+        username: 'limited.user@test.com',
+        groups: `group1,group2,${MozillaAccessGroup.CURATOR_SANDBOX}`,
+      };
+
+      const data: UpdateCustomSectionApiInput = {
+        externalId: 'SECTION-DIFFERENT-SURFACE',
+        title: 'Should Not Be Allowed',
+        description: 'This update should fail',
+        startDate: '2025-01-01',
+        updateSource: ActivitySource.MANUAL,
+      };
+
+      const res = await request(app)
+        .post('/admin')
+        .set(limitedHeaders)
+        .send({
+          query: print(UPDATE_CUSTOM_SECTION),
+          variables: { data },
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeNull();
+      const [err] = res.body.errors;
+      expect(err.message).toMatch(/You do not have access to perform this action/i);
+    });
+
     it('returns error when trying to update non-MANUAL section', async () => {
       const data: UpdateCustomSectionApiInput = {
         externalId: SECTION_EXTERNAL_ID_ML,

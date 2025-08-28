@@ -179,8 +179,8 @@ export async function updateCustomSection(
     );
   }
 
-  // Check if the user can perform this mutation
-  if (!context.authenticatedUser.canWriteToCorpus()) {
+  // Check if the user can execute this mutation.
+  if (!context.authenticatedUser.canWriteToSurface(existingSection.scheduledSurfaceGuid)) {
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
 
