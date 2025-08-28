@@ -697,6 +697,52 @@ input RemoveSectionItemInput {
 }
 
 """
+Input data for updating a Custom Editorial Section
+"""
+input UpdateCustomSectionInput {
+  """
+  An alternative primary key in UUID format supplied by ML.
+  """
+  externalId: ID!
+  """
+  The title of the custom section displayed to the users.
+  """
+  title: String!
+  """
+  The description of the custom section displayed to the users.
+  """
+  description: String!
+  """
+  An optional title used in hero modules.
+  """
+  heroTitle: String
+  """
+  An optional description or supporting text for use in hero modules.
+  """
+  heroDescription: String
+  """
+  The date of when the Section should go "live" for display on NewTab.
+  """
+  startDate: Date!
+  """
+  An optional date of when the Section should stop being displayed.
+  """
+  endDate: Date
+  """
+  Optional IAB metadata input
+  """
+  iab: IABMetadataInput
+  """
+  The source which updated the Section.
+  """
+  updateSource: ActivitySource!
+  """
+  Controls the display order of Sections.
+  """
+  sort: Int
+}
+
+"""
 Input data for creating a Custom Editorial Section
 """
 input CreateCustomSectionInput {
@@ -1314,6 +1360,12 @@ type Mutation {
   This mutation is to be used by curators via admin tool.
   """
   createCustomSection(data: CreateCustomSectionInput!): Section!
+
+  """
+  Updates an existing custom editorial section entity.
+  This mutation is to be used by curators via admin tool.
+  """
+  updateCustomSection(data: UpdateCustomSectionInput!): Section!
 }
 
 """
