@@ -23,6 +23,7 @@ import { DELETE_CUSTOM_SECTION } from '../sample-mutations.gql';
 import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
+import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 
 describe('mutations: Section (deleteCustomSection)', () => {
   let app: Express.Application;
@@ -152,7 +153,7 @@ describe('mutations: Section (deleteCustomSection)', () => {
         variables: { externalId: activeSection.externalId },
       });
 
-    // we should have a NotFoundError
+    // we should have a BAS_USER_INPUT
     expect(result.body.errors).not.toBeUndefined();
     expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
 
@@ -160,5 +161,28 @@ describe('mutations: Section (deleteCustomSection)', () => {
     expect(result.body.errors?.[0].message).toContain(
       'Cannot delete Section: createSource must be MANUAL',
     );
+  });
+
+  it('should fail to delete a Custom Section if curator does not have access to scheduled surface', async () => {
+
+    // Headers for a user with only SANDBOX surface access
+    const sandboxHeader = {
+      name: 'SandboxUser',
+      username: 'sandboxuser@test.com',
+      groups: `group1,group2,${MozillaAccessGroup.CURATOR_SANDBOX}`,
+    };
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(sandboxHeader)
+      .send({
+        query: print(DELETE_CUSTOM_SECTION),
+        variables: { externalId: 'active-123' },
+      });
+
+    expect(result.body.errors).not.toBeUndefined();
+    expect(result.body.data).toBeNull();
+
+    expect(result.body.errors?.[0].message).toContain(ACCESS_DENIED_ERROR);
   });
 });

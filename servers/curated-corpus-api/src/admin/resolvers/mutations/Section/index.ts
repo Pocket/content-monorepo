@@ -147,11 +147,6 @@ export async function deleteCustomSection(
   args,
   context: IAdminContext,
 ): Promise<Section> {
-  // Check if the user can perform this mutation
-  if (!context.authenticatedUser.canWriteToCorpus()) {
-    throw new AuthenticationError(ACCESS_DENIED_ERROR);
-  }
-
   // check if the Section with the passed externalId exists
   const section = await context.db.section.findUnique({
     where: { externalId: args.externalId },
@@ -164,6 +159,11 @@ export async function deleteCustomSection(
     );
   }
 
+  // Check if the user can execute this mutation.
+  if (!context.authenticatedUser.canWriteToSurface(section.scheduledSurfaceGuid)) {
+    throw new AuthenticationError(ACCESS_DENIED_ERROR);
+  }
+
   // Make sure createSource == MANUAL for now for this mutation
   if (section.createSource !== ActivitySource.MANUAL) {
     throw new UserInputError(
@@ -173,7 +173,7 @@ export async function deleteCustomSection(
 
   // Save sectionId to pass to the db mutation
   const sectionId = section.id;
-  
+
   // soft-delete the custom section
   return await dbDeleteCustomSection(context.db, sectionId, args.externalId);
 }
