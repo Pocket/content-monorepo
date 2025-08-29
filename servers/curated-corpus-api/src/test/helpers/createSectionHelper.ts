@@ -13,6 +13,11 @@ export interface CreateSectionHelperOptionalInput {
   title?: string;
   active?: boolean;
   disabled?: boolean;
+  description?: string;
+  heroTitle?: string;
+  heroDescription?: string;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 // create an array of scheduled surface guids for random selection

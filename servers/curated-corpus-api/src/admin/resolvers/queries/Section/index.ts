@@ -27,5 +27,10 @@ export async function getSectionsWithSectionItems(
   ) {
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
-  return await dbGetSectionsWithSectionItems(context.db, false, args.scheduledSurfaceGuid);
+  return await dbGetSectionsWithSectionItems(
+    context.db, 
+    false, 
+    args.scheduledSurfaceGuid,
+    args.createSource
+  );
 }

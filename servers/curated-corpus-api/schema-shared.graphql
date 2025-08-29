@@ -102,15 +102,16 @@ type Section {
   """
   sectionItems: [SectionItem!]!
   """
-  Optional description for the Section.
+  A short description of the Section.
   """
   description: String
   """
-  Optional hero title for the Section.
+  An optional title used in hero modules. Relevant for custom sections.
   """
   heroTitle: String
   """
-  Optional hero description for the Section.
+  An optional description or supporting text for use in hero modules.
+  Relevant for custom sections.
   """
   heroDescription: String
 }
