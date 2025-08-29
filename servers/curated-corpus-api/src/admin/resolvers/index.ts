@@ -33,7 +33,8 @@ import {
   createOrUpdateSection,
   disableEnableSection,
   createCustomSection,
-  deleteCustomSection
+  deleteCustomSection,
+  updateCustomSection,
 } from './mutations/Section';
 import { createSectionItem, removeSectionItem } from './mutations/SectionItem';
 
@@ -127,5 +128,6 @@ export const resolvers = {
     disableEnableSection: disableEnableSection,
     createCustomSection: createCustomSection,
     deleteCustomSection: deleteCustomSection,
+    updateCustomSection: updateCustomSection,
   },
 };

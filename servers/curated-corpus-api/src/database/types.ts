@@ -154,6 +154,19 @@ export type CreateCustomSectionInput = {
   disabled: boolean;
 };
 
+export type UpdateCustomSectionInput = {
+  externalId: string;
+  title: string;
+  description: string;
+  heroTitle?: string;
+  heroDescription?: string;
+  startDate: string;
+  endDate?: string;
+  iab?: IABMetadata;
+  sort?: number;
+  updateSource: ActivitySource;
+};
+
 export type ApprovedItem = ApprovedItemModel & {
   authors: ApprovedItemAuthor[];
 };
