@@ -31,6 +31,7 @@ import { hasTrustedDomain } from './queries/ApprovedItem/hasTrustedDomain';
 import { getSectionsWithSectionItems } from './queries/Section';
 import { createOrUpdateSection, disableEnableSection, createCustomSection } from './mutations/Section';
 import { createSectionItem, removeSectionItem } from './mutations/SectionItem';
+import { computeSectionStatus } from './utils/computeSectionStatus';
 
 export const resolvers = {
   // The custom scalars from GraphQL-Scalars that we find useful.
@@ -95,43 +96,7 @@ export const resolvers = {
      * - startDate
      * - endDate
      */
-    status: (section) => {
-      const currentDate = new Date();
-      currentDate.setHours(0, 0, 0, 0); // Set to start of day for date comparison
-
-      // DISABLED: disabled flag is true
-      if (section.disabled) {
-        return 'DISABLED';
-      }
-
-      // For sections with startDate (custom sections)
-      if (section.startDate) {
-        const startDate = new Date(section.startDate);
-        startDate.setHours(0, 0, 0, 0);
-
-        // SCHEDULED: disabled flag is false AND startDate is in the future
-        if (startDate > currentDate) {
-          return 'SCHEDULED';
-        }
-
-        // EXPIRED: disabled is false AND currentDate >= endDate
-        if (section.endDate) {
-          const endDate = new Date(section.endDate);
-          endDate.setHours(0, 0, 0, 0);
-          if (currentDate >= endDate) {
-            return 'EXPIRED';
-          }
-        }
-
-        // LIVE: disabled is false AND startDate <= currentDate AND (endDate is null OR currentDate < endDate)
-        if (startDate <= currentDate && (!section.endDate || currentDate < new Date(section.endDate))) {
-          return 'LIVE';
-        }
-      }
-
-      // For ML sections or sections without dates, if not disabled, they are LIVE
-      return 'LIVE';
-    },
+    status: computeSectionStatus,
   },
   SectionItem: {
     createdAt: UnixTimestampResolver,
