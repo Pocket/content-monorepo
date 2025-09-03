@@ -11,6 +11,7 @@ export interface CreateSectionHelperOptionalInput {
   scheduledSurfaceGuid?: ScheduledSurfacesEnum;
   iab?: IABMetadata,
   title?: string;
+  description?: string;
   active?: boolean;
   disabled?: boolean;
 }

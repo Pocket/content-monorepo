@@ -34,6 +34,7 @@ describe('createSectionHelper', () => {
       externalId: 'AnExternalIdFromML',
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
       title: 'How to Build Community',
+      description: 'a small description here'
     };
 
     const section: Section = await createSectionHelper(db, data);
@@ -43,5 +44,6 @@ describe('createSectionHelper', () => {
     expect(section.externalId).toEqual(data.externalId);
     expect(section.scheduledSurfaceGuid).toEqual(data.scheduledSurfaceGuid);
     expect(section.title).toEqual(data.title);
+    expect(section.description).toEqual(data.description);
   });
 });

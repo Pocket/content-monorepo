@@ -115,6 +115,7 @@ export type CreateScheduleReviewInput = {
 export type CreateSectionInput = {
   externalId: string;
   title: string;
+  description?: string;
   scheduledSurfaceGuid: string;
   iab?: IABMetadata,
   sort?: number;

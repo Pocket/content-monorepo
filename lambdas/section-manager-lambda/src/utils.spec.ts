@@ -89,6 +89,7 @@ describe('utils', () => {
         sort: 42,
         source: CorpusItemSource.ML,
         title: 'test title',
+        description: 'test description'
       };
 
       const apiInput =
@@ -103,6 +104,7 @@ describe('utils', () => {
       expect(apiInput.iab).toEqual(sqsData.iab);
       expect(apiInput.sort).toEqual(sqsData.sort);
       expect(apiInput.title).toEqual(sqsData.title);
+      expect(apiInput.description).toEqual(sqsData.description);
     });
   });
 

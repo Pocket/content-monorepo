@@ -93,6 +93,7 @@ export type ApprovedItemRequiredInput = {
 export type CreateOrUpdateSectionApiInput = {
   externalId: string;
   title: string;
+  description?: string;
   scheduledSurfaceGuid: string;
   iab?: IABMetadata;
   sort?: number;

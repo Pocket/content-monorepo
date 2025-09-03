@@ -84,6 +84,7 @@ describe('mutations: Section (createOrUpdateSection)', () => {
     input = {
       externalId: '123-abc',
       title: 'Fake Section Title',
+      description: 'Fake description',
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
       iab: iabMetadata,
       sort: 1,
@@ -108,6 +109,9 @@ describe('mutations: Section (createOrUpdateSection)', () => {
     );
     expect(result.body.data?.createOrUpdateSection.title).toEqual(
       'Fake Section Title',
+    );
+    expect(result.body.data?.createOrUpdateSection.description).toEqual(
+      'Fake description',
     );
     expect(
       result.body.data?.createOrUpdateSection.scheduledSurfaceGuid,
@@ -165,6 +169,7 @@ describe('mutations: Section (createOrUpdateSection)', () => {
     input = {
       externalId: 'bcg-456',
       title: 'Updating Fake Section Title',
+      description: 'Updating fake description',
       scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
       iab: iabMetadata,
       createSource: ActivitySource.ML,
@@ -195,6 +200,9 @@ describe('mutations: Section (createOrUpdateSection)', () => {
     );
     expect(result.body.data?.createOrUpdateSection.title).toEqual(
       'Updating Fake Section Title',
+    );
+    expect(result.body.data?.createOrUpdateSection.description).toEqual(
+      'Updating fake description',
     );
     expect(
       result.body.data?.createOrUpdateSection.scheduledSurfaceGuid,
