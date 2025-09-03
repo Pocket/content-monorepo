@@ -17,6 +17,7 @@ export async function createSection(
   const {
     externalId,
     title,
+    description,
     scheduledSurfaceGuid,
     iab,
     sort,
@@ -27,6 +28,7 @@ export async function createSection(
   const createData = {
     externalId,
     title,
+    description,
     scheduledSurfaceGuid,
     iab,
     sort,
@@ -57,10 +59,11 @@ export async function updateSection(
   data: CreateSectionInput,
   sectionId: number,
 ): Promise<Section> {
-  const { externalId, title, scheduledSurfaceGuid, iab, sort, active } = data;
+  const { externalId, title, description, scheduledSurfaceGuid, iab, sort, active } = data;
 
   const sectionUpdateData: Prisma.SectionUpdateInput = {
     title,
+    description,
     scheduledSurfaceGuid,
     iab,
     sort,

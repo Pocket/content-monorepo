@@ -208,6 +208,7 @@ export const mapSqsSectionDataToCreateOrUpdateSectionApiInput = (
     iab: sqsSectionData.iab,
     sort: sqsSectionData.sort,
     title: sqsSectionData.title,
+    description: sqsSectionData.description,
   };
 };
 

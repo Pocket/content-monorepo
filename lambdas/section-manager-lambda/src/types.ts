@@ -17,6 +17,7 @@ export interface SqsSectionWithSectionItems {
   sort: number;
   source: CorpusItemSource.ML;
   title: string;
+  description?: string;
 }
 
 export interface SqsSectionItem {
@@ -48,6 +49,7 @@ export type CreateOrUpdateSectionApiInput = {
   iab?: IABMetadata;
   sort?: number;
   title: string;
+  description?: string;
 };
 
 export type CreateSectionItemApiInput = {

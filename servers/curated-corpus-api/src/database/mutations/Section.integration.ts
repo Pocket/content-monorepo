@@ -46,6 +46,7 @@ describe('Section', () => {
       const input = {
         externalId: 'njh-789',
         title: 'Fake Section Title',
+        description: 'Fake section description',
         scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
         iab: iabMetadata,
         createSource: ActivitySource.MANUAL,
@@ -68,6 +69,7 @@ describe('Section', () => {
       const section = await createSectionHelper(db, {
         externalId: 'oiueh-123',
         title: 'New Title',
+        description: 'Fake description'
       });
 
       const sectionItem = await createSectionItemHelper(db, {
@@ -101,6 +103,7 @@ describe('Section', () => {
       const input = {
         externalId: 'oiueh-123',
         title: 'Updating new title',
+        description: 'Updating new description',
         scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
         createSource: ActivitySource.MANUAL,
         sort: 3,
@@ -111,6 +114,7 @@ describe('Section', () => {
 
       expect(result.externalId).toEqual('oiueh-123');
       expect(result.title).toEqual('Updating new title');
+      expect(result.description).toEqual('Updating new description');
       // exepct deactivateSource to be null
       expect(result.deactivateSource).toBeNull();
       expect(result.sort).toEqual(3);
