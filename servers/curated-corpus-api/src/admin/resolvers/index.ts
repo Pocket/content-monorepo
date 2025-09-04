@@ -37,6 +37,7 @@ import {
   updateCustomSection,
 } from './mutations/Section';
 import { createSectionItem, removeSectionItem } from './mutations/SectionItem';
+import { computeSectionStatus } from './utils/computeSectionStatus';
 
 export const resolvers = {
   // The custom scalars from GraphQL-Scalars that we find useful.
@@ -95,6 +96,13 @@ export const resolvers = {
   Section: {
     createdAt: UnixTimestampResolver,
     updatedAt: UnixTimestampResolver,
+    /**
+     * Compute the status of a Section dynamically based on:
+     * - disabled flag
+     * - startDate
+     * - endDate
+     */
+    status: computeSectionStatus,
   },
   SectionItem: {
     createdAt: UnixTimestampResolver,

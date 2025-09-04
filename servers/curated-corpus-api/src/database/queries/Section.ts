@@ -10,11 +10,13 @@ import { Section } from '../types';
  * @param db
  * @param isPublicContext
  * @param scheduledSurfaceGuid
+ * @param createSource - optional filter to query by createSource (ML or MANUAL)
  */
 export async function getSectionsWithSectionItems(
   db: PrismaClient,
   isPublicContext: boolean,
-  scheduledSurfaceGuid: string
+  scheduledSurfaceGuid: string,
+  createSource?: 'ML' | 'MANUAL'
 ): Promise<Section[]> {
   const sections = await db.section.findMany({
     where: {
@@ -22,6 +24,8 @@ export async function getSectionsWithSectionItems(
       active: true,
       // if public query, filter by disabled
       ...(isPublicContext ? { disabled: false } : {}),
+      // if createSource is provided, filter by it
+      ...(createSource ? { createSource } : {}),
     },
     include: {
       sectionItems: {

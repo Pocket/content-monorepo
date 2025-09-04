@@ -53,6 +53,12 @@ export const AdminSectionData = gql`
         disabled
         createdAt
         updatedAt
+        status
+        startDate
+        endDate
+        description
+        heroTitle
+        heroDescription
     }
     ${BaseSectionData}
     ${AdminSectionItemData}

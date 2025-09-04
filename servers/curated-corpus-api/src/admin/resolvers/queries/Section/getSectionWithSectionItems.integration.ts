@@ -232,4 +232,87 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     expect(result.body.errors).toBeUndefined();
     expect(result.body.data?.getSectionsWithSectionItems).toEqual([]);
   });
+
+  it('should filter sections by createSource when provided', async () => {
+    // Create a MANUAL section
+    await createSectionHelper(db, {
+      externalId: 'manual-section-1',
+      createSource: ActivitySource.MANUAL,
+      scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      active: true,
+      disabled: false,
+    });
+
+    // Query for only ML sections
+    const mlResult = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(GET_SECTIONS_WITH_SECTION_ITEMS),
+        variables: {
+          scheduledSurfaceGuid: "NEW_TAB_EN_US",
+          createSource: "ML"
+        },
+      });
+
+    expect(mlResult.body.errors).toBeUndefined();
+    // Should return only ML sections (3 from beforeEach)
+    expect(mlResult.body.data?.getSectionsWithSectionItems.length).toEqual(3);
+    expect(mlResult.body.data?.getSectionsWithSectionItems.every(s => s.createSource === 'ML')).toBeTruthy();
+
+    // Query for only MANUAL sections
+    const manualResult = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(GET_SECTIONS_WITH_SECTION_ITEMS),
+        variables: {
+          scheduledSurfaceGuid: "NEW_TAB_EN_US",
+          createSource: "MANUAL"
+        },
+      });
+
+    expect(manualResult.body.errors).toBeUndefined();
+    // Should return only MANUAL section
+    expect(manualResult.body.data?.getSectionsWithSectionItems.length).toEqual(1);
+    expect(manualResult.body.data?.getSectionsWithSectionItems[0].externalId).toEqual('manual-section-1');
+    expect(manualResult.body.data?.getSectionsWithSectionItems[0].createSource).toEqual('MANUAL');
+  });
+
+  it('should return custom section fields', async () => {
+    // Create a custom section with description, heroTitle, and heroDescription
+    await createSectionHelper(db, {
+      externalId: 'custom-section-with-metadata',
+      createSource: ActivitySource.MANUAL,
+      scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      active: true,
+      disabled: false,
+      description: 'Custom section description',
+      heroTitle: 'Hero Title Text',
+      heroDescription: 'Hero Description Text',
+      startDate: new Date(),
+    });
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(GET_SECTIONS_WITH_SECTION_ITEMS),
+        variables: {
+          scheduledSurfaceGuid: "NEW_TAB_EN_US",
+          createSource: "MANUAL"
+        },
+      });
+
+    expect(result.body.errors).toBeUndefined();
+    
+    const section = result.body.data?.getSectionsWithSectionItems.find(
+      s => s.externalId === 'custom-section-with-metadata'
+    );
+    
+    expect(section?.description).toEqual('Custom section description');
+    expect(section?.heroTitle).toEqual('Hero Title Text');
+    expect(section?.heroDescription).toEqual('Hero Description Text');
+    expect(section?.status).toEqual('LIVE');
+  });
 });
