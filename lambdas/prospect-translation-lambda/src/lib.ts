@@ -13,7 +13,6 @@ import {
 } from 'prospectapi-common';
 
 import {
-  applyApTitleCase,
   formatQuotesEN,
   formatQuotesDashesDE,
   CorpusLanguage,
@@ -481,7 +480,7 @@ export const hydrateProspectMetadata = (
   // apply title/excerpt formatting for EN & DE
   if (prospect.language?.toUpperCase() === CorpusLanguage.EN) {
     prospect.title =
-      prospect.title && formatQuotesEN(applyApTitleCase(prospect.title));
+      prospect.title && formatQuotesEN(prospect.title);
     prospect.excerpt = prospect.excerpt && formatQuotesEN(prospect.excerpt);
   } else if (prospect.language?.toUpperCase() === CorpusLanguage.DE) {
     prospect.title = prospect.title && formatQuotesDashesDE(prospect.title);

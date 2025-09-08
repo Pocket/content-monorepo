@@ -4,7 +4,6 @@ import { SQSRecord } from 'aws-lambda';
 import { assert, TypeGuardError } from 'typia';
 
 import {
-  applyApTitleCase,
   ActivitySource,
   ApprovedItemAuthor,
   CorpusLanguage,
@@ -119,7 +118,7 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
       // title and excerpt have different formatting for different languages
       if (language === CorpusLanguage.EN) {
         // only apply formatting if title and excerpt are defined
-        title = title && formatQuotesEN(applyApTitleCase(title));
+        title = title && formatQuotesEN(title);
         excerpt = excerpt && formatQuotesEN(excerpt);
       } else if (language === CorpusLanguage.DE) {
         title = title && formatQuotesDashesDE(title);

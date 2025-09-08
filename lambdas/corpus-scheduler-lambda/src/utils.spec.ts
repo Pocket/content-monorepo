@@ -128,13 +128,9 @@ describe('utils', function () {
           parserItem,
         );
 
-      // check that AP style has been applied
-      expect(output.title).not.toEqual(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-      );
-
+      // check that curly quotes have been applied
       expect(output.title).toEqual(
-        'Romantic Norms Are in Flux. No Wonder Everyone’s Obsessed With Polyamory.',
+        'Romantic norms are in flux. No wonder everyone\u2019s obsessed with polyamory.',
       );
 
       // validate all other fields
@@ -157,7 +153,7 @@ describe('utils', function () {
       // update expected values due to lang switches above
       expectedCreateApprovedCorpusItemApiOutput.language = CorpusLanguage.DE;
       expectedCreateApprovedCorpusItemApiOutput.title =
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.';
+        'Romantic norms are in flux. No wonder everyone\u2019s obsessed with polyamory.';
 
       expect(output).toEqual(expectedCreateApprovedCorpusItemApiOutput);
     });
@@ -225,7 +221,7 @@ describe('utils', function () {
       const incompleteParserItem: UrlMetadata = {
         url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
         title:
-          'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+          'Romantic norms are in flux. No wonder everyone\u2019s obsessed with polyamory.',
         excerpt:
           'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
         language: 'EN',
