@@ -2,6 +2,8 @@ import { print } from 'graphql';
 import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
+
+import config from '../../../../config';
 import { client } from '../../../../database/client';
 
 import {
@@ -19,7 +21,11 @@ import {
 } from 'content-common';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { MozillaAccessGroup } from 'content-common';
-import { clearDb, createApprovedItemHelper, createScheduledItemHelper } from '../../../../test/helpers';
+import {
+  clearDb,
+  createApprovedItemHelper,
+  createScheduledItemHelper,
+} from '../../../../test/helpers';
 import {
   CREATE_APPROVED_ITEM,
   REJECT_APPROVED_ITEM,
@@ -36,7 +42,8 @@ describe('mutations: ApprovedItem - authentication checks', () => {
   let server: ApolloServer<IAdminContext>;
   let graphQLUrl: string;
   let db: PrismaClient;
-  const rejectApprovedItemForDomainEndpoint = '/admin/reject-approved-corpus-items-for-domain';
+  const rejectApprovedItemForDomainEndpoint =
+    '/admin/reject-approved-corpus-items-for-domain';
 
   beforeAll(async () => {
     // port 0 tells express to dynamically assign an available port
@@ -65,7 +72,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
       { name: 'Jane Austen', sortOrder: 2 },
     ],
     status: CuratedStatus.CORPUS,
-    imageUrl: 'https://test.com/image.png',
+    imageUrl: `${config.aws.s3.path}/image.png`,
     language: CorpusLanguage.DE,
     publisher: 'Convective Cloud',
     datePublished: '2024-01-02',
@@ -192,7 +199,7 @@ describe('mutations: ApprovedItem - authentication checks', () => {
         excerpt: 'Updated excerpt',
         authors,
         status: CuratedStatus.CORPUS,
-        imageUrl: 'https://test.com/image.png',
+        imageUrl: `${config.aws.s3.path}/image.png`,
         language: CorpusLanguage.DE,
         publisher: 'Cloud Factory',
         datePublished: '2024-02-22',
@@ -444,22 +451,22 @@ describe('mutations: ApprovedItem - authentication checks', () => {
         title: '15 Unheard Ways To Achieve Greater Terraform',
         status: CuratedStatus.RECOMMENDATION,
         language: 'EN',
-        url: "https://elpais.com/example-one/"
+        url: 'https://elpais.com/example-one/',
       });
       // create a scheduled entry for item1
       await createScheduledItemHelper(db, {
-        approvedItem: item1
+        approvedItem: item1,
       });
 
       const item2 = await createApprovedItemHelper(db, {
         title: '16 Unheard Ways To Achieve Greater Terraform',
         status: CuratedStatus.RECOMMENDATION,
         language: 'EN',
-        url: "https://elpais.com/example-two/"
+        url: 'https://elpais.com/example-two/',
       });
       // create a scheduled entry for item2
       await createScheduledItemHelper(db, {
-        approvedItem: item2
+        approvedItem: item2,
       });
 
       // expect 2 approved corpus items

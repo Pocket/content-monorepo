@@ -11,7 +11,10 @@ import {
   deleteApprovedItem as dbDeleteApprovedItem,
   updateApprovedItem as dbUpdateApprovedItem,
 } from '../../../../database/mutations';
-import { getApprovedItemByExternalId, getApprovedItemsForDomain } from '../../../../database/queries';
+import {
+  getApprovedItemByExternalId,
+  getApprovedItemsForDomain,
+} from '../../../../database/queries';
 import {
   ApprovedCorpusItemPayload,
   RejectedCorpusItemPayload,
@@ -19,7 +22,7 @@ import {
   ScheduledCorpusItemEventType,
   ScheduledCorpusItemPayload,
 } from '../../../../events/types';
-import { uploadImageToS3 } from '../../../aws/upload';
+import { uploadImageToS3, getS3UrlForImageUrl } from '../../../aws/upload';
 import {
   ACCESS_DENIED_ERROR,
   ApprovedItemS3ImageUrl,
@@ -33,9 +36,7 @@ import {
 } from '../../../../database/types';
 import { IAdminContext } from '../../../context';
 import { createTrustedDomainIfPastScheduledDateExists } from '../../../../database/mutations/TrustedDomain';
-import {
-  getScheduledItemsForApprovedCorpusItem,
-} from '../../../../database/queries/ScheduledItem';
+import { getScheduledItemsForApprovedCorpusItem } from '../../../../database/queries/ScheduledItem';
 import { deleteScheduledItem } from '../ScheduledItem';
 import { RejectApprovedCorpusItemsForDomainResponse } from '../../types';
 
@@ -92,6 +93,21 @@ export async function createApprovedItem(
       `Cannot create a corpus item with the topic "${approvedItemData.topic}".`,
     );
   }
+
+  // validate image
+  const s3ImageUrl = await getS3UrlForImageUrl(
+    context.s3,
+    approvedItemData.imageUrl,
+  );
+
+  if (s3ImageUrl === null) {
+    throw new UserInputError(
+      `Could not generate an S3 URL for the given image: ${approvedItemData.imageUrl}`,
+    );
+  }
+
+  // make sure the image we put in the db is the S3 image
+  approvedItemData.imageUrl = s3ImageUrl;
 
   const approvedItem = await dbCreateApprovedItem(
     context.db,
@@ -178,6 +194,21 @@ export async function updateApprovedItem(
       `Cannot create a corpus item with the topic "${updatedItemData.topic}".`,
     );
   }
+
+  // validate image
+  const s3ImageUrl = await getS3UrlForImageUrl(
+    context.s3,
+    updatedItemData.imageUrl,
+  );
+
+  if (s3ImageUrl === null) {
+    throw new UserInputError(
+      `Could not generate an S3 URL for the given image: ${updatedItemData.imageUrl}`,
+    );
+  }
+
+  // make sure the image we put in the db is the S3 image
+  updatedItemData.imageUrl = s3ImageUrl;
 
   // To be able to delete authors associated with a corpus item, we first need
   // to get the internal (integer) id for the story. This means doing a DB query
@@ -333,7 +364,7 @@ export async function rejectApprovedCorpusItemsForDomain(
   }
   // 1. Get approved corpus items for a domain name
   const approvedItems = await getApprovedItemsForDomain(context.db, domainName);
-  if (testing ) {
+  if (testing) {
     return { totalFoundApprovedCorpusItems: approvedItems.length };
   }
   const rejectedItemExternalIds: (string | null)[] = [];
@@ -341,25 +372,44 @@ export async function rejectApprovedCorpusItemsForDomain(
   for (const approvedItem of approvedItems) {
     try {
       // 2. Get scheduled items
-      const scheduledItems = await getScheduledItemsForApprovedCorpusItem(context.db, approvedItem.id);
+      const scheduledItems = await getScheduledItemsForApprovedCorpusItem(
+        context.db,
+        approvedItem.id,
+      );
 
       // 3. Unschedule all scheduled items
       for (const scheduledItem of scheduledItems) {
-        await deleteScheduledItem(null, { data: { externalId: scheduledItem.externalId, actionScreen: ActionScreen.CORPUS } }, context);
+        await deleteScheduledItem(
+          null,
+          {
+            data: {
+              externalId: scheduledItem.externalId,
+              actionScreen: ActionScreen.CORPUS,
+            },
+          },
+          context,
+        );
       }
 
       // 4. Construct input for rejecting approvied Item
       const rejectApprovedItemInput = {
         externalId: approvedItem.externalId,
-        reason: "PUBLISHER_REQUEST",
+        reason: 'PUBLISHER_REQUEST',
         actionScreen: ActionScreen.CORPUS,
       };
 
       // 5. Reject approved item
-      const rejectedItem = await rejectApprovedItem(null, { data: rejectApprovedItemInput }, context);
+      const rejectedItem = await rejectApprovedItem(
+        null,
+        { data: rejectApprovedItemInput },
+        context,
+      );
       rejectedItemExternalIds.push(rejectedItem?.externalId || null);
     } catch (error) {
-      console.error(`Error processing ApprovedCorpusItem ${approvedItem.id}:`, error);
+      console.error(
+        `Error processing ApprovedCorpusItem ${approvedItem.id}:`,
+        error,
+      );
       // Silently continue even if error
       rejectedItemExternalIds.push(null);
     }
@@ -368,8 +418,8 @@ export async function rejectApprovedCorpusItemsForDomain(
   const rejectedItemsCount = rejectedItemExternalIds.filter(Boolean).length;
   return {
     totalFoundApprovedCorpusItems: approvedItems.length,
-    totalRejectedApprovedCorpusItems: rejectedItemsCount
-  }
+    totalRejectedApprovedCorpusItems: rejectedItemsCount,
+  };
 }
 
 /**
