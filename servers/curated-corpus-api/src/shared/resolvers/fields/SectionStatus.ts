@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { SectionStatus } from '../types';
+import { SectionStatus } from '../../../database/types';
 
 interface Section {
   disabled: boolean;
