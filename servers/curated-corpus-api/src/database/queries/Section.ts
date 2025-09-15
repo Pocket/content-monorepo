@@ -22,6 +22,7 @@ export async function getSectionsWithSectionItems(
   const currentDate = DateTime.utc().startOf('day').toJSDate();
 
   const filterLiveSections = {
+    disabled: false,
     OR: [
       // ML sections (no startDate or endDate)
       { startDate: null, endDate: null },
@@ -43,7 +44,7 @@ export async function getSectionsWithSectionItems(
     where: {
       scheduledSurfaceGuid,
       active: true,
-      ...(isPublicContext ? { disabled: false, ...filterLiveSections } : {}),
+      ...(isPublicContext && filterLiveSections),
       ...(createSource ? { createSource } : {}),
     },
     include: {
