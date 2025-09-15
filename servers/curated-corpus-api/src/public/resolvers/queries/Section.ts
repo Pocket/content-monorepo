@@ -1,8 +1,7 @@
 import {
   getSectionsWithSectionItems as dbGetSectionsWithSectionItems
 } from '../../../database/queries';
-import { Section, SectionStatus } from '../../../database/types';
-import { computeSectionStatus } from '../../../shared/resolvers/fields/SectionStatus';
+import { Section } from '../../../database/types';
 import { IPublicContext } from '../../context';
 
 /**
@@ -18,11 +17,6 @@ export async function getSections(
   context: IPublicContext,
 ): Promise<Section[]> {
   const { filters } = args;
-  // Fetch active & non-disabled Sections from DB with active SectionItems
-  const sections = await dbGetSectionsWithSectionItems(context.db, true, filters.scheduledSurfaceGuid);
-
-  // Filter only LIVE sections using computeSectionStatus
-  const liveSections = sections.filter((section) => computeSectionStatus(section) === SectionStatus.LIVE);
-
-  return liveSections;
+  // Fetch active & non-disabled + LIVE Sections from DB with active SectionItems
+  return await dbGetSectionsWithSectionItems(context.db, true, filters.scheduledSurfaceGuid);
 }

@@ -1,9 +1,10 @@
 import { PrismaClient } from '.prisma/client';
+import { DateTime } from 'luxon';
 import { Section } from '../types';
 
 /**
  * This query retrieves all active Sections & their associated active SectionItems for a given ScheduledSurface.
- * If the context is public, only active & enabled Sections are retrieved.
+ * If the context is public, only LIVE, active & enabled Sections are retrieved.
  * If the context is admin, all active & enabled/disabled Sections are retrieved.
  * Returns an empty array if no Sections are found.
  *
@@ -16,21 +17,46 @@ export async function getSectionsWithSectionItems(
   db: PrismaClient,
   isPublicContext: boolean,
   scheduledSurfaceGuid: string,
-  createSource?: 'ML' | 'MANUAL'
+  createSource?: 'ML' | 'MANUAL',
 ): Promise<Section[]> {
+  const currentDate = DateTime.utc().startOf('day').toJSDate();
+
+  const filterLiveSections = {
+    OR: [
+      // ML sections (no startDate or endDate)
+      { startDate: null, endDate: null },
+      // Custom Sections that are currently live
+      {
+        // startDate <= currentDate
+        startDate: { lte: currentDate },
+        OR: [
+          // a. no endDate
+          { endDate: null },
+          //b. currentDate < endDate
+          { endDate: { gt: currentDate } },
+        ],
+      },
+    ],
+  };
+
   const sections = await db.section.findMany({
     where: {
       scheduledSurfaceGuid: scheduledSurfaceGuid,
       active: true,
-      // if public query, filter by disabled
-      ...(isPublicContext ? { disabled: false } : {}),
+      // if public query, filter by disabled & live sections
+      ...(isPublicContext
+        ? {
+          disabled: false,
+          ...filterLiveSections,
+        }
+        : {}),
       // if createSource is provided, filter by it
       ...(createSource ? { createSource } : {}),
     },
     include: {
       sectionItems: {
         where: {
-          active: true
+          active: true,
         },
         include: {
           approvedItem: {
@@ -39,10 +65,10 @@ export async function getSectionsWithSectionItems(
                 orderBy: [{ sortOrder: 'asc' }],
               },
             },
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   });
   return sections;
 }

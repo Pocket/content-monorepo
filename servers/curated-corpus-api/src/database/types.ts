@@ -111,12 +111,6 @@ export type CreateScheduleReviewInput = {
   scheduledSurfaceGuid: string;
   scheduledDate: string;
 };
-export enum SectionStatus {
-  DISABLED = 'DISABLED',
-  SCHEDULED = 'SCHEDULED',
-  EXPIRED = 'EXPIRED',
-  LIVE = 'LIVE',
-}
 
 export type CreateSectionInput = {
   externalId: string;

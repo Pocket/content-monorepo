@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import { computeSectionStatus } from './SectionStatus';
-import { SectionStatus } from '../../../database/types';
+import { SectionStatus } from '../../types';
 
 describe('computeSectionStatus', () => {
   let mockNow: DateTime;
