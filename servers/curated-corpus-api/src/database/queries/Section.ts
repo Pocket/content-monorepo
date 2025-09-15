@@ -25,14 +25,14 @@ export async function getSectionsWithSectionItems(
     OR: [
       // ML sections (no startDate or endDate)
       { startDate: null, endDate: null },
-      // Custom Sections that are currently live
       {
-        // startDate <= currentDate
+        // Custom Sections that are currently live
+        // a. startDate <= currentDate
         startDate: { lte: currentDate },
         OR: [
-          // a. no endDate
+          // b. no endDate
           { endDate: null },
-          //b. currentDate < endDate
+          // c. currentDate < endDate
           { endDate: { gt: currentDate } },
         ],
       },
@@ -41,16 +41,9 @@ export async function getSectionsWithSectionItems(
 
   const sections = await db.section.findMany({
     where: {
-      scheduledSurfaceGuid: scheduledSurfaceGuid,
+      scheduledSurfaceGuid,
       active: true,
-      // if public query, filter by disabled & live sections
-      ...(isPublicContext
-        ? {
-          disabled: false,
-          ...filterLiveSections,
-        }
-        : {}),
-      // if createSource is provided, filter by it
+      ...(isPublicContext ? { disabled: false, ...filterLiveSections } : {}),
       ...(createSource ? { createSource } : {}),
     },
     include: {
@@ -70,5 +63,6 @@ export async function getSectionsWithSectionItems(
       },
     },
   });
+
   return sections;
 }
