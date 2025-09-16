@@ -65,10 +65,3 @@ export type RejectApprovedCorpusItemsForDomainResponse = {
   totalFoundApprovedCorpusItems: number;
   totalRejectedApprovedCorpusItems?: number;
 }
-
-export enum SectionStatus {
-  DISABLED = 'DISABLED',
-  SCHEDULED = 'SCHEDULED',
-  EXPIRED = 'EXPIRED',
-  LIVE = 'LIVE',
-}
