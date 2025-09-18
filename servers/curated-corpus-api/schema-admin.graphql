@@ -635,7 +635,7 @@ extend type Section {
   """
   Computed status for the Section, based on startDate, endDate, and disabled.
   """
-  status: SectionStatus
+  status: SectionStatus!
   """
   The date when the Section becomes eligible for display.
   Format: YYYY-MM-DD.

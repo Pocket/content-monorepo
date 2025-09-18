@@ -21,6 +21,7 @@ import { GET_SECTIONS_WITH_SECTION_ITEMS } from '../sample-queries.gql';
 import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
+import { SectionStatus } from '../../../../shared/types';
 
 describe('queries: Section (getSectionsWithSectionItems)', () => {
   let app: Express.Application;
@@ -192,15 +193,19 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     expect(result.body.data).not.toBeNull();
 
     // All active+disabled Sections should be returned, Section #4 (inactive-123) is in-active
+    // Also check that status is always returned
     expect(result.body.data?.getSectionsWithSectionItems.length).toEqual(3);
     expect(result.body.data?.getSectionsWithSectionItems[0].externalId).toEqual('active-456');
     expect(result.body.data?.getSectionsWithSectionItems[0].disabled).toBeFalsy();
+    expect(result.body.data?.getSectionsWithSectionItems[0].status).toEqual(SectionStatus.LIVE);
 
     expect(result.body.data?.getSectionsWithSectionItems[1].externalId).toEqual('active-123');
     expect(result.body.data?.getSectionsWithSectionItems[1].disabled).toBeFalsy();
+    expect(result.body.data?.getSectionsWithSectionItems[1].status).toEqual(SectionStatus.LIVE);
 
     expect(result.body.data?.getSectionsWithSectionItems[2].externalId).toEqual('disabled-890');
     expect(result.body.data?.getSectionsWithSectionItems[2].disabled).toBeTruthy();
+    expect(result.body.data?.getSectionsWithSectionItems[2].status).toEqual(SectionStatus.DISABLED);
 
     // Each active Section should have an active SectionItem
     // Section #1 has 2 SectionItems but only the active (1) SectionItem is returned
@@ -313,6 +318,6 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     expect(section?.description).toEqual('Custom section description');
     expect(section?.heroTitle).toEqual('Hero Title Text');
     expect(section?.heroDescription).toEqual('Hero Description Text');
-    expect(section?.status).toEqual('LIVE');
+    expect(section?.status).toEqual(SectionStatus.LIVE);
   });
 });
