@@ -14,6 +14,7 @@ const testSurfacesTimeZones = [
 describe.each(testSurfacesTimeZones)(
   'computeSectionStatus – %s',
   ({ guid, timezone }) => {
+    
     beforeEach(() => {
       const mockNowLocal = DateTime.fromISO('2024-06-15T00:00:00', { zone: timezone }).startOf('day');
       jest.spyOn(DateTime, 'now').mockReturnValue(mockNowLocal);
@@ -179,6 +180,17 @@ describe.each(testSurfacesTimeZones)(
         disabled: false,
         startDate: new Date('2024-06-15T00:00:00Z'),
         endDate: new Date('2024-06-16T00:00:00Z'),
+      };
+
+      expect(computeSectionStatus(section)).toBe(SectionStatus.LIVE);
+    });
+
+    it('should return LIVE when startDate and endDate are the same and match currentDate', () => {
+      const section = {
+        scheduledSurfaceGuid: guid,
+        disabled: false,
+        startDate: new Date('2024-06-15T00:00:00-04:00'),
+        endDate: new Date('2024-06-15T00:00:00-04:00'),
       };
 
       expect(computeSectionStatus(section)).toBe(SectionStatus.LIVE);

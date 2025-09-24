@@ -58,7 +58,7 @@ export function computeSectionStatus(section: Section): SectionStatus {
     // c. LIVE: disabled is false AND startDate <= currentDate AND (endDate is null OR currentDate < endDate (inclusive of full endDate))
     if (
       startDate <= currentDate &&
-      (!section.endDate || currentDate < DateTime.fromJSDate(section.endDate).setZone(timeZone).endOf('day').plus({ days: 1 }))
+      (!section.endDate || currentDate < DateTime.fromJSDate(section.endDate).setZone(timeZone).startOf('day').plus({ days: 1 }))
     ) {
       return SectionStatus.LIVE;
     }
