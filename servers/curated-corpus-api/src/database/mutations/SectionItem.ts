@@ -1,8 +1,12 @@
-import { NotFoundError } from '@pocket-tools/apollo-utils';
+import { NotFoundError, ForbiddenError } from '@pocket-tools/apollo-utils';
 
 import { PrismaClient } from '.prisma/client';
 
-import { CreateSectionItemInput, RemoveSectionItemInput, SectionItem } from '../types';
+import {
+  CreateSectionItemInput,
+  RemoveSectionItemInput,
+  SectionItem,
+} from '../types';
 import { ActivitySource } from 'content-common';
 
 /**
@@ -10,10 +14,12 @@ import { ActivitySource } from 'content-common';
  *
  * @param db
  * @param data
+ * @param createSource - The source creating the section item (ML or MANUAL)
  */
 export async function createSectionItem(
   db: PrismaClient,
   data: CreateSectionItemInput,
+  createSource: ActivitySource = ActivitySource.MANUAL,
 ): Promise<SectionItem> {
   // we verify the Section/sectionId in the upstream resolver, so no need to
   // do so again here
@@ -28,6 +34,23 @@ export async function createSectionItem(
     throw new NotFoundError(
       `Cannot create a section item: ApprovedItem with id "${approvedItemExternalId}" does not exist.`,
     );
+  }
+
+  // Check if ML is trying to add an item that was manually removed
+  if (createSource === ActivitySource.ML) {
+    const manuallyRemovedItem = await db.sectionItem.findFirst({
+      where: {
+        approvedItemId: approvedItem.id,
+        active: false,
+        deactivateSource: ActivitySource.MANUAL,
+      },
+    });
+
+    if (manuallyRemovedItem) {
+      throw new ForbiddenError(
+        `Cannot create section item: This item was previously removed manually and cannot be re-added by ML.`,
+      );
+    }
   }
 
   const createData = {

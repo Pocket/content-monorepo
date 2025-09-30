@@ -7,6 +7,7 @@ import {
 import { SectionItem } from '../../../../database/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
+import { ActivitySource } from 'content-common';
 
 /**
  * Creates a SectionItem & adds it to a Section.
@@ -38,11 +39,22 @@ export async function createSectionItem(
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
 
-  const sectionItem = await dbCreateSectionItem(context.db, {
-    approvedItemExternalId: data.approvedItemExternalId,
-    rank: data.rank,
-    sectionId: section.id,
-  });
+  // Determine the source based on the authenticated user
+  // ML Lambda has username === 'ML', all other users are MANUAL
+  const createSource =
+    context.authenticatedUser.username === 'ML'
+      ? ActivitySource.ML
+      : ActivitySource.MANUAL;
+
+  const sectionItem = await dbCreateSectionItem(
+    context.db,
+    {
+      approvedItemExternalId: data.approvedItemExternalId,
+      rank: data.rank,
+      sectionId: section.id,
+    },
+    createSource,
+  );
 
   // TODO: emit creation event to a data pipeline
   // as of this writing (2025-01-09), we are navigating the migration from

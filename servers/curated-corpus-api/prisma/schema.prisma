@@ -167,6 +167,8 @@ model SectionItem {
 
   // access pattern for this table will be by section where active = true
   @@index([sectionId, active], name: "SectionIdActive")
+  // index for efficiently checking if an item was manually removed
+  @@index([approvedItemId, deactivateSource, active], name: "ApprovedItemRemovalCheck")
 }
 
 enum CuratedStatus {
