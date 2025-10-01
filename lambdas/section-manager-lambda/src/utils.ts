@@ -2,7 +2,6 @@ import { assert } from 'typia';
 import * as Sentry from '@sentry/serverless';
 
 import {
-  applyApTitleCase,
   ApprovedItemAuthor,
   CorpusLanguage,
   CreateApprovedCorpusItemApiInput,
@@ -244,7 +243,7 @@ export const mapSqsSectionItemToCreateApprovedItemApiInput = async (
 
   if (language === CorpusLanguage.EN) {
     // only apply formatting if title and excerpt are defined
-    title = title && formatQuotesEN(applyApTitleCase(title));
+    title = title && formatQuotesEN(title);
     excerpt = excerpt && formatQuotesEN(excerpt);
   } else if (language === CorpusLanguage.DE) {
     title = title && formatQuotesDashesDE(title);

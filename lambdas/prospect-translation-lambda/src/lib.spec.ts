@@ -59,7 +59,7 @@ describe('lib', () => {
       excerpt: 'test-excerpt',
       imageUrl: 'test-imageUrl',
       language: 'en',
-      title: 'Test-Title',
+      title: 'test-title',
       publisher: 'test-publisher',
       isCollection: false,
       isSyndicated: false,
@@ -480,8 +480,7 @@ describe('lib', () => {
   });
 
   describe('hydrateProspectMetaData', () => {
-    it('should hydrate the prospect with the url meta data fields & apply title formatting if prospect is EN', () => {
-      expected.title = 'Test-Title'; // AP style expected
+    it('should hydrate the prospect with the url meta data fields', () => {
       urlMetadata.title = 'test-title';
 
       expect(expected).toEqual(
