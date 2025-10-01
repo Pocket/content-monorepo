@@ -37,7 +37,7 @@ import {
   updateCustomSection,
 } from './mutations/Section';
 import { createSectionItem, removeSectionItem } from './mutations/SectionItem';
-import { computeSectionStatus } from './utils/computeSectionStatus';
+import { computeSectionStatus } from '../../shared/resolvers/fields/SectionStatus';
 
 export const resolvers = {
   // The custom scalars from GraphQL-Scalars that we find useful.

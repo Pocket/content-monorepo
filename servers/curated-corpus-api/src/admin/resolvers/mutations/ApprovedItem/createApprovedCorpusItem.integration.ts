@@ -14,6 +14,9 @@ import {
   CorpusLanguage,
 } from 'content-common';
 
+import * as Utils from '../../../aws/utils';
+
+import config from '../../../../config';
 import { client } from '../../../../database/client';
 
 import {
@@ -69,7 +72,7 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
       excerpt: 'A short summary of what this story is about',
       authors: [{ name: 'Mary Shelley', sortOrder: 1 }],
       status: CuratedStatus.CORPUS,
-      imageUrl: 'https://test.com/image.png',
+      imageUrl: `${config.aws.s3.path}/image.png`,
       language: CorpusLanguage.DE,
       publisher: 'Convective Cloud',
       datePublished: '2024-02-29',
@@ -577,5 +580,82 @@ describe('mutations: ApprovedItem (createApprovedCorpusItem)', () => {
     expect(result.body.errors?.[0].message).toContain(
       'does not exist in "CorpusLanguage" enum.',
     );
+  });
+
+  it('should succeed if provided image URL is external', async () => {
+    // mock function to control response of fetching remote image
+    const spy = jest
+      .spyOn(Utils, 'fetchImageFromUrl')
+      .mockImplementation(async () => {
+        const response = {
+          headers: new Headers({
+            // this is all that really matters in this mock
+            'Content-Type': 'image/png',
+          }),
+          body: 'fakeimagebody',
+        } as any as Response;
+
+        return Promise.resolve(response);
+      });
+
+    input.imageUrl = 'https://some.external.domain/image.jpg';
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(CREATE_APPROVED_ITEM),
+        variables: { data: input },
+      });
+
+    expect(result.body.errors).toBeUndefined();
+    expect(result.body.data).not.toBeNull();
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(result.body.data?.createApprovedCorpusItem.imageUrl).toContain(
+      config.aws.s3.bucket,
+    );
+
+    jest.restoreAllMocks();
+  });
+
+  it('should fail if provided external image URL cannot be uploaded', async () => {
+    // mock function to control response of fetching remote image
+    const spy = jest
+      .spyOn(Utils, 'fetchImageFromUrl')
+      .mockImplementation(async () => {
+        const response = {
+          headers: new Headers({
+            // this is all that really matters in this mock
+            'Content-Type': 'text/javascript',
+          }),
+          body: 'someMaliciousJs',
+        } as any as Response;
+
+        return Promise.resolve(response);
+      });
+
+    input.imageUrl = 'https://some.external.domain/image.jpg';
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(CREATE_APPROVED_ITEM),
+        variables: { data: input },
+      });
+
+    expect(result.body.data).toBeNull();
+    expect(result.body.errors).not.toBeUndefined();
+
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    // And there is the right error from the resolvers
+    expect(result.body.errors?.[0].message).toContain(
+      `Could not generate an S3 URL for the given image: ${input.imageUrl}`,
+    );
+    expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
+
+    jest.restoreAllMocks();
   });
 });

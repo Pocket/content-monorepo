@@ -31,6 +31,14 @@ export enum ScheduledCorpusItemStatus {
   RESCHEDULED = 'rescheduled',
 }
 
+// Computed status for the Section, based on startDate, endDate, and disabled.
+export enum SectionStatus {
+  DISABLED = 'DISABLED',
+  SCHEDULED = 'SCHEDULED',
+  EXPIRED = 'EXPIRED',
+  LIVE = 'LIVE',
+}
+
 export type ApprovedItemS3ImageUrl = {
   url: string;
 };

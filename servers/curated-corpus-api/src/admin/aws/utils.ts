@@ -22,3 +22,13 @@ export function checkValidImageContentType(contentType: string): boolean {
 
   return true;
 }
+
+/**
+ * wrapper function for fetch so we can mock easily in tests
+ *
+ * @param imageUrl string
+ * @returns Response
+ */
+export async function fetchImageFromUrl(imageUrl: string): Promise<Response> {
+  return await fetch(imageUrl);
+}
