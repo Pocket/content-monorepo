@@ -3,7 +3,6 @@ import { http } from 'msw';
 import { SetupServer } from 'msw/node';
 
 import {
-  applyApTitleCase,
   CorpusItemSource,
   CorpusLanguage,
   CreateApprovedCorpusItemApiInput,
@@ -136,9 +135,7 @@ export const getCreateApprovedCorpusItemApiOutput =
   (): CreateApprovedCorpusItemApiInput => {
     return {
       url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
-      title: applyApTitleCase(
-        'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-      ) as string,
+      title: "Romantic norms are in flux. No wonder everyone\u2019s obsessed with polyamory.",
       excerpt:
         'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
       status: CuratedStatus.RECOMMENDATION,

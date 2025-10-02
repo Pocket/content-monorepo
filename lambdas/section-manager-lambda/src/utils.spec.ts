@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/serverless';
 import {
-  applyApTitleCase,
   CorpusItemSource,
   CorpusLanguage,
   CreateApprovedCorpusItemApiInput,
@@ -272,7 +271,7 @@ describe('utils', () => {
           );
 
         expect(result.title).toEqual(
-          formatQuotesEN(applyApTitleCase(sqsSectionItem.title as string)),
+          formatQuotesEN(sqsSectionItem.title as string),
         );
         expect(result.excerpt).toEqual(
           formatQuotesEN(sqsSectionItem.excerpt as string),
