@@ -131,8 +131,7 @@ describe('mutations: SectionItem (removeSectionItem)', () => {
 
     input = {
       externalId: sectionItem.externalId,
-      deactivateReasons: [SectionItemRemovalReason.DATED, SectionItemRemovalReason.OTHER],
-      deactivateSource: ActivitySource.ML
+      deactivateReasons: [SectionItemRemovalReason.DATED, SectionItemRemovalReason.OTHER]
     };
 
     const result = await request(app)
@@ -163,8 +162,8 @@ describe('mutations: SectionItem (removeSectionItem)', () => {
     const inactiveSectionItem = await db.sectionItem.findUnique({
       where: {externalId: sectionItem.externalId}
     });
-    // deactivateSource provided
-    expect(inactiveSectionItem.deactivateSource).toEqual(ActivitySource.ML);
+    // deactivateSource should be MANUAL (always set by the mutation)
+    expect(inactiveSectionItem.deactivateSource).toEqual(ActivitySource.MANUAL);
     expect(inactiveSectionItem.deactivatedAt).toEqual(rightNow);
     expect(inactiveSectionItem.deactivateReasons).toEqual(input.deactivateReasons);
   });

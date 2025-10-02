@@ -1,10 +1,13 @@
 import { AuthenticationError, NotFoundError } from '@pocket-tools/apollo-utils';
 
-import { createSectionItem as dbCreateSectionItem, 
-         removeSectionItem as dbRemoveSectionItem, } from '../../../../database/mutations';
+import {
+  createSectionItem as dbCreateSectionItem,
+  removeSectionItem as dbRemoveSectionItem,
+} from '../../../../database/mutations';
 import { SectionItem } from '../../../../database/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
+import { ActivitySource, ML_USERNAME } from 'content-common';
 
 /**
  * Creates a SectionItem & adds it to a Section.
@@ -36,11 +39,22 @@ export async function createSectionItem(
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
 
-  const sectionItem = await dbCreateSectionItem(context.db, {
-    approvedItemExternalId: data.approvedItemExternalId,
-    rank: data.rank,
-    sectionId: section.id,
-  });
+  // Determine the source based on the authenticated user
+  // Items created by ML have username === ML_USERNAME, all other users are MANUAL
+  const createSource =
+    context.authenticatedUser.username === ML_USERNAME
+      ? ActivitySource.ML
+      : ActivitySource.MANUAL;
+
+  const sectionItem = await dbCreateSectionItem(
+    context.db,
+    {
+      approvedItemExternalId: data.approvedItemExternalId,
+      rank: data.rank,
+      sectionId: section.id,
+    },
+    createSource,
+  );
 
   // TODO: emit creation event to a data pipeline
   // as of this writing (2025-01-09), we are navigating the migration from
@@ -63,20 +77,26 @@ export async function removeSectionItem(
   context: IAdminContext,
 ): Promise<SectionItem> {
   // First check if the SectionItem exists & check if it is active
-  const sectionItemToRemove =  await context.db.sectionItem.findUnique({
-    where: { externalId: data.externalId, active: true}
+  const sectionItemToRemove = await context.db.sectionItem.findUnique({
+    where: { externalId: data.externalId, active: true },
   });
 
-  if(sectionItemToRemove) {
+  if (sectionItemToRemove) {
     // Check if the user can perform this mutation
     if (!context.authenticatedUser.canWriteToCorpus()) {
       throw new AuthenticationError(ACCESS_DENIED_ERROR);
     }
-    
-    return await dbRemoveSectionItem(context.db, {externalId: data.externalId, deactivateReasons: data.deactivateReasons, deactivateSource: data.deactivateSource});
+
+    return await dbRemoveSectionItem(context.db, {
+      externalId: data.externalId,
+      deactivateReasons: data.deactivateReasons,
+      deactivateSource: data.deactivateSource,
+    });
   }
   // Check if SectionItem exists
   else {
-    throw new NotFoundError(`Cannot remove a section item: Section item with id "${data.externalId}" does not exist.`)
+    throw new NotFoundError(
+      `Cannot remove a section item: Section item with id "${data.externalId}" does not exist.`,
+    );
   }
 }

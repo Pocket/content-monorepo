@@ -48,6 +48,12 @@ export enum ActivitySource {
   ML = 'ML', // created by ML
 }
 
+/**
+ * The username identifier for ML Lambda service accounts.
+ * Used in JWT userId field and for identifying ML-initiated actions.
+ */
+export const ML_USERNAME = 'ML';
+
 export enum ActionScreen {
   PROSPECTING = 'PROSPECTING',
   SCHEDULE = 'SCHEDULE',
@@ -68,13 +74,13 @@ export enum SectionItemRemovalReason {
   PUBLISHER_QUALITY = 'PUBLISHER_QUALITY',
   SET_DIVERSITY = 'SET_DIVERSITY',
   OTHER = 'OTHER',
-  ML = 'ML'
+  ML = 'ML',
 }
 
 export type IABMetadata = {
   taxonomy: string;
   categories: string[];
-}
+};
 
 export type ApprovedItemRequiredInput = {
   prospectId?: string;
@@ -109,7 +115,7 @@ export type CreateCustomSectionApiInput = {
   startDate: string;
   endDate?: string;
   scheduledSurfaceGuid: string;
-  iab?: IABMetadata,
+  iab?: IABMetadata;
   sort?: number;
   createSource: ActivitySource;
   active: boolean;

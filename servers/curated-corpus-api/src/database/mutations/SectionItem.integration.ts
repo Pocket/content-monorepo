@@ -45,6 +45,110 @@ describe('SectionItem', () => {
       expect(result.sectionId).toEqual(section.id);
       expect(result.approvedItemId).toEqual(approvedItem.id);
     });
+
+    it('should block ML from re-adding a manually removed item', async () => {
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'Test Item',
+      });
+
+      const section1 = await createSectionHelper(db, {});
+      const section2 = await createSectionHelper(db, {});
+
+      // Create a SectionItem that was manually removed
+      await db.sectionItem.create({
+        data: {
+          approvedItemId: approvedItem.id,
+          sectionId: section1.id,
+          rank: 1,
+          active: false,
+          deactivateSource: ActivitySource.MANUAL,
+          deactivatedAt: new Date(),
+          deactivateReasons: JSON.stringify(['DATED']),
+        },
+      });
+
+      // ML should be blocked from adding this item to ANY section
+      await expect(
+        createSectionItem(
+          db,
+          {
+            sectionId: section2.id,
+            approvedItemExternalId: approvedItem.externalId,
+          },
+          ActivitySource.ML,
+        ),
+      ).rejects.toThrow(
+        'Cannot create section item: This item was previously removed manually and cannot be re-added by ML.',
+      );
+    });
+
+    it('should allow manual users to re-add a manually removed item', async () => {
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'Test Item',
+      });
+
+      const section = await createSectionHelper(db, {});
+
+      // Create a SectionItem that was manually removed
+      await db.sectionItem.create({
+        data: {
+          approvedItemId: approvedItem.id,
+          sectionId: section.id,
+          rank: 1,
+          active: false,
+          deactivateSource: ActivitySource.MANUAL,
+          deactivatedAt: new Date(),
+          deactivateReasons: JSON.stringify(['DATED']),
+        },
+      });
+
+      // Manual users should be able to re-add the item
+      const result = await createSectionItem(
+        db,
+        {
+          sectionId: section.id,
+          approvedItemExternalId: approvedItem.externalId,
+        },
+        ActivitySource.MANUAL,
+      );
+
+      expect(result.sectionId).toEqual(section.id);
+      expect(result.approvedItemId).toEqual(approvedItem.id);
+    });
+
+    it('should allow ML to re-add an ML-removed item', async () => {
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'Test Item',
+      });
+
+      const section = await createSectionHelper(db, {});
+
+      // Create a SectionItem that was removed by ML
+      await db.sectionItem.create({
+        data: {
+          approvedItemId: approvedItem.id,
+          sectionId: section.id,
+          rank: 1,
+          active: false,
+          deactivateSource: ActivitySource.ML,
+          deactivatedAt: new Date(),
+          deactivateReasons: JSON.stringify(['ML']),
+        },
+      });
+
+      // ML should be able to re-add the item
+      const result = await createSectionItem(
+        db,
+        {
+          sectionId: section.id,
+          approvedItemExternalId: approvedItem.externalId,
+        },
+        ActivitySource.ML,
+      );
+
+      expect(result.sectionId).toEqual(section.id);
+      expect(result.approvedItemId).toEqual(approvedItem.id);
+    });
   });
 
   describe('removeSectionItem', () => {
@@ -71,7 +175,10 @@ describe('SectionItem', () => {
 
       const input = {
         externalId: sectionItem.externalId,
-        deactivateReasons: [SectionItemRemovalReason.DATED, SectionItemRemovalReason.CONTROVERSIAL]
+        deactivateReasons: [
+          SectionItemRemovalReason.DATED,
+          SectionItemRemovalReason.CONTROVERSIAL,
+        ],
       };
 
       const result = await removeSectionItem(db, input);

@@ -1,3 +1,5 @@
+import { ML_USERNAME } from 'content-common';
+
 const environment = process.env.ENVIRONMENT || 'development';
 const isDev = environment === 'development';
 
@@ -46,7 +48,7 @@ const config = {
     iss: process.env.JWT_ISS || 'https://getpocket.com',
     aud: process.env.JWT_AUD || 'https://admin-api.getpocket.com/',
     name: 'ML Corpus Scheduler Lambda User',
-    userId: 'ML',
+    userId: ML_USERNAME,
     groups: ['mozilliansorg_pocket_scheduled_surface_curator_full'],
   },
   snowplow: {
