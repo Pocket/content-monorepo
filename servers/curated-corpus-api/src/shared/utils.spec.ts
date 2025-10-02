@@ -1,5 +1,5 @@
 import { CorpusItemSource, CuratedStatus, Topics } from 'content-common';
-
+import { DateTime } from 'luxon';
 import { MozillaAccessGroup } from 'content-common';
 import {
   getCorpusItemFromApprovedItem,
@@ -8,10 +8,34 @@ import {
   toUtcDateString,
   getPocketPath,
   getNormalizedDomainName,
+  getLocalDate,
 } from './utils';
 import { ApprovedItem } from '../database/types';
 
 describe('shared/utils', () => {
+  // Timezones to test
+  const timezones = [
+    'UTC',
+    'America/New_York',
+    'Europe/Berlin',
+    'Europe/London',
+    'Europe/Paris',
+    'Europe/Rome',
+    'Europe/Madrid',
+    'Asia/Kolkata',
+  ];
+  describe.each(timezones)('getLocalDate in %s', (tz) => {
+    it('should return midnight of the same calendar day in the given timezone', () => {
+      const input = new Date('2024-06-15T12:30:56Z'); // noon UTC
+      const result = getLocalDate(input, tz);
+      
+      const expected = DateTime.fromJSDate(input)
+        .setZone(tz)
+        .startOf('day');
+
+      expect(result.toISO()).toBe(expected.toISO());
+    });
+  });
   describe('toUtcDateString', () => {
     it('should convert to YYYY-MM-DD UTC for zero-padded months', async () => {
       const date = new Date(1647042571000); // 2022-03-11 23:49:31 UTC

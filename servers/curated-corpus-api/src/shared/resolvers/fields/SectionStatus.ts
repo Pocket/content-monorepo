@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { SectionStatus } from '../../types';
 import { ScheduledSurfaces } from 'content-common';
+import { getLocalDate } from '../../utils';
 
 interface Section {
   scheduledSurfaceGuid: string;
@@ -36,7 +37,8 @@ export function computeSectionStatus(section: Section): SectionStatus {
 
   // 2. If section has a startDate (custom section logic)
   if (section.startDate) {
-    const startDate = DateTime.fromJSDate(section.startDate).setZone(timeZone).startOf('day');
+    // Get local date in section timezone
+    const startDate = getLocalDate(section.startDate, timeZone);
 
     // a. SCHEDULED: disabled flag is false AND startDate is in the future
     if (startDate > currentDate) {
@@ -45,20 +47,17 @@ export function computeSectionStatus(section: Section): SectionStatus {
 
     // b. EXPIRED: disabled is false & section's endDate has passed (inclusive of full endDate)
     if (section.endDate) {
-      const endDateExclusive = DateTime.fromJSDate(section.endDate)
-        .setZone(timeZone)
-        .startOf('day')
-        .plus({ days: 1 });
+      const endDateExclusive = getLocalDate(section.endDate, timeZone).plus({ days: 1 });
 
       if (currentDate >= endDateExclusive) {
         return SectionStatus.EXPIRED;
       }
     }
 
-    // c. LIVE: disabled is false AND startDate <= currentDate AND (endDate is null OR currentDate < endDate (inclusive of full endDate))
     if (
       startDate <= currentDate &&
-      (!section.endDate || currentDate < DateTime.fromJSDate(section.endDate).setZone(timeZone).startOf('day').plus({ days: 1 }))
+      (!section.endDate ||
+        currentDate < getLocalDate(section.endDate, timeZone).plus({ days: 1 }))
     ) {
       return SectionStatus.LIVE;
     }
