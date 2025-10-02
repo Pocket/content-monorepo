@@ -2,6 +2,7 @@ import { ScheduledSurface, ScheduledSurfaces } from 'content-common';
 import { ApprovedItem, CorpusItem, CorpusTargetType } from '../database/types';
 import { ApprovedItemAuthor } from 'content-common';
 import { parse } from 'url';
+import { DateTime } from 'luxon';
 
 /**
  * Generate an integer Epoch time from a JavaScript Date object.
@@ -231,4 +232,23 @@ export function reorderResultByKey<T, K extends keyof T>(
   }, {} as any); // idk... help me with this index type
 
   return reorderMap.values.map((input) => resMap[input]);
+}
+
+/**
+ * Convert JS Date → Luxon DateTime in the section's local timezone,
+ * treating the JS Date as a plain calendar date (not a UTC timestamp).
+ * JS Date months are 0-based (January = 0), but Luxon expects 1-based months.
+ * So we must add 1 to `getMonth()` to get the correct calendar month.
+ * @param date JS Date object
+ * @param timeZone IANA time zone string (e.g., "America/New_York")
+ */
+export function getLocalDate(date: Date, timeZone: string): DateTime {
+  return DateTime.fromObject(
+    {
+      year: date.getFullYear(),
+      month: date.getMonth() + 1, // JS months are 0-based; Luxon expects 1-based
+      day: date.getDate(),
+    },
+    { zone: timeZone }
+  ).startOf('day');
 }

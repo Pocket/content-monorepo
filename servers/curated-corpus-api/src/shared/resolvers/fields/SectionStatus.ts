@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { SectionStatus } from '../../types';
 import { ScheduledSurfaces } from 'content-common';
+import { getLocalDate } from '../../utils';
 
 interface Section {
   scheduledSurfaceGuid: string;
@@ -36,18 +37,8 @@ export function computeSectionStatus(section: Section): SectionStatus {
 
   // 2. If section has a startDate (custom section logic)
   if (section.startDate) {
-    // Convert JS Date → Luxon DateTime in the section's local timezone,
-    // treating the JS Date as a plain calendar date (not a UTC timestamp).
-    // JS Date months are 0-based (January = 0), but Luxon expects 1-based months.
-    // So we must add 1 to `getMonth()` to get the correct calendar month.
-    const startDate = DateTime.fromObject(
-      {
-        year: section.startDate.getFullYear(),
-        month: section.startDate.getMonth() + 1,
-        day: section.startDate.getDate(),
-      },
-      { zone: timeZone }
-    ).startOf('day');
+    // Get local date in section timezone
+    const startDate = getLocalDate(section.startDate, timeZone);
 
     // a. SCHEDULED: disabled flag is false AND startDate is in the future
     if (startDate > currentDate) {
@@ -56,16 +47,7 @@ export function computeSectionStatus(section: Section): SectionStatus {
 
     // b. EXPIRED: disabled is false & section's endDate has passed (inclusive of full endDate)
     if (section.endDate) {
-      const endDateExclusive = DateTime.fromObject(
-        {
-          year: section.endDate.getFullYear(),
-          month: section.endDate.getMonth() + 1,
-          day: section.endDate.getDate(),
-        },
-        { zone: timeZone }
-      )
-        .startOf('day')
-        .plus({ days: 1 });
+      const endDateExclusive = getLocalDate(section.endDate, timeZone).plus({ days: 1 });
 
       if (currentDate >= endDateExclusive) {
         return SectionStatus.EXPIRED;
@@ -75,17 +57,7 @@ export function computeSectionStatus(section: Section): SectionStatus {
     if (
       startDate <= currentDate &&
       (!section.endDate ||
-        currentDate <
-        DateTime.fromObject(
-          {
-            year: section.endDate.getFullYear(),
-            month: section.endDate.getMonth() + 1,
-            day: section.endDate.getDate(),
-          },
-          { zone: timeZone }
-        )
-          .startOf('day')
-          .plus({ days: 1 }))
+        currentDate < getLocalDate(section.endDate, timeZone).plus({ days: 1 }))
     ) {
       return SectionStatus.LIVE;
     }
