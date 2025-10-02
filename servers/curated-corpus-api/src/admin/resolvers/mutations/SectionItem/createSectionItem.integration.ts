@@ -4,7 +4,12 @@ import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient, Section } from '.prisma/client';
 
-import { ActivitySource, CreateSectionItemApiInput } from 'content-common';
+import {
+  ActivitySource,
+  CreateSectionItemApiInput,
+  ML_USERNAME,
+  MozillaAccessGroup,
+} from 'content-common';
 
 import { client } from '../../../../database/client';
 import { ApprovedItem } from '../../../../database/types';
@@ -15,7 +20,6 @@ import {
   createApprovedItemHelper,
 } from '../../../../test/helpers';
 import { CREATE_SECTION_ITEM } from '../sample-mutations.gql';
-import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 
@@ -47,6 +51,7 @@ describe('mutations: SectionItem (createSectionItem)', () => {
   });
 
   beforeEach(async () => {
+    await clearDb(db);
     // we need a Section and an ApprovedItem to create a SectionItem
     section = await createSectionHelper(db, {
       createSource: ActivitySource.ML,
@@ -55,6 +60,10 @@ describe('mutations: SectionItem (createSectionItem)', () => {
     approvedItem = await createApprovedItemHelper(db, {
       title: '10 Reasons You Should Quit Social Media',
     });
+  });
+
+  afterEach(async () => {
+    await clearDb(db);
   });
 
   it('should create a SectionItem if user has full access', async () => {
@@ -209,6 +218,137 @@ describe('mutations: SectionItem (createSectionItem)', () => {
     // error message should reference the invalid Section externalId
     expect(result.body.errors?.[0].message).toContain(
       `Cannot create a section item: ApprovedItem with id "aTotallyLegitimateId" does not exist.`,
+    );
+  });
+
+  it('should block ML from re-adding a manually removed item', async () => {
+    // First, manually remove an item from a section
+    await db.sectionItem.create({
+      data: {
+        sectionId: section.id,
+        approvedItemId: approvedItem.id,
+        rank: 1,
+        active: false,
+        deactivateSource: ActivitySource.MANUAL,
+        deactivatedAt: new Date(),
+        deactivateReasons: ['DATED'],
+      },
+    });
+
+    // Create a second section
+    const section2 = await createSectionHelper(db, {
+      createSource: ActivitySource.ML,
+    });
+
+    // ML headers (username: ML_USERNAME identifies the ML Lambda)
+    const mlHeaders = {
+      name: 'ML Section Manager Lambda User',
+      username: ML_USERNAME,
+      groups: `${MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL}`,
+    };
+
+    input = {
+      sectionExternalId: section2.externalId,
+      approvedItemExternalId: approvedItem.externalId,
+      rank: 2,
+    };
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(mlHeaders)
+      .send({
+        query: print(CREATE_SECTION_ITEM),
+        variables: { data: input },
+      });
+
+    // Should have a FORBIDDEN error
+    expect(result.body.errors).not.toBeUndefined();
+    expect(result.body.errors?.[0].extensions?.code).toEqual('FORBIDDEN');
+    expect(result.body.errors?.[0].message).toContain(
+      'Cannot create section item: This item was previously removed manually and cannot be re-added by ML.',
+    );
+  });
+
+  it('should allow manual users to re-add a manually removed item', async () => {
+    // First, manually remove an item from a section
+    await db.sectionItem.create({
+      data: {
+        sectionId: section.id,
+        approvedItemId: approvedItem.id,
+        rank: 1,
+        active: false,
+        deactivateSource: ActivitySource.MANUAL,
+        deactivatedAt: new Date(),
+        deactivateReasons: ['DATED'],
+      },
+    });
+
+    // Manual user (not ML) should be able to re-add the item
+    input = {
+      sectionExternalId: section.externalId,
+      approvedItemExternalId: approvedItem.externalId,
+      rank: 2,
+    };
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(headers) // Regular user headers, not ML
+      .send({
+        query: print(CREATE_SECTION_ITEM),
+        variables: { data: input },
+      });
+
+    // Should succeed
+    expect(result.body.errors).toBeUndefined();
+    expect(result.body.data).not.toBeNull();
+    expect(result.body.data?.createSectionItem).not.toBeNull();
+    expect(result.body.data?.createSectionItem.approvedItem.externalId).toEqual(
+      approvedItem.externalId,
+    );
+  });
+
+  it('should allow ML to re-add an ML-removed item', async () => {
+    // First, ML removes an item from a section
+    await db.sectionItem.create({
+      data: {
+        sectionId: section.id,
+        approvedItemId: approvedItem.id,
+        rank: 1,
+        active: false,
+        deactivateSource: ActivitySource.ML,
+        deactivatedAt: new Date(),
+        deactivateReasons: ['ML'],
+      },
+    });
+
+    // ML headers
+    const mlHeaders = {
+      name: 'ML Section Manager Lambda User',
+      username: ML_USERNAME,
+      groups: `${MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL}`,
+    };
+
+    // ML should be able to re-add the item
+    input = {
+      sectionExternalId: section.externalId,
+      approvedItemExternalId: approvedItem.externalId,
+      rank: 2,
+    };
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(mlHeaders)
+      .send({
+        query: print(CREATE_SECTION_ITEM),
+        variables: { data: input },
+      });
+
+    // Should succeed
+    expect(result.body.errors).toBeUndefined();
+    expect(result.body.data).not.toBeNull();
+    expect(result.body.data?.createSectionItem).not.toBeNull();
+    expect(result.body.data?.createSectionItem.approvedItem.externalId).toEqual(
+      approvedItem.externalId,
     );
   });
 });
