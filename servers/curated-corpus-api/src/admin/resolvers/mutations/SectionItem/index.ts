@@ -7,7 +7,7 @@ import {
 import { SectionItem } from '../../../../database/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
-import { ActivitySource } from 'content-common';
+import { ActivitySource, ML_USERNAME } from 'content-common';
 
 /**
  * Creates a SectionItem & adds it to a Section.
@@ -40,9 +40,9 @@ export async function createSectionItem(
   }
 
   // Determine the source based on the authenticated user
-  // ML Lambda has username === 'ML', all other users are MANUAL
+  // Items created by ML have username === ML_USERNAME, all other users are MANUAL
   const createSource =
-    context.authenticatedUser.username === 'ML'
+    context.authenticatedUser.username === ML_USERNAME
       ? ActivitySource.ML
       : ActivitySource.MANUAL;
 

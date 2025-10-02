@@ -4,7 +4,12 @@ import request from 'supertest';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient, Section } from '.prisma/client';
 
-import { ActivitySource, CreateSectionItemApiInput } from 'content-common';
+import {
+  ActivitySource,
+  CreateSectionItemApiInput,
+  ML_USERNAME,
+  MozillaAccessGroup,
+} from 'content-common';
 
 import { client } from '../../../../database/client';
 import { ApprovedItem } from '../../../../database/types';
@@ -15,7 +20,6 @@ import {
   createApprovedItemHelper,
 } from '../../../../test/helpers';
 import { CREATE_SECTION_ITEM } from '../sample-mutations.gql';
-import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 
@@ -236,10 +240,10 @@ describe('mutations: SectionItem (createSectionItem)', () => {
       createSource: ActivitySource.ML,
     });
 
-    // ML headers (username: 'ML' identifies the ML Lambda)
+    // ML headers (username: ML_USERNAME identifies the ML Lambda)
     const mlHeaders = {
       name: 'ML Section Manager Lambda User',
-      username: 'ML',
+      username: ML_USERNAME,
       groups: `${MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL}`,
     };
 
@@ -320,7 +324,7 @@ describe('mutations: SectionItem (createSectionItem)', () => {
     // ML headers
     const mlHeaders = {
       name: 'ML Section Manager Lambda User',
-      username: 'ML',
+      username: ML_USERNAME,
       groups: `${MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL}`,
     };
 
