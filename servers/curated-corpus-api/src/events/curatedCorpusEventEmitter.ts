@@ -4,13 +4,15 @@ import {
   BaseEventData,
   ReviewedCorpusItemEventType,
   ScheduledCorpusItemEventType,
+  SectionEventType,
+  SectionItemEventType,
 } from './types';
 import { getUnixTimestamp } from '../shared/utils';
 
 export class CuratedCorpusEventEmitter extends EventEmitter {
   private static buildEvent<BaseEventPayload>(
     eventData: BaseEventPayload,
-    eventType: ReviewedCorpusItemEventType | ScheduledCorpusItemEventType
+    eventType: ReviewedCorpusItemEventType | ScheduledCorpusItemEventType | SectionEventType | SectionItemEventType
   ): BaseEventPayload & BaseEventData {
     return {
       ...eventData,
@@ -22,7 +24,7 @@ export class CuratedCorpusEventEmitter extends EventEmitter {
   }
 
   emitEvent<BaseEventPayload>(
-    event: ReviewedCorpusItemEventType | ScheduledCorpusItemEventType,
+    event: ReviewedCorpusItemEventType | ScheduledCorpusItemEventType | SectionEventType | SectionItemEventType,
     data: BaseEventPayload
   ): void {
     this.emit(event, CuratedCorpusEventEmitter.buildEvent(data, event));

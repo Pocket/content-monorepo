@@ -1,6 +1,8 @@
 import {
   ReviewedCorpusItemEventType,
   ScheduledCorpusItemEventType,
+  SectionEventType,
+  SectionItemEventType,
 } from '../events/types';
 
 // Work out the AWS/localstack endpoint
@@ -64,12 +66,16 @@ export default {
         : 'pocket-backend-curated-corpus-api-dev',
     corpusItemEvents: ReviewedCorpusItemEventType,
     corpusScheduleEvents: ScheduledCorpusItemEventType,
+    sectionEvents: SectionEventType,
+    sectionItemEvents: SectionItemEventType,
     schemas: {
-      objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-5',
+      objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-17',
       reviewedCorpusItem:
         'iglu:com.pocket/reviewed_corpus_item/jsonschema/1-0-11',
       scheduledCorpusItem:
         'iglu:com.pocket/scheduled_corpus_item/jsonschema/1-0-8',
+      section: 'iglu:com.pocket/section/jsonschema/1-0-0',
+      sectionItem: 'iglu:com.pocket/section_item/jsonschema/1-0-0',
     },
   },
   tracing: {

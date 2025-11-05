@@ -1,5 +1,5 @@
 import { RejectedCuratedCorpusItem } from '.prisma/client';
-import { ScheduledItem, ApprovedItem } from '../database/types';
+import { ScheduledItem, ApprovedItem, Section, SectionItem } from '../database/types';
 import { ScheduledCorpusItemStatus } from '../shared/types';
 import { ActionScreen, ActivitySource } from 'content-common';
 
@@ -16,16 +16,31 @@ export enum ScheduledCorpusItemEventType {
   RESCHEDULE = 'RESCHEDULE',
 }
 
+export enum SectionEventType {
+  CREATE_SECTION = 'CREATE_SECTION',
+  UPDATE_SECTION = 'UPDATE_SECTION',
+  DELETE_SECTION = 'DELETE_SECTION',
+}
+
+export enum SectionItemEventType {
+  ADD_SECTION_ITEM = 'ADD_SECTION_ITEM',
+  REMOVE_SECTION_ITEM = 'REMOVE_SECTION_ITEM',
+}
+
 export type ReviewedCorpusItemEventTypeString =
   keyof typeof ReviewedCorpusItemEventType;
 export type ScheduledCorpusItemEventTypeString =
   keyof typeof ScheduledCorpusItemEventType;
+export type SectionEventTypeString = keyof typeof SectionEventType;
+export type SectionItemEventTypeString = keyof typeof SectionItemEventType;
 
 // Data common to all events
 export type BaseEventData = {
   eventType:
     | ReviewedCorpusItemEventTypeString
-    | ScheduledCorpusItemEventTypeString;
+    | ScheduledCorpusItemEventTypeString
+    | SectionEventTypeString
+    | SectionItemEventTypeString;
   timestamp: number; // epoch time (ms)
   source: string;
   version: string; // semver (e.g. 1.2.33)
@@ -65,6 +80,22 @@ export type ScheduledCorpusItemPayload = {
     reasonComment?: string;
     // the status of the scheduled_corpus_item, as decided by a curator.
     status?: ScheduledCorpusItemStatus;
+    // the admin UI screen that originated the event
+    action_screen?: ActionScreen;
+  };
+};
+
+// Data for the events that are fired on changes to Sections
+export type SectionPayload = {
+  section: Section & {
+    // the admin UI screen that originated the event
+    action_screen?: ActionScreen;
+  };
+};
+
+// Data for the events that are fired on changes to SectionItems
+export type SectionItemPayload = {
+  sectionItem: SectionItem & {
     // the admin UI screen that originated the event
     action_screen?: ActionScreen;
   };
