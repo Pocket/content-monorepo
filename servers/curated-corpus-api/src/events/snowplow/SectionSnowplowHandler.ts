@@ -8,7 +8,7 @@ import { CuratedCorpusItemUpdate, ObjectVersion, Section } from './schema';
 import { getUnixTimestamp } from '../../shared/utils';
 import { getScheduledSurfaceByGuid } from '../../shared/utils';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
-import { ActivitySource } from 'content-common';
+import { ActivitySource, IABMetadata } from 'content-common';
 
 type CuratedCorpusItemUpdateEvent = Omit<SelfDescribingJson, 'data'> & {
   data: CuratedCorpusItemUpdate;
@@ -85,13 +85,14 @@ export class SectionSnowplowHandler extends CuratedCorpusSnowplowHandler {
         hero_title: section.heroTitle ?? undefined,
         hero_description: section.heroDescription ?? undefined,
         scheduled_surface_id: section.scheduledSurfaceGuid,
-        iab: section.iab ? JSON.stringify(section.iab) : undefined,
+        iab_taxonomy: (section.iab as IABMetadata | null)?.taxonomy,
+        iab_categories: (section.iab as IABMetadata | null)?.categories,
         sort: section.sort ?? undefined,
         active: section.active,
         disabled: section.disabled,
         create_source: section.createSource as ActivitySource,
-        deactivate_source: section.deactivateSource as ActivitySource | undefined,
-        update_source: section.updateSource as ActivitySource | undefined,
+        deactivate_source: (section.deactivateSource ?? undefined) as ActivitySource | undefined,
+        update_source: (section.updateSource ?? undefined) as ActivitySource | undefined,
         deactivated_at: section.deactivatedAt
           ? getUnixTimestamp(section.deactivatedAt)
           : undefined,
@@ -106,19 +107,6 @@ export class SectionSnowplowHandler extends CuratedCorpusSnowplowHandler {
         action_screen: section.action_screen ?? undefined,
       },
     };
-
-    // Get the ScheduledSurface info
-    const scheduledSurface = getScheduledSurfaceByGuid(
-      section.scheduledSurfaceGuid,
-    );
-
-    if (scheduledSurface) {
-      context.data = {
-        ...context.data,
-        scheduled_surface_name: scheduledSurface.name,
-        scheduled_surface_iana_timezone: scheduledSurface.ianaTimezone,
-      };
-    }
 
     return context;
   }

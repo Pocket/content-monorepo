@@ -113,7 +113,7 @@ export class SectionItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
         rank: sectionItem.rank ?? undefined,
         active: sectionItem.active,
         deactivate_reasons: deactivateReasons,
-        deactivate_source: sectionItem.deactivateSource as ActivitySource | undefined,
+        deactivate_source: (sectionItem.deactivateSource ?? undefined) as ActivitySource | undefined,
         deactivated_at: sectionItem.deactivatedAt
           ? getUnixTimestamp(sectionItem.deactivatedAt)
           : undefined,

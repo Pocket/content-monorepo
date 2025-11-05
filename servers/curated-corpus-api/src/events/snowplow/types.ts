@@ -13,9 +13,9 @@ export type SnowplowEventType =
   | 'scheduled_corpus_item_added'
   | 'scheduled_corpus_item_removed'
   | 'scheduled_corpus_item_rescheduled'
-  | 'section_created'
+  | 'section_added'
   | 'section_updated'
-  | 'section_deleted'
+  | 'section_removed'
   | 'section_item_added'
   | 'section_item_removed';
 
@@ -42,9 +42,9 @@ export const SectionSnowplowEventMap: Record<
   SectionEventTypeString,
   SnowplowEventType
 > = {
-  CREATE_SECTION: 'section_created',
+  CREATE_SECTION: 'section_added',
   UPDATE_SECTION: 'section_updated',
-  DELETE_SECTION: 'section_deleted',
+  DELETE_SECTION: 'section_removed',
 };
 
 export const SectionItemSnowplowEventMap: Record<
