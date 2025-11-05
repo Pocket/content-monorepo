@@ -28,9 +28,9 @@ export type CuratedCorpusItemUpdate = {
     | 'reviewed_corpus_item_rejected' // Item is added to the rejected corpus
     | 'scheduled_corpus_item_added' // Item is added to the scheduled surface schedule
     | 'scheduled_corpus_item_removed' // Item is removed from the scheduled surface schedule
-    | 'section_created' // Section is created
+    | 'section_added' // Section is added
     | 'section_updated' // Section is updated
-    | 'section_deleted' // Section is deleted
+    | 'section_removed' // Section is removed
     | 'section_item_added' // SectionItem is added
     | 'section_item_removed'; // SectionItem is removed
   object: 'reviewed_corpus_item' | 'scheduled_corpus_item' | 'section' | 'section_item';
@@ -275,17 +275,13 @@ export type Section = {
    */
   scheduled_surface_id: string;
   /**
-   * The name of the scheduled surface.
+   * The IAB taxonomy version.
    */
-  scheduled_surface_name?: string;
+  iab_taxonomy?: string;
   /**
-   * The iana.org timezone of the scheduled surface.
+   * The list of IAB category codes.
    */
-  scheduled_surface_iana_timezone?: string;
-  /**
-   * The IAB category information as JSON.
-   */
-  iab?: string;
+  iab_categories?: string[];
   /**
    * The sort order of the section.
    */

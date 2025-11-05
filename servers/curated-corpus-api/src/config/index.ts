@@ -69,7 +69,7 @@ export default {
     sectionEvents: SectionEventType,
     sectionItemEvents: SectionItemEventType,
     schemas: {
-      objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-17',
+      objectUpdate: 'iglu:com.pocket/object_update/jsonschema/1-0-21',
       reviewedCorpusItem:
         'iglu:com.pocket/reviewed_corpus_item/jsonschema/1-0-11',
       scheduledCorpusItem:
