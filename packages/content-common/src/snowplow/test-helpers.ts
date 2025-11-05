@@ -91,7 +91,7 @@ export const generateObjectUpdateEvent = (
 ): PayloadBuilder => {
   return buildSelfDescribingEvent({
     event: {
-      schema: 'iglu:com.pocket/object_update/jsonschema/1-0-17',
+      schema: 'iglu:com.pocket/object_update/jsonschema/1-0-21',
       data: {
         trigger: 'scheduled_corpus_candidate_generated',
         object: 'scheduled_corpus_candidate',

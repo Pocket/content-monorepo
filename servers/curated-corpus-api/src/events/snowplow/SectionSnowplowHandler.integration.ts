@@ -55,13 +55,8 @@ const sectionEventContextData = {
   hero_title: mockSection.heroTitle,
   hero_description: mockSection.heroDescription,
   scheduled_surface_id: mockSection.scheduledSurfaceGuid,
-  scheduled_surface_name: getScheduledSurfaceByGuid(
-    mockSection.scheduledSurfaceGuid,
-  )?.name,
-  scheduled_surface_iana_timezone: getScheduledSurfaceByGuid(
-    mockSection.scheduledSurfaceGuid,
-  )?.ianaTimezone,
-  iab: JSON.stringify(mockSection.iab),
+  iab_taxonomy: (mockSection.iab as any)?.taxonomy,
+  iab_categories: (mockSection.iab as any)?.categories,
   sort: mockSection.sort,
   active: mockSection.active,
   disabled: mockSection.disabled,
@@ -146,7 +141,7 @@ describe('SectionSnowplowHandler', () => {
 
     assertValidSnowplowObjectUpdateEvents(
       goodEvents.map((goodEvent) => goodEvent.rawEvent.parameters.ue_px),
-      ['section_created', 'section_updated', 'section_deleted'],
+      ['section_added', 'section_updated', 'section_removed'],
       'section',
     );
   });
