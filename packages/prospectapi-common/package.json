@@ -41,6 +41,8 @@
     "msw": "2.4.7",
     "ts-jest": "29.1.2",
     "tsup": "8.2.4",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "typescript": "5.6.3",
+    "@types/node": "^22"
   }
 }

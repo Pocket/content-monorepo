@@ -1,0 +1,16 @@
+{
+  "extends": "tsconfig/cdktf.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  },
+  "exclude": [
+    "node_modules/",
+    "dist/"
+  ],
+  "include": [
+    "src/**/*.ts", 
+  ]
+}

@@ -7,7 +7,7 @@
     "clean": "rm -rf .turbo node_modules packages/**/.turbo packages/**/dist packages/**/node_modules servers/**/logs servers/**/.turbo servers/**/dist servers/**/node_modules lambdas/**/logs lambdas/**/.turbo lambdas/**/dist lambdas/**/node_modules infrastructure/**/dist infrastructure/**/node_modules infrastructure/**/.turbo infrastructure/**/cdktf.out",
     "db:dynamo-seed": "dotenv -- turbo run db:dynamo-seed",
     "db:generate-prisma-client": "dotenv -- turbo run db:generate-prisma-client",
-    "dev": "dotenv -- turbo dev",
+    "dev": "dotenv -- turbo dev --concurrency 30",
     "fix-mismatches": "syncpack fix-mismatches && pnpm install",
     "format": "turbo run format",
     "lint": "turbo run lint",
@@ -23,15 +23,15 @@
     "seed": "dotenv -- turbo run db:prisma-seed"
   },
   "engines": {
-    "node": "^20.12"
+    "node": "^22.11"
   },
-  "packageManager": "pnpm@9.9.0",
+  "packageManager": "pnpm@9.12.2",
   "dependencies": {
     "dotenv-cli": "latest"
   },
   "devDependencies": {
     "syncpack": "^13.0.0",
     "tsconfig": "workspace:*",
-    "turbo": "^2.1.1"
+    "turbo": "^2.3.3"
   }
 }
