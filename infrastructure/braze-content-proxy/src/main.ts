@@ -14,7 +14,7 @@ import { PocketALBApplication } from '@pocket-tools/terraform-modules';
 import { provider as localProvider } from '@cdktf/provider-local';
 import { provider as nullProvider } from '@cdktf/provider-null';
 import { provider as pagerDutyProvider } from '@cdktf/provider-pagerduty';
-// import * as fs from 'fs';
+import * as fs from 'fs';
 
 class BrazeContentProxy extends TerraformStack {
   constructor(scope: Construct, name: string) {
@@ -290,7 +290,7 @@ class BrazeContentProxy extends TerraformStack {
 }
 
 const app = new App();
-new BrazeContentProxy(app, 'braze-content-proxy');
-// const tfEnvVersion = fs.readFileSync('.terraform-version', 'utf8');
-// stack.addOverride('terraform.required_version', tfEnvVersion);
+const stack = new BrazeContentProxy(app, 'braze-content-proxy');
+const tfEnvVersion = fs.readFileSync('.terraform-version', 'utf8');
+stack.addOverride('terraform.required_version', tfEnvVersion);
 app.synth();
