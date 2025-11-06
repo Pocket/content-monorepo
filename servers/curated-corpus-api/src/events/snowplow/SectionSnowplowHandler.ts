@@ -85,8 +85,6 @@ export class SectionSnowplowHandler extends CuratedCorpusSnowplowHandler {
         hero_title: section.heroTitle ?? undefined,
         hero_description: section.heroDescription ?? undefined,
         scheduled_surface_id: section.scheduledSurfaceGuid,
-        iab_taxonomy: (section.iab as IABMetadata | null)?.taxonomy,
-        iab_categories: (section.iab as IABMetadata | null)?.categories,
         sort: section.sort ?? undefined,
         active: section.active,
         disabled: section.disabled,

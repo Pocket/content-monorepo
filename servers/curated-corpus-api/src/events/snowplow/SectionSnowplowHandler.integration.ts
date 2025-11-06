@@ -55,8 +55,6 @@ const sectionEventContextData = {
   hero_title: mockSection.heroTitle,
   hero_description: mockSection.heroDescription,
   scheduled_surface_id: mockSection.scheduledSurfaceGuid,
-  iab_taxonomy: (mockSection.iab as any)?.taxonomy,
-  iab_categories: (mockSection.iab as any)?.categories,
   sort: mockSection.sort,
   active: mockSection.active,
   disabled: mockSection.disabled,
