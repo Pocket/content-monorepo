@@ -275,14 +275,6 @@ export type Section = {
    */
   scheduled_surface_id: string;
   /**
-   * The IAB taxonomy version.
-   */
-  iab_taxonomy?: string;
-  /**
-   * The list of IAB category codes.
-   */
-  iab_categories?: string[];
-  /**
    * The sort order of the section.
    */
   sort?: number;
