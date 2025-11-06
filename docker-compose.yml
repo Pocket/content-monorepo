@@ -43,7 +43,10 @@ services:
       retries: 60
 
   snowplow:
-    image: pocket/snowplow-micro:dev
+    image: pocket/snowplow-micro:prod
+    environment:
+      - MICRO_IGLU_REGISTRY_URL=https://com-getpocket-prod.iglu.snplow.net/api
+      - MICRO_IGLU_API_KEY=8648ed81-2eb9-4b06-96be-e64d89c6405b
     healthcheck:
       test: ['CMD', 'bash', '-c', 'curl -sf localhost:9090/micro/all']
       interval: 5s

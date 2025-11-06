@@ -31,9 +31,23 @@ export async function snowplowRequest(
  * Resets the event counts in Snowplow Micro.
  */
 export async function resetSnowplowEvents(): Promise<void> {
-  // Wait a bit for any in-flight Snowplow events from unrelated tests to arrive at Snowplow.
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  // Wait for any in-flight Snowplow events from previous tests to arrive at Snowplow.
+  // Increased from 500ms to 2000ms to handle async event processing timing issues
+  // and prevent event leakage between test files.
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   await snowplowRequest('/micro/reset', true);
+  // Add additional wait after reset to ensure the reset operation completes
+  // before the next test begins emitting events
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
+  // Verify the reset was successful by checking event count is 0
+  const eventsAfterReset = await getAllSnowplowEvents();
+  if (eventsAfterReset.total > 0) {
+    // If events still exist, wait a bit longer and reset again
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await snowplowRequest('/micro/reset', true);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
 }
 
 export async function getAllSnowplowEvents(): Promise<SnowplowMicroEventCounts> {
@@ -69,9 +83,9 @@ export async function waitForSnowplowEvents(
 
   while (totalWaitTime < maxWaitTime) {
     const eventCounts = await getAllSnowplowEvents();
-    // TODO why is this >= and not === ?
-    // if it's greater than expected, that seems to say it hasn't been properly cleared
-    if (eventCounts.total >= expectedEventCount) {
+    // Use === to ensure we get exactly the expected number of events
+    // Using >= would mask event leakage issues where extra events are present
+    if (eventCounts.total === expectedEventCount) {
       return eventCounts;
     } else {
       await new Promise((resolve) => setTimeout(resolve, waitPeriod));
