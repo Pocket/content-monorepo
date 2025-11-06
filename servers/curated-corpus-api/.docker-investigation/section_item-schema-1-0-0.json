@@ -1,0 +1,110 @@
+{
+  "$schema": "http://iglucentral.com/schemas/com.snowplowanalytics.self-desc/schema/jsonschema/1-0-0#",
+  "self": {
+    "vendor": "com.pocket",
+    "name": "section_item",
+    "format": "jsonschema",
+    "version": "1-0-0"
+  },
+  "description": "Entity to describe a SectionItem that belongs to a Section. Expected (new and old) on all object_update events where object = section_item.",
+  "properties": {
+    "object_version": {
+      "enum": [
+        "new",
+        "old"
+      ],
+      "description": "Indication of whether the version of the entity is before or after the modifications were made."
+    },
+    "section_item_external_id": {
+      "type": "string",
+      "description": "A guid that identifies the section item in backend systems, sometimes referred to as the section item's external_id."
+    },
+    "section_external_id": {
+      "type": "string",
+      "description": "A guid that identifies the parent Section to which this SectionItem belongs."
+    },
+    "approved_corpus_item_external_id": {
+      "type": "string",
+      "description": "A guid that identifies the approved_corpus_item in backend systems, sometimes referred to as an approved corpus item's external_id."
+    },
+    "url": {
+      "type": "string",
+      "description": "The url of the approved corpus item."
+    },
+    "rank": {
+      "type": "integer",
+      "description": "The initial rank of the SectionItem in relation to its siblings. Used as a fallback when there is no engagement/click data available. May only apply to ML-generated SectionItems."
+    },
+    "active": {
+      "type": "boolean",
+      "description": "Indicates whether the SectionItem is currently active in the Section."
+    },
+    "deactivate_reasons": {
+      "type": "array",
+      "description": "The list of reasons why the SectionItem was removed from the Section.",
+      "items": {
+        "type": "string",
+        "description": "The reason the SectionItem was removed from the Section."
+      }
+    },
+    "deactivate_source": {
+      "enum": [
+        "ML",
+        "MANUAL"
+      ],
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The source that deactivated the SectionItem. ML or MANUAL."
+    },
+    "deactivated_at": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9999999999,
+      "description": "The UTC unix timestamp (in seconds) for when the SectionItem was deactivated."
+    },
+    "created_at": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9999999999,
+      "description": "The UTC unix timestamp (in seconds) for when the SectionItem was created."
+    },
+    "created_by": {
+      "type": "string",
+      "description": "The curator who created the SectionItem, or 'ML' if created by an ML process."
+    },
+    "updated_at": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9999999999,
+      "description": "The UTC unix timestamp (in seconds) for when the SectionItem was last updated."
+    },
+    "updated_by": {
+      "type": "string",
+      "description": "The curator who last updated the SectionItem."
+    },
+    "action_screen": {
+      "enum": [
+        "PROSPECTING",
+        "SCHEDULE",
+        "CORPUS",
+        "SECTIONS"
+      ],
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Indicates where in the Curation Tools UI the action took place. Null if the action was performed by a backend ML process."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "object_version",
+    "section_item_external_id",
+    "section_external_id",
+    "approved_corpus_item_external_id",
+    "url"
+  ]
+}

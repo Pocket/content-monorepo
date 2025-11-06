@@ -275,6 +275,10 @@ export type Section = {
    */
   scheduled_surface_id: string;
   /**
+   * IAB data as a JSON-stringified object containing taxonomy and categories.
+   */
+  iab?: string;
+  /**
    * The sort order of the section.
    */
   sort?: number;
