@@ -6,7 +6,6 @@ import config from '../../config';
 import { SectionSnowplowEventMap } from './types';
 import { CuratedCorpusItemUpdate, ObjectVersion, Section } from './schema';
 import { getUnixTimestamp } from '../../shared/utils';
-import { getScheduledSurfaceByGuid } from '../../shared/utils';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import { ActivitySource, IABMetadata } from 'content-common';
 
@@ -85,12 +84,14 @@ export class SectionSnowplowHandler extends CuratedCorpusSnowplowHandler {
         hero_title: section.heroTitle ?? undefined,
         hero_description: section.heroDescription ?? undefined,
         scheduled_surface_id: section.scheduledSurfaceGuid,
+        /* eslint-disable prettier/prettier */
         iab: section.iab
           ? JSON.stringify({
-              taxonomy: (section.iab as IABMetadata).taxonomy,
-              categories: (section.iab as IABMetadata).categories,
-            })
+            taxonomy: (section.iab as IABMetadata).taxonomy,
+            categories: (section.iab as IABMetadata).categories,
+          })
           : undefined,
+        /* eslint-enable prettier/prettier */
         sort: section.sort ?? undefined,
         active: section.active,
         disabled: section.disabled,

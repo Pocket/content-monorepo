@@ -1,5 +1,6 @@
 import {
   getAllSnowplowEvents,
+  getBadSnowplowEvents,
   getGoodSnowplowEvents,
   parseSnowplowData,
   resetSnowplowEvents,
@@ -14,7 +15,6 @@ import { tracker } from './tracker';
 import { CuratedCorpusEventEmitter } from '../curatedCorpusEventEmitter';
 import { getUnixTimestamp } from '../../shared/utils';
 import { ActivitySource } from 'content-common';
-import { getScheduledSurfaceByGuid } from '../../shared/utils';
 import { Section } from '../../database/types';
 
 /**
@@ -119,14 +119,12 @@ describe('SectionSnowplowHandler', () => {
 
     // If there are bad events, log them for debugging
     if (allEvents.bad > 0) {
-      const { getBadSnowplowEvents } = require('content-common');
       const badEvents = await getBadSnowplowEvents();
       console.log('Bad events details:', JSON.stringify(badEvents, null, 2));
     }
 
     // If no events at all, check bad events anyway
     if (allEvents.total === 0) {
-      const { getBadSnowplowEvents } = require('content-common');
       const badEvents = await getBadSnowplowEvents();
       console.log('No events received. Checking bad events:', JSON.stringify(badEvents, null, 2));
     }
