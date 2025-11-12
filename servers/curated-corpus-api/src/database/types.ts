@@ -1,7 +1,6 @@
 import {
   ApprovedItem as ApprovedItemModel,
   CuratedStatus,
-  PublisherDomain,
   ScheduledItem as ScheduledItemModel,
   ScheduleReview,
   Section as SectionModel,
