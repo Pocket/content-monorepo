@@ -1,6 +1,7 @@
 import {
   ApprovedItem as ApprovedItemModel,
   CuratedStatus,
+  PublisherDomain,
   ScheduledItem as ScheduledItemModel,
   ScheduleReview,
   Section as SectionModel,
@@ -235,3 +236,6 @@ export type ApprovedItemScheduledSurfaceHistory = {
   scheduledDate: string;
   scheduledSurfaceGuid: string;
 };
+
+// Re-export PublisherDomain from Prisma client
+export { PublisherDomain };
