@@ -236,6 +236,3 @@ export type ApprovedItemScheduledSurfaceHistory = {
   scheduledDate: string;
   scheduledSurfaceGuid: string;
 };
-
-// Re-export PublisherDomain from Prisma client
-export { PublisherDomain };
