@@ -11,7 +11,9 @@ CREATE TABLE `PublisherDomain` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Insert publisher domain data
--- Only insert domains that exist in the ApprovedItem table
+-- The domain names are sourced from domain_business_metadata,
+-- and narrowed down to those that were associated with a
+-- ScheduledItem or SectionItem at any point in time.
 INSERT INTO `PublisherDomain` (`domainName`, `publisher`, `createdBy`, `updatedAt`)
 SELECT DISTINCT
     dbm.domain_name,
