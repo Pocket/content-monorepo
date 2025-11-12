@@ -28,6 +28,15 @@ model ExcludedDomain {
   domainName String @id @db.VarChar(255)
 }
 
+model PublisherDomain {
+  domainName String   @id @db.VarChar(255)
+  publisher  String   @db.VarChar(255)
+  createdAt  DateTime @default(now())
+  createdBy  String   @db.VarChar(255)
+  updatedAt  DateTime @updatedAt
+  updatedBy  String?  @db.VarChar(255)
+}
+
 model ApprovedItem {
   id              Int                  @id @default(autoincrement())
   externalId      String               @unique @default(uuid()) @db.VarChar(255)
