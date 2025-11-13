@@ -119,20 +119,6 @@ describe('SectionItemSnowplowHandler', () => {
 
     // make sure we only have good events
     const allEvents = await waitForSnowplowEvents(2);
-    console.log('Events received:', allEvents);
-
-    // If there are bad events, log them for debugging
-    if (allEvents.bad > 0) {
-      const badEvents = await getBadSnowplowEvents();
-      console.log('Bad events details:', JSON.stringify(badEvents, null, 2));
-    }
-
-    // If no events at all, check bad events anyway
-    if (allEvents.total === 0) {
-      const badEvents = await getBadSnowplowEvents();
-      console.log('No events received. Checking bad events:', JSON.stringify(badEvents, null, 2));
-    }
-
     expect(allEvents.total).toEqual(2);
     expect(allEvents.good).toEqual(2);
     expect(allEvents.bad).toEqual(0);
@@ -168,20 +154,6 @@ describe('SectionItemSnowplowHandler', () => {
 
       // make sure we only have good events
       const allEvents = await waitForSnowplowEvents();
-      console.log('Events received:', allEvents);
-
-      // If there are bad events, log them for debugging
-      if (allEvents.bad > 0) {
-        const badEvents = await getBadSnowplowEvents();
-        console.log('Bad events details:', JSON.stringify(badEvents, null, 2));
-      }
-
-      // If no events at all, check bad events anyway
-      if (allEvents.total === 0) {
-        const badEvents = await getBadSnowplowEvents();
-        console.log('No events received. Checking bad events:', JSON.stringify(badEvents, null, 2));
-      }
-
       expect(allEvents.total).toEqual(1);
       expect(allEvents.good).toEqual(1);
       expect(allEvents.bad).toEqual(0);
@@ -225,25 +197,8 @@ describe('SectionItemSnowplowHandler', () => {
         eventType: SectionItemEventType.REMOVE_SECTION_ITEM,
       });
 
-      // wait a bit
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
       // make sure we only have good events
-      const allEvents = await getAllSnowplowEvents();
-      console.log('Events received:', allEvents);
-
-      // If there are bad events, log them for debugging
-      if (allEvents.bad > 0) {
-        const badEvents = await getBadSnowplowEvents();
-        console.log('Bad events details:', JSON.stringify(badEvents, null, 2));
-      }
-
-      // If no events at all, check bad events anyway
-      if (allEvents.total === 0) {
-        const badEvents = await getBadSnowplowEvents();
-        console.log('No events received. Checking bad events:', JSON.stringify(badEvents, null, 2));
-      }
-
+      const allEvents = await waitForSnowplowEvents();
       expect(allEvents.total).toEqual(1);
       expect(allEvents.good).toEqual(1);
       expect(allEvents.bad).toEqual(0);
@@ -284,25 +239,8 @@ describe('SectionItemSnowplowHandler', () => {
         eventType: SectionItemEventType.ADD_SECTION_ITEM,
       });
 
-      // wait a bit
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
       // make sure we only have good events
-      const allEvents = await getAllSnowplowEvents();
-      console.log('Events received:', allEvents);
-
-      // If there are bad events, log them for debugging
-      if (allEvents.bad > 0) {
-        const badEvents = await getBadSnowplowEvents();
-        console.log('Bad events details:', JSON.stringify(badEvents, null, 2));
-      }
-
-      // If no events at all, check bad events anyway
-      if (allEvents.total === 0) {
-        const badEvents = await getBadSnowplowEvents();
-        console.log('No events received. Checking bad events:', JSON.stringify(badEvents, null, 2));
-      }
-
+      const allEvents = await waitForSnowplowEvents();
       expect(allEvents.total).toEqual(1);
       expect(allEvents.good).toEqual(1);
       expect(allEvents.bad).toEqual(0);
