@@ -116,6 +116,11 @@ export async function removeSectionItem(
           },
         },
       },
+      section: {
+        select: {
+          externalId: true,
+        },
+      },
     },
   });
 }

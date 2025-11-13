@@ -60,6 +60,11 @@ export async function getSectionsWithSectionItems(
               },
             },
           },
+          section: {
+            select: {
+              externalId: true,
+            },
+          },
         },
       },
     },
