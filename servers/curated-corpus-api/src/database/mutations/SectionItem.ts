@@ -74,6 +74,11 @@ export async function createSectionItem(
           },
         },
       },
+      section: {
+        select: {
+          externalId: true,
+        },
+      },
     },
   });
 }

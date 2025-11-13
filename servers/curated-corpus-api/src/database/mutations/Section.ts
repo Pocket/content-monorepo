@@ -95,10 +95,15 @@ export async function updateSection(
             orderBy: [{ sortOrder: 'asc' }],
           },
         },
-      }
+      },
+      section: {
+        select: {
+          externalId: true,
+        },
+      },
     },
   });
-  
+
   return {
     ...updatedSection,
     sectionItems: activeSectionItems
@@ -137,7 +142,12 @@ export async function disableEnableSection(
                 orderBy: [{ sortOrder: 'asc' }],
               },
             },
-          }
+          },
+          section: {
+            select: {
+              externalId: true,
+            },
+          },
         }
       }
     }
@@ -286,6 +296,11 @@ export async function deleteCustomSection(
                 authors: {
                   orderBy: [{ sortOrder: 'asc' }],
                 },
+              },
+            },
+            section: {
+              select: {
+                externalId: true,
               },
             },
           },

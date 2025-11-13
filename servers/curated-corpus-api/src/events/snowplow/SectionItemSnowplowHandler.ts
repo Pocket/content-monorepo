@@ -106,7 +106,7 @@ export class SectionItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
       data: {
         object_version: ObjectVersion.NEW,
         section_item_external_id: sectionItem.externalId,
-        section_external_id: sectionItem.section?.externalId ?? '',
+        section_external_id: sectionItem.section.externalId,
         approved_corpus_item_external_id:
           sectionItem.approvedItem.externalId,
         url: sectionItem.approvedItem.url,
