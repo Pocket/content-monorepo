@@ -1,7 +1,5 @@
 import { CuratedStatus } from '.prisma/client';
 import {
-  getAllSnowplowEvents,
-  getBadSnowplowEvents,
   getGoodSnowplowEvents,
   parseSnowplowData,
   resetSnowplowEvents,
