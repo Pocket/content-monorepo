@@ -44,6 +44,7 @@ services:
 
   snowplow:
     image: pocket/snowplow-micro:prod
+    pull_policy: always
     healthcheck:
       test: ['CMD', 'bash', '-c', 'curl -sf localhost:9090/micro/all']
       interval: 5s
