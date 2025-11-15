@@ -96,11 +96,7 @@ export async function updateSection(
           },
         },
       },
-      section: {
-        select: {
-          externalId: true,
-        },
-      },
+      section: true,
     },
   });
 
@@ -143,11 +139,7 @@ export async function disableEnableSection(
               },
             },
           },
-          section: {
-            select: {
-              externalId: true,
-            },
-          },
+          section: true,
         }
       }
     }
@@ -298,11 +290,7 @@ export async function deleteCustomSection(
                 },
               },
             },
-            section: {
-              select: {
-                externalId: true,
-              },
-            },
+            section: true,
           },
         },
       },

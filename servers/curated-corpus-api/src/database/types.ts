@@ -174,7 +174,7 @@ export type ApprovedItem = ApprovedItemModel & {
 
 export type SectionItem = SectionItemModel & {
   approvedItem: ApprovedItem;
-  section: Pick<SectionModel, 'externalId'>;
+  section: SectionModel;
 };
 
 export type Section = SectionModel & {

@@ -19,6 +19,8 @@ import { REMOVE_SECTION_ITEM } from '../sample-mutations.gql';
 import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
+import { curatedCorpusEventEmitter as eventEmitter } from '../../../../events/init';
+import { SectionItemEventType } from '../../../../events/types';
 
 describe('mutations: SectionItem (removeSectionItem)', () => {
   let app: Express.Application;
@@ -67,6 +69,10 @@ describe('mutations: SectionItem (removeSectionItem)', () => {
   });
 
   it('should remove a SectionItem if user has full access & deactivateSource not provided', async () => {
+    // Set up event tracking
+    const eventTracker = jest.fn();
+    eventEmitter.on(SectionItemEventType.REMOVE_SECTION_ITEM, eventTracker);
+
     const rightNow = new Date();
 
     // control the result of `new Date()` so we can explicitly check values
@@ -115,6 +121,25 @@ describe('mutations: SectionItem (removeSectionItem)', () => {
     expect(inactiveSectionItem.deactivateSource).toEqual(ActivitySource.MANUAL);
     expect(inactiveSectionItem.deactivatedAt).toEqual(rightNow);
     expect(inactiveSectionItem.deactivateReasons).toEqual(input.deactivateReasons);
+
+    // Check that the REMOVE_SECTION_ITEM event was fired successfully:
+    // 1 - Event was fired once.
+    expect(eventTracker).toHaveBeenCalledTimes(1);
+
+    const removeSectionItemEventCall = await eventTracker.mock.calls[0][0];
+
+    // 2 - Event has the right type.
+    expect(removeSectionItemEventCall.eventType).toEqual(
+      SectionItemEventType.REMOVE_SECTION_ITEM,
+    );
+
+    // 3 - Event has the right entity passed to it.
+    expect(removeSectionItemEventCall.sectionItem.externalId).toEqual(
+      result.body.data?.removeSectionItem.externalId,
+    );
+
+    // Clean up event listener
+    eventEmitter.removeAllListeners(SectionItemEventType.REMOVE_SECTION_ITEM);
   });
 
   it('should remove a SectionItem if user has full access & deactivateSource is provided', async () => {

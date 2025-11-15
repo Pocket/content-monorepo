@@ -8,6 +8,10 @@ import { SectionItem } from '../../../../database/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
 import { ActivitySource, ML_USERNAME } from 'content-common';
+import {
+  SectionItemEventType,
+  SectionItemPayload,
+} from '../../../../events/types';
 
 /**
  * Creates a SectionItem & adds it to a Section.
@@ -21,14 +25,16 @@ export async function createSectionItem(
   { data },
   context: IAdminContext,
 ): Promise<SectionItem> {
+  const { actionScreen, ...createData } = data;
+
   // find the targeted Section so we can verify user has write access to its Scheduled Surface
   const section = await context.db.section.findUnique({
-    where: { externalId: data.sectionExternalId },
+    where: { externalId: createData.sectionExternalId },
   });
 
   if (!section) {
     throw new NotFoundError(
-      `Cannot create a section item: Section with id "${data.sectionExternalId}" does not exist.`,
+      `Cannot create a section item: Section with id "${createData.sectionExternalId}" does not exist.`,
     );
   }
 
@@ -49,17 +55,24 @@ export async function createSectionItem(
   const sectionItem = await dbCreateSectionItem(
     context.db,
     {
-      approvedItemExternalId: data.approvedItemExternalId,
-      rank: data.rank,
+      approvedItemExternalId: createData.approvedItemExternalId,
+      rank: createData.rank,
       sectionId: section.id,
     },
     createSource,
   );
 
-  // TODO: emit creation event to a data pipeline
-  // as of this writing (2025-01-09), we are navigating the migration from
-  // snowplow & snowflake to glean & bigquery. we are awaiting a decision
-  // on the best path forward for our data pipeline.
+  const sectionItemForEvents: SectionItemPayload = {
+    sectionItem: {
+      ...sectionItem,
+      action_screen: actionScreen,
+    },
+  };
+
+  context.emitSectionItemEvent(
+    SectionItemEventType.ADD_SECTION_ITEM,
+    sectionItemForEvents,
+  );
 
   return sectionItem;
 }
@@ -76,9 +89,11 @@ export async function removeSectionItem(
   { data },
   context: IAdminContext,
 ): Promise<SectionItem> {
+  const { actionScreen, ...removeData } = data;
+
   // First check if the SectionItem exists & check if it is active
   const sectionItemToRemove = await context.db.sectionItem.findUnique({
-    where: { externalId: data.externalId, active: true },
+    where: { externalId: removeData.externalId, active: true },
   });
 
   if (sectionItemToRemove) {
@@ -87,16 +102,30 @@ export async function removeSectionItem(
       throw new AuthenticationError(ACCESS_DENIED_ERROR);
     }
 
-    return await dbRemoveSectionItem(context.db, {
-      externalId: data.externalId,
-      deactivateReasons: data.deactivateReasons,
-      deactivateSource: data.deactivateSource,
+    const sectionItem = await dbRemoveSectionItem(context.db, {
+      externalId: removeData.externalId,
+      deactivateReasons: removeData.deactivateReasons,
+      deactivateSource: removeData.deactivateSource,
     });
+
+    const sectionItemForEvents: SectionItemPayload = {
+      sectionItem: {
+        ...sectionItem,
+        action_screen: actionScreen,
+      },
+    };
+
+    context.emitSectionItemEvent(
+      SectionItemEventType.REMOVE_SECTION_ITEM,
+      sectionItemForEvents,
+    );
+
+    return sectionItem;
   }
   // Check if SectionItem exists
   else {
     throw new NotFoundError(
-      `Cannot remove a section item: Section item with id "${data.externalId}" does not exist.`,
+      `Cannot remove a section item: Section item with id "${removeData.externalId}" does not exist.`,
     );
   }
 }

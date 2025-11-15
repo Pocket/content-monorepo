@@ -74,11 +74,7 @@ export async function createSectionItem(
           },
         },
       },
-      section: {
-        select: {
-          externalId: true,
-        },
-      },
+      section: true,
     },
   });
 }
@@ -116,11 +112,7 @@ export async function removeSectionItem(
           },
         },
       },
-      section: {
-        select: {
-          externalId: true,
-        },
-      },
+      section: true,
     },
   });
 }

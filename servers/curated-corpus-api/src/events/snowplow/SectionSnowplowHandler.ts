@@ -30,16 +30,13 @@ export class SectionSnowplowHandler extends CuratedCorpusSnowplowHandler {
    * @param data
    */
   async process(data: SectionPayload & BaseEventData): Promise<void> {
-    console.log('[SectionSnowplowHandler] Processing event:', data.eventType);
     const event = buildSelfDescribingEvent({
       event: SectionSnowplowHandler.generateItemUpdateEvent(data),
     });
 
     const context = await SectionSnowplowHandler.generateEventContext(data);
-    console.log('[SectionSnowplowHandler] Sending to Snowplow...');
 
     await super.track(event, context);
-    console.log('[SectionSnowplowHandler] Event sent');
   }
 
   /**

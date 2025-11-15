@@ -123,12 +123,6 @@ describe('SectionSnowplowHandler', () => {
       console.log('Bad events details:', JSON.stringify(badEvents, null, 2));
     }
 
-    // If no events at all, check bad events anyway
-    if (allEvents.total === 0) {
-      const badEvents = await getBadSnowplowEvents();
-      console.log('No events received. Checking bad events:', JSON.stringify(badEvents, null, 2));
-    }
-
     expect(allEvents.total).toEqual(3);
     expect(allEvents.good).toEqual(3);
     expect(allEvents.bad).toEqual(0);

@@ -286,6 +286,10 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
 
   it('should return custom section fields', async () => {
     // Create a custom section with description, heroTitle, and heroDescription
+    // Use yesterday's date to ensure the section is LIVE (not SCHEDULED)
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
     await createSectionHelper(db, {
       externalId: 'custom-section-with-metadata',
       createSource: ActivitySource.MANUAL,
@@ -295,7 +299,7 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
       description: 'Custom section description',
       heroTitle: 'Hero Title Text',
       heroDescription: 'Hero Description Text',
-      startDate: new Date(),
+      startDate: yesterday,
     });
 
     const result = await request(app)

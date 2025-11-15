@@ -76,29 +76,7 @@ export class SectionItemSnowplowHandler extends CuratedCorpusSnowplowHandler {
 
     const sectionItem = result.sectionItem;
 
-    // Parse deactivateReasons if it's a JSON string/object
-    let deactivateReasons: string[] | undefined;
-    if (sectionItem.deactivateReasons) {
-      try {
-        // If it's already parsed as an object, convert to array
-        if (typeof sectionItem.deactivateReasons === 'object') {
-          const reasons = Array.isArray(sectionItem.deactivateReasons)
-            ? sectionItem.deactivateReasons
-            : Object.values(sectionItem.deactivateReasons);
-          // Filter to only include string values
-          deactivateReasons = reasons.filter((r): r is string => typeof r === 'string');
-        } else if (typeof sectionItem.deactivateReasons === 'string') {
-          // If it's a JSON string, parse it
-          const parsed = JSON.parse(sectionItem.deactivateReasons);
-          if (Array.isArray(parsed)) {
-            deactivateReasons = parsed.filter((r): r is string => typeof r === 'string');
-          }
-        }
-      } catch (e) {
-        // If parsing fails, leave it undefined
-        deactivateReasons = undefined;
-      }
-    }
+    const deactivateReasons = (sectionItem.deactivateReasons as string[] | null) ?? undefined;
 
     // Set up data to be returned
     const context: SectionItemContext = {
