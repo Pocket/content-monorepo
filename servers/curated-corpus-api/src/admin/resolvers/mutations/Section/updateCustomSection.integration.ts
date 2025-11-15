@@ -21,6 +21,8 @@ import {
 import { UPDATE_CUSTOM_SECTION } from '../sample-mutations.gql';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
+import { curatedCorpusEventEmitter as eventEmitter } from '../../../../events/init';
+import { SectionEventType } from '../../../../events/types';
 
 describe('mutations: Section (updateCustomSection)', () => {
   let app: any;
@@ -98,6 +100,10 @@ describe('mutations: Section (updateCustomSection)', () => {
 
   describe('successful updates', () => {
     it('updates a custom section with all fields', async () => {
+      // Set up event tracking
+      const eventTracker = jest.fn();
+      eventEmitter.on(SectionEventType.UPDATE_SECTION, eventTracker);
+
       const data: UpdateCustomSectionApiInput = {
         externalId: SECTION_EXTERNAL_ID,
         title: 'Fully Updated Title',
@@ -113,7 +119,7 @@ describe('mutations: Section (updateCustomSection)', () => {
           categories: ['1', '2'],
         },
       };
-      
+
       const variables = { data };
 
       const res = await request(app)
@@ -139,6 +145,25 @@ describe('mutations: Section (updateCustomSection)', () => {
       expect(section.createSource).toEqual('MANUAL');
       expect(section.sort).toEqual(42);
       expect(Array.isArray(section.sectionItems)).toBe(true);
+
+      // Check that the UPDATE_SECTION event was fired successfully:
+      // 1 - Event was fired once.
+      expect(eventTracker).toHaveBeenCalledTimes(1);
+
+      const updateSectionEventCall = eventTracker.mock.calls[0][0];
+
+      // 2 - Event has the right type.
+      expect(updateSectionEventCall.eventType).toEqual(
+        SectionEventType.UPDATE_SECTION,
+      );
+
+      // 3 - Event has the right entity passed to it.
+      expect(updateSectionEventCall.section.externalId).toEqual(
+        res.body.data?.updateCustomSection.externalId,
+      );
+
+      // Clean up event listener
+      eventEmitter.removeAllListeners(SectionEventType.UPDATE_SECTION);
     });
 
     it('updates with minimal fields (only required)', async () => {

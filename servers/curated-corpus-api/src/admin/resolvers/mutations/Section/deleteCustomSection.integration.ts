@@ -24,6 +24,8 @@ import { MozillaAccessGroup } from 'content-common';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
+import { curatedCorpusEventEmitter as eventEmitter } from '../../../../events/init';
+import { SectionEventType } from '../../../../events/types';
 
 describe('mutations: Section (deleteCustomSection)', () => {
   let app: Express.Application;
@@ -85,6 +87,9 @@ describe('mutations: Section (deleteCustomSection)', () => {
   });
 
   it('should soft-delete a Custom Section successfully', async () => {
+    // Set up event tracking
+    const eventTracker = jest.fn();
+    eventEmitter.on(SectionEventType.DELETE_SECTION, eventTracker);
 
     const result = await request(app)
       .post(graphQLUrl)
@@ -115,6 +120,25 @@ describe('mutations: Section (deleteCustomSection)', () => {
     });
     expect(inactiveSectionItem2.externalId).toEqual(sectionItem2.externalId);
     expect(inactiveSectionItem2.active).toBeFalsy();
+
+    // Check that the DELETE_SECTION event was fired successfully:
+    // 1 - Event was fired once.
+    expect(eventTracker).toHaveBeenCalledTimes(1);
+
+    const deleteSectionEventCall = eventTracker.mock.calls[0][0];
+
+    // 2 - Event has the right type.
+    expect(deleteSectionEventCall.eventType).toEqual(
+      SectionEventType.DELETE_SECTION,
+    );
+
+    // 3 - Event has the right entity passed to it.
+    expect(deleteSectionEventCall.section.externalId).toEqual(
+      result.body.data?.deleteCustomSection.externalId,
+    );
+
+    // Clean up event listener
+    eventEmitter.removeAllListeners(SectionEventType.DELETE_SECTION);
   });
 
   it('should fail to delete a Custom Section if the Section does not exist', async () => {

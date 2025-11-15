@@ -195,7 +195,7 @@ export async function updateCustomSection(
   context: IAdminContext,
 
 ): Promise<Section> {
-  const { externalId } = data;
+  const { externalId, actionScreen, ...updateData } = data;
 
   // Find the existing section
   const existingSection = await context.db.section.findUnique({
@@ -219,18 +219,29 @@ export async function updateCustomSection(
   }
 
   // Make sure updateSource == MANUAL for now for this mutation
-  if (data.updateSource !== ActivitySource.MANUAL) {
+  if (updateData.updateSource !== ActivitySource.MANUAL) {
     throw new UserInputError(
       'Cannot update a Section: updateSource must be MANUAL',
     );
   }
 
   // Check that the IAB taxonomy & code are valid
-  if (data.iab) {
-    validateIAB(data.iab);
+  if (updateData.iab) {
+    validateIAB(updateData.iab);
   }
 
-  return await dbUpdateCustomSection(context.db, data);
+  const section = await dbUpdateCustomSection(context.db, { externalId, ...updateData });
+
+  const sectionForEvents: SectionPayload = {
+    section: {
+      ...section,
+      action_screen: actionScreen,
+    },
+  };
+
+  context.emitSectionEvent(SectionEventType.UPDATE_SECTION, sectionForEvents);
+
+  return section;
 }
 
 /**
@@ -245,15 +256,17 @@ export async function deleteCustomSection(
   args,
   context: IAdminContext,
 ): Promise<Section> {
+  const { externalId, actionScreen } = args;
+
   // check if the Section with the passed externalId exists
   const section = await context.db.section.findUnique({
-    where: { externalId: args.externalId },
+    where: { externalId },
   });
 
   // if Section does not exist, throw NotFoundError
   if (!section) {
     throw new NotFoundError(
-      `Cannot delete the section: Section with id "${args.externalId}" does not exist.`,
+      `Cannot delete the section: Section with id "${externalId}" does not exist.`,
     );
   }
 
@@ -273,7 +286,18 @@ export async function deleteCustomSection(
   const sectionId = section.id;
 
   // soft-delete the custom section
-  return await dbDeleteCustomSection(context.db, sectionId, args.externalId);
+  const deletedSection = await dbDeleteCustomSection(context.db, sectionId, externalId);
+
+  const sectionForEvents: SectionPayload = {
+    section: {
+      ...deletedSection,
+      action_screen: actionScreen,
+    },
+  };
+
+  context.emitSectionEvent(SectionEventType.DELETE_SECTION, sectionForEvents);
+
+  return deletedSection;
 }
 
 /**
