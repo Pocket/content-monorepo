@@ -96,7 +96,6 @@ export async function updateSection(
           },
         },
       },
-      section: true,
     },
   });
 
@@ -139,7 +138,6 @@ export async function disableEnableSection(
               },
             },
           },
-          section: true,
         }
       }
     }
@@ -290,7 +288,6 @@ export async function deleteCustomSection(
                 },
               },
             },
-            section: true,
           },
         },
       },

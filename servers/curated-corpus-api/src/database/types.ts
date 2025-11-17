@@ -178,7 +178,7 @@ export type SectionItem = SectionItemModel & {
 };
 
 export type Section = SectionModel & {
-  sectionItems?: SectionItem[];
+  sectionItems?: SectionItemModel[];
 };
 
 /**
