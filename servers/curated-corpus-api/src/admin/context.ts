@@ -12,6 +12,10 @@ import {
   ReviewedCorpusItemPayload,
   ScheduledCorpusItemEventType,
   ScheduledCorpusItemPayload,
+  SectionEventType,
+  SectionItemEventType,
+  SectionPayload,
+  SectionItemPayload,
 } from '../events/types';
 import s3 from './aws/s3';
 import { MozillaAccessGroup } from 'content-common';
@@ -51,6 +55,16 @@ export interface IAdminContext {
   emitScheduledCorpusItemEvent(
     event: ScheduledCorpusItemEventType,
     scheduledCorpusItem: ScheduledCorpusItemPayload,
+  ): void;
+
+  emitSectionEvent(
+    event: SectionEventType,
+    section: SectionPayload,
+  ): void;
+
+  emitSectionItemEvent(
+    event: SectionItemEventType,
+    sectionItem: SectionItemPayload,
   ): void;
 }
 
@@ -156,6 +170,20 @@ export class AdminContextManager implements IAdminContext {
       event,
       scheduledCorpusItem,
     );
+  }
+
+  emitSectionEvent(
+    event: SectionEventType,
+    section: SectionPayload,
+  ): void {
+    this.eventEmitter.emitEvent<SectionPayload>(event, section);
+  }
+
+  emitSectionItemEvent(
+    event: SectionItemEventType,
+    sectionItem: SectionItemPayload,
+  ): void {
+    this.eventEmitter.emitEvent<SectionItemPayload>(event, sectionItem);
   }
 }
 

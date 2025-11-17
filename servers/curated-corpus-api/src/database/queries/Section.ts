@@ -60,6 +60,7 @@ export async function getSectionsWithSectionItems(
               },
             },
           },
+          section: true,
         },
       },
     },

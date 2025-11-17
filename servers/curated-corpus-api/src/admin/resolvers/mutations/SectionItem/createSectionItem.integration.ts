@@ -22,6 +22,8 @@ import {
 import { CREATE_SECTION_ITEM } from '../sample-mutations.gql';
 import { startServer } from '../../../../express';
 import { IAdminContext } from '../../../context';
+import { curatedCorpusEventEmitter as eventEmitter } from '../../../../events/init';
+import { SectionItemEventType } from '../../../../events/types';
 
 describe('mutations: SectionItem (createSectionItem)', () => {
   let app: Express.Application;
@@ -67,6 +69,10 @@ describe('mutations: SectionItem (createSectionItem)', () => {
   });
 
   it('should create a SectionItem if user has full access', async () => {
+    // Set up event tracking
+    const eventTracker = jest.fn();
+    eventEmitter.on(SectionItemEventType.ADD_SECTION_ITEM, eventTracker);
+
     input = {
       sectionExternalId: section.externalId,
       approvedItemExternalId: approvedItem.externalId,
@@ -92,6 +98,25 @@ describe('mutations: SectionItem (createSectionItem)', () => {
     expect(result.body.data?.createSectionItem.approvedItem.externalId).toEqual(
       input.approvedItemExternalId,
     );
+
+    // Check that the ADD_SECTION_ITEM event was fired successfully:
+    // 1 - Event was fired once.
+    expect(eventTracker).toHaveBeenCalledTimes(1);
+
+    const addSectionItemEventCall = await eventTracker.mock.calls[0][0];
+
+    // 2 - Event has the right type.
+    expect(addSectionItemEventCall.eventType).toEqual(
+      SectionItemEventType.ADD_SECTION_ITEM,
+    );
+
+    // 3 - Event has the right entity passed to it.
+    expect(addSectionItemEventCall.sectionItem.externalId).toEqual(
+      result.body.data?.createSectionItem.externalId,
+    );
+
+    // Clean up event listener
+    eventEmitter.removeAllListeners(SectionItemEventType.ADD_SECTION_ITEM);
   });
 
   it('should create a SectionItem without optional properties', async () => {

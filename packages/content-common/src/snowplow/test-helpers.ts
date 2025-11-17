@@ -69,9 +69,9 @@ export async function waitForSnowplowEvents(
 
   while (totalWaitTime < maxWaitTime) {
     const eventCounts = await getAllSnowplowEvents();
-    // TODO why is this >= and not === ?
-    // if it's greater than expected, that seems to say it hasn't been properly cleared
-    if (eventCounts.total >= expectedEventCount) {
+    // Use === to ensure we get exactly the expected number of events
+    // Using >= would mask event leakage issues where extra events are present
+    if (eventCounts.total === expectedEventCount) {
       return eventCounts;
     } else {
       await new Promise((resolve) => setTimeout(resolve, waitPeriod));
@@ -91,7 +91,7 @@ export const generateObjectUpdateEvent = (
 ): PayloadBuilder => {
   return buildSelfDescribingEvent({
     event: {
-      schema: 'iglu:com.pocket/object_update/jsonschema/1-0-17',
+      schema: 'iglu:com.pocket/object_update/jsonschema/1-0-21',
       data: {
         trigger: 'scheduled_corpus_candidate_generated',
         object: 'scheduled_corpus_candidate',

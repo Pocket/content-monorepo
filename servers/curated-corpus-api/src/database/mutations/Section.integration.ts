@@ -499,7 +499,7 @@ describe('Section', () => {
       expect(result.title).toEqual('Updated Section with Items');
       expect(result.sectionItems).toHaveLength(1); // Only active items
       expect(result.sectionItems[0].active).toBe(true);
-      expect(result.sectionItems[0].approvedItem.title).toEqual('Item 1');
+      expect(result.sectionItems[0].approvedItemId).toEqual(approvedItem1.id);
     });
 
     it('should preserve fields not included in the update', async () => {

@@ -174,10 +174,11 @@ export type ApprovedItem = ApprovedItemModel & {
 
 export type SectionItem = SectionItemModel & {
   approvedItem: ApprovedItem;
+  section: SectionModel;
 };
 
 export type Section = SectionModel & {
-  sectionItems?: SectionItem[];
+  sectionItems?: SectionItemModel[];
 };
 
 /**

@@ -27,8 +27,13 @@ export type CuratedCorpusItemUpdate = {
     | 'reviewed_corpus_item_removed' // Item is removed from the approved corpus
     | 'reviewed_corpus_item_rejected' // Item is added to the rejected corpus
     | 'scheduled_corpus_item_added' // Item is added to the scheduled surface schedule
-    | 'scheduled_corpus_item_removed'; // Item is removed from the scheduled surface schedule
-  object: 'reviewed_corpus_item' | 'scheduled_corpus_item';
+    | 'scheduled_corpus_item_removed' // Item is removed from the scheduled surface schedule
+    | 'section_added' // Section is added
+    | 'section_updated' // Section is updated
+    | 'section_removed' // Section is removed
+    | 'section_item_added' // SectionItem is added
+    | 'section_item_removed'; // SectionItem is removed
+  object: 'reviewed_corpus_item' | 'scheduled_corpus_item' | 'section' | 'section_item';
 };
 
 /**
@@ -171,8 +176,8 @@ export type ScheduledCorpusItem = {
    */
   url: string;
   /**
-   * A guid that identifies the reviewed corpus item’s approved_item_id
-   * in backend systems, sometimes referred to as an approved corpus item’s
+   * A guid that identifies the reviewed corpus item's approved_item_id
+   * in backend systems, sometimes referred to as an approved corpus item's
    * external_id.
    *
    * This will help link the scheduled item back to the approved curated item.
@@ -228,6 +233,156 @@ export type ScheduledCorpusItem = {
    * The status of the scheduled_corpus_item, as decided by a curator.
    */
   status?: ScheduledCorpusItemStatus;
+  /**
+   * Indicates where in the Curation Tools UI the action took place. Null if the action was performed by a backend ML process.
+   */
+  action_screen?: ActionScreen;
+};
+
+/**
+ * Entity to describe a Section that groups approved corpus items
+ * for display on scheduled surfaces. Expected (new and old) on all
+ * object_update events where object = section.
+ */
+export type Section = {
+  /**
+   * Indication of whether the version of the entity is before or after
+   * the modifications were made.
+   */
+  object_version: ObjectVersion;
+  /**
+   * A guid that identifies the section in backend systems.
+   */
+  section_external_id: string;
+  /**
+   * The title of the section.
+   */
+  title: string;
+  /**
+   * The description of the section.
+   */
+  description?: string;
+  /**
+   * The hero title for custom sections.
+   */
+  hero_title?: string;
+  /**
+   * The hero description for custom sections.
+   */
+  hero_description?: string;
+  /**
+   * A guid that identifies the scheduled surface.
+   */
+  scheduled_surface_id: string;
+  /**
+   * IAB data as a JSON-stringified object containing taxonomy and categories.
+   */
+  iab?: string;
+  /**
+   * The sort order of the section.
+   */
+  sort?: number;
+  /**
+   * Indicates whether the section is active.
+   */
+  active: boolean;
+  /**
+   * Indicates whether the section is disabled.
+   */
+  disabled: boolean;
+  /**
+   * The method by which this section was created (ML or MANUAL).
+   */
+  create_source: ActivitySource;
+  /**
+   * The method by which this section was deactivated (ML or MANUAL).
+   */
+  deactivate_source?: ActivitySource;
+  /**
+   * The method by which this section was updated (ML or MANUAL).
+   */
+  update_source?: ActivitySource;
+  /**
+   * The UTC unix timestamp (in seconds) for when the section was deactivated.
+   */
+  deactivated_at?: number;
+  /**
+   * The UTC unix timestamp (in seconds) for when the section was created.
+   */
+  created_at: number;
+  /**
+   * The UTC unix timestamp (in seconds) for when the section was last updated.
+   */
+  updated_at: number;
+  /**
+   * The start date for custom sections.
+   */
+  start_date?: number;
+  /**
+   * The end date for custom sections.
+   */
+  end_date?: number;
+  /**
+   * Indicates where in the Curation Tools UI the action took place. Null if the action was performed by a backend ML process.
+   */
+  action_screen?: ActionScreen;
+};
+
+/**
+ * Entity to describe a SectionItem that represents an approved corpus item
+ * within a Section. Expected (new and old) on all object_update events
+ * where object = section_item.
+ */
+export type SectionItem = {
+  /**
+   * Indication of whether the version of the entity is before or after
+   * the modifications were made.
+   */
+  object_version: ObjectVersion;
+  /**
+   * A guid that identifies the section item in backend systems.
+   */
+  section_item_external_id: string;
+  /**
+   * A guid that identifies the section this item belongs to.
+   */
+  section_external_id: string;
+  /**
+   * A guid that identifies the approved corpus item.
+   */
+  approved_corpus_item_external_id: string;
+  /**
+   * The URL of the approved corpus item.
+   */
+  url: string;
+  /**
+   * The rank/position of the item within the section.
+   */
+  rank?: number;
+  /**
+   * Indicates whether the section item is active.
+   */
+  active: boolean;
+  /**
+   * The reasons for deactivating the section item, stored as JSON.
+   */
+  deactivate_reasons?: string[];
+  /**
+   * The method by which this section item was deactivated (ML or MANUAL).
+   */
+  deactivate_source?: ActivitySource;
+  /**
+   * The UTC unix timestamp (in seconds) for when the section item was deactivated.
+   */
+  deactivated_at?: number;
+  /**
+   * The UTC unix timestamp (in seconds) for when the section item was created.
+   */
+  created_at: number;
+  /**
+   * The UTC unix timestamp (in seconds) for when the section item was last updated.
+   */
+  updated_at: number;
   /**
    * Indicates where in the Curation Tools UI the action took place. Null if the action was performed by a backend ML process.
    */

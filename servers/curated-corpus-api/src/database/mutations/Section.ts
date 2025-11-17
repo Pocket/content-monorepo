@@ -95,10 +95,10 @@ export async function updateSection(
             orderBy: [{ sortOrder: 'asc' }],
           },
         },
-      }
+      },
     },
   });
-  
+
   return {
     ...updatedSection,
     sectionItems: activeSectionItems
@@ -137,7 +137,7 @@ export async function disableEnableSection(
                 orderBy: [{ sortOrder: 'asc' }],
               },
             },
-          }
+          },
         }
       }
     }

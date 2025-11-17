@@ -74,6 +74,7 @@ export async function createSectionItem(
           },
         },
       },
+      section: true,
     },
   });
 }
@@ -111,6 +112,7 @@ export async function removeSectionItem(
           },
         },
       },
+      section: true,
     },
   });
 }

@@ -15,11 +15,15 @@ import {
 import { Section } from '../../../../database/types';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
 import { IAdminContext } from '../../../context';
-import { 
-  ActivitySource, 
+import {
+  ActivitySource,
   IABMetadata
 } from 'content-common';
-import { IAB_CATEGORIES } from '../../iabCategories'
+import { IAB_CATEGORIES } from '../../iabCategories';
+import {
+  SectionEventType,
+  SectionPayload,
+} from '../../../../events/types';
 
 /**
  * Create or update a Section.
@@ -33,39 +37,52 @@ export async function createOrUpdateSection(
   { data },
   context: IAdminContext,
 ): Promise<Section> {
+  const { actionScreen, ...sectionData } = data;
+
   // Check if the user can execute this mutation.
-  if (!context.authenticatedUser.canWriteToSurface(data.scheduledSurfaceGuid)) {
+  if (!context.authenticatedUser.canWriteToSurface(sectionData.scheduledSurfaceGuid)) {
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
 
   // Make sure createSource == ML for now for this mutation
-  if (data.createSource !== ActivitySource.ML) {
+  if (sectionData.createSource !== ActivitySource.ML) {
     throw new UserInputError(
       'Cannot create or update a Section: createSource must be ML',
     );
   }
 
   // Check that the IAB taxonomy & code are valid
-  if(data.iab) {
-    validateIAB(data.iab)
+  if(sectionData.iab) {
+    validateIAB(sectionData.iab)
   }
 
   // check if the Section with the passed externalId already exists
-  const section = await context.db.section.findUnique({
-    where: { externalId: data.externalId },
+  const existingSection = await context.db.section.findUnique({
+    where: { externalId: sectionData.externalId },
   });
 
+  let section: Section;
+  let eventType: SectionEventType;
+
   // if the Section exists, update it
-  if (section) {
-    return await dbUpdateSection(context.db, data, section.id);
+  if (existingSection) {
+    section = await dbUpdateSection(context.db, sectionData, existingSection.id);
+    eventType = SectionEventType.UPDATE_SECTION;
+  } else {
+    section = await dbCreateSection(context.db, sectionData);
+    eventType = SectionEventType.CREATE_SECTION;
   }
 
-  return await dbCreateSection(context.db, data);
+  const sectionForEvents: SectionPayload = {
+    section: {
+      ...section,
+      action_screen: actionScreen,
+    },
+  };
 
-  // TODO: emit creation event to a data pipeline
-  // as of this writing (2025-01-09), we are navigating the migration from
-  // snowplow & snowflake to glean & bigquery. we are awaiting a decision
-  // on the best path forward for our data pipeline.
+  context.emitSectionEvent(eventType, sectionForEvents);
+
+  return section;
 }
 
 
@@ -99,12 +116,15 @@ export async function disableEnableSection(
   }
 
   // disable or enable a Section
-  return await dbDisableEnableSection(context.db, data);
+  const updatedSection = await dbDisableEnableSection(context.db, data);
 
-  // TODO: emit creation event to a data pipeline
-  // as of this writing (2025-01-09), we are navigating the migration from
-  // snowplow & snowflake to glean & bigquery. we are awaiting a decision
-  // on the best path forward for our data pipeline.
+  const sectionForEvents: SectionPayload = {
+    section: updatedSection,
+  };
+
+  context.emitSectionEvent(SectionEventType.UPDATE_SECTION, sectionForEvents);
+
+  return updatedSection;
 }
 
 /**
@@ -119,24 +139,37 @@ export async function createCustomSection(
   { data },
   context: IAdminContext,
 ): Promise<Section> {
+  const { actionScreen, ...sectionData } = data;
+
   // Check if the user can execute this mutation.
-  if (!context.authenticatedUser.canWriteToSurface(data.scheduledSurfaceGuid)) {
+  if (!context.authenticatedUser.canWriteToSurface(sectionData.scheduledSurfaceGuid)) {
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
 
   // Make sure createSource == MANUAL for now for this mutation
-  if (data.createSource !== ActivitySource.MANUAL) {
+  if (sectionData.createSource !== ActivitySource.MANUAL) {
     throw new UserInputError(
       'Cannot create a custom Section: createSource must be MANUAL',
     );
   }
 
   // Check that the IAB taxonomy & code are valid
-  if(data.iab) {
-    validateIAB(data.iab)
+  if(sectionData.iab) {
+    validateIAB(sectionData.iab)
   }
 
-  return await dbCreateCustomSection(context.db, data);
+  const section = await dbCreateCustomSection(context.db, sectionData);
+
+  const sectionForEvents: SectionPayload = {
+    section: {
+      ...section,
+      action_screen: actionScreen,
+    },
+  };
+
+  context.emitSectionEvent(SectionEventType.CREATE_SECTION, sectionForEvents);
+
+  return section;
 }
 
 /**
@@ -162,7 +195,7 @@ export async function updateCustomSection(
   context: IAdminContext,
 
 ): Promise<Section> {
-  const { externalId } = data;
+  const { externalId, actionScreen, ...updateData } = data;
 
   // Find the existing section
   const existingSection = await context.db.section.findUnique({
@@ -186,18 +219,29 @@ export async function updateCustomSection(
   }
 
   // Make sure updateSource == MANUAL for now for this mutation
-  if (data.updateSource !== ActivitySource.MANUAL) {
+  if (updateData.updateSource !== ActivitySource.MANUAL) {
     throw new UserInputError(
       'Cannot update a Section: updateSource must be MANUAL',
     );
   }
 
   // Check that the IAB taxonomy & code are valid
-  if (data.iab) {
-    validateIAB(data.iab);
+  if (updateData.iab) {
+    validateIAB(updateData.iab);
   }
 
-  return await dbUpdateCustomSection(context.db, data);
+  const section = await dbUpdateCustomSection(context.db, { externalId, ...updateData });
+
+  const sectionForEvents: SectionPayload = {
+    section: {
+      ...section,
+      action_screen: actionScreen,
+    },
+  };
+
+  context.emitSectionEvent(SectionEventType.UPDATE_SECTION, sectionForEvents);
+
+  return section;
 }
 
 /**
@@ -212,15 +256,17 @@ export async function deleteCustomSection(
   args,
   context: IAdminContext,
 ): Promise<Section> {
+  const { externalId, actionScreen } = args;
+
   // check if the Section with the passed externalId exists
   const section = await context.db.section.findUnique({
-    where: { externalId: args.externalId },
+    where: { externalId },
   });
 
   // if Section does not exist, throw NotFoundError
   if (!section) {
     throw new NotFoundError(
-      `Cannot delete the section: Section with id "${args.externalId}" does not exist.`,
+      `Cannot delete the section: Section with id "${externalId}" does not exist.`,
     );
   }
 
@@ -240,7 +286,18 @@ export async function deleteCustomSection(
   const sectionId = section.id;
 
   // soft-delete the custom section
-  return await dbDeleteCustomSection(context.db, sectionId, args.externalId);
+  const deletedSection = await dbDeleteCustomSection(context.db, sectionId, externalId);
+
+  const sectionForEvents: SectionPayload = {
+    section: {
+      ...deletedSection,
+      action_screen: actionScreen,
+    },
+  };
+
+  context.emitSectionEvent(SectionEventType.DELETE_SECTION, sectionForEvents);
+
+  return deletedSection;
 }
 
 /**
