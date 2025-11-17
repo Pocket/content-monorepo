@@ -1,17 +1,21 @@
 import { SQSEvent, SQSHandler } from 'aws-lambda';
 import * as Sentry from '@sentry/serverless';
 
-import { dbClient, Prospect } from 'prospectapi-common';
-
-import config from './config';
-import { SqsProspect } from './types';
 import {
   ProspectFeatures,
   ProspectRunDetails,
   getEmitter,
   getTracker,
 } from 'content-common';
+import {
+  generateGraphQlApiHeaders,
+  GraphQlApiCallHeaders,
+} from 'lambda-common';
+import { dbClient, Prospect } from 'prospectapi-common';
 
+import config from './config';
+import { deleteOldProspects } from './dynamodb/lib';
+import { getJwtBearerToken } from './jwt';
 import {
   getProspectsFromMessageJson,
   convertSqsProspectToProspect,
@@ -21,8 +25,7 @@ import {
   validateProperties,
   getProspectRunDetailsFromMessageJson,
 } from './lib';
-
-import { deleteOldProspects } from './dynamodb/lib';
+import { SqsProspect } from './types';
 
 // little sentry initialization. no big deal.
 Sentry.AWSLambda.init({
@@ -61,6 +64,17 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
   // this function will send an exception to sentry if prospects cannot be
   // found in the json. in that case, it will return an empty array.
   const rawSqsProspects: Array<any> = getProspectsFromMessageJson(json);
+
+  // retrieve JWT bearer token for use in graph calls to admin api
+  const jwtBearerToken = await getJwtBearerToken();
+
+  // configure headers for making calls to the admin graph - we use this
+  // for each call to get url metadata for a prospect
+  const graphHeaders: GraphQlApiCallHeaders = generateGraphQlApiHeaders(
+    config.app.name,
+    config.app.version,
+    jwtBearerToken,
+  );
 
   // iterate over each prospect, populating the metadata and inserting into
   // dynamo
@@ -110,7 +124,13 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
         // now get the metadata and put it into dynamo
         // this function will send an exception to sentry if any part of it
         // fails.
-        await processProspect(prospect, runDetails, features, tracker);
+        await processProspect(
+          prospect,
+          runDetails,
+          features,
+          tracker,
+          graphHeaders,
+        );
 
         // an edge case we've hit before - ML was sending duplicate prospects in a
         // single batch. we don't need to error here - dynamo will silently replace

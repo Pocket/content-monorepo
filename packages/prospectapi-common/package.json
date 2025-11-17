@@ -21,16 +21,11 @@
   "license": "ISC",
   "private": true,
   "dependencies": {
-    "@apollo/client": "3.9.5",
     "@aws-sdk/client-dynamodb": "3.529.1",
     "@aws-sdk/lib-dynamodb": "3.529.1",
     "@aws-sdk/util-dynamodb": "3.529.1",
     "content-common": "workspace:*",
     "@sentry/node": "8.37.1",
-    "cross-fetch": "3.1.5",
-    "fetch-retry": "5.0.6",
-    "graphql-tag": "2.12.6",
-    "tldts": "5.7.87",
     "tslib": "2.7.0"
   },
   "devDependencies": {

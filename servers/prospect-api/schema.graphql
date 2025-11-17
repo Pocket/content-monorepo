@@ -56,20 +56,6 @@ extend type RejectedCorpusItem @key(fields: "url") {
   url: Url! @external
 }
 
-type UrlMetadata {
-  url: String!
-  imageUrl: String
-  publisher: String
-  datePublished: String
-  domain: String
-  title: String
-  excerpt: String
-  language: String
-  isSyndicated: Boolean
-  isCollection: Boolean
-  authors: String
-}
-
 input GetProspectsFilters {
   """
   string GUID of the scheduled surface being prospected, e.g. 'NEW_TAB_EN_US' or 'POCKET_HITS_DE_DE'
@@ -114,11 +100,6 @@ type Query {
   returns a set of at most 20 prospects (number may be smaller depending on available data)
   """
   getProspects(filters: GetProspectsFilters!): [Prospect!]!
-
-  """
-  returns parser meta data for a given url
-  """
-  getUrlMetadata(url: String!): UrlMetadata!
 }
 
 type Mutation {

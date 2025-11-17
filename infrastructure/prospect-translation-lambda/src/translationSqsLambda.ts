@@ -57,6 +57,13 @@ export class TranslationSqsLambda extends Construct {
                 `arn:aws:dynamodb:${region.name}:${caller.accountId}:table/${config.shortName}-${config.environment}-Prospects/*`,
               ],
             },
+            {
+              actions: ['secretsmanager:GetSecretValue', 'kms:Decrypt'],
+              resources: [
+                `arn:aws:secretsmanager:${vpc.region}:${vpc.accountId}:secret:${config.name}/${config.environment}`,
+                `arn:aws:secretsmanager:${vpc.region}:${vpc.accountId}:secret:${config.name}/${config.environment}/*`,
+              ],
+            },
           ],
           environment: {
             PROSPECT_API_PROSPECTS_TABLE: `${config.shortName}-${config.environment}-Prospects`,
@@ -65,6 +72,7 @@ export class TranslationSqsLambda extends Construct {
             ENVIRONMENT:
               config.environment === 'Prod' ? 'production' : 'development',
             SNOWPLOW_ENDPOINT: config.envVars.snowplowEndpoint,
+            JWT_KEY: `${config.name}/${config.environment}/JWT_KEY`,
           },
           vpcConfig: {
             securityGroupIds: vpc.internalSecurityGroups.ids,
@@ -91,6 +99,9 @@ export class TranslationSqsLambda extends Construct {
       name: `${config.circleCIPrefix}/SERVICE_HASH`,
     });
 
-    return { sentryDsn: sentryDsn.value, gitSha: serviceHash.value };
+    return {
+      sentryDsn: sentryDsn.value,
+      gitSha: serviceHash.value,
+    };
   }
 }

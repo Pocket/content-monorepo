@@ -2,9 +2,6 @@ import { setupServer } from 'msw/node';
 import { Callback, Context } from 'aws-lambda';
 import * as Sentry from '@sentry/serverless';
 
-import config from './config';
-
-import { processor } from './';
 import {
   SnowplowProspect,
   getGoodSnowplowEvents,
@@ -12,6 +9,11 @@ import {
   resetSnowplowEvents,
   waitForSnowplowEvents,
 } from 'content-common';
+
+import config from './config';
+import { processor } from './';
+import * as Jwt from './jwt';
+import { mockGetUrlMetadata } from './testHelpers';
 
 /**
  * these tests are primarily to verify the entry function can run end to end.
@@ -28,6 +30,12 @@ describe('prospect api translation lambda entry function', () => {
   beforeEach(() => {
     // The Lambda waits for 10 seconds to flush Snowplow events. During tests we don't want to wait that long.
     jest.replaceProperty(config.snowplow, 'emitterDelay', 500);
+
+    jest
+      .spyOn(Jwt, 'getJwtBearerToken')
+      .mockReturnValue(Promise.resolve('test-jwt'));
+
+    mockGetUrlMetadata();
   });
 
   afterEach(() => {
@@ -101,6 +109,7 @@ describe('prospect api translation lambda entry function', () => {
       ).toBeTruthy();
     }
   });
+
   it('gets correct counts when processing valid JSON', async () => {
     const fakePayload = {
       Records: [

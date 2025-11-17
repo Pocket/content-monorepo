@@ -51,6 +51,10 @@ export default {
     source: 'curated-corpus-api',
     version: '0.0.2',
   },
+  metadataParser: {
+    endpoint: process.env.ZYTE_EXTRACT_API_ENDPOINT || '',
+    apiKey: process.env.ZYTE_EXTRACT_API_KEY || '',
+  },
   sentry: {
     dsn: process.env.SENTRY_DSN || '',
     environment: process.env.NODE_ENV || 'development',
