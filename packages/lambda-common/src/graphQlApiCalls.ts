@@ -77,16 +77,17 @@ export async function getUrlMetadata(
   const query = `
         query getUrlMetadata($url: String!) {
           getUrlMetadata(url: $url) {
-              url
-              title
-              publisher
-              datePublished
-              language
-              isSyndicated
-              isCollection
-              imageUrl
-              excerpt
               authors
+              datePublished
+              domain
+              excerpt
+              imageUrl
+              isCollection
+              isSyndicated
+              language
+              publisher
+              title
+              url
           }
         }`;
 
