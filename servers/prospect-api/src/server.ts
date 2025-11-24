@@ -7,7 +7,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { ApolloServerPluginUsageReportingDisabled } from '@apollo/server/plugin/disabled';
 import { buildSubgraphSchema } from '@apollo/subgraph';
 
-import { errorHandler, sentryPlugin } from '@pocket-tools/apollo-utils';
+import { errorHandler, defaultPlugins } from '@pocket-tools/apollo-utils';
 
 import { AdminAPIUserContext } from './types';
 import { resolvers } from './resolvers';
@@ -23,20 +23,20 @@ import typeDefs from './typeDefs';
 export function getServer(
   httpServer: Server,
 ): ApolloServer<AdminAPIUserContext> {
-  const plugins = [
-    sentryPlugin,
-    ApolloServerPluginDrainHttpServer({ httpServer }),
-    // All our subgraphs are behind a VPC and a VPN so its safe to enable the Landing Page
-    ApolloServerPluginLandingPageLocalDefault({ footer: false }),
-    // Enable the ftv trace in our response which will be used by the gateway, and ensure we include errors so we can see them in apollo studio.
-    ApolloServerPluginInlineTrace({ includeErrors: { unmodified: true } }),
-    // Disable Usage reporting on all subgraphs in all environments because our gateway/router will be the one reporting that.
-    ApolloServerPluginUsageReportingDisabled(),
-  ];
+  // const plugins = [
+  //   defaultPlugins,
+  //   ApolloServerPluginDrainHttpServer({ httpServer }),
+  //   // All our subgraphs are behind a VPC and a VPN so its safe to enable the Landing Page
+  //   ApolloServerPluginLandingPageLocalDefault({ footer: false }),
+  //   // Enable the ftv trace in our response which will be used by the gateway, and ensure we include errors so we can see them in apollo studio.
+  //   ApolloServerPluginInlineTrace({ includeErrors: { unmodified: true } }),
+  //   // Disable Usage reporting on all subgraphs in all environments because our gateway/router will be the one reporting that.
+  //   ApolloServerPluginUsageReportingDisabled(),
+  // ];
 
   return new ApolloServer<AdminAPIUserContext>({
     schema: buildSubgraphSchema([{ typeDefs: typeDefs, resolvers: resolvers }]),
-    plugins,
+    plugins: defaultPlugins(httpServer),
     introspection: true,
     formatError: errorHandler,
   });

@@ -6,7 +6,7 @@
 # Docker build step that creates our 
 # base image used in all steps
 #----------------------------------------
-FROM node:20.12-alpine AS base
+FROM node:22.11-alpine@sha256:f265794478aa0b1a23d85a492c8311ed795bc527c3fe7e43453b3c872dcd71a3 AS base
 
 ARG SCOPE
 ARG APP_PATH
@@ -20,12 +20,12 @@ RUN apk add --no-cache curl
 
 ## Add turbo and pnpm to all followup builder images
 # Dockerfile
-RUN corepack enable && corepack prepare pnpm@9.9.0 --activate
+RUN corepack enable && corepack prepare pnpm@9.12.2 --activate
 # Enable `pnpm add --global` on Alpine Linux by setting
 # home location environment variable to a location already in $PATH
 # https://github.com/pnpm/pnpm/issues/784#issuecomment-1518582235
 ENV PNPM_HOME=/usr/local/bin
-RUN pnpm add -g turbo@2.1.0
+RUN pnpm add -g turbo@2.2.3
 
 #----------------------------------------
 # Docker build step that prunes down to 
