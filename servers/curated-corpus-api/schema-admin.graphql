@@ -969,8 +969,11 @@ input CreateApprovedCorpusItemInput {
   language: CorpusLanguage!
   """
   The name of the online publication that published this story.
+  If not provided, it will be derived from the PublisherDomain table
+  (looking up by subdomain first, then registrable domain),
+  falling back to the URL's hostname if no match is found.
   """
-  publisher: String!
+  publisher: String
   """
   The publication date for this story.
   """

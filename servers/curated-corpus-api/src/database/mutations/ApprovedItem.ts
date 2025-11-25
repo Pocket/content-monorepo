@@ -10,6 +10,7 @@ import {
 import { checkCorpusUrl } from '../helpers/checkCorpusUrl';
 import { getNormalizedDomainName } from '../../shared/utils';
 import { isExcludedDomain } from './ExcludedDomain';
+import { lookupPublisher } from './PublisherDomain';
 import { deleteSectionItemsByApprovedItemId } from './SectionItem';
 
 /**
@@ -39,9 +40,21 @@ export async function createApprovedItem(
     );
   }
 
+  // Derive publisher if not provided (or empty string).
+  // Lookup order: subdomain -> registrable domain -> fallback to hostname.
+  let publisher = data.publisher;
+  if (!publisher) {
+    publisher = await lookupPublisher(db, data.url);
+    if (!publisher) {
+      // Fallback to hostname (domainName) if no match in PublisherDomain
+      publisher = domainName;
+    }
+  }
+
   return db.approvedItem.create({
     data: {
       ...data,
+      publisher,
       domainName,
       // Use the SSO username here.
       createdBy: username,

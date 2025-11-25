@@ -24,7 +24,7 @@ export type CreateApprovedItemInput = {
   authors: ApprovedItemAuthor[];
   status: CuratedStatus;
   language: CorpusLanguage;
-  publisher: string;
+  publisher?: string;
   datePublished?: string;
   imageUrl: string;
   topic: string;
