@@ -34,7 +34,7 @@ export async function lookupPublisher(
 
   // Only look up if the registrable domain is different from the hostname
   // (i.e., the URL has a subdomain)
-  if (registrableDomain && registrableDomain !== hostname) {
+  if (registrableDomain !== hostname) {
     const domainMatch = await db.publisherDomain.findUnique({
       where: { domainName: registrableDomain },
     });

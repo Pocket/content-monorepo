@@ -308,16 +308,12 @@ describe('shared/utils', () => {
       expect(getRegistrableDomain(url)).toStrictEqual('bbc.co.uk');
     });
 
-    it('should return null for invalid URLs', () => {
-      expect(getRegistrableDomain('not-a-url')).toBeNull();
-    });
-
-    it('should return null for localhost', () => {
-      expect(getRegistrableDomain('http://localhost:3000')).toBeNull();
-    });
-
-    it('should return null for IP addresses', () => {
-      expect(getRegistrableDomain('http://192.168.1.1/path')).toBeNull();
+    it.each([
+      ['not-a-url', 'invalid URL'],
+      ['http://localhost:3000', 'localhost'],
+      ['http://192.168.1.1/path', 'IP address'],
+    ])('should throw an error for %s (%s)', (url) => {
+      expect(() => getRegistrableDomain(url)).toThrow(Error);
     });
   });
 });

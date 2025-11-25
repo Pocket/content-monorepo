@@ -204,11 +204,15 @@ export const getNormalizedDomainName = (url: string): string => {
  * For example, "news.example.com" returns "example.com".
  *
  * @param url url with http(s) scheme
- * @returns the registrable domain, or null if it cannot be determined
+ * @returns the registrable domain
+ * @throws Error if the registrable domain cannot be determined
  */
-export const getRegistrableDomain = (url: string): string | null => {
+export const getRegistrableDomain = (url: string): string => {
   const result = parseDomain(url);
-  return result.domain ?? null;
+  if (!result.domain) {
+    throw new Error(`Cannot extract registrable domain from: ${url}`);
+  }
+  return result.domain;
 };
 
 // the below was graciously provided by:
