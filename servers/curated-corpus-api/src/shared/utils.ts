@@ -1,7 +1,8 @@
+import { UserInputError } from '@pocket-tools/apollo-utils';
 import { ScheduledSurface, ScheduledSurfaces } from 'content-common';
 import { ApprovedItem, CorpusItem, CorpusTargetType } from '../database/types';
 import { ApprovedItemAuthor } from 'content-common';
-import { parse } from 'url';
+import { domainToASCII, parse } from 'url';
 import { parse as parseDomain } from 'tldts';
 import { DateTime } from 'luxon';
 
@@ -189,6 +190,81 @@ export const getPocketPath = (
 };
 
 /**
+ * Normalizes a domain string by lowercasing, converting to ASCII (punycode),
+ * and stripping the www. prefix.
+ *
+ * @param hostname A domain name (e.g., "www.Example.com" or "español.example.com")
+ * @returns Normalized domain (e.g., "example.com" or "xn--espaol-zwa.example.com")
+ */
+export const normalizeDomainString = (hostname: string): string => {
+  let domain = hostname.toLowerCase();
+  domain = domainToASCII(domain);
+  domain = domain.replace(/^www\./, '');
+  return domain;
+};
+
+/**
+ * Sanitizes a bare hostname input by trimming whitespace and normalizing.
+ *
+ * @param hostname A bare hostname (e.g., "  Example.com  ")
+ * @returns Sanitized domain (e.g., "example.com")
+ */
+export const sanitizeDomainName = (hostname: string): string => {
+  return normalizeDomainString(hostname.trim());
+};
+
+/**
+ * Validates a domain name, throwing UserInputError if invalid.
+ * Must be a registrable domain or subdomain (not a public suffix, IP, or wildcard).
+ *
+ * @param domainName A sanitized domain name
+ * @throws UserInputError if validation fails
+ */
+export const validateDomainName = (domainName: string): void => {
+  // Check length
+  if (domainName.length === 0) {
+    throw new UserInputError('Domain name cannot be empty.');
+  }
+  if (domainName.length > 255) {
+    throw new UserInputError(
+      'Domain name cannot exceed 255 characters.',
+    );
+  }
+
+  // Reject URLs with scheme
+  if (/^https?:\/\//i.test(domainName)) {
+    throw new UserInputError(
+      'Domain name must be a hostname, not a full URL. Remove the http(s):// prefix.',
+    );
+  }
+
+  // Reject wildcards
+  if (domainName.includes('*')) {
+    throw new UserInputError(
+      'Wildcard domain names are not supported.',
+    );
+  }
+
+  // Use tldts to validate
+  const parsed = parseDomain(domainName);
+
+  // Reject IP addresses
+  if (parsed.isIp) {
+    throw new UserInputError(
+      'IP addresses are not valid domain names.',
+    );
+  }
+
+  // Reject if not a valid registrable domain or subdomain
+  // (domain is null for public suffixes like "co.uk" or invalid inputs like "localhost")
+  if (!parsed.domain) {
+    throw new UserInputError(
+      `"${domainName}" is not a valid domain name. It must be a registrable domain (e.g., "example.com") or subdomain (e.g., "news.example.com").`,
+    );
+  }
+};
+
+/**
  * @param url url with http(s) scheme
  * @returns domain name of url including subdomains, except www.
  * @throws an error if the URL does not contain a domain name.
@@ -196,7 +272,8 @@ export const getPocketPath = (
 export const getNormalizedDomainName = (url: string): string => {
   const regex = /^https?:\/\/(www\.)?(?<domainName>[^?/:]+)/i;
   const matches = url.match(regex);
-  return matches.groups.domainName.toLowerCase();
+  const hostname = matches.groups.domainName;
+  return normalizeDomainString(hostname);
 };
 
 /**

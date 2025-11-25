@@ -1386,6 +1386,17 @@ type Mutation {
   This mutation is to be used by curators via admin tool.
   """
   updateCustomSection(data: UpdateCustomSectionInput!): Section!
+
+  """
+  Creates or updates a publisher domain mapping.
+  If a mapping for the domain already exists, updates the publisher name.
+  Otherwise, creates a new mapping.
+  Domain names are sanitized (trimmed, lowercased, converted to ASCII, www. stripped)
+  and validated before storage.
+  """
+  createOrUpdatePublisherDomain(
+    data: CreateOrUpdatePublisherDomainInput!
+  ): PublisherDomain!
 }
 
 """
@@ -1403,4 +1414,54 @@ type CorpusItem @key(fields: "url") {
 
 type OpenGraphFields {
   description: String!
+}
+
+"""
+A mapping between a domain name and its publisher display name.
+Used to auto-populate the publisher field when creating corpus items.
+"""
+type PublisherDomain {
+  """
+  The domain name (hostname). This is the unique identifier.
+  Stored normalized: lowercase, ASCII (punycode), without www. prefix.
+  Can be a registrable domain (e.g., "example.com") or subdomain (e.g., "news.example.com").
+  """
+  domainName: String!
+  """
+  The display name for the publisher.
+  """
+  publisher: String!
+  """
+  A Unix timestamp of when the entity was created.
+  """
+  createdAt: Int!
+  """
+  A single sign-on user identifier of the user who created this entity.
+  """
+  createdBy: String!
+  """
+  A Unix timestamp of when the entity was last updated.
+  """
+  updatedAt: Int!
+  """
+  A single sign-on user identifier of the user who last updated this entity. Null on creation.
+  """
+  updatedBy: String
+}
+
+"""
+Input data for creating or updating a publisher domain mapping.
+"""
+input CreateOrUpdatePublisherDomainInput {
+  """
+  The domain name (hostname only, not a full URL).
+  Will be sanitized: trimmed, lowercased, converted to ASCII (punycode), www. prefix stripped.
+  Must be a registrable domain (e.g., "example.com") or subdomain (e.g., "news.example.com").
+  Cannot be a public suffix (e.g., "co.uk"), IP address, or wildcard.
+  """
+  domainName: String!
+  """
+  The display name for the publisher. Will be trimmed but case is preserved.
+  """
+  publisher: String!
 }

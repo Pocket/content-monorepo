@@ -153,3 +153,18 @@ export const DELETE_CUSTOM_SECTION = gql`
     }
     ${AdminSectionData}
 `;
+
+export const CREATE_OR_UPDATE_PUBLISHER_DOMAIN = gql`
+  mutation createOrUpdatePublisherDomain(
+    $data: CreateOrUpdatePublisherDomainInput!
+  ) {
+    createOrUpdatePublisherDomain(data: $data) {
+      domainName
+      publisher
+      createdAt
+      createdBy
+      updatedAt
+      updatedBy
+    }
+  }
+`;

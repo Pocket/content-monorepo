@@ -1,6 +1,46 @@
-import { PrismaClient } from '.prisma/client';
+import { PrismaClient, PublisherDomain } from '.prisma/client';
 
 import { getNormalizedDomainName, getRegistrableDomain } from '../../shared/utils';
+
+/**
+ * Input type for createOrUpdatePublisherDomain mutation.
+ */
+export interface CreateOrUpdatePublisherDomainInput {
+  domainName: string; // Already sanitized and validated
+  publisher: string;
+}
+
+/**
+ * Creates or updates a publisher name mapping for a domain.
+ *
+ * Uses Prisma upsert to either create a new record or update an existing one.
+ *
+ * @param db Prisma client
+ * @param data Input containing sanitized domainName and publisher name
+ * @param username The authenticated user performing the action
+ * @returns The created or updated PublisherDomain record
+ */
+export async function createOrUpdatePublisherDomain(
+  db: PrismaClient,
+  data: CreateOrUpdatePublisherDomainInput,
+  username: string,
+): Promise<PublisherDomain> {
+  const { domainName, publisher } = data;
+  const trimmedPublisher = publisher.trim();
+
+  return db.publisherDomain.upsert({
+    where: { domainName },
+    update: {
+      publisher: trimmedPublisher,
+      updatedBy: username,
+    },
+    create: {
+      domainName,
+      publisher: trimmedPublisher,
+      createdBy: username,
+    },
+  });
+}
 
 /**
  * Looks up a publisher name from the PublisherDomain table.
