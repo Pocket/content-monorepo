@@ -246,7 +246,7 @@ export const validateDomainName = (domainName: string): void => {
 
   // Reject localhost
   if (domain === 'localhost' || domain.endsWith('.localhost')) {
-    throw new UserInputError('localhost is not a valid domain name.');
+    throw new UserInputError('"localhost" is not a valid domain name.');
   }
 
   // Use tldts to validate

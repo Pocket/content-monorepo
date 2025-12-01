@@ -320,7 +320,7 @@ describe('shared/utils', () => {
     });
     it('should reject localhost', () => {
       expect(() => validateHttpUrl('http://localhost/path')).toThrow(
-        'localhost is not a valid domain name',
+        '"localhost" is not a valid domain name',
       );
     });
     it('should reject IPv4 addresses', () => {
@@ -503,7 +503,7 @@ describe('shared/utils', () => {
 
       it('should reject localhost', () => {
         expect(() => validateDomainName('localhost')).toThrow(
-          'localhost is not a valid domain name.',
+          '"localhost" is not a valid domain name.',
         );
       });
 

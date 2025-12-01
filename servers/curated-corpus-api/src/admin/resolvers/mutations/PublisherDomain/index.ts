@@ -39,7 +39,9 @@ export async function createOrUpdatePublisherDomain(
     throw new AuthenticationError(ACCESS_DENIED_ERROR);
   }
 
-  // Check for URL scheme before sanitization (sanitization would mangle it)
+  // Check for URL scheme before sanitization.
+  // This must happen BEFORE sanitizeDomainName because domainToASCII converts
+  // URLs like "http://example.com" to empty strings, losing the original input.
   const trimmedInput = data.domainName.trim();
   if (/^https?:\/\//i.test(trimmedInput)) {
     throw new UserInputError(

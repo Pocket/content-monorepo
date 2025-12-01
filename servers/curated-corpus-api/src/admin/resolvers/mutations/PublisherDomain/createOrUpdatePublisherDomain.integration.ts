@@ -36,15 +36,15 @@ describe('mutations: PublisherDomain (createOrUpdatePublisherDomain)', () => {
     // port 0 tells express to dynamically assign an available port
     ({ app, adminServer: server, adminUrl: graphQLUrl } = await startServer(0));
     db = client();
+    await clearDb(db);
   });
 
   afterAll(async () => {
     await server.stop();
-    await clearDb(db);
     await db.$disconnect();
   });
 
-  afterEach(async () => {
+  beforeEach(async () => {
     await clearDb(db);
   });
 
@@ -367,6 +367,24 @@ describe('mutations: PublisherDomain (createOrUpdatePublisherDomain)', () => {
       expect(result.body.errors?.[0].message).toContain(
         'You do not have access to perform this action',
       );
+    });
+
+    it('should fail if request headers are not supplied', async () => {
+      const input = {
+        domainName: 'example.com',
+        publisher: 'Example Publisher',
+      };
+
+      const result = await request(app)
+        .post(graphQLUrl)
+        .send({
+          query: print(CREATE_OR_UPDATE_PUBLISHER_DOMAIN),
+          variables: { data: input },
+        });
+
+      expect(result.body.data).toBeNull();
+      expect(result.body.errors).not.toBeUndefined();
+      expect(result.body.errors?.[0].extensions?.code).toEqual('UNAUTHENTICATED');
     });
   });
 });
