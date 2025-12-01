@@ -31,7 +31,7 @@
     "@snowplow/node-tracker": "3.5.0",
     "content-common": "workspace:*",
     "cors": "2.8.5",
-    "express": "5.1.0",
+    "express": "5.2.0",
     "graphql": "16.9.0",
     "graphql-tag": "2.12.6",
     "lodash": "4.17.21",

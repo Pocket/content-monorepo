@@ -44,7 +44,7 @@
     "content-common": "workspace:*",
     "cors": "2.8.5",
     "dataloader": "^2.2.2",
-    "express": "5.1.0",
+    "express": "5.2.0",
     "graphql": "16.9.0",
     "graphql-tag": "2.12.6",
     "graphql-upload": "15.0.2",
