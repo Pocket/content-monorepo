@@ -8,6 +8,7 @@ import {
   toUtcDateString,
   getPocketPath,
   getNormalizedDomainName,
+  getRegistrableDomain,
   getLocalDate,
 } from './utils';
 import { ApprovedItem } from '../database/types';
@@ -273,6 +274,46 @@ describe('shared/utils', () => {
         const url = 'ftp://example.com/http://other.com';
         expect(() => getNormalizedDomainName(url)).toThrow(Error);
       });
+    });
+  });
+
+  describe('getRegistrableDomain', () => {
+    it('should extract registrable domain from a simple URL', () => {
+      const url = 'https://example.com/path';
+      expect(getRegistrableDomain(url)).toStrictEqual('example.com');
+    });
+
+    it('should extract registrable domain from a URL with subdomain', () => {
+      const url = 'https://news.example.com/article';
+      expect(getRegistrableDomain(url)).toStrictEqual('example.com');
+    });
+
+    it('should extract registrable domain from a URL with multiple subdomains', () => {
+      const url = 'https://a.b.c.example.com/path';
+      expect(getRegistrableDomain(url)).toStrictEqual('example.com');
+    });
+
+    it('should handle www subdomain', () => {
+      const url = 'https://www.example.com/path';
+      expect(getRegistrableDomain(url)).toStrictEqual('example.com');
+    });
+
+    it('should handle country-code TLDs', () => {
+      const url = 'https://news.example.co.uk/article';
+      expect(getRegistrableDomain(url)).toStrictEqual('example.co.uk');
+    });
+
+    it('should handle second-level country-code TLDs', () => {
+      const url = 'https://bbc.co.uk/news';
+      expect(getRegistrableDomain(url)).toStrictEqual('bbc.co.uk');
+    });
+
+    it.each([
+      ['not-a-url', 'invalid URL'],
+      ['http://localhost:3000', 'localhost'],
+      ['http://192.168.1.1/path', 'IP address'],
+    ])('should throw an error for %s (%s)', (url) => {
+      expect(() => getRegistrableDomain(url)).toThrow(Error);
     });
   });
 });

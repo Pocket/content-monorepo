@@ -2,6 +2,7 @@ import { ScheduledSurface, ScheduledSurfaces } from 'content-common';
 import { ApprovedItem, CorpusItem, CorpusTargetType } from '../database/types';
 import { ApprovedItemAuthor } from 'content-common';
 import { parse } from 'url';
+import { parse as parseDomain } from 'tldts';
 import { DateTime } from 'luxon';
 
 /**
@@ -196,6 +197,22 @@ export const getNormalizedDomainName = (url: string): string => {
   const regex = /^https?:\/\/(www\.)?(?<domainName>[^?/:]+)/i;
   const matches = url.match(regex);
   return matches.groups.domainName.toLowerCase();
+};
+
+/**
+ * Extracts the registrable domain (eTLD+1) from a URL.
+ * For example, "news.example.com" returns "example.com".
+ *
+ * @param url url with http(s) scheme
+ * @returns the registrable domain
+ * @throws Error if the registrable domain cannot be determined
+ */
+export const getRegistrableDomain = (url: string): string => {
+  const result = parseDomain(url);
+  if (!result.domain) {
+    throw new Error(`Cannot extract registrable domain from: ${url}`);
+  }
+  return result.domain;
 };
 
 // the below was graciously provided by:
