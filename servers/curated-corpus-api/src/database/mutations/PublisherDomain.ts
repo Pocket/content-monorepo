@@ -1,6 +1,9 @@
 import { PrismaClient, PublisherDomain } from '.prisma/client';
 
-import { getNormalizedDomainName, getRegistrableDomain } from '../../shared/utils';
+import {
+  getDomainFromUrl,
+  getRegistrableDomainFromUrl,
+} from '../../shared/utils';
 
 /**
  * Input type for createOrUpdatePublisherDomain mutation.
@@ -58,7 +61,7 @@ export async function lookupPublisher(
   url: string,
 ): Promise<string | null> {
   // Get the full hostname (minus www.)
-  const hostname = getNormalizedDomainName(url);
+  const hostname = getDomainFromUrl(url);
 
   // First, try to find an exact match by hostname (e.g., "news.example.com")
   const exactMatch = await db.publisherDomain.findUnique({
@@ -70,7 +73,7 @@ export async function lookupPublisher(
   }
 
   // If no exact match, try to find by registrable domain (e.g., "example.com")
-  const registrableDomain = getRegistrableDomain(url);
+  const registrableDomain = getRegistrableDomainFromUrl(url);
 
   // Only look up if the registrable domain is different from the hostname
   // (i.e., the URL has a subdomain)
