@@ -11,7 +11,6 @@ import {
   getRegistrableDomainFromUrl,
   getLocalDate,
   normalizeDomain,
-  sanitizeDomainName,
   validateDomainName,
   validateHttpUrl,
 } from './utils';
@@ -419,26 +418,6 @@ describe('shared/utils', () => {
     it('should preserve subdomains', () => {
       expect(normalizeDomain('news.example.com')).toStrictEqual(
         'news.example.com',
-      );
-    });
-  });
-
-  describe('sanitizeDomainName', () => {
-    it('should trim whitespace and normalize', () => {
-      expect(sanitizeDomainName('  Example.COM  ')).toStrictEqual(
-        'example.com',
-      );
-    });
-
-    it('should handle leading/trailing newlines and tabs', () => {
-      expect(sanitizeDomainName('\n\texample.com\t\n')).toStrictEqual(
-        'example.com',
-      );
-    });
-
-    it('should strip www and lowercase after trimming', () => {
-      expect(sanitizeDomainName('  WWW.Example.COM  ')).toStrictEqual(
-        'example.com',
       );
     });
   });

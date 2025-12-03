@@ -110,9 +110,9 @@ describe('mutations: PublisherDomain (createOrUpdatePublisherDomain)', () => {
       expect(response.updatedBy).toEqual('test.user@test.com');
     });
 
-    it('should sanitize domain name (lowercase, strip www)', async () => {
+    it('should normalize domain name (lowercase, strip www)', async () => {
       const input = {
-        domainName: '  WWW.Example.COM  ',
+        domainName: 'WWW.Example.COM',
         publisher: 'Example Publisher',
       };
 
@@ -128,7 +128,6 @@ describe('mutations: PublisherDomain (createOrUpdatePublisherDomain)', () => {
       expect(result.body.data).not.toBeNull();
 
       const response = result.body.data?.createOrUpdatePublisherDomain;
-      // Domain should be sanitized
       expect(response.domainName).toEqual('example.com');
     });
 
@@ -199,73 +198,12 @@ describe('mutations: PublisherDomain (createOrUpdatePublisherDomain)', () => {
   });
 
   describe('validation errors', () => {
-    it('should reject URLs with http scheme', async () => {
-      const input = {
-        domainName: 'http://example.com',
-        publisher: 'Example Publisher',
-      };
-
-      const result = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(CREATE_OR_UPDATE_PUBLISHER_DOMAIN),
-          variables: { data: input },
-        });
-
-      expect(result.body.errors).not.toBeUndefined();
-      expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
-      expect(result.body.errors?.[0].message).toContain(
-        'Domain name must be a hostname, not a full URL',
-      );
-    });
-
-    it('should reject URLs with https scheme', async () => {
-      const input = {
-        domainName: 'https://example.com/path',
-        publisher: 'Example Publisher',
-      };
-
-      const result = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(CREATE_OR_UPDATE_PUBLISHER_DOMAIN),
-          variables: { data: input },
-        });
-
-      expect(result.body.errors).not.toBeUndefined();
-      expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
-      expect(result.body.errors?.[0].message).toContain(
-        'Domain name must be a hostname, not a full URL',
-      );
-    });
-
-    it('should reject wildcard domains', async () => {
-      const input = {
-        domainName: '*.example.com',
-        publisher: 'Example Publisher',
-      };
-
-      const result = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(CREATE_OR_UPDATE_PUBLISHER_DOMAIN),
-          variables: { data: input },
-        });
-
-      expect(result.body.errors).not.toBeUndefined();
-      expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
-      expect(result.body.errors?.[0].message).toContain(
-        'Wildcard domain names are not supported',
-      );
-    });
-
-    it('should reject IP addresses', async () => {
+    // Detailed validation logic is covered by unit tests in utils.spec.ts.
+    // This integration test verifies validation errors surface correctly via GraphQL.
+    it('should reject invalid domain names with BAD_USER_INPUT error', async () => {
       const input = {
         domainName: '192.168.1.1',
-        publisher: 'IP Publisher',
+        publisher: 'Example Publisher',
       };
 
       const result = await request(app)
@@ -278,72 +216,6 @@ describe('mutations: PublisherDomain (createOrUpdatePublisherDomain)', () => {
 
       expect(result.body.errors).not.toBeUndefined();
       expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
-      expect(result.body.errors?.[0].message).toContain(
-        'IP addresses are not valid domain names',
-      );
-    });
-
-    it('should reject public suffixes (e.g., co.uk)', async () => {
-      const input = {
-        domainName: 'co.uk',
-        publisher: 'UK Publisher',
-      };
-
-      const result = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(CREATE_OR_UPDATE_PUBLISHER_DOMAIN),
-          variables: { data: input },
-        });
-
-      expect(result.body.errors).not.toBeUndefined();
-      expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
-      expect(result.body.errors?.[0].message).toContain(
-        '"co.uk" is not a valid domain name',
-      );
-    });
-
-    it('should reject localhost', async () => {
-      const input = {
-        domainName: 'localhost',
-        publisher: 'Local Publisher',
-      };
-
-      const result = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(CREATE_OR_UPDATE_PUBLISHER_DOMAIN),
-          variables: { data: input },
-        });
-
-      expect(result.body.errors).not.toBeUndefined();
-      expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
-      expect(result.body.errors?.[0].message).toContain(
-        '"localhost" is not a valid domain name',
-      );
-    });
-
-    it('should reject empty domain name after trimming', async () => {
-      const input = {
-        domainName: '   ',
-        publisher: 'Empty Publisher',
-      };
-
-      const result = await request(app)
-        .post(graphQLUrl)
-        .set(headers)
-        .send({
-          query: print(CREATE_OR_UPDATE_PUBLISHER_DOMAIN),
-          variables: { data: input },
-        });
-
-      expect(result.body.errors).not.toBeUndefined();
-      expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
-      expect(result.body.errors?.[0].message).toContain(
-        'Domain name cannot be empty',
-      );
     });
   });
 

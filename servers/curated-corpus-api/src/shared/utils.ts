@@ -204,16 +204,6 @@ export const normalizeDomain = (hostname: string): string => {
 };
 
 /**
- * Sanitizes a bare hostname input by trimming whitespace and normalizing.
- *
- * @param hostname A bare hostname (e.g., "  Example.com  ")
- * @returns Sanitized domain (e.g., "example.com")
- */
-export const sanitizeDomainName = (hostname: string): string => {
-  return normalizeDomain(hostname.trim());
-};
-
-/**
  * Validates a domain name, throwing UserInputError if invalid.
  * Must be a registrable domain or subdomain (not a public suffix, IP, or wildcard).
  *
