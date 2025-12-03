@@ -3,10 +3,7 @@ import { PublisherDomain } from '.prisma/client';
 
 import { createOrUpdatePublisherDomain as dbCreateOrUpdatePublisherDomain } from '../../../../database/mutations';
 import { ACCESS_DENIED_ERROR } from '../../../../shared/types';
-import {
-  normalizeDomain,
-  validateDomainName,
-} from '../../../../shared/utils';
+import { normalizeDomain, validateDomainName } from '../../../../shared/utils';
 import { IAdminContext } from '../../../context';
 
 /**

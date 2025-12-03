@@ -293,7 +293,7 @@ export const validateHttpUrl = (url: string): void => {
  * @param url A valid URL with a hostname
  * @returns domain including subdomains, except www.
  */
-export const getDomainFromUrl = (url: string): string => {
+export const getNormalizedDomainFromUrl = (url: string): string => {
   return normalizeDomain(new URL(url).hostname);
 };
 

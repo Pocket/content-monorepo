@@ -215,7 +215,9 @@ describe('mutations: PublisherDomain (createOrUpdatePublisherDomain)', () => {
         });
 
       expect(result.body.errors).not.toBeUndefined();
-      expect(result.body.errors?.[0].extensions?.code).toEqual('BAD_USER_INPUT');
+      expect(result.body.errors?.[0].extensions?.code).toEqual(
+        'BAD_USER_INPUT',
+      );
     });
   });
 
@@ -235,7 +237,9 @@ describe('mutations: PublisherDomain (createOrUpdatePublisherDomain)', () => {
         });
 
       expect(result.body.errors).not.toBeUndefined();
-      expect(result.body.errors?.[0].extensions?.code).toEqual('UNAUTHENTICATED');
+      expect(result.body.errors?.[0].extensions?.code).toEqual(
+        'UNAUTHENTICATED',
+      );
       expect(result.body.errors?.[0].message).toContain(
         'You do not have access to perform this action',
       );
@@ -256,7 +260,9 @@ describe('mutations: PublisherDomain (createOrUpdatePublisherDomain)', () => {
 
       expect(result.body.data).toBeNull();
       expect(result.body.errors).not.toBeUndefined();
-      expect(result.body.errors?.[0].extensions?.code).toEqual('UNAUTHENTICATED');
+      expect(result.body.errors?.[0].extensions?.code).toEqual(
+        'UNAUTHENTICATED',
+      );
     });
   });
 });

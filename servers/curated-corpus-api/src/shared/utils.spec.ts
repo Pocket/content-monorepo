@@ -7,7 +7,7 @@ import {
   getScheduledSurfaceByGuid,
   toUtcDateString,
   getPocketPath,
-  getDomainFromUrl,
+  getNormalizedDomainFromUrl,
   getRegistrableDomainFromUrl,
   getLocalDate,
   normalizeDomain,
@@ -213,66 +213,68 @@ describe('shared/utils', () => {
     });
   });
 
-  describe('getDomainFromUrl', () => {
+  describe('getNormalizedDomainFromUrl', () => {
     it('should extract domain from a http url', () => {
       const url = 'http://example.com';
-      expect(getDomainFromUrl(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should extract domain from a https url', () => {
       const url = 'https://example.com';
-      expect(getDomainFromUrl(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should handle a homograph attack', () => {
       const url = 'http://exаmple.com'; // Note: The 'а' is a Cyrillic character.
-      expect(getDomainFromUrl(url)).not.toEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).not.toEqual('example.com');
     });
     it('should correctly remove the www. subdomain', () => {
       const url = 'http://www.example.com';
-      expect(getDomainFromUrl(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should handle mixed case in the domain name', () => {
       const url = 'Https://WwW.ExAmPlE.cOm';
-      expect(getDomainFromUrl(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should handle URLs with many subdomains', () => {
       expect(
-        getDomainFromUrl('http://sub.sub2.sub3.example.com'),
+        getNormalizedDomainFromUrl('http://sub.sub2.sub3.example.com'),
       ).toStrictEqual('sub.sub2.sub3.example.com');
     });
     it('should not be tricked by a domain in the path', () => {
       const url = 'http://legit.com/redirect?http://example.com';
-      expect(getDomainFromUrl(url)).toStrictEqual('legit.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('legit.com');
     });
     it('should handle URLs with paths', () => {
       const url = 'http://example.com/path/to/resource';
-      expect(getDomainFromUrl(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should handle query parameters', () => {
       const url = 'http://example.com?query=123';
-      expect(getDomainFromUrl(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should handle ports in the URL', () => {
       const url = 'http://example.com:8080';
-      expect(getDomainFromUrl(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should handle international domain names by converting to punycode', () => {
       const url = 'http://münchen.com';
-      expect(getDomainFromUrl(url)).toStrictEqual('xn--mnchen-3ya.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual(
+        'xn--mnchen-3ya.com',
+      );
     });
     it('should extract domain from ftp URLs (no protocol restriction)', () => {
       const url = 'ftp://example.com';
-      expect(getDomainFromUrl(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should extract domain from ftp URLs with http in path', () => {
       const url = 'ftp://example.com/http://other.com';
-      expect(getDomainFromUrl(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
-    describe('getDomainFromUrl errors', () => {
+    describe('getNormalizedDomainFromUrl errors', () => {
       it('should throw an error for empty strings', () => {
-        expect(() => getDomainFromUrl('')).toThrow();
+        expect(() => getNormalizedDomainFromUrl('')).toThrow();
       });
       it('should throw an error for invalid URLs', () => {
-        expect(() => getDomainFromUrl('not-a-url')).toThrow();
+        expect(() => getNormalizedDomainFromUrl('not-a-url')).toThrow();
       });
     });
   });

@@ -1,7 +1,7 @@
 import { PrismaClient, PublisherDomain } from '.prisma/client';
 
 import {
-  getDomainFromUrl,
+  getNormalizedDomainFromUrl,
   getRegistrableDomainFromUrl,
 } from '../../shared/utils';
 
@@ -61,7 +61,7 @@ export async function lookupPublisher(
   url: string,
 ): Promise<string | null> {
   // Get the full hostname (minus www.)
-  const hostname = getDomainFromUrl(url);
+  const hostname = getNormalizedDomainFromUrl(url);
 
   // First, try to find an exact match by hostname (e.g., "news.example.com")
   const exactMatch = await db.publisherDomain.findUnique({

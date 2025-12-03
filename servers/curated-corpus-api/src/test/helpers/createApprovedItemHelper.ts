@@ -8,7 +8,7 @@ import {
 } from 'content-common';
 
 import { ApprovedItem } from '../../database/types';
-import { getDomainFromUrl } from '../../shared/utils';
+import { getNormalizedDomainFromUrl } from '../../shared/utils';
 
 // the minimum of data required to create a approved curated item
 interface CreateApprovedItemHelperRequiredInput {
@@ -56,7 +56,7 @@ export async function createApprovedItemHelper(
   }
 
   const url = `${faker.internet.url()}/${faker.lorem.slug()}/${faker.string.uuid()}`;
-  const domainName = getDomainFromUrl(data.url || url);
+  const domainName = getNormalizedDomainFromUrl(data.url || url);
 
   // defaults for optional properties
   const createApprovedItemDefaults = {
