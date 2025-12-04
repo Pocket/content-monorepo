@@ -15,7 +15,7 @@ export const createSqsSectionWithSectionItems = (
 ): SqsSectionWithSectionItems => {
   const iabMetadata: IABMetadata = {
     taxonomy: 'IAB-3.0',
-    categories: ['488']
+    categories: ['488'],
   };
 
   const candidates: SqsSectionItem[] = [];
@@ -44,15 +44,16 @@ export const createSqsSectionItem = (
 ): SqsSectionItem => {
   return {
     authors: ['Rebecca Jennings'],
+    date_published: '2024-02-26',
     excerpt:
-      'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+      "In the conversation about open marriages and polyamory, America's sexual anxieties are on full display.",
     image_url: 'https://fake-image-url.com',
     language: CorpusLanguage.EN,
     rank: 1,
     source: CorpusItemSource.ML,
     status: CuratedStatus.RECOMMENDATION,
     title:
-      'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
+      "Romantic norms are in flux. No wonder everyone's obsessed with polyamory.",
     topic: Topics.SELF_IMPROVEMENT,
     url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
     ...sqsSectionItemOverride,

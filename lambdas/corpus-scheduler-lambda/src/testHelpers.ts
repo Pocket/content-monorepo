@@ -10,7 +10,6 @@ import {
   ActivitySource,
   ScheduledSurfacesEnum,
   Topics,
-  UrlMetadata,
 } from 'content-common';
 
 import config from './config';
@@ -107,6 +106,7 @@ export const createScheduledCandidate = (
       language: CorpusLanguage.EN,
       image_url: 'https://fake-image-url.com',
       authors: ['Rebecca Jennings'],
+      date_published: '2024-02-26',
       ...scheduledCorpusItemOverrides,
     },
     features: {
@@ -135,13 +135,14 @@ export const getCreateApprovedCorpusItemApiOutput =
   (): CreateApprovedCorpusItemApiInput => {
     return {
       url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
-      title: "Romantic norms are in flux. No wonder everyone\u2019s obsessed with polyamory.",
+      title:
+        'Romantic norms are in flux. No wonder everyone\u2019s obsessed with polyamory.',
       excerpt:
-        'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
+        'In the conversation about open marriages and polyamory, America\u2019s sexual anxieties are on full display.',
       status: CuratedStatus.RECOMMENDATION,
       language: CorpusLanguage.EN,
-      publisher: 'POLITICO',
       authors: [{ name: 'Rebecca Jennings', sortOrder: 1 }],
+      datePublished: '2024-02-26',
       imageUrl: 'https://fake-image-url.com',
       topic: Topics.SELF_IMPROVEMENT,
       source: CorpusItemSource.ML,
@@ -153,38 +154,6 @@ export const getCreateApprovedCorpusItemApiOutput =
       scheduledSurfaceGuid: 'NEW_TAB_EN_US',
     };
   };
-
-export const getParserItem = (): UrlMetadata => {
-  return {
-    url: 'https://www.politico.com/news/magazine/2024/02/26/former-boeing-employee-speaks-out-00142948',
-    title:
-      'Romantic norms are in flux. No wonder everyone’s obsessed with polyamory.',
-    excerpt:
-      'In the conversation about open marriages and polyamory, America’s sexual anxieties are on full display.',
-    language: 'EN',
-    publisher: 'POLITICO',
-    authors: 'Rebecca Jennings',
-    imageUrl: 'https://fake-image-url.com',
-    isCollection: false,
-    isSyndicated: false,
-  };
-};
-
-export const getUrlMetadataBody = {
-  url: 'https://getUrlMetadataBody-fake-url.com',
-  title: 'Fake title',
-  excerpt: 'fake excerpt',
-  status: CuratedStatus.RECOMMENDATION,
-  language: 'EN',
-  publisher: 'POLITICO',
-  datePublished: '2024-01-01',
-  authors: 'Fake Author',
-  imageUrl: 'https://fake-image-url.com',
-  topic: Topics.SELF_IMPROVEMENT,
-  source: CorpusItemSource.ML,
-  isCollection: false,
-  isSyndicated: false,
-};
 
 export const getApprovedCorpusItemByUrlBody = {
   url: 'https://getApprovedCorpusItemByUrlBody-fake-url.com',
@@ -209,14 +178,6 @@ export const createScheduledCorpusItemBody = {
     url: 'https://createScheduledCorpusItemBody-fake-url.com',
     title: 'Fake title',
   },
-};
-
-export const mockGetUrlMetadata = (
-  responseBody: any = getUrlMetadataBody,
-): void => {
-  jest.spyOn(GraphQlApiCalls, 'getUrlMetadata').mockImplementation(async () => {
-    return responseBody;
-  });
 };
 
 export const mockGetApprovedCorpusItemByUrl = (

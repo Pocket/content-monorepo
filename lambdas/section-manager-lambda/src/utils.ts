@@ -7,7 +7,6 @@ import {
   CreateApprovedCorpusItemApiInput,
   formatQuotesEN,
   formatQuotesDashesDE,
-  UrlMetadata,
   CorpusItemSource,
   SectionItemRemovalReason,
 } from 'content-common';
@@ -25,7 +24,6 @@ import {
   createOrUpdateSection,
   createSectionItem,
   getApprovedCorpusItemByUrl,
-  getUrlMetadata,
   removeSectionItem,
 } from './graphQlApiCalls';
 import {
@@ -65,17 +63,22 @@ export const processSqsSectionData = async (
     createOrUpdateSectionApiInput,
   );
 
-  const sectionExternalId =  sectionResult.externalId;
+  const sectionExternalId = sectionResult.externalId;
   const activeSectionItems = sectionResult.sectionItems || [];
   // Get SectionItems URLs from existing active SectionItems
-  const activeSectionItemsUrlsSet = new Set(activeSectionItems.map((item) => item.approvedItem.url));
+  const activeSectionItemsUrlsSet = new Set(
+    activeSectionItems.map((item) => item.approvedItem.url),
+  );
 
   // keep track of how many candidates succeeded, how many failed
   let successfulCandidates = 0;
   let failedCandidates = 0;
 
   // Get the existing SectionItems to remove from a Section
-  const sectionItemsToRemove = computeSectionItemsToRemove(sqsSectionData, activeSectionItems);
+  const sectionItemsToRemove = computeSectionItemsToRemove(
+    sqsSectionData,
+    activeSectionItems,
+  );
 
   // for each SectionItem, see if the URL already exists in the corpus
   for (let i = 0; i < sqsSectionData.candidates.length; i++) {
@@ -100,21 +103,8 @@ export const processSqsSectionData = async (
         approvedItemExternalId = approvedCorpusItem.externalId;
       } else {
         // if an ApprovedItem wasn't found based on the URL, create one
-
-        // retrieve URL metadata from the Parser. this fills in some metadata ML
-        // doesn't send, and acts as a backup if optional ML data points are not
-        // available.
-        const parserMetadata = await getUrlMetadata(
-          config.adminApiEndpoint,
-          graphHeaders,
-          sqsSectionItem.url,
-        );
-
-        // create input for the createApprovedItem mutation, favoring metadata
-        // from ML (in most cases)
         const apiInput = await mapSqsSectionItemToCreateApprovedItemApiInput(
           sqsSectionItem,
-          parserMetadata,
         );
 
         // create the ApprovedItem
@@ -166,7 +156,9 @@ export const processSqsSectionData = async (
     console.log(`No SectionItems to remove for Section ${sectionExternalId}`);
   }
 
-  console.log(`processSqsSectionData result: ${successfulCandidates} succeeded, ${failedCandidates} failed`);
+  console.log(
+    `processSqsSectionData result: ${successfulCandidates} succeeded, ${failedCandidates} failed`,
+  );
 };
 
 /**
@@ -177,17 +169,17 @@ export const processSqsSectionData = async (
  */
 export const computeSectionItemsToRemove = (
   sqsSectionData: SqsSectionWithSectionItems,
-  currentActiveSectionItems: ActiveSectionItem[]
+  currentActiveSectionItems: ActiveSectionItem[],
 ): ActiveSectionItem[] => {
   // Get SectionItems URLs from ML SectionItem payload
-  const mlSectionItemUrls = sqsSectionData.candidates.map(item => item.url);
+  const mlSectionItemUrls = sqsSectionData.candidates.map((item) => item.url);
 
   // Get the SectionItems to remove -- existing active SectionItems whose URL is not in the ML SectionItem payload
   const sectionItemsToRemove = currentActiveSectionItems.filter(
     (item) => !mlSectionItemUrls.includes(item.approvedItem.url),
   );
   return sectionItemsToRemove;
-}
+};
 
 /**
  * helper function to map section data from SQS to the API input required to
@@ -216,30 +208,22 @@ export const mapSqsSectionDataToCreateOrUpdateSectionApiInput = (
  * to call createApprovedCorpusItem
  *
  * @param sqsSectionItem SqsSectionItem
- * @param parserMetadata UrlMetadata
- * @returns
+ * @returns CreateApprovedCorpusItemApiInput
  */
 export const mapSqsSectionItemToCreateApprovedItemApiInput = async (
   sqsSectionItem: SqsSectionItem,
-  parserMetadata: UrlMetadata,
 ): Promise<CreateApprovedCorpusItemApiInput> => {
   // source and topic are required from ML & have been validated upstream
   const source = sqsSectionItem.source;
   const topic = sqsSectionItem.topic;
 
-  // for language, title, and excerpt, we prefer ML-supplied values, but
-  // will fall back to Parser-supplied values if ML values are missing
-  let language: string | undefined =
-    sqsSectionItem.language || parserMetadata.language;
-
-  // the Parser returns a lowercase language value
+  // language from ML, normalized to uppercase
+  let language: string | undefined = sqsSectionItem.language ?? undefined;
   language = language && language.toUpperCase();
 
   // title and excerpt have different formatting for different languages
-  let title: string | undefined = sqsSectionItem.title || parserMetadata.title;
-
-  let excerpt: string | undefined =
-    sqsSectionItem.excerpt || parserMetadata.excerpt;
+  let title: string | undefined = sqsSectionItem.title ?? undefined;
+  let excerpt: string | undefined = sqsSectionItem.excerpt ?? undefined;
 
   if (language === CorpusLanguage.EN) {
     // only apply formatting if title and excerpt are defined
@@ -250,36 +234,31 @@ export const mapSqsSectionItemToCreateApprovedItemApiInput = async (
     excerpt = excerpt && formatQuotesDashesDE(excerpt);
   }
 
-  let imageUrl: string | undefined =
-    sqsSectionItem.image_url || parserMetadata.imageUrl;
-
+  let imageUrl: string | undefined = sqsSectionItem.image_url ?? undefined;
   // only validate the imageUrl if it's defined
   imageUrl = imageUrl && (await validateImageUrl(imageUrl));
 
-  // the following fields are from primary source = Parser
-  const publisher = parserMetadata.publisher;
-
-  const datePublished = validateDatePublished(parserMetadata.datePublished);
-
-  // Metaflow only grabs the first author even if there are more than 1 author present, so grab authors from Parser
-  // if Parser cannot return authors, default to Metaflow then
-  let authors: ApprovedItemAuthor[] | undefined;
-
-  if (parserMetadata.authors) {
-    authors = mapAuthorToApprovedItemAuthor(parserMetadata.authors.split(','));
-  } else if (sqsSectionItem.authors) {
-    authors = mapAuthorToApprovedItemAuthor(sqsSectionItem.authors);
+  // Validate date_published from ML; drop if invalid
+  const datePublished = validateDatePublished(sqsSectionItem.date_published);
+  if (sqsSectionItem.date_published && !datePublished) {
+    console.error(
+      `Invalid date_published "${sqsSectionItem.date_published}" for URL ${sqsSectionItem.url}; dropping field`,
+    );
   }
+
+  // Use ML authors, fallback to empty array if not provided
+  const authors: ApprovedItemAuthor[] = sqsSectionItem.authors
+    ? mapAuthorToApprovedItemAuthor(sqsSectionItem.authors)
+    : [];
 
   const apiInput: any = {
     authors,
     excerpt,
     imageUrl,
-    isCollection: parserMetadata.isCollection || false,
-    isSyndicated: parserMetadata.isSyndicated || false,
+    isCollection: false,
+    isSyndicated: false,
     isTimeSensitive: false,
     language,
-    publisher,
     source,
     status: sqsSectionItem.status,
     title,

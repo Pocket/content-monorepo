@@ -22,6 +22,7 @@ export interface SqsSectionWithSectionItems {
 
 export interface SqsSectionItem {
   authors: string[] | null;
+  date_published: string | null;
   excerpt: string | null;
   image_url: string | null;
   language: CorpusLanguage | null;
@@ -31,7 +32,7 @@ export interface SqsSectionItem {
   title: string | null;
   topic: Topics;
   url: string;
-};
+}
 
 export interface ActiveSectionItem {
   externalId: string;
@@ -39,7 +40,7 @@ export interface ActiveSectionItem {
     externalId: string;
     url: string;
   };
-};
+}
 
 export type CreateOrUpdateSectionApiInput = {
   active: boolean;

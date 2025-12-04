@@ -14,7 +14,6 @@ import {
   formatQuotesEN,
   getEmitter,
   getTracker,
-  UrlMetadata,
 } from 'content-common';
 import {
   generateGraphQlApiHeaders,
@@ -35,7 +34,6 @@ import {
   createApprovedAndScheduledCorpusItem,
   createScheduledCorpusItem,
   getApprovedCorpusItemByUrl,
-  getUrlMetadata,
 } from './graphQlApiCalls';
 import {
   allowedScheduledSurfaces,
@@ -88,32 +86,27 @@ function handleApprovedItemInputTypiaError(
 /**
  * Creates a scheduled item to send to createApprovedCorpusItem mutation
  * @param candidate ScheduledCandidate received from Metaflow
- * @param itemMetadata UrlMetadata item from Parser
  * @return CreateApprovedCorpusItemApiInput
  */
 export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
   async (
     candidate: ScheduledCandidate,
-    itemMetadata: UrlMetadata,
   ): Promise<CreateApprovedCorpusItemApiInput> => {
     try {
       // source and topic are required from ML & have been validated upstream
       const source = candidate.scheduled_corpus_item.source;
       const topic = candidate.scheduled_corpus_item.topic;
 
-      // for language, title, and excerpt, we prefer ML-supplied values, but
-      // will fall back to Parser-supplied values if ML values are missing
       let language: string | undefined =
-        candidate.scheduled_corpus_item.language || itemMetadata.language;
+        candidate.scheduled_corpus_item.language ?? undefined;
 
-      // the Parser returns a lowercase language value
       language = language && language.toUpperCase();
 
       let title: string | undefined =
-        candidate.scheduled_corpus_item.title || itemMetadata.title;
+        candidate.scheduled_corpus_item.title ?? undefined;
 
       let excerpt: string | undefined =
-        candidate.scheduled_corpus_item.excerpt || itemMetadata.excerpt;
+        candidate.scheduled_corpus_item.excerpt ?? undefined;
 
       // title and excerpt have different formatting for different languages
       if (language === CorpusLanguage.EN) {
@@ -126,50 +119,43 @@ export const mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput =
       }
 
       let imageUrl: string | undefined =
-        candidate.scheduled_corpus_item.image_url || itemMetadata.imageUrl;
+        candidate.scheduled_corpus_item.image_url ?? undefined;
 
       // only validate the imageUrl if it's defined
       imageUrl = imageUrl && (await validateImageUrl(imageUrl));
 
-      // the following fields are from primary source = Parser
-      const publisher = itemMetadata.publisher;
-
-      const datePublished = validateDatePublished(itemMetadata.datePublished);
-
-      // Metaflow only grabs the first author even if there are more than 1 author present, so grab authors from Parser
-      // if Parser cannot return authors, default to Metaflow then
-      let authors: ApprovedItemAuthor[] | undefined;
-
-      if (itemMetadata.authors) {
-        authors = mapAuthorToApprovedItemAuthor(
-          itemMetadata.authors.split(','),
-        );
-      } else if (candidate.scheduled_corpus_item.authors) {
-        authors = mapAuthorToApprovedItemAuthor(
-          candidate.scheduled_corpus_item.authors,
+      const datePublished = validateDatePublished(
+        candidate.scheduled_corpus_item.date_published,
+      );
+      if (candidate.scheduled_corpus_item.date_published && !datePublished) {
+        console.error(
+          `Invalid date_published "${candidate.scheduled_corpus_item.date_published}" for URL ${candidate.scheduled_corpus_item.url}; dropping field`,
         );
       }
 
+      const authors: ApprovedItemAuthor[] = candidate.scheduled_corpus_item
+        .authors
+        ? mapAuthorToApprovedItemAuthor(candidate.scheduled_corpus_item.authors)
+        : [];
+
       // set this to any type for now - we validate the type below
       const itemToSchedule: any = {
-        url: candidate.scheduled_corpus_item.url, // source = Metaflow
+        url: candidate.scheduled_corpus_item.url,
         title: title,
         excerpt: excerpt,
-        status: candidate.scheduled_corpus_item.status, // source = Metaflow
+        status: candidate.scheduled_corpus_item.status,
         language: language,
-        publisher: publisher,
         authors: authors,
         imageUrl: imageUrl,
         topic: topic,
-        source: source, // source = Metaflow
+        source: source,
         scheduledSource: source,
-        // true will stay true, false or undefined will be false
-        isCollection: itemMetadata.isCollection || false, // source = Parser
-        isSyndicated: itemMetadata.isSyndicated || false, // source = Parser
+        isCollection: false,
+        isSyndicated: false,
         isTimeSensitive: false,
-        scheduledDate: candidate.scheduled_corpus_item.scheduled_date, // source = Metaflow
+        scheduledDate: candidate.scheduled_corpus_item.scheduled_date,
         scheduledSurfaceGuid:
-          candidate.scheduled_corpus_item.scheduled_surface_guid, // source = Metaflow
+          candidate.scheduled_corpus_item.scheduled_surface_guid,
       };
 
       // Only add the publication date to the mutation input if the date is available
@@ -251,21 +237,13 @@ export const createAndScheduleCorpusItemHelper = async (
   // if getApprovedCorpusItemByUrl mutation returns null, this is a new candidate
   // create, approve & schedule it
   if (!approvedCorpusItem) {
-    // 2. get metadata from Parser (used to fill in some data fields not provided by Metaflow)
-    const parserMetadata = await getUrlMetadata(
-      config.AdminApi,
-      graphHeaders,
-      candidate.scheduled_corpus_item.url,
-    );
-
-    // 3. map Metaflow input to CreateApprovedCorpusItemApiInput
+    // 2. map Metaflow input to CreateApprovedCorpusItemApiInput
     const createApprovedCorpusItemApiInput =
       await mapScheduledCandidateInputToCreateApprovedCorpusItemApiInput(
         candidate,
-        parserMetadata,
       );
 
-    // 4. call createApprovedCorpusItem mutation
+    // 3. call createApprovedCorpusItem mutation
     const approvedCorpusItemWithScheduleHistory =
       await createApprovedAndScheduledCorpusItem(
         config.AdminApi,
@@ -283,14 +261,14 @@ export const createAndScheduleCorpusItemHelper = async (
   }
   // item has already been created & approved, try scheduling item
   else {
-    // 5. create CreateScheduledItem input obj
+    // 4. create CreateScheduledItem input obj
     const createScheduledItemInput = createCreateScheduledItemInput(
       candidate,
       approvedCorpusItem.externalId,
     );
 
     try {
-      // 6.  call createScheduledItemInput mutation
+      // 5. call createScheduledItemInput mutation
       const scheduledItem = await createScheduledCorpusItem(
         config.AdminApi,
         graphHeaders,
@@ -322,7 +300,7 @@ export const createAndScheduleCorpusItemHelper = async (
     }
   }
 
-  // 7. Send a Snowplow event after the item got successfully scheduled.
+  // 6. Send a Snowplow event after the item got successfully scheduled.
   queueSnowplowEvent(
     tracker,
     generateSnowplowSuccessEntity(
