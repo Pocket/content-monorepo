@@ -19,7 +19,6 @@ import {
   mockCreateApprovedCorpusItem,
   mockCreateScheduledCorpusItem,
   mockGetApprovedCorpusItemByUrl,
-  mockGetUrlMetadata,
 } from './testHelpers';
 import { extractScheduledCandidateEntity } from './events/testHelpers';
 import * as Jwt from './jwt';
@@ -94,7 +93,6 @@ describe('corpus scheduler lambda', () => {
 
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(null);
-    mockGetUrlMetadata();
     mockCreateApprovedCorpusItem();
 
     await processor(fakeEvent, sqsContext, sqsCallback);
@@ -200,7 +198,6 @@ describe('corpus scheduler lambda', () => {
   it('sends a Sentry error if curated-corpus-api has error, with partial success', async () => {
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(null);
-    mockGetUrlMetadata();
     jest
       .spyOn(GraphQlApiCalls, 'createApprovedAndScheduledCorpusItem')
       .mockImplementation(() => {
@@ -219,7 +216,6 @@ describe('corpus scheduler lambda', () => {
   it('sends a Sentry error if curated-corpus-api returns null data', async () => {
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(null);
-    mockGetUrlMetadata();
     mockCreateApprovedCorpusItem(null);
 
     await processor(fakeEvent, sqsContext, sqsCallback);
@@ -230,7 +226,6 @@ describe('corpus scheduler lambda', () => {
   it('should not start scheduling if allowedToSchedule is false', async () => {
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(null);
-    mockGetUrlMetadata();
     mockCreateApprovedCorpusItem(null);
 
     // mock the config.app.enableScheduledDateValidation
@@ -278,7 +273,6 @@ describe('corpus scheduler lambda', () => {
 
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(null);
-    mockGetUrlMetadata();
     mockCreateApprovedCorpusItem(null);
 
     // overwrite with NEW_TAB_EN_GB scheduled surface which is not allowed
@@ -315,7 +309,6 @@ describe('corpus scheduler lambda', () => {
 
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(null);
-    mockGetUrlMetadata();
     mockCreateApprovedCorpusItem();
 
     await processor(fakeEvent, sqsContext, sqsCallback);
@@ -340,7 +333,6 @@ describe('corpus scheduler lambda', () => {
 
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(null);
-    mockGetUrlMetadata();
     mockCreateApprovedCorpusItem();
 
     // overwrite with NEW_TAB_DE_DE scheduled surface
@@ -358,7 +350,6 @@ describe('corpus scheduler lambda', () => {
   it('does not emit Sentry exceptions if curated-corpus-api request is successful & valid scheduled surface but not allowed for scheduling (approve & schedule candidate) (dev)', async () => {
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(null);
-    mockGetUrlMetadata();
     mockCreateApprovedCorpusItem();
 
     // overwrite with NEW_TAB_EN_GB scheduled surface which is not allowed (but dev, so should be scheduled)
@@ -372,7 +363,6 @@ describe('corpus scheduler lambda', () => {
   it('does not emit Sentry exceptions if curated-corpus-api request is successful (approve & schedule candidate) (dev)', async () => {
     // returns null as we are trying to create & schedule a new item
     mockGetApprovedCorpusItemByUrl(null);
-    mockGetUrlMetadata();
     mockCreateApprovedCorpusItem();
 
     await processor(fakeEvent, sqsContext, sqsCallback);

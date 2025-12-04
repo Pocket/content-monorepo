@@ -89,7 +89,7 @@ export type ApprovedItemRequiredInput = {
   authors: ApprovedItemAuthor[];
   status: CuratedStatus;
   language: CorpusLanguage;
-  publisher: string;
+  publisher?: string;
   imageUrl: string;
   topic: string;
   source: CorpusItemSource;

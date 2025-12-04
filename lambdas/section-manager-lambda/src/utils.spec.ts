@@ -8,13 +8,11 @@ import {
   formatQuotesDashesDE,
   ScheduledSurfacesEnum,
   Topics,
-  UrlMetadata,
   IABMetadata,
 } from 'content-common';
 import {
   mapAuthorToApprovedItemAuthor,
   mockPocketImageCache,
-  validateDatePublished,
 } from 'lambda-common';
 
 import * as GraphQlApiCalls from './graphQlApiCalls';
@@ -30,12 +28,12 @@ describe('utils', () => {
   const url = 'https://science-fiction-reads.com/octavia-and-ursula';
 
   let sqsSectionItem: SqsSectionItem;
-  let urlMetadata: UrlMetadata;
 
   beforeEach(() => {
     // reset mocked inputs before each test
     sqsSectionItem = {
       authors: ['Octavia E Butler', 'Ursula K Le Guin'],
+      date_published: '2025-02-10',
       excerpt: 'Sqs excerpt',
       image_url: 'https://fake-image.com/sqs-image.jpg',
       language: CorpusLanguage.EN,
@@ -45,20 +43,6 @@ describe('utils', () => {
       title: 'Sqs Title',
       topic: Topics.ENTERTAINMENT,
       url,
-    };
-
-    urlMetadata = {
-      url,
-      imageUrl: 'https://fake-image.com/parser-image.jpg',
-      publisher: 'Science Fiction Reads',
-      datePublished: '2025-02-10 12:00:00',
-      domain: 'science-fiction-reads.com',
-      title: 'Parser Title',
-      excerpt: 'Parser excerpt',
-      language: 'en',
-      isSyndicated: false,
-      isCollection: false,
-      authors: 'Margaret Weis,Tracy Hickman',
     };
   });
 
@@ -76,7 +60,7 @@ describe('utils', () => {
     it('should map an SqsSectionWithSectionItems object to a CreateOrUpdateSectionApiInput object', () => {
       const iabMetadata: IABMetadata = {
         taxonomy: 'IAB-3.0',
-        categories: ['488']
+        categories: ['488'],
       };
 
       const sqsData: SqsSectionWithSectionItems = {
@@ -88,7 +72,7 @@ describe('utils', () => {
         sort: 42,
         source: CorpusItemSource.ML,
         title: 'test title',
-        description: 'test description'
+        description: 'test description',
       };
 
       const apiInput =
@@ -108,19 +92,16 @@ describe('utils', () => {
   });
 
   describe('mapSqsSectionItemToCreateApprovedItemApiInput', () => {
-    it('should default to SQS values if they exist', async () => {
+    it('should map SQS values correctly', async () => {
       mockPocketImageCache(200);
 
       const result = await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
         sqsSectionItem,
-        urlMetadata,
       );
 
-      // uses SQS values (where available)
       const expected = {
-        // Parser authors are preferred at this time
         authors: mapAuthorToApprovedItemAuthor(
-          (urlMetadata.authors as string).split(','),
+          sqsSectionItem.authors as string[],
         ),
         excerpt: sqsSectionItem.excerpt,
         imageUrl: sqsSectionItem.image_url,
@@ -128,61 +109,58 @@ describe('utils', () => {
         isSyndicated: false,
         isTimeSensitive: false,
         language: sqsSectionItem.language,
-        // only available from the Parser at this time
-        publisher: urlMetadata.publisher,
         source: sqsSectionItem.source.toString(),
         status: sqsSectionItem.status.toString(),
         title: sqsSectionItem.title,
         topic: sqsSectionItem.topic.toString(),
         url,
-        // only available from the Parser at this time
-        datePublished: validateDatePublished(urlMetadata.datePublished),
+        datePublished: sqsSectionItem.date_published,
       };
 
       expect(result).toEqual(expected);
     });
 
-    it('should use fall back values as expected', async () => {
+    it('should use empty array for authors when not provided', async () => {
       mockPocketImageCache(200);
 
-      // remove preferred SQS values
-      sqsSectionItem.excerpt = null;
-      sqsSectionItem.image_url = null;
-      sqsSectionItem.language = null;
-      sqsSectionItem.title = null;
-
-      // remove preferred Parser values
-      delete urlMetadata.authors;
+      sqsSectionItem.authors = null;
 
       const result = await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
         sqsSectionItem,
-        urlMetadata,
       );
 
-      const expected = {
-        // falls back to SQS
-        authors: mapAuthorToApprovedItemAuthor(
-          sqsSectionItem.authors as string[],
-        ),
-        excerpt: urlMetadata.excerpt, // falls back to Parser
-        imageUrl: urlMetadata.imageUrl, // falls back to Parser
-        isCollection: false,
-        isSyndicated: false,
-        isTimeSensitive: false,
-        language: urlMetadata.language?.toUpperCase(), // falls back to Parser
-        publisher: urlMetadata.publisher,
-        // required in SQS data
-        source: sqsSectionItem.source.toString(),
-        // required in SQS data
-        status: sqsSectionItem.status.toString(),
-        title: urlMetadata.title, // falls back to Parser
-        // required in SQS data
-        topic: sqsSectionItem.topic.toString(),
-        url,
-        datePublished: validateDatePublished(urlMetadata.datePublished),
-      };
+      expect(result.authors).toEqual([]);
+    });
 
-      expect(result).toEqual(expected);
+    it('should omit datePublished when date_published is null', async () => {
+      mockPocketImageCache(200);
+
+      sqsSectionItem.date_published = null;
+
+      const result = await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
+        sqsSectionItem,
+      );
+
+      expect(result.datePublished).toBeUndefined();
+    });
+
+    it('should omit datePublished and log error when date_published is invalid', async () => {
+      mockPocketImageCache(200);
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      sqsSectionItem.date_published = 'invalid-date';
+
+      const result = await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
+        sqsSectionItem,
+      );
+
+      expect(result.datePublished).toBeUndefined();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid date_published "invalid-date"'),
+      );
+      // Note: Don't call mockRestore() here as it affects other spies on console.error
     });
 
     /**
@@ -190,18 +168,13 @@ describe('utils', () => {
      * what we expect it to do - erroring if data does not conform to the
      * expected type.
      */
-    it('should fail if neither SQS nor the Parser have required data', async () => {
+    it('should fail if SQS does not have required data', async () => {
       mockPocketImageCache(200);
 
-      // remove title from both sources
       sqsSectionItem.title = null;
-      delete urlMetadata.title;
 
       await expect(
-        Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
-          sqsSectionItem,
-          urlMetadata,
-        ),
+        Utils.mapSqsSectionItemToCreateApprovedItemApiInput(sqsSectionItem),
       ).rejects.toThrow(
         new Error(
           `Error on assert(): invalid type on $input.title, expect to be string`,
@@ -223,14 +196,6 @@ describe('utils', () => {
       sqsSectionItem.language = null;
       sqsSectionItem.title = null;
 
-      // remove all optional Parser data
-      delete urlMetadata.authors;
-      delete urlMetadata.excerpt;
-      delete urlMetadata.imageUrl;
-      delete urlMetadata.language;
-      delete urlMetadata.publisher;
-      delete urlMetadata.title;
-
       // jest's way to wait for the async operation below - make sure it
       // knows how many assertions are in this test
       expect.assertions(1);
@@ -238,7 +203,6 @@ describe('utils', () => {
       try {
         await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
           sqsSectionItem,
-          urlMetadata,
         );
       } catch (error: any) {
         // assert(): lets us know that Typia's `assert` function is where the
@@ -267,7 +231,6 @@ describe('utils', () => {
         const result =
           await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
             sqsSectionItem,
-            urlMetadata,
           );
 
         expect(result.title).toEqual(
@@ -284,7 +247,6 @@ describe('utils', () => {
         const result =
           await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
             sqsSectionItem,
-            urlMetadata,
           );
 
         expect(result.title).toEqual(
@@ -301,7 +263,6 @@ describe('utils', () => {
         const result =
           await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
             sqsSectionItem,
-            urlMetadata,
           );
 
         expect(result.title).toEqual(sqsSectionItem.title as string);
@@ -313,10 +274,7 @@ describe('utils', () => {
       mockPocketImageCache(500);
 
       await expect(
-        Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
-          sqsSectionItem,
-          urlMetadata,
-        ),
+        Utils.mapSqsSectionItemToCreateApprovedItemApiInput(sqsSectionItem),
       ).rejects.toThrow(
         new Error(
           `Error on assert(): invalid type on $input.imageUrl, expect to be string`,
@@ -330,9 +288,7 @@ describe('utils', () => {
       // ML Section payload with 1 SectionItem candidate
       const sqsData: SqsSectionWithSectionItems = {
         active: true,
-        candidates: [
-          { url: 'https://example-one-stay.com', rank: 1 } as any,
-        ],
+        candidates: [{ url: 'https://example-one-stay.com', rank: 1 } as any],
         id: 'Section1',
         scheduled_surface_guid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
         source: CorpusItemSource.ML,
@@ -344,19 +300,29 @@ describe('utils', () => {
       const currentActiveSectionItems: any[] = [
         {
           externalId: 'sectionItem1',
-          approvedItem: { externalId: 'approved1', url: 'https://example-one-stay.com' },
+          approvedItem: {
+            externalId: 'approved1',
+            url: 'https://example-one-stay.com',
+          },
         },
         {
           externalId: 'sectionItem2',
-          approvedItem: { externalId: 'approved2', url: 'https://example-two-remove.com' },
+          approvedItem: {
+            externalId: 'approved2',
+            url: 'https://example-two-remove.com',
+          },
         },
       ];
 
-      const sectionItemsToRemove  =
-        Utils.computeSectionItemsToRemove(sqsData, currentActiveSectionItems);
+      const sectionItemsToRemove = Utils.computeSectionItemsToRemove(
+        sqsData,
+        currentActiveSectionItems,
+      );
 
       expect(sectionItemsToRemove).toHaveLength(1);
-      expect(sectionItemsToRemove[0].approvedItem.url).toBe('https://example-two-remove.com');
+      expect(sectionItemsToRemove[0].approvedItem.url).toBe(
+        'https://example-two-remove.com',
+      );
     });
   });
   describe('processSqsSectionData', () => {
@@ -367,17 +333,18 @@ describe('utils', () => {
       sectionItemCount,
     );
     // ensure each candidate URL is unique to test de-dupe logic
-    sqsSectionData.candidates = sqsSectionData.candidates.map((candidate, i) => ({
-      ...candidate,
-      url: `https://example-${i}.com`,
-    }));
+    sqsSectionData.candidates = sqsSectionData.candidates.map(
+      (candidate, i) => ({
+        ...candidate,
+        url: `https://example-${i}.com`,
+      }),
+    );
     const jwtBearerToken = 'testJwtBearerToken';
 
     // mock all the functions orchestrated by processSqsSectionData.
     // this is just to test call count.
     let mockMapSqsSectionDataToCreateOrUpdateSectionApiInput: any;
     let mockCreateOrUpdateSection: any;
-    let mockGetUrlMetadata: any;
     let mockMapSqsSectionItemToCreateApprovedItemApiInput: any;
     let mockCreateApprovedCorpusItem: any;
     let mockCreateSectionItem: any;
@@ -386,8 +353,12 @@ describe('utils', () => {
       .spyOn(Sentry, 'captureException')
       .mockImplementation(() => '');
 
-    const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const mockConsoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    const mockConsoleLog = jest
+      .spyOn(console, 'log')
+      .mockImplementation(() => {});
 
     afterEach(() => {
       // clear all information/history about mocked functions
@@ -400,17 +371,24 @@ describe('utils', () => {
     });
 
     beforeEach(() => {
+      // Reset candidate URLs that may have been modified by previous tests
+      sqsSectionData.candidates = sqsSectionData.candidates.map(
+        (candidate, i) => ({
+          ...candidate,
+          url: `https://example-${i}.com`,
+        }),
+      );
+
       mockMapSqsSectionDataToCreateOrUpdateSectionApiInput = jest
         .spyOn(Utils, 'mapSqsSectionDataToCreateOrUpdateSectionApiInput')
         .mockReturnValue({} as CreateOrUpdateSectionApiInput);
 
       mockCreateOrUpdateSection = jest
         .spyOn(GraphQlApiCalls, 'createOrUpdateSection')
-        .mockResolvedValue({externalId: 'sectionExternalId1', sectionItems: []});
-
-      mockGetUrlMetadata = jest
-        .spyOn(GraphQlApiCalls, 'getUrlMetadata')
-        .mockResolvedValue({} as UrlMetadata);
+        .mockResolvedValue({
+          externalId: 'sectionExternalId1',
+          sectionItems: [],
+        });
 
       mockMapSqsSectionItemToCreateApprovedItemApiInput = jest
         .spyOn(Utils, 'mapSqsSectionItemToCreateApprovedItemApiInput')
@@ -451,9 +429,10 @@ describe('utils', () => {
       await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
 
       expect(mockCreateOrUpdateSection).toHaveBeenCalledTimes(1);
-      const sectionResponse = await mockCreateOrUpdateSection.mock.results[0].value;
+      const sectionResponse = await mockCreateOrUpdateSection.mock.results[0]
+        .value;
 
-      expect(sectionResponse.externalId).toEqual('sectionExternalId1')
+      expect(sectionResponse.externalId).toEqual('sectionExternalId1');
       // check sectionItems are returned in response
       expect(sectionResponse.sectionItems).toEqual(mockSectionItems);
     });
@@ -466,7 +445,6 @@ describe('utils', () => {
           externalId: 'approvedItemExternalId1',
           url: 'test.com',
         });
-
 
       await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
 
@@ -481,9 +459,8 @@ describe('utils', () => {
       );
 
       // we are mocking getApprovedCorpusItemByUrl to return a value,
-      // meaning it already exists in the corpus, so we shouldn't be getting
-      // URL metadata from the parser or creating a new approved item.
-      expect(mockGetUrlMetadata).not.toHaveBeenCalled();
+      // meaning it already exists in the corpus, so we shouldn't be
+      // creating a new approved item.
       expect(
         mockMapSqsSectionItemToCreateApprovedItemApiInput,
       ).not.toHaveBeenCalled();
@@ -522,9 +499,7 @@ describe('utils', () => {
       );
 
       // we are mocking getApprovedCorpusItemByUrl to return null, meaning
-      // meaning it doesn't exist in the corpus, so we should be getting
-      // URL metadata from the parser and creating a new approved item.
-      expect(mockGetUrlMetadata).toHaveBeenCalledTimes(sectionItemCount);
+      // it doesn't exist in the corpus, so we should be creating a new approved item.
       expect(
         mockMapSqsSectionItemToCreateApprovedItemApiInput,
       ).toHaveBeenCalledTimes(sectionItemCount);
@@ -568,9 +543,7 @@ describe('utils', () => {
       );
 
       // A sectionItem should be created for the two candidates that have succeeded
-      expect(mockCreateSectionItem).toHaveBeenCalledTimes(
-        sectionItemCount - 1,
-      );
+      expect(mockCreateSectionItem).toHaveBeenCalledTimes(sectionItemCount - 1);
 
       // Check that console.error & Sentry were called
       expect(sentryStub).toHaveBeenCalledTimes(1);
@@ -623,7 +596,8 @@ describe('utils', () => {
       ];
 
       // Mock ApprovedItem lookup
-      jest.spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
+      jest
+        .spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
         .mockImplementation(async (_endpoint, _headers, url) => {
           if (url === url2) return { externalId: 'approvedItem2', url: url2 };
           if (url === url3) return { externalId: 'approvedItem3', url: url3 };
