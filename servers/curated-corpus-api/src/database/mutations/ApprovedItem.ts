@@ -8,7 +8,10 @@ import {
   UpdateApprovedItemInput,
 } from '../types';
 import { checkCorpusUrl } from '../helpers/checkCorpusUrl';
-import { getNormalizedDomainName } from '../../shared/utils';
+import {
+  getNormalizedDomainFromUrl,
+  validateHttpUrl,
+} from '../../shared/utils';
 import { isExcludedDomain } from './ExcludedDomain';
 import { lookupPublisher } from './PublisherDomain';
 import { deleteSectionItemsByApprovedItemId } from './SectionItem';
@@ -28,7 +31,10 @@ export async function createApprovedItem(
   // Check if an item with this URL has already been created in the Curated Corpus.
   await checkCorpusUrl(db, data.url);
 
-  const domainName = getNormalizedDomainName(data.url);
+  // Validate URL is http(s) before processing
+  validateHttpUrl(data.url);
+
+  const domainName = getNormalizedDomainFromUrl(data.url);
 
   // Look up this story in the excluded domains list.
   const isExcluded = await isExcludedDomain(db, domainName);

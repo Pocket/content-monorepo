@@ -1,8 +1,9 @@
+import { UserInputError } from '@pocket-tools/apollo-utils';
 import { ScheduledSurface, ScheduledSurfaces } from 'content-common';
 import { ApprovedItem, CorpusItem, CorpusTargetType } from '../database/types';
 import { ApprovedItemAuthor } from 'content-common';
-import { parse } from 'url';
-import { parse as parseDomain } from 'tldts';
+import { domainToASCII, parse } from 'url';
+import { parse as parseDomain, getDomain } from 'tldts';
 import { DateTime } from 'luxon';
 
 /**
@@ -189,30 +190,127 @@ export const getPocketPath = (
 };
 
 /**
- * @param url url with http(s) scheme
- * @returns domain name of url including subdomains, except www.
- * @throws an error if the URL does not contain a domain name.
+ * Normalizes a domain string by lowercasing, converting to ASCII (punycode),
+ * and stripping the www. prefix.
+ *
+ * @param hostname A domain name (e.g., "www.Example.com" or "español.example.com")
+ * @returns Normalized domain (e.g., "example.com" or "xn--espaol-zwa.example.com")
  */
-export const getNormalizedDomainName = (url: string): string => {
-  const regex = /^https?:\/\/(www\.)?(?<domainName>[^?/:]+)/i;
-  const matches = url.match(regex);
-  return matches.groups.domainName.toLowerCase();
+export const normalizeDomain = (hostname: string): string => {
+  let domain = hostname.toLowerCase();
+  domain = domainToASCII(domain);
+  domain = domain.replace(/^www\./, '');
+  return domain;
 };
 
 /**
- * Extracts the registrable domain (eTLD+1) from a URL.
- * For example, "news.example.com" returns "example.com".
+ * Validates a domain name, throwing UserInputError if invalid.
+ * Must be a registrable domain or subdomain (not a public suffix, IP, or wildcard).
  *
- * @param url url with http(s) scheme
- * @returns the registrable domain
+ * @param domainName A sanitized domain name
+ * @throws UserInputError if validation fails
+ */
+export const validateDomainName = (domainName: string): void => {
+  // Normalize to lowercase for consistent validation
+  const domain = domainName.toLowerCase();
+
+  // Check length
+  if (domain.length === 0) {
+    throw new UserInputError('Domain name cannot be empty.');
+  }
+  if (domain.length > 255) {
+    throw new UserInputError('Domain name cannot exceed 255 characters.');
+  }
+
+  // Reject URLs with scheme
+  if (/^https?:\/\//i.test(domain)) {
+    throw new UserInputError(
+      'Domain name must be a hostname, not a full URL. Remove the http(s):// prefix.',
+    );
+  }
+
+  // Reject wildcards
+  if (domain.includes('*')) {
+    throw new UserInputError('Wildcard domain names are not supported.');
+  }
+
+  // Reject localhost
+  if (domain === 'localhost' || domain.endsWith('.localhost')) {
+    throw new UserInputError('"localhost" is not a valid domain name.');
+  }
+
+  // Use tldts to validate
+  const parsed = parseDomain(domain);
+
+  // Reject IP addresses
+  if (parsed.isIp) {
+    throw new UserInputError('IP addresses are not valid domain names.');
+  }
+
+  // Reject if not a valid registrable domain or subdomain
+  if (!parsed.domain) {
+    throw new UserInputError(
+      `"${domain}" is not a valid domain name. It must be a registrable domain (e.g., "example.com") or subdomain (e.g., "news.example.com").`,
+    );
+  }
+};
+
+/**
+ * Validates that a URL is a valid, secure http or https URL.
+ *
+ * @param url The URL to validate
+ * @throws UserInputError if the URL is invalid, not http(s), has no hostname, or contains credentials
+ */
+export const validateHttpUrl = (url: string): void => {
+  // Reject malformed URLs with missing hostname (e.g., "http:///path")
+  // before URL class normalizes them
+  if (/^https?:\/\/\//.test(url)) {
+    throw new UserInputError('URL does not contain a valid hostname.');
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new UserInputError(`Invalid URL: ${url}`);
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new UserInputError('URL must have http or https scheme.');
+  }
+  if (!parsed.hostname || parsed.hostname.length === 0) {
+    throw new UserInputError('URL does not contain a valid hostname.');
+  }
+  // Reject URLs with embedded credentials (security risk)
+  if (parsed.username || parsed.password) {
+    throw new UserInputError('URL must not contain embedded credentials.');
+  }
+  // Validate the hostname is a proper domain (rejects localhost, IPs, public suffixes, etc.)
+  validateDomainName(parsed.hostname);
+};
+
+/**
+ * Extracts the normalized domain from a URL.
+ *
+ * @param url A valid URL with a hostname
+ * @returns domain including subdomains, except www.
+ */
+export const getNormalizedDomainFromUrl = (url: string): string => {
+  return normalizeDomain(new URL(url).hostname);
+};
+
+/**
+ * Extracts the normalized registrable domain (eTLD+1) from a URL.
+ * For example, "https://news.example.com" returns "example.com".
+ *
+ * @param url A valid URL with a hostname
+ * @returns Normalized registrable domain (lowercase, punycode)
  * @throws Error if the registrable domain cannot be determined
  */
-export const getRegistrableDomain = (url: string): string => {
-  const result = parseDomain(url);
-  if (!result.domain) {
+export const getRegistrableDomainFromUrl = (url: string): string => {
+  const domain = getDomain(url);
+  if (!domain) {
     throw new Error(`Cannot extract registrable domain from: ${url}`);
   }
-  return result.domain;
+  return normalizeDomain(domain);
 };
 
 // the below was graciously provided by:
@@ -266,6 +364,6 @@ export function getLocalDate(date: Date, timeZone: string): DateTime {
       month: date.getMonth() + 1, // JS months are 0-based; Luxon expects 1-based
       day: date.getDate(),
     },
-    { zone: timeZone }
+    { zone: timeZone },
   ).startOf('day');
 }

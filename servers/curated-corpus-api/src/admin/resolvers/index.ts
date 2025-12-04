@@ -37,6 +37,7 @@ import {
   updateCustomSection,
 } from './mutations/Section';
 import { createSectionItem, removeSectionItem } from './mutations/SectionItem';
+import { createOrUpdatePublisherDomain } from './mutations/PublisherDomain';
 import { computeSectionStatus } from '../../shared/resolvers/fields/SectionStatus';
 
 export const resolvers = {
@@ -108,6 +109,10 @@ export const resolvers = {
     createdAt: UnixTimestampResolver,
     updatedAt: UnixTimestampResolver,
   },
+  PublisherDomain: {
+    createdAt: UnixTimestampResolver,
+    updatedAt: UnixTimestampResolver,
+  },
   // The queries available
   Query: {
     approvedCorpusItemByExternalId: getApprovedItemByExternalId,
@@ -137,5 +142,6 @@ export const resolvers = {
     createCustomSection: createCustomSection,
     deleteCustomSection: deleteCustomSection,
     updateCustomSection: updateCustomSection,
+    createOrUpdatePublisherDomain: createOrUpdatePublisherDomain,
   },
 };

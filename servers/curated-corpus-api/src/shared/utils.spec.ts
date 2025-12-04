@@ -7,9 +7,12 @@ import {
   getScheduledSurfaceByGuid,
   toUtcDateString,
   getPocketPath,
-  getNormalizedDomainName,
-  getRegistrableDomain,
+  getNormalizedDomainFromUrl,
+  getRegistrableDomainFromUrl,
   getLocalDate,
+  normalizeDomain,
+  validateDomainName,
+  validateHttpUrl,
 } from './utils';
 import { ApprovedItem } from '../database/types';
 
@@ -29,10 +32,8 @@ describe('shared/utils', () => {
     it('should return midnight of the same calendar day in the given timezone', () => {
       const input = new Date('2024-06-15T12:30:56Z'); // noon UTC
       const result = getLocalDate(input, tz);
-      
-      const expected = DateTime.fromJSDate(input)
-        .setZone(tz)
-        .startOf('day');
+
+      const expected = DateTime.fromJSDate(input).setZone(tz).startOf('day');
 
       expect(result.toISO()).toBe(expected.toISO());
     });
@@ -212,100 +213,173 @@ describe('shared/utils', () => {
     });
   });
 
-  describe('getNormalizedDomainName', () => {
+  describe('getNormalizedDomainFromUrl', () => {
     it('should extract domain from a http url', () => {
       const url = 'http://example.com';
-      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should extract domain from a https url', () => {
       const url = 'https://example.com';
-      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should handle a homograph attack', () => {
       const url = 'http://exаmple.com'; // Note: The 'а' is a Cyrillic character.
-      expect(getNormalizedDomainName(url)).not.toEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).not.toEqual('example.com');
     });
     it('should correctly remove the www. subdomain', () => {
       const url = 'http://www.example.com';
-      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should handle mixed case in the domain name', () => {
       const url = 'Https://WwW.ExAmPlE.cOm';
-      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should handle URLs with many subdomains', () => {
       expect(
-        getNormalizedDomainName('http://sub.sub2.sub3.example.com'),
+        getNormalizedDomainFromUrl('http://sub.sub2.sub3.example.com'),
       ).toStrictEqual('sub.sub2.sub3.example.com');
     });
     it('should not be tricked by a domain in the path', () => {
       const url = 'http://legit.com/redirect?http://example.com';
-      expect(getNormalizedDomainName(url)).toStrictEqual('legit.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('legit.com');
     });
     it('should handle URLs with paths', () => {
       const url = 'http://example.com/path/to/resource';
-      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should handle query parameters', () => {
       const url = 'http://example.com?query=123';
-      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
     it('should handle ports in the URL', () => {
       const url = 'http://example.com:8080';
-      expect(getNormalizedDomainName(url)).toStrictEqual('example.com');
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
     });
-    it('should handle international domain names', () => {
-      const url = 'http://münchen.com'; // Might need punycode conversion in a real scenario
-      expect(getNormalizedDomainName(url)).toStrictEqual('münchen.com');
+    it('should handle international domain names by converting to punycode', () => {
+      const url = 'http://münchen.com';
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual(
+        'xn--mnchen-3ya.com',
+      );
     });
-    describe('getNormalizedDomainName errors', () => {
+    it('should extract domain from ftp URLs (no protocol restriction)', () => {
+      const url = 'ftp://example.com';
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
+    });
+    it('should extract domain from ftp URLs with http in path', () => {
+      const url = 'ftp://example.com/http://other.com';
+      expect(getNormalizedDomainFromUrl(url)).toStrictEqual('example.com');
+    });
+    describe('getNormalizedDomainFromUrl errors', () => {
       it('should throw an error for empty strings', () => {
-        expect(() => getNormalizedDomainName('')).toThrow(Error);
+        expect(() => getNormalizedDomainFromUrl('')).toThrow();
       });
-      it('should throw an error for URLs without a domain name', () => {
-        const url = 'http:///path/without/domain';
-        expect(() => getNormalizedDomainName(url)).toThrow(Error);
-      });
-      it('should return an error for an ftp scheme', () => {
-        const url = 'ftp://example.com';
-        expect(() => getNormalizedDomainName(url)).toThrow(Error);
-      });
-      it('should return an error for an ftp scheme, with a http scheme in the path', () => {
-        const url = 'ftp://example.com/http://other.com';
-        expect(() => getNormalizedDomainName(url)).toThrow(Error);
+      it('should throw an error for invalid URLs', () => {
+        expect(() => getNormalizedDomainFromUrl('not-a-url')).toThrow();
       });
     });
   });
 
-  describe('getRegistrableDomain', () => {
+  describe('validateHttpUrl', () => {
+    it('should accept valid http URLs', () => {
+      expect(() => validateHttpUrl('http://example.com')).not.toThrow();
+    });
+    it('should accept valid https URLs', () => {
+      expect(() =>
+        validateHttpUrl('https://example.com/path?query=1'),
+      ).not.toThrow();
+    });
+    it('should reject empty strings', () => {
+      expect(() => validateHttpUrl('')).toThrow('Invalid URL');
+    });
+    it('should reject malformed URLs', () => {
+      expect(() => validateHttpUrl('not-a-url')).toThrow('Invalid URL');
+    });
+    it('should reject ftp URLs', () => {
+      expect(() => validateHttpUrl('ftp://example.com')).toThrow(
+        'URL must have http or https scheme',
+      );
+    });
+    it('should reject file URLs', () => {
+      expect(() => validateHttpUrl('file:///etc/passwd')).toThrow(
+        'URL must have http or https scheme',
+      );
+    });
+    it('should reject URLs with triple slash (missing hostname)', () => {
+      expect(() => validateHttpUrl('http:///path/without/domain')).toThrow(
+        'URL does not contain a valid hostname',
+      );
+    });
+    it('should reject URLs with embedded credentials', () => {
+      expect(() => validateHttpUrl('http://user:pass@example.com')).toThrow(
+        'URL must not contain embedded credentials',
+      );
+    });
+    it('should reject URLs with username only', () => {
+      expect(() => validateHttpUrl('http://user@example.com')).toThrow(
+        'URL must not contain embedded credentials',
+      );
+    });
+    it('should reject localhost', () => {
+      expect(() => validateHttpUrl('http://localhost/path')).toThrow(
+        '"localhost" is not a valid domain name',
+      );
+    });
+    it('should reject IPv4 addresses', () => {
+      expect(() => validateHttpUrl('http://127.0.0.1:8080/path')).toThrow(
+        'IP addresses are not valid domain names',
+      );
+      expect(() => validateHttpUrl('http://8.8.8.8/path')).toThrow(
+        'IP addresses are not valid domain names',
+      );
+    });
+    it('should reject IPv6 addresses', () => {
+      expect(() => validateHttpUrl('http://[::1]/path')).toThrow(
+        'IP addresses are not valid domain names',
+      );
+    });
+  });
+
+  describe('getRegistrableDomainFromUrl', () => {
     it('should extract registrable domain from a simple URL', () => {
       const url = 'https://example.com/path';
-      expect(getRegistrableDomain(url)).toStrictEqual('example.com');
+      expect(getRegistrableDomainFromUrl(url)).toStrictEqual('example.com');
     });
 
     it('should extract registrable domain from a URL with subdomain', () => {
       const url = 'https://news.example.com/article';
-      expect(getRegistrableDomain(url)).toStrictEqual('example.com');
+      expect(getRegistrableDomainFromUrl(url)).toStrictEqual('example.com');
     });
 
     it('should extract registrable domain from a URL with multiple subdomains', () => {
       const url = 'https://a.b.c.example.com/path';
-      expect(getRegistrableDomain(url)).toStrictEqual('example.com');
+      expect(getRegistrableDomainFromUrl(url)).toStrictEqual('example.com');
     });
 
     it('should handle www subdomain', () => {
       const url = 'https://www.example.com/path';
-      expect(getRegistrableDomain(url)).toStrictEqual('example.com');
+      expect(getRegistrableDomainFromUrl(url)).toStrictEqual('example.com');
     });
 
     it('should handle country-code TLDs', () => {
       const url = 'https://news.example.co.uk/article';
-      expect(getRegistrableDomain(url)).toStrictEqual('example.co.uk');
+      expect(getRegistrableDomainFromUrl(url)).toStrictEqual('example.co.uk');
     });
 
     it('should handle second-level country-code TLDs', () => {
       const url = 'https://bbc.co.uk/news';
-      expect(getRegistrableDomain(url)).toStrictEqual('bbc.co.uk');
+      expect(getRegistrableDomainFromUrl(url)).toStrictEqual('bbc.co.uk');
+    });
+
+    it('should lowercase the domain', () => {
+      const url = 'https://NEWS.EXAMPLE.COM/article';
+      expect(getRegistrableDomainFromUrl(url)).toStrictEqual('example.com');
+    });
+
+    it('should convert IDN to punycode', () => {
+      const url = 'https://news.münchen.com/article';
+      expect(getRegistrableDomainFromUrl(url)).toStrictEqual(
+        'xn--mnchen-3ya.com',
+      );
     });
 
     it.each([
@@ -313,7 +387,112 @@ describe('shared/utils', () => {
       ['http://localhost:3000', 'localhost'],
       ['http://192.168.1.1/path', 'IP address'],
     ])('should throw an error for %s (%s)', (url) => {
-      expect(() => getRegistrableDomain(url)).toThrow(Error);
+      expect(() => getRegistrableDomainFromUrl(url)).toThrow(Error);
+    });
+  });
+
+  describe('normalizeDomain', () => {
+    it('should lowercase the domain', () => {
+      expect(normalizeDomain('EXAMPLE.COM')).toStrictEqual('example.com');
+    });
+
+    it('should strip www. prefix', () => {
+      expect(normalizeDomain('www.example.com')).toStrictEqual('example.com');
+    });
+
+    it('should convert IDN to punycode', () => {
+      expect(normalizeDomain('münchen.com')).toStrictEqual(
+        'xn--mnchen-3ya.com',
+      );
+    });
+
+    it('should handle mixed case with www prefix', () => {
+      expect(normalizeDomain('WWW.Example.COM')).toStrictEqual('example.com');
+    });
+
+    it('should normalize equivalent IDN representations to the same value', () => {
+      // español.com in different Unicode representations should normalize to same punycode
+      const nfc = 'español.com'; // NFC form (precomposed)
+      const nfd = 'español.com'; // NFD form (decomposed) - same visually but different bytes
+      expect(normalizeDomain(nfc)).toStrictEqual(normalizeDomain(nfd));
+    });
+
+    it('should preserve subdomains', () => {
+      expect(normalizeDomain('news.example.com')).toStrictEqual(
+        'news.example.com',
+      );
+    });
+  });
+
+  describe('validateDomainName', () => {
+    describe('valid domains', () => {
+      it.each([
+        ['example.com', 'simple domain'],
+        ['news.example.com', 'subdomain'],
+        ['a.b.c.example.com', 'multiple subdomains'],
+        ['example.co.uk', 'country-code TLD'],
+        ['bbc.co.uk', 'second-level ccTLD'],
+        ['xn--mnchen-3ya.com', 'punycode domain'],
+      ])('should accept %s (%s)', (domain) => {
+        expect(() => validateDomainName(domain)).not.toThrow();
+      });
+    });
+
+    describe('invalid domains', () => {
+      it('should reject empty string', () => {
+        expect(() => validateDomainName('')).toThrow(
+          'Domain name cannot be empty.',
+        );
+      });
+
+      it('should reject domains exceeding 255 characters', () => {
+        const longDomain = 'a'.repeat(256) + '.com';
+        expect(() => validateDomainName(longDomain)).toThrow(
+          'Domain name cannot exceed 255 characters.',
+        );
+      });
+
+      it('should reject URLs with http scheme', () => {
+        expect(() => validateDomainName('http://example.com')).toThrow(
+          'Domain name must be a hostname, not a full URL.',
+        );
+      });
+
+      it('should reject URLs with https scheme', () => {
+        expect(() => validateDomainName('https://example.com')).toThrow(
+          'Domain name must be a hostname, not a full URL.',
+        );
+      });
+
+      it('should reject wildcard domains', () => {
+        expect(() => validateDomainName('*.example.com')).toThrow(
+          'Wildcard domain names are not supported.',
+        );
+      });
+
+      it('should reject IP addresses', () => {
+        expect(() => validateDomainName('192.168.1.1')).toThrow(
+          'IP addresses are not valid domain names.',
+        );
+      });
+
+      it('should reject public suffixes (e.g., co.uk)', () => {
+        expect(() => validateDomainName('co.uk')).toThrow(
+          '"co.uk" is not a valid domain name.',
+        );
+      });
+
+      it('should reject localhost', () => {
+        expect(() => validateDomainName('localhost')).toThrow(
+          '"localhost" is not a valid domain name.',
+        );
+      });
+
+      it('should reject bare TLDs', () => {
+        expect(() => validateDomainName('com')).toThrow(
+          '"com" is not a valid domain name.',
+        );
+      });
     });
   });
 });
