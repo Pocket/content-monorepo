@@ -1,16 +1,10 @@
 import * as Sentry from '@sentry/serverless';
+import { Tracker } from '@snowplow/node-tracker';
+
 import { SQSEvent } from 'aws-lambda';
+import { parse } from 'tldts';
 import { URL } from 'url';
 import { v4 as uuidv4 } from 'uuid';
-
-import {
-  dbClient,
-  deriveDomainName,
-  deriveUrlMetadata,
-  insertProspect,
-  Prospect,
-  ScheduledSurfaces,
-} from 'prospectapi-common';
 
 import {
   formatQuotesEN,
@@ -21,10 +15,18 @@ import {
   ProspectRunDetails,
   UrlMetadata,
 } from 'content-common';
+import { GraphQlApiCallHeaders } from 'lambda-common';
+import {
+  dbClient,
+  insertProspect,
+  Prospect,
+  ScheduledSurfaces,
+} from 'prospectapi-common';
 
+import config from './config';
+import { getUrlMetadata } from './graphQlApiCalls';
 import { SqsProspect, ProspectTypesWithMlUrlMetadata } from './types';
 import { generateSnowplowEntity, queueSnowplowEvent } from './events/snowplow';
-import { Tracker } from '@snowplow/node-tracker';
 
 /**
  * verifies the event coming from SQS can be parsed as JSON
@@ -129,7 +131,7 @@ export const getProspectRunDetailsFromMessageJson = (
 };
 
 /**
- * retrieves URL metadata from the Parser to hydrate the prospect.
+ * retrieves URL metadata to hydrate the prospect.
  * inserts the prospect into dynamo and sends snowplow event.
  *
  * @param prospect a Prospect object with partially hydrated data
@@ -143,9 +145,14 @@ export const processProspect = async (
   runDetails: ProspectRunDetails,
   features: ProspectFeatures,
   tracker: Tracker,
+  graphHeaders: GraphQlApiCallHeaders,
 ): Promise<void> => {
-  // get URL metadata from the Parser
-  const urlMetadata = await deriveUrlMetadata(prospect.url);
+  // get URL metadata
+  const urlMetadata = await getUrlMetadata(
+    config.adminApiEndpoint,
+    graphHeaders,
+    prospect.url,
+  );
 
   // hydrate necessary URL metadata
   prospect = hydrateProspectMetadata(prospect, urlMetadata);
@@ -462,10 +469,7 @@ export const hydrateProspectMetadata = (
     // `convertSqsProspectToProspect` above. we specifically do *not* want to
     // fall-back to Parser metadata in this scenario, as we want to know if
     // any data is missing from ML.
-
-    // `deriveDomainName` is the same method used under the hood in
-    // `deriveUrlMetadata` - calling directly here to clarify no Parser use.
-    prospect.domain = deriveDomainName(prospect.url);
+    prospect.domain = parse(prospect.url).domain;
   } else {
     // URL metadata *not* supplied by ML, so use the Parser
     // NOTE: urlMetadata fields might be undefined/empty
@@ -479,8 +483,7 @@ export const hydrateProspectMetadata = (
 
   // apply title/excerpt formatting for EN & DE
   if (prospect.language?.toUpperCase() === CorpusLanguage.EN) {
-    prospect.title =
-      prospect.title && formatQuotesEN(prospect.title);
+    prospect.title = prospect.title && formatQuotesEN(prospect.title);
     prospect.excerpt = prospect.excerpt && formatQuotesEN(prospect.excerpt);
   } else if (prospect.language?.toUpperCase() === CorpusLanguage.DE) {
     prospect.title = prospect.title && formatQuotesDashesDE(prospect.title);

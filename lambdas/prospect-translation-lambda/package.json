@@ -16,11 +16,13 @@
     "@aws-sdk/client-dynamodb": "3.529.1",
     "@aws-sdk/lib-dynamodb": "3.529.1",
     "@sentry/serverless": "7.112.2",
+    "@snowplow/node-tracker": "3.5.0",
     "content-common": "workspace:*",
+    "lambda-common": "workspace:*",
     "prospectapi-common": "workspace:*",
-    "uuid": "9.0.1",
+    "tldts": "5.7.87",
     "tslib": "2.7.0",
-    "@snowplow/node-tracker": "3.5.0"
+    "uuid": "9.0.1"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.134",

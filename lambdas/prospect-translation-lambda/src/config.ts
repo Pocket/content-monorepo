@@ -1,7 +1,12 @@
+import { ML_USERNAME } from 'content-common';
+
 const environment = process.env.ENVIRONMENT || 'development';
 const isDev = environment === 'development';
 
 const config = {
+  adminApiEndpoint: isDev
+    ? process.env.ADMIN_API_URI || 'https://admin-api.getpocket.dev'
+    : process.env.ADMIN_API_URI || 'https://admin-api.getpocket.com',
   app: {
     name: 'Prospect-Api-Translation-Lambda',
     environment: environment,
@@ -21,6 +26,14 @@ const config = {
       maxBatchDelete: 25, // this is a dynamo-enforced limit
       maxAgeBeforeDeletion: 30, // if a prospect has been around more than 30 minutes, it's ripe for deletion
     },
+  },
+  jwt: {
+    key: process.env.JWT_KEY || 'ProspectAPI/Dev/JWT_KEY',
+    iss: process.env.JWT_ISS || 'https://getpocket.com',
+    aud: process.env.JWT_AUD || 'https://admin-api.getpocket.com/',
+    name: 'ML Prospect Translation Lambda User',
+    userId: ML_USERNAME,
+    groups: ['mozilliansorg_pocket_scheduled_surface_curator_full'],
   },
   snowplow: {
     // appId should end in '-dev' outside of production such that Dbt can filter events:
