@@ -1,10 +1,9 @@
 import fetch from 'node-fetch';
 
-import { CreateApprovedCorpusItemApiInput, UrlMetadata } from 'content-common';
+import { CreateApprovedCorpusItemApiInput } from 'content-common';
 import {
   ApprovedCorpusItemOutput,
   getApprovedCorpusItemByUrl as getApprovedCorpusItemByUrlCommon,
-  getUrlMetadata as getUrlMetadataCommon,
   GraphQlApiCallHeaders,
 } from 'lambda-common';
 
@@ -38,22 +37,6 @@ export async function getApprovedCorpusItemByUrl(
     graphHeaders,
     url,
   );
-}
-
-/**
- * this function wraps the common function for the purposes of easily mocking in tests
- *
- * @param adminApiEndpoint string
- * @param graphHeaders GraphQlApiHeaders object
- * @param url string
- * @returns Promise<UrlMetadata>
- */
-export async function getUrlMetadata(
-  adminApiEndpoint: string,
-  graphHeaders: GraphQlApiCallHeaders,
-  url: string,
-): Promise<UrlMetadata> {
-  return await getUrlMetadataCommon(adminApiEndpoint, graphHeaders, url);
 }
 
 /**

@@ -31,6 +31,7 @@ export interface ScheduledCorpusItem {
   language: CorpusLanguage | null;
   image_url: string | null;
   authors: string[] | null;
+  date_published: string | null;
 }
 
 export const allowedScheduledSurfaces: string[] = [
