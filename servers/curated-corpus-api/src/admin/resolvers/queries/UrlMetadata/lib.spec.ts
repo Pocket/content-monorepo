@@ -1,14 +1,10 @@
 import { parse } from 'tldts';
-import { PrismaClient } from '.prisma/client';
 
 import {
   convertParserJsonToUrlMetadata,
   deriveAuthors,
   deriveDatePublished,
-  derivePublisher,
 } from './lib';
-import { getNormalizedDomainFromUrl } from '../../../../shared/utils';
-import * as PublisherDomain from '../../../../database/mutations/PublisherDomain';
 
 describe('lib', () => {
   describe('convertParserJsonToUrlMetadata', () => {
@@ -85,6 +81,7 @@ describe('lib', () => {
     });
 
     it('should fall back to the given URL and domain if the parser JSON is malformed', () => {
+      // `data` key in the object below is unexpected. (`article` is the expected key.)
       const parserJson = {
         data: {
           datePublishedRaw: '2025-12-01T12:00:09+00:00',
@@ -210,32 +207,6 @@ describe('lib', () => {
       expect(deriveDatePublished(42)).toEqual(undefined);
       expect(deriveDatePublished('i promise i am a date string')).toEqual(
         undefined,
-      );
-    });
-  });
-
-  describe('derivePublisher', () => {
-    it('should return a normalized domain name if the publisher was not found in our db', async () => {
-      const url = 'https://www.veschwab.com/threads';
-
-      jest
-        .spyOn(PublisherDomain, 'lookupPublisher')
-        .mockReturnValue(Promise.resolve(null));
-
-      expect(await derivePublisher(null as any as PrismaClient, url)).toEqual(
-        getNormalizedDomainFromUrl(url),
-      );
-    });
-
-    it('should return a publisher if the publisher was found in our db', async () => {
-      const url = 'https://www.veschwab.com/threads';
-
-      jest
-        .spyOn(PublisherDomain, 'lookupPublisher')
-        .mockReturnValue(Promise.resolve('VE Schwab Inc'));
-
-      expect(await derivePublisher(null as any as PrismaClient, url)).toEqual(
-        'VE Schwab Inc',
       );
     });
   });

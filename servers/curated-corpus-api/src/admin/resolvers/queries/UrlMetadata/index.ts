@@ -4,11 +4,8 @@ import { UrlMetadata } from 'content-common';
 
 import config from '../../../../config';
 import { IAdminContext } from '../../../context';
-import {
-  convertParserJsonToUrlMetadata,
-  derivePublisher,
-  fetchUrlMetadata,
-} from './lib';
+import { convertParserJsonToUrlMetadata, fetchUrlMetadata } from './lib';
+import { lookupPublisher } from '../../../../database/mutations/PublisherDomain';
 
 /**
  * main entry point for the resolver for the getUrlMetadata query. validates
@@ -44,9 +41,13 @@ export const getUrlMetadata = async (
   // a domain.
   const urlMetadata = convertParserJsonToUrlMetadata(url, metadataJson);
 
-  // attempt to find the publisher value in our internal db, falling back to
-  // a normalized domain name if not
-  urlMetadata.publisher = await derivePublisher(context.db, urlMetadata.url);
+  // attempt to find the publisher value in our internal db, will either be a
+  // string value or null
+  const publisher = await lookupPublisher(context.db, urlMetadata.url);
+
+  if (publisher) {
+    urlMetadata.publisher = publisher;
+  }
 
   return urlMetadata;
 };

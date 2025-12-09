@@ -57,10 +57,7 @@ export interface IAdminContext {
     scheduledCorpusItem: ScheduledCorpusItemPayload,
   ): void;
 
-  emitSectionEvent(
-    event: SectionEventType,
-    section: SectionPayload,
-  ): void;
+  emitSectionEvent(event: SectionEventType, section: SectionPayload): void;
 
   emitSectionItemEvent(
     event: SectionItemEventType,
@@ -172,10 +169,7 @@ export class AdminContextManager implements IAdminContext {
     );
   }
 
-  emitSectionEvent(
-    event: SectionEventType,
-    section: SectionPayload,
-  ): void {
+  emitSectionEvent(event: SectionEventType, section: SectionPayload): void {
     this.eventEmitter.emitEvent<SectionPayload>(event, section);
   }
 

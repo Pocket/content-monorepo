@@ -1,12 +1,9 @@
-import { PrismaClient } from '.prisma/client';
 import * as Sentry from '@sentry/node';
 import { parse } from 'tldts';
 
 import { UrlMetadata } from 'content-common';
 
 import config from '../../../../config';
-import { getNormalizedDomainFromUrl } from '../../../../shared/utils';
-import { lookupPublisher } from '../../../../database/mutations/PublisherDomain';
 
 /**
  * creates a CSV of authors from the array returned by the metadata parser
@@ -78,26 +75,6 @@ export const deriveDatePublished = (dateRaw: any): string | undefined => {
 };
 
 /**
- * looks for a publisher name mapping to domain in our internal db. if found,
- * returns that. if not, returns the normalized domain name.
- *
- * @param db PrismaClient
- * @param url URL for which to look up the publisher
- * @returns string publisher name, or normalized domain name
- */
-export const derivePublisher = async (
-  db: PrismaClient,
-  url: string,
-): Promise<string> => {
-  const domainName = getNormalizedDomainFromUrl(url);
-
-  // look up the publisher value from our internal mapping
-  const publisher = await lookupPublisher(db, url);
-
-  return publisher ?? domainName;
-};
-
-/**
  * use node fetch to hit the external metadata parser.
  *
  * broken out into a standalone function for easier mocking in tests.
@@ -140,7 +117,6 @@ export const fetchUrlMetadata = async (
     Sentry.captureException(
       new Error(`Metadata parser failed to return metadata for ${url}`),
     );
-
     // gracefully return empty object when external metadata parser fails
     return {};
   }
