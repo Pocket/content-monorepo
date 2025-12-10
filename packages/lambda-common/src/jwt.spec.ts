@@ -42,7 +42,7 @@ describe('utils', function () {
   };
 
   const now = new Date('2021-01-01 10:20:30');
-  const exp = new Date('2021-01-01 10:30:30');
+  const exp = new Date('2021-01-01 10:35:30');
 
   beforeAll(() => {
     jest.useFakeTimers({
