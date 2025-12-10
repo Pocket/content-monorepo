@@ -64,6 +64,7 @@ describe('lib', () => {
       isCollection: false,
       isSyndicated: false,
       authors: 'questlove,rafael frumkin',
+      datePublished: '2025-12-01T12:05:00',
     };
 
     prospectToHydrate = {
@@ -79,6 +80,7 @@ describe('lib', () => {
 
     urlMetadata = {
       url: 'test-url',
+      datePublished: '2025-12-01T12:05:00',
       domain: 'test-domain',
       excerpt: 'test-excerpt',
       imageUrl: 'test-imageUrl',
@@ -539,7 +541,7 @@ describe('lib', () => {
       );
     });
 
-    it('should hydrate prospect when parser has no metadata', () => {
+    it('should hydrate prospect when metadata service returns no metadata', () => {
       const expectedProspect: Prospect = {
         ...expected,
         excerpt: undefined,
@@ -550,6 +552,7 @@ describe('lib', () => {
         isCollection: false,
         isSyndicated: false,
         authors: undefined,
+        datePublished: undefined,
       };
 
       const urlMetadata: UrlMetadata = {

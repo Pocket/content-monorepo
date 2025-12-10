@@ -50,26 +50,27 @@ export const generateInsertParams = (prospect: Prospect): PutCommandInput => {
   return {
     TableName: config.aws.dynamoDb.table,
     Item: {
-      id: prospect.id, // custom GUID
-      // GUID supplied by ML - not unique on purpose!
-      prospectId: prospect.prospectId,
-      scheduledSurfaceGuid: prospect.scheduledSurfaceGuid,
-      url: prospect.url,
-      topic: prospect.topic,
-      prospectType: prospect.prospectType,
-      saveCount: prospect.saveCount,
-      rank: prospect.rank,
+      authors: prospect.authors,
       createdAt,
       curated,
+      datePublished: prospect.datePublished,
       domain: prospect.domain,
       excerpt: prospect.excerpt,
+      id: prospect.id, // custom GUID
       imageUrl: prospect.imageUrl,
-      language: prospect.language,
-      publisher: prospect.publisher,
-      title: prospect.title,
-      isSyndicated: prospect.isSyndicated,
       isCollection: prospect.isCollection,
-      authors: prospect.authors,
+      isSyndicated: prospect.isSyndicated,
+      language: prospect.language,
+      // GUID supplied by ML - not unique on purpose!
+      prospectId: prospect.prospectId,
+      prospectType: prospect.prospectType,
+      publisher: prospect.publisher,
+      rank: prospect.rank,
+      saveCount: prospect.saveCount,
+      scheduledSurfaceGuid: prospect.scheduledSurfaceGuid,
+      title: prospect.title,
+      topic: prospect.topic,
+      url: prospect.url,
     },
   };
 };

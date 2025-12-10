@@ -31,7 +31,8 @@ export type Prospect = {
   curated?: boolean;
   // unix timestamp
   createdAt?: number;
-  // below properties will be populated via client api/parser
+  // below properties will be populated via external metadata service
+  datePublished?: string;
   domain?: string;
   excerpt?: string;
   imageUrl?: string;

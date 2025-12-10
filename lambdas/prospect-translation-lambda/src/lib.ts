@@ -479,6 +479,7 @@ export const hydrateProspectMetadata = (
     prospect.imageUrl = urlMetadata.imageUrl;
     prospect.language = urlMetadata.language;
     prospect.title = urlMetadata.title;
+    prospect.datePublished = urlMetadata.datePublished;
   }
 
   // apply title/excerpt formatting for EN & DE
