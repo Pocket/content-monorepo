@@ -41,7 +41,7 @@ export const generateJwt = (config: JwtConfig, privateKey: any): string => {
     iss: config.iss,
     aud: config.aud,
     iat: now,
-    exp: now + 60 * 10, //expires in 10 mins.
+    exp: now + 60 * 15, //expires in 15 mins.
     name: config.name,
     identities: [{ userId: config.userId }],
     // this group gives us full access in corpus API
