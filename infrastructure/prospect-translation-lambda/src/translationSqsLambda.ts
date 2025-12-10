@@ -34,12 +34,14 @@ export class TranslationSqsLambda extends Construct {
         batchWindow: 60,
         sqsQueue: {
           maxReceiveCount: 3,
-          visibilityTimeoutSeconds: 300,
+          // 2 minutes longer than the lambda timeout
+          visibilityTimeoutSeconds: 1020,
         },
         lambda: {
           runtime: LAMBDA_RUNTIMES.NODEJS20,
           handler: 'index.handler',
-          timeout: 120,
+          // max of 900s/15m, as zyte metadata calls have high latency
+          timeout: 900,
           memorySizeInMb: 512,
           reservedConcurrencyLimit: 1,
           executionPolicyStatements: [
