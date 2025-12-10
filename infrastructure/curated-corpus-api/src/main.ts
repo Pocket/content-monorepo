@@ -253,6 +253,10 @@ class CuratedCorpusAPI extends TerraformStack {
               // do not log http, graphql, or debug events
               value: 'info',
             },
+            {
+              name: 'ZYTE_EXTRACT_API_ENDPOINT',
+              value: 'https://api.zyte.com/v1/extract',
+            },
           ],
           logGroup: this.createCustomLogGroup('app'),
           logMultilinePattern: '^\\S.+',
@@ -272,6 +276,10 @@ class CuratedCorpusAPI extends TerraformStack {
             {
               name: 'UNLEASH_KEY',
               valueFrom: `arn:aws:secretsmanager:${region.name}:${caller.accountId}:secret:${config.name}/${config.environment}/UNLEASH_KEY`,
+            },
+            {
+              name: 'ZYTE_EXTRACT_API_KEY',
+              valueFrom: `arn:aws:secretsmanager:${region.name}:${caller.accountId}:secret:${config.name}/${config.environment}/ZYTE_EXTRACT_API_KEY`,
             },
           ],
         },

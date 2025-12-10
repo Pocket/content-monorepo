@@ -5,13 +5,9 @@ import {
   UserInputError,
 } from '@pocket-tools/apollo-utils';
 
-import {
-  deriveUrlMetadata,
-  Prospect,
-  getProspectById,
-} from 'prospectapi-common';
+import { Prospect, getProspectById } from 'prospectapi-common';
 
-import { UrlMetadata, parseReasonsCsv, sanitizeText } from 'content-common';
+import { parseReasonsCsv, sanitizeText } from 'content-common';
 
 import {
   getProspects,
@@ -106,16 +102,6 @@ export const resolvers = {
       findAndLogTrueDuplicateProspects(prospects);
 
       return prospects;
-    },
-    getUrlMetadata: async (parent, { url }, ctx): Promise<UrlMetadata> => {
-      let itemUrl = '';
-      try {
-        // validate url by throwing if url format is incorrect
-        itemUrl = new URL(url).toString();
-      } catch (error) {
-        throw new UserInputError(`${url} is not a valid url `);
-      }
-      return await deriveUrlMetadata(itemUrl);
     },
   },
   Mutation: {

@@ -1217,6 +1217,20 @@ input DeleteScheduledCorpusItemInput {
   actionScreen: ActionScreen
 }
 
+type UrlMetadata {
+  url: String! @override(from: "prospect-api")
+  imageUrl: String @override(from: "prospect-api")
+  publisher: String @override(from: "prospect-api")
+  datePublished: String @override(from: "prospect-api")
+  domain: String @override(from: "prospect-api")
+  title: String @override(from: "prospect-api")
+  excerpt: String @override(from: "prospect-api")
+  language: String @override(from: "prospect-api")
+  isSyndicated: Boolean @override(from: "prospect-api")
+  isCollection: Boolean @override(from: "prospect-api")
+  authors: String @override(from: "prospect-api")
+}
+
 type Query {
   """
   Retrieves a paginated, filterable list of Approved Items.
@@ -1278,7 +1292,15 @@ type Query {
   """
   Retrieves a list of active and enabled/disabled Sections with their corresponding active SectionItems for a scheduled surface.
   """
-  getSectionsWithSectionItems(scheduledSurfaceGuid: ID!, createSource: ActivitySource): [Section!]!
+  getSectionsWithSectionItems(
+    scheduledSurfaceGuid: ID!
+    createSource: ActivitySource
+  ): [Section!]!
+
+  """
+  returns meta data for a given url
+  """
+  getUrlMetadata(url: String!): UrlMetadata! @override(from: "prospect-api")
 }
 
 type Mutation {

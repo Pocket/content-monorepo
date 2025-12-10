@@ -64,4 +64,4 @@ export type CreateScheduleReviewInput = {
 export type RejectApprovedCorpusItemsForDomainResponse = {
   totalFoundApprovedCorpusItems: number;
   totalRejectedApprovedCorpusItems?: number;
-}
+};

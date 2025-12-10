@@ -1,5 +1,6 @@
 import { DateResolver, NonNegativeIntResolver } from 'graphql-scalars';
 import { UnixTimestampResolver } from '../../shared/resolvers/fields/UnixTimestamp';
+
 import {
   getApprovedItems,
   getApprovedItemByExternalId,
@@ -39,6 +40,7 @@ import {
 import { createSectionItem, removeSectionItem } from './mutations/SectionItem';
 import { createOrUpdatePublisherDomain } from './mutations/PublisherDomain';
 import { computeSectionStatus } from '../../shared/resolvers/fields/SectionStatus';
+import { getUrlMetadata } from './queries/UrlMetadata';
 
 export const resolvers = {
   // The custom scalars from GraphQL-Scalars that we find useful.
@@ -123,6 +125,7 @@ export const resolvers = {
     getScheduledSurfacesForUser: getScheduledSurfacesForUser,
     getOpenGraphFields: getOpenGraphFields,
     getSectionsWithSectionItems: getSectionsWithSectionItems,
+    getUrlMetadata: getUrlMetadata,
   },
   // Mutations that we need in the admin interface
   Mutation: {

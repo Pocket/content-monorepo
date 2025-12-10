@@ -4,6 +4,7 @@ const environment = isDev ? 'Dev' : 'Prod';
 const snowplowEndpoint = isDev
   ? 'com-getpocket-prod1.mini.snplow.net'
   : 'd.getpocket.com';
+
 export const config = {
   name,
   isDev,
