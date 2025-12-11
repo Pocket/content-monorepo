@@ -2,25 +2,26 @@ import { gql } from 'graphql-tag';
 
 export const ProspectData = gql`
   fragment ProspectData on Prospect {
-    id
-    prospectId
-    scheduledSurfaceGuid
-    topic
-    prospectType
-    url
-    createdAt
-    imageUrl
-    publisher
-    domain
-    title
-    excerpt
-    language
-    saveCount
-    isSyndicated
-    isCollection
-    authors
     approvedCorpusItem {
       url
     }
+    authors
+    createdAt
+    datePublished
+    domain
+    excerpt
+    id
+    imageUrl
+    isCollection
+    isSyndicated
+    language
+    prospectId
+    prospectType
+    publisher
+    saveCount
+    scheduledSurfaceGuid
+    title
+    topic
+    url
   }
 `;

@@ -31,7 +31,8 @@ export const dynamoItemToProspect = (item: DynamoItem): Prospect => {
     createdAt: item?.createdAt,
     // note - curated is not exposed in the graphql API
     curated: item?.curated,
-    // the below are optional parser metadata values and may be empty
+    // the below are optional metadata parsing service values and may be empty
+    datePublished: item?.datePublished,
     domain: item?.domain,
     excerpt: item?.excerpt,
     imageUrl: item?.imageUrl,
@@ -56,7 +57,7 @@ export const dynamoItemToProspect = (item: DynamoItem): Prospect => {
  */
 export const getProspects = async (
   dbClient: DynamoDBDocumentClient,
-  filters: GetProspectsFilters
+  filters: GetProspectsFilters,
 ): Promise<Prospect[]> => {
   // base key condition - scheduledSurfaceGuid is required here
   let keyConditionExpression = 'scheduledSurfaceGuid = :scheduledSurfaceGuid';
@@ -122,7 +123,7 @@ export const getProspects = async (
  */
 export const updateProspectAsCurated = async (
   dbClient: DynamoDBDocumentClient,
-  id: string
+  id: string,
 ): Promise<Prospect | null> => {
   const input: UpdateCommandInput = {
     TableName: config.aws.dynamoDb.table,
@@ -153,7 +154,7 @@ export const updateProspectAsCurated = async (
       e['name'] === 'ConditionalCheckFailedException'
     ) {
       Sentry.captureException(
-        `failed to mark prospect as curated. id ${id} not found in dynamo.`
+        `failed to mark prospect as curated. id ${id} not found in dynamo.`,
       );
 
       return null;
