@@ -1218,17 +1218,17 @@ input DeleteScheduledCorpusItemInput {
 }
 
 type UrlMetadata {
-  url: String! @override(from: "prospect-api")
-  imageUrl: String @override(from: "prospect-api")
-  publisher: String @override(from: "prospect-api")
-  datePublished: String @override(from: "prospect-api")
-  domain: String @override(from: "prospect-api")
-  title: String @override(from: "prospect-api")
-  excerpt: String @override(from: "prospect-api")
-  language: String @override(from: "prospect-api")
-  isSyndicated: Boolean @override(from: "prospect-api")
-  isCollection: Boolean @override(from: "prospect-api")
-  authors: String @override(from: "prospect-api")
+  url: String!
+  imageUrl: String
+  publisher: String
+  datePublished: String
+  domain: String
+  title: String
+  excerpt: String
+  language: String
+  isSyndicated: Boolean
+  isCollection: Boolean
+  authors: String
 }
 
 type Query {
@@ -1300,7 +1300,7 @@ type Query {
   """
   returns meta data for a given url
   """
-  getUrlMetadata(url: String!): UrlMetadata! @override(from: "prospect-api")
+  getUrlMetadata(url: String!): UrlMetadata!
 }
 
 type Mutation {
