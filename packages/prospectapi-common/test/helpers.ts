@@ -56,5 +56,6 @@ export const createProspect = (
     isSyndicated: faker.datatype.boolean(),
     isCollection: faker.datatype.boolean(),
     authors: authors.join(','),
+    datePublished: faker.date.recent().toISOString(),
   };
 };
