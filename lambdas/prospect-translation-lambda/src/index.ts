@@ -65,6 +65,24 @@ export const processor: SQSHandler = async (event: SQSEvent): Promise<void> => {
   // found in the json. in that case, it will return an empty array.
   const rawSqsProspects: Array<any> = getProspectsFromMessageJson(json);
 
+  // log the number of prospects we're receiving and the surface/type to help
+  // with debugging/verification
+  let batchScheduledSurface;
+  let batchProspectType;
+
+  try {
+    batchScheduledSurface =
+      rawSqsProspects[0].scheduled_surface_guid.toUpperCase();
+    batchProspectType = rawSqsProspects[0].prospect_source;
+  } catch {
+    batchScheduledSurface = 'UNKNOWN';
+    batchProspectType = 'UNKNOWN';
+  }
+
+  console.log(
+    `received ${rawSqsProspects.length} prospects for ${batchScheduledSurface} / ${batchProspectType}`,
+  );
+
   // retrieve JWT bearer token for use in graph calls to admin api
   const jwtBearerToken = await getJwtBearerToken();
 
