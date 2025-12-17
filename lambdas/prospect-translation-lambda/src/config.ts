@@ -24,7 +24,7 @@ const config = {
       table:
         process.env.PROSPECT_API_PROSPECTS_TABLE || 'PROAPI-local-Prospects',
       maxBatchDelete: 25, // this is a dynamo-enforced limit
-      maxAgeBeforeDeletion: 30, // if a prospect has been around more than 30 minutes, it's ripe for deletion
+      maxAgeBeforeDeletion: 60, // if a prospect has been around more than 60 minutes, it's ripe for deletion
     },
   },
   jwt: {
