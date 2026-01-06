@@ -52,6 +52,14 @@ services:
       retries: 30
     ports:
       - '9090:9090'
+    # the below injects our custom enrichment script to discard events from
+    # legacy pocket apps
+    # https://docs.snowplow.io/docs/pipeline/enrichments/available-enrichments/custom-javascript-enrichment/testing/#basic-setup
+    volumes:
+      - type: bind
+        source: packages/snowplow-enrichment/script.js
+        target: /config/enrichments/script.js
+        read_only: true
 
   otlpcollector:
     image: grafana/otel-lgtm

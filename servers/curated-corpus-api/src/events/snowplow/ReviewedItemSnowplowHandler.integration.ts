@@ -155,6 +155,7 @@ function assertValidSnowplowRejectedItemEvents(eventContext) {
 
 describe('ReviewedItemSnowplowHandler', () => {
   const emitter = new CuratedCorpusEventEmitter();
+
   new ReviewedItemSnowplowHandler(emitter, tracker, [
     ReviewedCorpusItemEventType.ADD_ITEM,
     ReviewedCorpusItemEventType.UPDATE_ITEM,
