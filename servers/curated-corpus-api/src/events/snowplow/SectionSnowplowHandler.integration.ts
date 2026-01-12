@@ -94,28 +94,23 @@ describe('SectionSnowplowHandler', () => {
   });
 
   it('should send good events to Snowplow on section operations', async () => {
-    console.log('Emitting CREATE_SECTION event...');
     emitter.emit(SectionEventType.CREATE_SECTION, {
       ...sectionEventData,
       eventType: SectionEventType.CREATE_SECTION,
     });
 
-    console.log('Emitting UPDATE_SECTION event...');
     emitter.emit(SectionEventType.UPDATE_SECTION, {
       ...sectionEventData,
       eventType: SectionEventType.UPDATE_SECTION,
     });
 
-    console.log('Emitting DELETE_SECTION event...');
     emitter.emit(SectionEventType.DELETE_SECTION, {
       ...sectionEventData,
       eventType: SectionEventType.DELETE_SECTION,
     });
 
-    console.log('Waiting for events...');
     // make sure we only have good events
     const allEvents = await waitForSnowplowEvents(3);
-    console.log('Events received:', allEvents);
 
     // If there are bad events, log them for debugging
     if (allEvents.bad > 0) {
