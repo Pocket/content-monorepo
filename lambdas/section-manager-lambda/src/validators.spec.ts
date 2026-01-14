@@ -79,7 +79,7 @@ describe('validation', function () {
         expect(() => {
           validateSqsData(sqsData);
         }).toThrow(
-          'Error on assert(): invalid type on $input.scheduled_surface_guid, expect to be ("NEW_TAB_DE_DE" | "NEW_TAB_EN_GB" | "NEW_TAB_EN_INT" | "NEW_TAB_EN_US" | "NEW_TAB_ES_ES" | "NEW_TAB_FR_FR" | "NEW_TAB_IT_IT" | "POCKET_HITS_DE_DE" | "POCKET_HITS_EN_US" | "SANDBOX")',
+          'Error on assert(): invalid type on $input.scheduled_surface_guid, expect to be ("NEW_TAB_DE_DE" | "NEW_TAB_EN_CA" | "NEW_TAB_EN_GB" | "NEW_TAB_EN_IE" | "NEW_TAB_EN_INT" | "NEW_TAB_EN_US" | "NEW_TAB_ES_ES" | "NEW_TAB_FR_FR" | "NEW_TAB_IT_IT" | "POCKET_HITS_DE_DE" | "POCKET_HITS_EN_US" | "SANDBOX")',
         );
 
         // scheduled surface has an invalid value
@@ -89,7 +89,7 @@ describe('validation', function () {
         expect(() => {
           validateSqsData(sqsData);
         }).toThrow(
-          'Error on assert(): invalid type on $input.scheduled_surface_guid, expect to be ("NEW_TAB_DE_DE" | "NEW_TAB_EN_GB" | "NEW_TAB_EN_INT" | "NEW_TAB_EN_US" | "NEW_TAB_ES_ES" | "NEW_TAB_FR_FR" | "NEW_TAB_IT_IT" | "POCKET_HITS_DE_DE" | "POCKET_HITS_EN_US" | "SANDBOX")',
+          'Error on assert(): invalid type on $input.scheduled_surface_guid, expect to be ("NEW_TAB_DE_DE" | "NEW_TAB_EN_CA" | "NEW_TAB_EN_GB" | "NEW_TAB_EN_IE" | "NEW_TAB_EN_INT" | "NEW_TAB_EN_US" | "NEW_TAB_ES_ES" | "NEW_TAB_FR_FR" | "NEW_TAB_IT_IT" | "POCKET_HITS_DE_DE" | "POCKET_HITS_EN_US" | "SANDBOX")',
         );
       });
 
