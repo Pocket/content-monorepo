@@ -335,6 +335,13 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENUS,
   },
   {
+    name: 'New Tab (en-CA)',
+    guid: 'NEW_TAB_EN_CA',
+    ianaTimezone: 'America/Toronto',
+    prospectTypes: [],
+    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENCA,
+  },
+  {
     name: 'New Tab (de-DE)',
     guid: 'NEW_TAB_DE_DE',
     ianaTimezone: 'Europe/Berlin',
@@ -366,13 +373,6 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.PUBLISHER_SUBMITTED,
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENGB,
-  },
-  {
-    name: 'New Tab (en-CA)',
-    guid: 'NEW_TAB_EN_CA',
-    ianaTimezone: 'America/Toronto',
-    prospectTypes: [],
-    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENCA,
   },
   {
     name: 'New Tab (en-IE)',
