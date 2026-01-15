@@ -7,7 +7,7 @@ import {
 
 describe('Snowplow Tracker integration', () => {
   const emitter = getEmitter();
-  const tracker = getTracker(emitter, 'test-app-id');
+  const tracker = getTracker(emitter, 'pocket-backend-curated-corpus-api-dev');
 
   beforeEach(async () => {
     await resetSnowplowEvents();
