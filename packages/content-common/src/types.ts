@@ -268,6 +268,8 @@ export enum ScheduledSurfacesEnum {
   NEW_TAB_EN_US = 'NEW_TAB_EN_US',
   NEW_TAB_DE_DE = 'NEW_TAB_DE_DE',
   NEW_TAB_EN_GB = 'NEW_TAB_EN_GB',
+  NEW_TAB_EN_CA = 'NEW_TAB_EN_CA',
+  NEW_TAB_EN_IE = 'NEW_TAB_EN_IE',
   NEW_TAB_FR_FR = 'NEW_TAB_FR_FR',
   NEW_TAB_IT_IT = 'NEW_TAB_IT_IT',
   NEW_TAB_ES_ES = 'NEW_TAB_ES_ES',
@@ -284,6 +286,8 @@ export enum MozillaAccessGroup {
   NEW_TAB_CURATOR_ENUS = 'mozilliansorg_pocket_new_tab_curator_enus', // Access to en-US new tab in the corpus tool.
   NEW_TAB_CURATOR_DEDE = 'mozilliansorg_pocket_new_tab_curator_dede', // Access to de-DE new tab in corpus tool.
   NEW_TAB_CURATOR_ENGB = 'mozilliansorg_pocket_new_tab_curator_engb', // Access to en-GB new tab in corpus tool.
+  NEW_TAB_CURATOR_ENCA = 'mozilliansorg_pocket_new_tab_curator_enca', // Access to en-CA new tab in corpus tool.
+  NEW_TAB_CURATOR_ENIE = 'mozilliansorg_pocket_new_tab_curator_enie', // Access to en-IE new tab in corpus tool.
   NEW_TAB_CURATOR_FRFR = 'mozilliansorg_pocket_new_tab_curator_frfr', // Access to fr-FR new tab in corpus tool.
   NEW_TAB_CURATOR_ITIT = 'mozilliansorg_pocket_new_tab_curator_itit', // Access to it-IT new tab in corpus tool.
   NEW_TAB_CURATOR_ESES = 'mozilliansorg_pocket_new_tab_curator_eses', // Access to es-ES new tab in corpus tool.
@@ -331,6 +335,13 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENUS,
   },
   {
+    name: 'New Tab (en-CA)',
+    guid: 'NEW_TAB_EN_CA',
+    ianaTimezone: 'America/Toronto',
+    prospectTypes: [],
+    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENCA,
+  },
+  {
     name: 'New Tab (de-DE)',
     guid: 'NEW_TAB_DE_DE',
     ianaTimezone: 'Europe/Berlin',
@@ -362,6 +373,13 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.PUBLISHER_SUBMITTED,
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENGB,
+  },
+  {
+    name: 'New Tab (en-IE)',
+    guid: 'NEW_TAB_EN_IE',
+    ianaTimezone: 'Europe/Dublin',
+    prospectTypes: [],
+    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENIE,
   },
   {
     name: 'New Tab (fr-FR)',
