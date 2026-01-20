@@ -35,6 +35,8 @@ export enum MozillaAccessGroup {
   NEW_TAB_CURATOR_ENUS = 'mozilliansorg_pocket_new_tab_curator_enus', // Access to en-us new tab in the corpus tool.
   NEW_TAB_CURATOR_DEDE = 'mozilliansorg_pocket_new_tab_curator_dede', // Access to de-de new tab in corpus tool.
   NEW_TAB_CURATOR_ENGB = 'mozilliansorg_pocket_new_tab_curator_engb', // Access to en-gb new tab in corpus tool.
+  NEW_TAB_CURATOR_ENCA = 'mozilliansorg_pocket_new_tab_curator_enca', // Access to en-ca new tab in corpus tool.
+  NEW_TAB_CURATOR_ENIE = 'mozilliansorg_pocket_new_tab_curator_enie', // Access to en-ie new tab in corpus tool.
   NEW_TAB_CURATOR_ENINTL = 'mozilliansorg_pocket_new_tab_curator_enintl', // Access to en-intl new tab in corpus tool.
   NEW_TAB_CURATOR_ESES = 'mozilliansorg_pocket_new_tab_curator_eses', // Access to es-es new tab in the corpus tool.
   NEW_TAB_CURATOR_FRFR = 'mozilliansorg_pocket_new_tab_curator_frfr', // Access to fr-fr new tab in the corpus tool.
@@ -48,6 +50,8 @@ export enum MozillaAccessGroup {
 export enum ScheduledSurfaceGuidToMozillaAccessGroup {
   NEW_TAB_EN_US = MozillaAccessGroup.NEW_TAB_CURATOR_ENUS,
   NEW_TAB_EN_GB = MozillaAccessGroup.NEW_TAB_CURATOR_ENGB,
+  NEW_TAB_EN_CA = MozillaAccessGroup.NEW_TAB_CURATOR_ENCA,
+  NEW_TAB_EN_IE = MozillaAccessGroup.NEW_TAB_CURATOR_ENIE,
   NEW_TAB_EN_INTL = MozillaAccessGroup.NEW_TAB_CURATOR_ENINTL,
   NEW_TAB_DE_DE = MozillaAccessGroup.NEW_TAB_CURATOR_DEDE,
   NEW_TAB_ES_ES = MozillaAccessGroup.NEW_TAB_CURATOR_ESES,
