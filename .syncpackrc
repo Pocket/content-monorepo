@@ -27,7 +27,7 @@
       "dependencies": [
         "@sentry/node"
       ],
-      "pinVersion": "8.37.1",
+      "pinVersion": "8.47.0",
       "label": "Sentry node dependencies should all have the same version"
     },
     {

@@ -24,7 +24,7 @@
     "@snowplow/node-tracker": "3.5.0",
     "got": "11.8.6",
     "tslib": "2.7.0",
-    "@sentry/node": "8.37.1"
+    "@sentry/node": "8.47.0"
   },
   "devDependencies": {
     "@types/jest": "29.5.12",
