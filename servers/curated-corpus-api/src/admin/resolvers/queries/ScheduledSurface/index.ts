@@ -24,12 +24,7 @@ export function getScheduledSurfacesForUser(
 
   // Return all scheduled surfaces for users with full access to the tool
   // and read-only users (otherwise the latter won't see anything???)
-  if (
-    authenticatedUser.groups.includes(
-      MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL,
-    ) ||
-    authenticatedUser.groups.includes(MozillaAccessGroup.READONLY)
-  ) {
+  if (authenticatedUser.hasFullAccess || authenticatedUser.hasReadOnly) {
     // Somehow it doesn't seem right to be returning the entire shared data array
     // without assigning it to a variable first
     scheduledSurfaces = ScheduledSurfaces;

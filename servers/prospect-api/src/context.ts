@@ -15,9 +15,12 @@ export const getContext = ({ req }): Context => {
     username: req.headers.username as string,
     groups: authGroups,
     hasReadOnly: authGroups.includes(MozillaAccessGroup.READONLY),
-    hasCuratorFull: authGroups.includes(
-      MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL
-    ),
+    hasCuratorFull:
+      authGroups.includes(
+        MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL,
+      ) ||
+      (process.env.NODE_ENV === 'development' &&
+        authGroups.includes(MozillaAccessGroup.DEVELOPMENT_FULL)),
     // to determine if user has read access
     // note that canRead will be only used in queries and not in mutations
     canRead: (scheduledSurfaceGuid: string): boolean =>
