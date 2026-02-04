@@ -2,7 +2,11 @@
 export const COLLECTION_CURATOR_FULL =
   'mozilliansorg_pocket_collection_curator_full';
 
-export const READONLY = 'team_pocket';
+export const READONLY = 'mozilliansorg_pocket_new_tab_readonly';
+
+export const CURATOR_SANDBOX = 'mozilliansorg_pocket_curator_sandbox';
+
+export const DEVELOPMENT_FULL = 'mozilliansorg_pocket_new_tab_development_full';
 
 export const FULLACCESS = 'mozilliansorg_pocket_collection_curator_full';
 

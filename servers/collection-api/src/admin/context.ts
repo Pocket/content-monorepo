@@ -3,7 +3,11 @@ import { S3 } from '@aws-sdk/client-s3';
 import Express from 'express';
 import { client } from '../database/client';
 import s3service from '../aws/s3';
-import { COLLECTION_CURATOR_FULL, READONLY } from '../shared/constants';
+import {
+  COLLECTION_CURATOR_FULL,
+  DEVELOPMENT_FULL,
+  READONLY,
+} from '../shared/constants';
 
 /**
  * Context components specifically for the admin graph.
@@ -48,7 +52,10 @@ export class AdminContextManager implements IAdminContext {
     const groups = this.config.request.headers.groups as string;
     const accessGroups = groups ? groups.split(',') : [];
 
-    const hasFullAccess = accessGroups.includes(COLLECTION_CURATOR_FULL);
+    const hasFullAccess =
+      accessGroups.includes(COLLECTION_CURATOR_FULL) ||
+      (process.env.NODE_ENV === 'development' &&
+        accessGroups.includes(DEVELOPMENT_FULL));
     const hasReadOnly = accessGroups.includes(READONLY);
 
     return {

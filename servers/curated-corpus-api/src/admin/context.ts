@@ -93,9 +93,12 @@ export class AdminContextManager implements IAdminContext {
     const groups = this.config.request.headers.groups as string;
     const accessGroups = groups ? groups.split(',') : [];
 
-    const hasFullAccess = accessGroups.includes(
-      MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL,
-    );
+    const hasFullAccess =
+      accessGroups.includes(
+        MozillaAccessGroup.SCHEDULED_SURFACE_CURATOR_FULL,
+      ) ||
+      (process.env.NODE_ENV === 'development' &&
+        accessGroups.includes(MozillaAccessGroup.DEVELOPMENT_FULL));
 
     const hasReadOnly = accessGroups.includes(MozillaAccessGroup.READONLY);
 

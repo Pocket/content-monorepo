@@ -280,7 +280,8 @@ export enum ScheduledSurfacesEnum {
 }
 
 export enum MozillaAccessGroup {
-  READONLY = 'team_pocket', // Read only access to all curation tools
+  READONLY = 'mozilliansorg_pocket_new_tab_readonly', // Read only access to all curation tools
+  DEVELOPMENT_FULL = 'mozilliansorg_pocket_new_tab_development_full', // Full access to all surfaces in development environment
   COLLECTION_CURATOR_FULL = 'mozilliansorg_pocket_collection_curator_full', // Access to full collection tool
   SCHEDULED_SURFACE_CURATOR_FULL = 'mozilliansorg_pocket_scheduled_surface_curator_full', // Access to full corpus tool, implies they have access to all scheduled surfaces.
   NEW_TAB_CURATOR_ENUS = 'mozilliansorg_pocket_new_tab_curator_enus', // Access to en-US new tab in the corpus tool.
