@@ -99,5 +99,7 @@ export const BaseSectionData = gql`
     sort
     createSource
     active
+    followable
+    allowAds
   }
 `;

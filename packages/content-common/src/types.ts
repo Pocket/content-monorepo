@@ -120,6 +120,8 @@ export type CreateCustomSectionApiInput = {
   createSource: ActivitySource;
   active: boolean;
   disabled: boolean;
+  followable?: boolean;
+  allowAds?: boolean;
 };
 
 export type UpdateCustomSectionApiInput = {
@@ -133,6 +135,8 @@ export type UpdateCustomSectionApiInput = {
   iab?: IABMetadata;
   sort?: number;
   updateSource: ActivitySource;
+  followable?: boolean;
+  allowAds?: boolean;
 };
 
 export type DisableEnableSectionApiInput = {

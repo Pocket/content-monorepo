@@ -121,6 +121,14 @@ type Section {
   Relevant for custom sections.
   """
   heroDescription: String
+  """
+  Whether users can follow this section.
+  """
+  followable: Boolean!
+  """
+  Whether ads can be displayed in this section.
+  """
+  allowAds: Boolean!
 }
 
 """

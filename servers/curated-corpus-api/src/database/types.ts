@@ -153,6 +153,8 @@ export type CreateCustomSectionInput = {
   createSource: ActivitySource;
   active: boolean;
   disabled: boolean;
+  followable?: boolean;
+  allowAds?: boolean;
 };
 
 export type UpdateCustomSectionInput = {
@@ -166,6 +168,8 @@ export type UpdateCustomSectionInput = {
   iab?: IABMetadata;
   sort?: number;
   updateSource: ActivitySource;
+  followable?: boolean;
+  allowAds?: boolean;
 };
 
 export type ApprovedItem = ApprovedItemModel & {

@@ -112,6 +112,9 @@ describe('queries: Section (getSections)', () => {
     // Both active & enabled Sections should not have any SectionItems
     expect(sections[0].sectionItems).toEqual([]);
     expect(sections[0].disabled).toBeFalsy();
+    // followable and allowAds should default to true
+    expect(sections[0].followable).toBe(true);
+    expect(sections[0].allowAds).toBe(true);
 
     expect(sections[1].sectionItems).toEqual([]);
     expect(sections[1].disabled).toBeFalsy();

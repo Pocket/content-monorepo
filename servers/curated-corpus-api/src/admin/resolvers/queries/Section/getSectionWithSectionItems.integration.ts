@@ -324,4 +324,39 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     expect(section?.heroDescription).toEqual('Hero Description Text');
     expect(section?.status).toEqual(SectionStatus.LIVE);
   });
+
+  it('should return followable and allowAds fields', async () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    await createSectionHelper(db, {
+      externalId: 'section-with-followable-flags',
+      createSource: ActivitySource.MANUAL,
+      scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+      active: true,
+      disabled: false,
+      startDate: yesterday,
+    });
+
+    const result = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(GET_SECTIONS_WITH_SECTION_ITEMS),
+        variables: {
+          scheduledSurfaceGuid: "NEW_TAB_EN_US",
+          createSource: "MANUAL"
+        },
+      });
+
+    expect(result.body.errors).toBeUndefined();
+
+    const section = result.body.data?.getSectionsWithSectionItems.find(
+      s => s.externalId === 'section-with-followable-flags'
+    );
+
+    // Defaults to true for both
+    expect(section?.followable).toBe(true);
+    expect(section?.allowAds).toBe(true);
+  });
 });

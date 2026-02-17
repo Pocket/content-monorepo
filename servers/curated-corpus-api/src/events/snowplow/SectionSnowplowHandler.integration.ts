@@ -41,6 +41,8 @@ const mockSection: Section = {
   updatedAt: new Date(),
   startDate: new Date('2024-01-01'),
   endDate: new Date('2024-12-31'),
+  followable: true,
+  allowAds: true,
 };
 
 const sectionEventData: SectionPayload = {
@@ -195,6 +197,8 @@ describe('SectionSnowplowHandler', () => {
         updatedAt: new Date(),
         startDate: null,
         endDate: null,
+        followable: true,
+        allowAds: true,
       };
 
       emitter.emit(SectionEventType.CREATE_SECTION, {

@@ -56,6 +56,8 @@ const mockSectionItem: SectionItem = {
     disabled: false,
     startDate: null,
     endDate: null,
+    followable: true,
+    allowAds: true,
   },
   approvedItem: {
     id: 123,

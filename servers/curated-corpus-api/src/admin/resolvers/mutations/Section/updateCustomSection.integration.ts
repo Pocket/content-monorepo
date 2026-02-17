@@ -225,6 +225,79 @@ describe('mutations: Section (updateCustomSection)', () => {
       expect(section.sort).toEqual(10);
     });
 
+    it('updates followable and allowAds fields', async () => {
+      const data: UpdateCustomSectionApiInput = {
+        externalId: SECTION_EXTERNAL_ID,
+        title: 'Title',
+        description: 'Description',
+        startDate: '2025-01-01',
+        updateSource: ActivitySource.MANUAL,
+        followable: false,
+        allowAds: false,
+      };
+
+      const res = await request(app)
+        .post('/admin')
+        .set(headers)
+        .send({
+          query: print(UPDATE_CUSTOM_SECTION),
+          variables: { data },
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.errors).toBeUndefined();
+
+      const section = res.body.data?.updateCustomSection;
+      expect(section.followable).toBe(false);
+      expect(section.allowAds).toBe(false);
+    });
+
+    it('preserves followable and allowAds when not provided in update', async () => {
+      // First set them to false
+      await request(app)
+        .post('/admin')
+        .set(headers)
+        .send({
+          query: print(UPDATE_CUSTOM_SECTION),
+          variables: {
+            data: {
+              externalId: SECTION_EXTERNAL_ID,
+              title: 'Title',
+              description: 'Description',
+              startDate: '2025-01-01',
+              updateSource: ActivitySource.MANUAL,
+              followable: false,
+              allowAds: false,
+            },
+          },
+        });
+
+      // Now update without specifying followable/allowAds
+      const res = await request(app)
+        .post('/admin')
+        .set(headers)
+        .send({
+          query: print(UPDATE_CUSTOM_SECTION),
+          variables: {
+            data: {
+              externalId: SECTION_EXTERNAL_ID,
+              title: 'New Title',
+              description: 'Description',
+              startDate: '2025-01-01',
+              updateSource: ActivitySource.MANUAL,
+            },
+          },
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.errors).toBeUndefined();
+
+      const section = res.body.data?.updateCustomSection;
+      // Values should be preserved from previous update
+      expect(section.followable).toBe(false);
+      expect(section.allowAds).toBe(false);
+    });
+
     it('can clear optional fields by setting to null', async () => {
       const data: UpdateCustomSectionApiInput = {
         externalId: SECTION_WITH_METADATA,
