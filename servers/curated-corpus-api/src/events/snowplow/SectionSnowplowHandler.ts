@@ -107,6 +107,8 @@ export class SectionSnowplowHandler extends CuratedCorpusSnowplowHandler {
           ? getUnixTimestamp(section.endDate)
           : undefined,
         action_screen: section.action_screen ?? undefined,
+        followable: section.followable,
+        allowAds: section.allowAds,
       },
     };
 
