@@ -40,7 +40,7 @@
     "@pocket-tools/tracing": "1.12.0",
     "@pocket-tools/ts-logger": "^1.9.4",
     "@prisma/client": "5.22.0",
-    "@sentry/node": "8.47.0",
+    "@sentry/node": "8.49.0",
     "content-common": "workspace:*",
     "cors": "2.8.5",
     "dataloader": "^2.2.2",
