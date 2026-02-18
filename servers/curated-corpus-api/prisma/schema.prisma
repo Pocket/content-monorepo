@@ -145,6 +145,10 @@ model Section {
   startDate             DateTime?       @db.Date
   // For custom sections, indicates when a section "expires"
   endDate               DateTime?       @db.Date
+  // whether users can follow this section
+  followable            Boolean         @default(true)
+  // whether ads can be displayed in this section
+  allowAds              Boolean         @default(true)
 
   // relations
   sectionItems          SectionItem[]

@@ -118,6 +118,8 @@ describe('mutations: Section (updateCustomSection)', () => {
           taxonomy: 'IAB-3.0',
           categories: ['1', '2'],
         },
+        followable: false,
+        allowAds: false,
       };
 
       const variables = { data };
@@ -144,6 +146,8 @@ describe('mutations: Section (updateCustomSection)', () => {
       expect(section.endDate).toEqual('2025-12-31');
       expect(section.createSource).toEqual('MANUAL');
       expect(section.sort).toEqual(42);
+      expect(section.followable).toBe(false);
+      expect(section.allowAds).toBe(false);
       expect(Array.isArray(section.sectionItems)).toBe(true);
 
       // Check that the UPDATE_SECTION event was fired successfully:
@@ -223,6 +227,9 @@ describe('mutations: Section (updateCustomSection)', () => {
       expect(section.heroTitle).toEqual('Original Hero Title');
       expect(section.heroDescription).toEqual('Original Hero Description');
       expect(section.sort).toEqual(10);
+      // followable and allowAds should be preserved (defaults)
+      expect(section.followable).toBe(true);
+      expect(section.allowAds).toBe(true);
     });
 
     it('can clear optional fields by setting to null', async () => {

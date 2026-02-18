@@ -326,6 +326,14 @@ export type Section = {
    * Indicates where in the Curation Tools UI the action took place. Null if the action was performed by a backend ML process.
    */
   action_screen?: ActionScreen;
+  /**
+   * Whether users can follow this section.
+   */
+  followable: boolean;
+  /**
+   * Whether ads can be displayed in this section.
+   */
+  allow_ads: boolean;
 };
 
 /**

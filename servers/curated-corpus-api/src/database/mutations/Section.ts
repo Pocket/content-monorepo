@@ -168,6 +168,8 @@ export async function createCustomSection(
     sort,
     createSource,
     active,
+    followable,
+    allowAds,
   } = data;
 
   const createData = {
@@ -182,6 +184,8 @@ export async function createCustomSection(
     sort,
     createSource,
     active,
+    followable,
+    allowAds,
   };
 
   const newSection = await db.section.create({
@@ -272,7 +276,8 @@ export async function deleteCustomSection(
     if (updateFields.endDate !== undefined) updateData.endDate = updateFields.endDate ? new Date(updateFields.endDate) : null;
     if (updateFields.iab !== undefined) updateData.iab = updateFields.iab;
     if (updateFields.sort !== undefined) updateData.sort = updateFields.sort;
-
+    if (updateFields.followable !== undefined) updateData.followable = updateFields.followable;
+    if (updateFields.allowAds !== undefined) updateData.allowAds = updateFields.allowAds;
 
     const updated = await db.section.update({
       where: { externalId },

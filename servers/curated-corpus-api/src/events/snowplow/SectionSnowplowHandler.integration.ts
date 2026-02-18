@@ -41,6 +41,8 @@ const mockSection: Section = {
   updatedAt: new Date(),
   startDate: new Date('2024-01-01'),
   endDate: new Date('2024-12-31'),
+  followable: true,
+  allowAds: true,
 };
 
 const sectionEventData: SectionPayload = {
@@ -67,6 +69,8 @@ const sectionEventContextData = {
   updated_at: getUnixTimestamp(mockSection.updatedAt),
   start_date: getUnixTimestamp(mockSection.startDate),
   end_date: getUnixTimestamp(mockSection.endDate),
+  followable: mockSection.followable,
+  allow_ads: mockSection.allowAds,
 };
 
 function assertValidSnowplowSectionEvents(data) {
@@ -195,6 +199,8 @@ describe('SectionSnowplowHandler', () => {
         updatedAt: new Date(),
         startDate: null,
         endDate: null,
+        followable: true,
+        allowAds: true,
       };
 
       emitter.emit(SectionEventType.CREATE_SECTION, {

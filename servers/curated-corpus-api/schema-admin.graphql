@@ -746,6 +746,14 @@ input UpdateCustomSectionInput {
   Controls the display order of Sections.
   """
   sort: Int
+  """
+  Whether users can follow this section.
+  """
+  followable: Boolean
+  """
+  Whether ads can be displayed in this section.
+  """
+  allowAds: Boolean
 }
 
 """
@@ -804,6 +812,14 @@ input CreateCustomSectionInput {
   in the admin tool.
   """
   disabled: Boolean!
+  """
+  Whether users can follow this section.
+  """
+  followable: Boolean
+  """
+  Whether ads can be displayed in this section.
+  """
+  allowAds: Boolean
 }
 
 """

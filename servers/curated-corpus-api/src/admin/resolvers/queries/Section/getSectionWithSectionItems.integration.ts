@@ -128,6 +128,8 @@ describe('queries: Section (getSectionsWithSectionItems)', () => {
     // Both active Sections should not have any SectionItems
     expect(result.body.data?.getSectionsWithSectionItems[0].sectionItems).toEqual([]);
     expect(result.body.data?.getSectionsWithSectionItems[0].disabled).toBeFalsy();
+    expect(result.body.data?.getSectionsWithSectionItems[0].followable).toBe(true);
+    expect(result.body.data?.getSectionsWithSectionItems[0].allowAds).toBe(true);
     expect(result.body.data?.getSectionsWithSectionItems[0].iab).toEqual(activeEnabledSection1.iab);
 
     expect(result.body.data?.getSectionsWithSectionItems[1].sectionItems).toEqual([]);

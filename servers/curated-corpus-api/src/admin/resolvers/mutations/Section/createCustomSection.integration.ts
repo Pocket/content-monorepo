@@ -67,6 +67,8 @@ describe('mutations: Section (createCustomSection)', () => {
       createSource: ActivitySource.MANUAL,
       disabled: false,
       active: true,
+      followable: false,
+      allowAds: false,
     };
 
     const result = await request(app)
@@ -107,6 +109,8 @@ describe('mutations: Section (createCustomSection)', () => {
     expect(result.body.data?.createCustomSection.createSource).toEqual('MANUAL');
     expect(result.body.data?.createCustomSection.active).toBeTruthy();
     expect(result.body.data?.createCustomSection.disabled).toBeFalsy();
+    expect(result.body.data?.createCustomSection.followable).toBeFalsy();
+    expect(result.body.data?.createCustomSection.allowAds).toBeFalsy();
   });
 
   it('should create a Custom Section without optional properties', async () => {
@@ -150,6 +154,9 @@ describe('mutations: Section (createCustomSection)', () => {
     expect(result.body.data?.createCustomSection.createSource).toEqual('MANUAL');
     expect(result.body.data?.createCustomSection.active).toBeTruthy();
     expect(result.body.data?.createCustomSection.disabled).toBeFalsy();
+    // followable and allowAds default to true when not provided
+    expect(result.body.data?.createCustomSection.followable).toBeTruthy();
+    expect(result.body.data?.createCustomSection.allowAds).toBeTruthy();
   });
 
   it('should fail to create a Section if createSource is not MANUAL', async () => {
