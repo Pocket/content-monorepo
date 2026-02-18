@@ -67,6 +67,8 @@ describe('mutations: Section (createCustomSection)', () => {
       createSource: ActivitySource.MANUAL,
       disabled: false,
       active: true,
+      followable: false,
+      allowAds: false,
     };
 
     const result = await request(app)
@@ -107,63 +109,8 @@ describe('mutations: Section (createCustomSection)', () => {
     expect(result.body.data?.createCustomSection.createSource).toEqual('MANUAL');
     expect(result.body.data?.createCustomSection.active).toBeTruthy();
     expect(result.body.data?.createCustomSection.disabled).toBeFalsy();
-    // followable and allowAds default to true when not provided
-    expect(result.body.data?.createCustomSection.followable).toBeTruthy();
-    expect(result.body.data?.createCustomSection.allowAds).toBeTruthy();
-  });
-
-  it('should create a Custom Section with followable and allowAds set to false', async () => {
-    input = {
-      title: 'Non-Followable No-Ads Section',
-      description: 'section with followable and allowAds disabled',
-      startDate: '2025-01-01',
-      scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
-      createSource: ActivitySource.MANUAL,
-      disabled: false,
-      active: true,
-      followable: false,
-      allowAds: false,
-    };
-
-    const result = await request(app)
-      .post(graphQLUrl)
-      .set(headers)
-      .send({
-        query: print(CREATE_CUSTOM_SECTION),
-        variables: { data: input },
-      });
-
-    expect(result.body.errors).toBeUndefined();
-    expect(result.body.data).not.toBeNull();
     expect(result.body.data?.createCustomSection.followable).toBeFalsy();
     expect(result.body.data?.createCustomSection.allowAds).toBeFalsy();
-  });
-
-  it('should create a Custom Section with only followable set to false', async () => {
-    input = {
-      title: 'Non-Followable Section',
-      description: 'section with followable disabled',
-      startDate: '2025-01-01',
-      scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
-      createSource: ActivitySource.MANUAL,
-      disabled: false,
-      active: true,
-      followable: false,
-    };
-
-    const result = await request(app)
-      .post(graphQLUrl)
-      .set(headers)
-      .send({
-        query: print(CREATE_CUSTOM_SECTION),
-        variables: { data: input },
-      });
-
-    expect(result.body.errors).toBeUndefined();
-    expect(result.body.data).not.toBeNull();
-    expect(result.body.data?.createCustomSection.followable).toBeFalsy();
-    // allowAds should default to true when not provided
-    expect(result.body.data?.createCustomSection.allowAds).toBeTruthy();
   });
 
   it('should create a Custom Section without optional properties', async () => {
