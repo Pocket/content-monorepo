@@ -70,7 +70,7 @@ const sectionEventContextData = {
   start_date: getUnixTimestamp(mockSection.startDate),
   end_date: getUnixTimestamp(mockSection.endDate),
   followable: mockSection.followable,
-  allowAds: mockSection.allowAds,
+  allow_ads: mockSection.allowAds,
 };
 
 function assertValidSnowplowSectionEvents(data) {

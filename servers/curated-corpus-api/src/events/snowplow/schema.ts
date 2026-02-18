@@ -333,7 +333,7 @@ export type Section = {
   /**
    * Whether ads can be displayed in this section.
    */
-  allowAds: boolean;
+  allow_ads: boolean;
 };
 
 /**

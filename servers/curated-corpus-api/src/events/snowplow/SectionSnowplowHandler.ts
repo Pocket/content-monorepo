@@ -108,7 +108,7 @@ export class SectionSnowplowHandler extends CuratedCorpusSnowplowHandler {
           : undefined,
         action_screen: section.action_screen ?? undefined,
         followable: section.followable,
-        allowAds: section.allowAds,
+        allow_ads: section.allowAds,
       },
     };
 
