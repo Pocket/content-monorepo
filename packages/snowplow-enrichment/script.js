@@ -22,6 +22,10 @@ function process(event) {
   const appId = event.getApp_id();
 
   if (validAppIds.indexOf(appId) < 0) {
-    throw `Discarding event for unsupported app_id '${appId}'`;
+    // drop the event instead of throwing an error, as
+    // throwing incurs a cost via kinesis stream volume.
+    // dropping results in neither good nor bad events -
+    // the events are dropped and irrevocably gone.
+    event.drop();
   }
 }

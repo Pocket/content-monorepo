@@ -1,9 +1,5 @@
 import { CuratedStatus } from '.prisma/client';
-import {
-  getBadSnowplowEvents,
-  resetSnowplowEvents,
-  waitForSnowplowEvents,
-} from 'content-common';
+import { resetSnowplowEvents, waitForSnowplowEvents } from 'content-common';
 import {
   ApprovedCorpusItemPayload,
   RejectedCorpusItemPayload,
@@ -72,14 +68,13 @@ const rejectedEventData: ReviewedCorpusItemPayload = {
 describe('CustomJavascriptEnrichment', () => {
   const emitter = new CuratedCorpusEventEmitter();
 
-  // force the tracker's app_id to be invalid
-  tracker.setAppId('unsupported-app-id');
-
   beforeEach(async () => {
     await resetSnowplowEvents();
   });
 
-  it('should reject otherwise good events to Snowplow based on an unsupported app_id in the tracker', async () => {
+  it('should accept good events to Snowplow with a valid app_id', async () => {
+    // tracker as imported has a valid app_id from config
+
     new ReviewedItemSnowplowHandler(emitter, tracker, [
       ReviewedCorpusItemEventType.ADD_ITEM,
       ReviewedCorpusItemEventType.UPDATE_ITEM,
@@ -88,6 +83,7 @@ describe('CustomJavascriptEnrichment', () => {
     ]);
 
     // Emit all the events that are relevant for approved curated items
+    // this set of emitted events is the same in both tests in this file
     emitter.emit(ReviewedCorpusItemEventType.ADD_ITEM, {
       ...approvedEventData,
       eventType: ReviewedCorpusItemEventType.ADD_ITEM,
@@ -106,21 +102,48 @@ describe('CustomJavascriptEnrichment', () => {
       eventType: ReviewedCorpusItemEventType.REJECT_ITEM,
     });
 
-    // make sure we only have bad events
+    // make sure all events were received and none are bad
     const allEvents = await waitForSnowplowEvents(4);
     expect(allEvents.total).toEqual(4);
-    expect(allEvents.good).toEqual(0);
-    expect(allEvents.bad).toEqual(4);
+    expect(allEvents.good).toEqual(4);
+    expect(allEvents.bad).toEqual(0);
+  });
 
-    const badEvents = await getBadSnowplowEvents();
+  it('should drop otherwise good events to Snowplow based on an unsupported app_id in the tracker', async () => {
+    // force the tracker's app_id to be invalid
+    tracker.setAppId('unsupported-app-id');
 
-    // make sure each bad event is due to an unsupported app_id
-    for (let i = 0; i < badEvents.length; i++) {
-      expect(
-        JSON.stringify(badEvents[i].errors).indexOf(
-          'Discarding event for unsupported app_id',
-        ),
-      ).toBeGreaterThan(0);
-    }
+    new ReviewedItemSnowplowHandler(emitter, tracker, [
+      ReviewedCorpusItemEventType.ADD_ITEM,
+      ReviewedCorpusItemEventType.UPDATE_ITEM,
+      ReviewedCorpusItemEventType.REMOVE_ITEM,
+      ReviewedCorpusItemEventType.REJECT_ITEM,
+    ]);
+
+    // Emit all the events that are relevant for approved curated items
+    // this set of emitted events is the same in both tests in this file
+    emitter.emit(ReviewedCorpusItemEventType.ADD_ITEM, {
+      ...approvedEventData,
+      eventType: ReviewedCorpusItemEventType.ADD_ITEM,
+    });
+    emitter.emit(ReviewedCorpusItemEventType.UPDATE_ITEM, {
+      ...approvedEventData,
+      eventType: ReviewedCorpusItemEventType.UPDATE_ITEM,
+    });
+    emitter.emit(ReviewedCorpusItemEventType.REMOVE_ITEM, {
+      ...approvedEventData,
+      eventType: ReviewedCorpusItemEventType.REMOVE_ITEM,
+    });
+    // Emit the rejected item event
+    emitter.emit(ReviewedCorpusItemEventType.REJECT_ITEM, {
+      ...rejectedEventData,
+      eventType: ReviewedCorpusItemEventType.REJECT_ITEM,
+    });
+
+    // make sure all events were dropped
+    // (dropped events do not show up as good or bad - they don't show up
+    // at all.)
+    const allEvents = await waitForSnowplowEvents();
+    expect(allEvents.total).toEqual(0);
   });
 });
