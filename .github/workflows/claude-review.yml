@@ -48,8 +48,9 @@ jobs:
           # Pre-loads full PR context and shows a progress tracker.
           # Without this, the review is buried in the Actions step summary instead of posted on the PR.
           track_progress: true
-          # Only include comments from trusted team members in Claude's context (prompt injection mitigation).
-          include_comments_by_actor: "mmiermans"
+          # Prompt injection mitigation: only include comments from allowlisted team members in Claude's context.
+          # Empty (default) includes all actors. https://github.com/anthropics/claude-code-action/blob/main/action.yml
+          include_comments_by_actor: "mmiermans,jpetto,Herraj"
           # Update the same comment on each push instead of creating new ones.
           use_sticky_comment: true
           # Make inline code comments, PR comments, reading PR diffs, and git log for commit messages.
