@@ -845,12 +845,6 @@ importers:
       '@pocket-tools/feature-flags-client':
         specifier: 1.0.0
         version: 1.0.0
-      '@pocket-tools/sentry':
-        specifier: 1.3.0
-        version: 1.3.0(@sentry/node@8.47.0)
-      '@pocket-tools/tracing':
-        specifier: 1.12.0
-        version: 1.12.0(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(encoding@0.1.13)
       '@pocket-tools/ts-logger':
         specifier: ^1.9.4
         version: 1.13.0
@@ -7789,8 +7783,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typescript@6.0.0-dev.20260126:
-    resolution: {integrity: sha512-WCYppJE3QcDvqd5NVTYkpT+I5mz00NbWV6kV6sgzljF1y2CglOG4h0zffDJJ7s4TrWAT3asz8U2l+eEbObPVVA==}
+  typescript@6.0.0-dev.20260224:
+    resolution: {integrity: sha512-QEcW/uW/j914p/Avsw933+R03oIyJ1bmWlIOC/XFSUNmtkl9qi9yY2mWBjYX7tG4g22SzpbZPXX0QimZXPQQ8w==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -13095,7 +13089,7 @@ snapshots:
     dependencies:
       semver: 7.7.2
       shelljs: 0.8.5
-      typescript: 6.0.0-dev.20260126
+      typescript: 6.0.0-dev.20260224
 
   drange@1.1.1: {}
 
@@ -17038,7 +17032,7 @@ snapshots:
 
   typescript@5.6.2: {}
 
-  typescript@6.0.0-dev.20260126: {}
+  typescript@6.0.0-dev.20260224: {}
 
   typia@7.6.4(@samchon/openapi@2.5.3)(typescript@5.6.2):
     dependencies:
