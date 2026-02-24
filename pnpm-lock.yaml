@@ -10,7 +10,7 @@ importers:
     dependencies:
       dotenv-cli:
         specifier: latest
-        version: 8.0.0
+        version: 11.0.0
     devDependencies:
       syncpack:
         specifier: ^13.0.0
@@ -472,8 +472,8 @@ importers:
   packages/content-common:
     dependencies:
       '@sentry/node':
-        specifier: 8.47.0
-        version: 8.47.0
+        specifier: 8.49.0
+        version: 8.49.0
       '@snowplow/node-tracker':
         specifier: 3.5.0
         version: 3.5.0
@@ -643,8 +643,8 @@ importers:
         specifier: 3.529.1
         version: 3.529.1(@aws-sdk/client-dynamodb@3.529.1)
       '@sentry/node':
-        specifier: 8.47.0
-        version: 8.47.0
+        specifier: 8.49.0
+        version: 8.49.0
       content-common:
         specifier: workspace:*
         version: link:../content-common
@@ -723,10 +723,10 @@ importers:
         version: 1.0.0
       '@pocket-tools/sentry':
         specifier: 1.3.0
-        version: 1.3.0(@sentry/node@8.47.0)
+        version: 1.3.0(@sentry/node@8.49.0)
       '@pocket-tools/tracing':
         specifier: 1.12.0
-        version: 1.12.0(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(encoding@0.1.13)
+        version: 1.12.0(@opentelemetry/instrumentation@0.56.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)
       '@pocket-tools/ts-logger':
         specifier: ^1.9.4
         version: 1.13.0
@@ -734,8 +734,8 @@ importers:
         specifier: 5.22.0
         version: 5.22.0(prisma@5.22.0)
       '@sentry/node':
-        specifier: 8.47.0
-        version: 8.47.0
+        specifier: 8.49.0
+        version: 8.49.0
       content-common:
         specifier: workspace:*
         version: link:../../packages/content-common
@@ -852,8 +852,8 @@ importers:
         specifier: 5.22.0
         version: 5.22.0(prisma@5.22.0)
       '@sentry/node':
-        specifier: 8.47.0
-        version: 8.47.0
+        specifier: 8.49.0
+        version: 8.49.0
       '@snowplow/node-tracker':
         specifier: 3.5.0
         version: 3.5.0
@@ -977,7 +977,7 @@ importers:
         version: 1.0.0
       '@pocket-tools/sentry':
         specifier: 1.3.0
-        version: 1.3.0(@sentry/node@8.47.0)
+        version: 1.3.0(@sentry/node@8.49.0)
       '@pocket-tools/tracing':
         specifier: 1.12.0
         version: 1.12.0(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(encoding@0.1.13)
@@ -985,8 +985,8 @@ importers:
         specifier: ^1.9.4
         version: 1.13.0
       '@sentry/node':
-        specifier: 8.47.0
-        version: 8.47.0
+        specifier: 8.49.0
+        version: 8.49.0
       '@snowplow/node-tracker':
         specifier: 3.5.0
         version: 3.5.0
@@ -1069,12 +1069,14 @@ packages:
 
   '@apollo/server-gateway-interface@1.1.1':
     resolution: {integrity: sha512-pGwCl/po6+rxRmDMFgozKQo2pbsSwE91TpsDBAOgf74CRDPXHHtM88wbwjab0wMMZh95QfR45GGyDIdhY24bkQ==}
+    deprecated: '@apollo/server-gateway-interface v1 is part of Apollo Server v4, which is deprecated and will transition to end-of-life on January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v2 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.'
     peerDependencies:
       graphql: 14.x || 15.x || 16.x
 
   '@apollo/server-plugin-response-cache@4.1.4':
     resolution: {integrity: sha512-MicQsfTbwIzUc7GCFwY9uOz46ad2q22f4RWy42YEoy4YKGdrnl3X0rfs5GpBliw54nM3fxYIdmvGKeO2W7wMSg==}
     engines: {node: '>=14.16.0'}
+    deprecated: '@apollo/server-plugin-response-cache v4 is part of Apollo Server v4, which is deprecated and will transition to end-of-life on January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v5 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.'
     peerDependencies:
       '@apollo/server': ^4.0.1
       graphql: ^16.6.0
@@ -1082,6 +1084,7 @@ packages:
   '@apollo/server@4.12.1':
     resolution: {integrity: sha512-jceK1LK6l074in4mWu8XkwzDjvxdSzkmk8M7YpVLOGjQ6PmlaChcGRJ9BUwB46r22MxdPCXdC/6U5Vi8gzYbvQ==}
     engines: {node: '>=14.16.0'}
+    deprecated: Apollo Server v4 is end-of-life since January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v5 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.
     peerDependencies:
       graphql: ^16.6.0
 
@@ -1577,6 +1580,7 @@ packages:
   '@cdktf/provider-archive@10.3.0':
     resolution: {integrity: sha512-y5kAiCs+Ow0tOywsSx4OSME2a6VzCsvbkGMCXfyOCwJdoZN01yAIyLyVjtx/R25Vj20Q7EMC6zkE81dXSAh4Tw==}
     engines: {node: '>= 18.12.0'}
+    deprecated: See https://cdk.tf/imports for details on how to continue to use the archive provider in your CDK for Terraform (CDKTF) projects by generating the bindings locally.
     peerDependencies:
       cdktf: ^0.20.0
       constructs: ^10.3.0
@@ -1584,6 +1588,7 @@ packages:
   '@cdktf/provider-aws@19.49.1':
     resolution: {integrity: sha512-jgcezv/cTglFBIVOciPa03xzvEc2jbfzmI/sOcDHrGLPsTfWN7vuMnXHKLgOKzPVz1vEFo+u4pKeXQ3LCiFVAA==}
     engines: {node: '>= 18.12.0'}
+    deprecated: See https://cdk.tf/imports for details on how to continue to use the aws provider in your CDK for Terraform (CDKTF) projects by generating the bindings locally.
     peerDependencies:
       cdktf: ^0.20.0
       constructs: ^10.3.0
@@ -1594,6 +1599,7 @@ packages:
   '@cdktf/provider-local@10.1.1':
     resolution: {integrity: sha512-m1nJadesvpmGj/IFAM1n3TPqIPzB7I1Tc4csHwCRkddoPcDOvZJHbbmzJPy8Wn5HJZ+Y+5+IAfsghwHV5p9Z6A==}
     engines: {node: '>= 18.12.0'}
+    deprecated: See https://cdk.tf/imports for details on how to continue to use the local provider in your CDK for Terraform (CDKTF) projects by generating the bindings locally.
     peerDependencies:
       cdktf: ^0.20.0
       constructs: ^10.3.0
@@ -1601,6 +1607,7 @@ packages:
   '@cdktf/provider-newrelic@12.23.0':
     resolution: {integrity: sha512-4ELFufdlcEEiQiVfcSwfZLF5J3739NgLvfVxvyd53rDeQcHqTdyKcyUl+bFoIl7zSt5OsX8QhGufZYHVpyWS4w==}
     engines: {node: '>= 18.12.0'}
+    deprecated: See https://cdk.tf/imports for details on how to continue to use the newrelic provider in your CDK for Terraform (CDKTF) projects by generating the bindings locally.
     peerDependencies:
       cdktf: ^0.20.0
       constructs: ^10.3.0
@@ -1608,6 +1615,7 @@ packages:
   '@cdktf/provider-null@10.0.1':
     resolution: {integrity: sha512-X176VQZFTNi1xSyUEoSb9CsFHfJ9EpcdzCx33UlZMGfQo/DRZC8NT1vHxCQU2TAaB1ZwmnhXEkW2FJO6pB6Pjg==}
     engines: {node: '>= 18.12.0'}
+    deprecated: See https://cdk.tf/imports for details on how to continue to use the null provider in your CDK for Terraform (CDKTF) projects by generating the bindings locally.
     peerDependencies:
       cdktf: ^0.20.0
       constructs: ^10.3.0
@@ -1615,6 +1623,7 @@ packages:
   '@cdktf/provider-pagerduty@13.15.1':
     resolution: {integrity: sha512-auDYOTkOxRxspiRaKKYKkWj6gKKbWKtzxYBwBIU/B84xxXBJQjxF4fZfV8wlHIxuM0JnYE8ENTNvZ4OYtnKHRA==}
     engines: {node: '>= 18.12.0'}
+    deprecated: See https://cdk.tf/imports for details on how to continue to use the pagerduty provider in your CDK for Terraform (CDKTF) projects by generating the bindings locally.
     peerDependencies:
       cdktf: ^0.20.0
       constructs: ^10.3.0
@@ -1625,6 +1634,7 @@ packages:
   '@cdktf/provider-time@10.2.1':
     resolution: {integrity: sha512-I4hRjCOS2Kv2TqGxpZojtkpjVMkj9mb9iZZ3mdlKrAC3GGTtqpiIgNLQ3rLh7QiOYPivbaiYiUCFFvLDExgWJA==}
     engines: {node: '>= 18.12.0'}
+    deprecated: See https://cdk.tf/imports for details on how to continue to use the time provider in your CDK for Terraform (CDKTF) projects by generating the bindings locally.
     peerDependencies:
       cdktf: ^0.20.0
       constructs: ^10.3.0
@@ -2978,6 +2988,10 @@ packages:
     resolution: {integrity: sha512-iSEJZMe3DOcqBFZQAqgA3NB2lCWBc4Gv5x/SCri/TVg96wAlss4VrUunSI2Mp0J4jJ5nJcJ2ChqHSBAU48k3FA==}
     engines: {node: '>=14.18'}
 
+  '@sentry/core@8.49.0':
+    resolution: {integrity: sha512-/OAm6LdHhh8TvfDAucWfSJV7M03IOHrJm5LVjrrKr4gwQ1HKd4CDbARsBbPwHIzSRAle0IgG3sbJxEvv52JUIw==}
+    engines: {node: '>=14.18'}
+
   '@sentry/integrations@7.112.2':
     resolution: {integrity: sha512-ioC2yyU6DqtLkdmWnm87oNvdn2+9oKctJeA4t+jkS6JaJ10DcezjCwiLscX4rhB9aWJV3IWF7Op0O6K3w0t2Hg==}
     engines: {node: '>=8'}
@@ -3006,8 +3020,22 @@ packages:
     resolution: {integrity: sha512-tMzeU3KkmDi2OVvSu+Ah5pwoi7srsSyc1DovBbRQU96RFf/lOFzGe9JERa1MyDUqqLH95NqnPTNsa4Amb8/Vxg==}
     engines: {node: '>=14.18'}
 
+  '@sentry/node@8.49.0':
+    resolution: {integrity: sha512-ui/X6AsHEc+TzgegW8Lq2dZvLHm2npaPMzeICdTotoR8S7LUgTXWfxpzKNra7K13QWY2A2AmabxKOSZJSnPHyQ==}
+    engines: {node: '>=14.18'}
+
   '@sentry/opentelemetry@8.47.0':
     resolution: {integrity: sha512-wunyBIUPeY6Kx3SFhOQqOPs+hyRADO5bztpo8aZ3N3xfzhefSTOdrgUroKvHx1DvoQO6MAlykcuUFps3yfaqmg==}
+    engines: {node: '>=14.18'}
+    peerDependencies:
+      '@opentelemetry/api': ^1.9.0
+      '@opentelemetry/core': ^1.29.0
+      '@opentelemetry/instrumentation': ^0.56.0
+      '@opentelemetry/sdk-trace-base': ^1.29.0
+      '@opentelemetry/semantic-conventions': ^1.28.0
+
+  '@sentry/opentelemetry@8.49.0':
+    resolution: {integrity: sha512-Ffasnpat8WhqvRB/DFbcGp+J+xh76NCztTDi6f3a1jBCONTJypHt2p5l9lJuu1O/UPN1vIJjOpUMOvdd0FHGVA==}
     engines: {node: '>=14.18'}
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
@@ -4575,12 +4603,12 @@ packages:
   domino@2.1.6:
     resolution: {integrity: sha512-3VdM/SXBZX2omc9JF9nOPCtDaYQ67BGp5CoLpIQlO2KCAPETs8TcDHacF26jXadGbvUteZzRTeos2fhID5+ucQ==}
 
-  dotenv-cli@8.0.0:
-    resolution: {integrity: sha512-aLqYbK7xKOiTMIRf1lDPbI+Y+Ip/wo5k3eyp6ePysVaSqbyxjyK3dK35BTxG+rmd7djf5q2UPs4noPNH+cj0Qw==}
+  dotenv-cli@11.0.0:
+    resolution: {integrity: sha512-r5pA8idbk7GFWuHEU7trSTflWcdBpQEK+Aw17UrSHjS6CReuhrrPcyC3zcQBPQvhArRHnBo/h6eLH1fkCvNlww==}
     hasBin: true
 
-  dotenv-expand@10.0.0:
-    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
+  dotenv-expand@12.0.3:
+    resolution: {integrity: sha512-uc47g4b+4k/M/SeaW1y4OApx+mtLWl92l5LMPP0GNXctZqELk+YGgOPIIC5elYmUH4OuoK3JLhuRUYegeySiFA==}
     engines: {node: '>=12'}
 
   dotenv@16.0.3:
@@ -4589,6 +4617,10 @@ packages:
 
   dotenv@16.4.5:
     resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
+    engines: {node: '>=12'}
+
+  dotenv@17.3.1:
+    resolution: {integrity: sha512-IO8C/dzEb6O3F9/twg6ZLXz164a2fhTnEWb95H23Dm4OuN+92NmEAlTrupP9VW6Jm3sO26tQlqyvyi4CsnY9GA==}
     engines: {node: '>=12'}
 
   downlevel-dts@0.11.0:
@@ -5230,11 +5262,12 @@ packages:
 
   glob@10.4.5:
     resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   global-prefix@4.0.0:
     resolution: {integrity: sha512-w0Uf9Y9/nyHinEk5vMJKRie+wa4kR5hmDbEhGGds/kG1PwGLLHKRoNMeJOyCQjjBkANlnScqgzcFwGHgmgLkVA==}
@@ -6777,6 +6810,7 @@ packages:
   prebuild-install@7.1.3:
     resolution: {integrity: sha512-8Mf2cbV7x1cXPUILADGI3wuhfqWvtiLA1iclTDbFRZkgRQS0NqsPZphna9V+HyTEadheuPmjaJMsbzKQFOzLug==}
     engines: {node: '>=10'}
+    deprecated: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
     hasBin: true
 
   prelude-ls@1.2.1:
@@ -7466,11 +7500,12 @@ packages:
   superagent@8.1.2:
     resolution: {integrity: sha512-6WTxW1EB6yCxV5VFOIPQruWGHqc3yI7hEmZK6h+pyk69Lk/Ut7rLUY6W/ONF2MjBuGjvmMiIpsrVJ2vjrHlslA==}
     engines: {node: '>=6.4.0 <13 || >=14'}
-    deprecated: Please upgrade to v9.0.0+ as we have fixed a public vulnerability with formidable dependency. Note that v9.0.0+ requires Node.js v14.18.0+. See https://github.com/ladjs/superagent/pull/1800 for insight. This project is supported and maintained by the team at Forward Email @ https://forwardemail.net
+    deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
 
   supertest@6.3.4:
     resolution: {integrity: sha512-erY3HFDG0dPnhw4U+udPfrzXa4xhSG+n4rxfRuZWCUvjFWwKl+OxWf/7zk50s84/fAAs7vf5QAb9uRa0cCykxw==}
     engines: {node: '>=6.4.0'}
+    deprecated: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
 
   supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
@@ -7511,7 +7546,7 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
-    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   test-exclude@6.0.0:
     resolution: {integrity: sha512-cAGWPIyOHU6zlmg88jwm7VRyXnMN7iV68OGAbYDk/Mh/xC/pzVPlQtY6ngoIH/5/tciuhGfvESU8GrHrcxD56w==}
@@ -10870,9 +10905,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@pocket-tools/sentry@1.3.0(@sentry/node@8.47.0)':
+  '@pocket-tools/sentry@1.3.0(@sentry/node@8.49.0)':
     dependencies:
-      '@sentry/node': 8.47.0
+      '@sentry/node': 8.49.0
       tslib: 2.8.0
 
   '@pocket-tools/terraform-modules@5.20.0(encoding@0.1.13)(ink@3.2.0(react@17.0.2))(react@17.0.2)':
@@ -10899,6 +10934,39 @@ snapshots:
       - react
       - supports-color
       - utf-8-validate
+
+  '@pocket-tools/tracing@1.12.0(@opentelemetry/instrumentation@0.56.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/auto-instrumentations-node': 0.55.2(@opentelemetry/api@1.9.0)(encoding@0.1.13)
+      '@opentelemetry/context-async-hooks': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/exporter-logs-otlp-grpc': 0.57.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/exporter-logs-otlp-http': 0.57.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/exporter-metrics-otlp-grpc': 0.57.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/exporter-metrics-otlp-http': 0.57.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/exporter-trace-otlp-grpc': 0.57.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/exporter-trace-otlp-http': 0.57.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/id-generator-aws-xray': 1.2.2(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-knex': 0.44.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/propagator-aws-xray': 1.26.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/resource-detector-aws': 1.10.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-metrics': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-node': 0.57.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-trace-node': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/semantic-conventions': 1.28.0
+      '@opentelemetry/winston-transport': 0.10.0
+      '@prisma/instrumentation': 5.22.0
+      '@sentry/node': 8.47.0
+      '@sentry/opentelemetry': 8.47.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.56.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.28.0)
+      tslib: 2.8.1
+      unleash-client: 6.1.2
+    transitivePeerDependencies:
+      - '@opentelemetry/instrumentation'
+      - encoding
+      - supports-color
 
   '@pocket-tools/tracing@1.12.0(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(encoding@0.1.13)':
     dependencies:
@@ -11098,6 +11166,8 @@ snapshots:
 
   '@sentry/core@8.47.0': {}
 
+  '@sentry/core@8.49.0': {}
+
   '@sentry/integrations@7.112.2':
     dependencies:
       '@sentry/core': 7.112.2
@@ -11183,6 +11253,55 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@sentry/node@8.49.0':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/context-async-hooks': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation': 0.56.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-amqplib': 0.45.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-connect': 0.42.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-dataloader': 0.15.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-express': 0.46.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-fastify': 0.43.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-fs': 0.18.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-generic-pool': 0.42.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-graphql': 0.46.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-hapi': 0.44.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-http': 0.56.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-ioredis': 0.46.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-kafkajs': 0.6.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-knex': 0.43.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-koa': 0.46.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-lru-memoizer': 0.43.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-mongodb': 0.50.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-mongoose': 0.45.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-mysql': 0.44.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-mysql2': 0.44.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-nestjs-core': 0.43.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-pg': 0.49.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-redis-4': 0.45.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-tedious': 0.17.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-undici': 0.9.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/semantic-conventions': 1.34.0
+      '@prisma/instrumentation': 5.22.0
+      '@sentry/core': 8.49.0
+      '@sentry/opentelemetry': 8.49.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.56.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.34.0)
+      import-in-the-middle: 1.14.2
+    transitivePeerDependencies:
+      - supports-color
+
+  '@sentry/opentelemetry@8.47.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.56.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.28.0)':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation': 0.56.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/semantic-conventions': 1.28.0
+      '@sentry/core': 8.47.0
+
   '@sentry/opentelemetry@8.47.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.56.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.34.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -11200,6 +11319,15 @@ snapshots:
       '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.28.0
       '@sentry/core': 8.47.0
+
+  '@sentry/opentelemetry@8.49.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.56.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/semantic-conventions@1.34.0)':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation': 0.56.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/semantic-conventions': 1.34.0
+      '@sentry/core': 8.49.0
 
   '@sentry/serverless@7.112.2':
     dependencies:
@@ -13072,18 +13200,22 @@ snapshots:
 
   domino@2.1.6: {}
 
-  dotenv-cli@8.0.0:
+  dotenv-cli@11.0.0:
     dependencies:
       cross-spawn: 7.0.6
-      dotenv: 16.4.5
-      dotenv-expand: 10.0.0
+      dotenv: 17.3.1
+      dotenv-expand: 12.0.3
       minimist: 1.2.8
 
-  dotenv-expand@10.0.0: {}
+  dotenv-expand@12.0.3:
+    dependencies:
+      dotenv: 16.4.5
 
   dotenv@16.0.3: {}
 
   dotenv@16.4.5: {}
+
+  dotenv@17.3.1: {}
 
   downlevel-dts@0.11.0:
     dependencies:
