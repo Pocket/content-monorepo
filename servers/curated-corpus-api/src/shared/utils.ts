@@ -12,7 +12,7 @@ import { DateTime } from 'luxon';
  * @param date
  */
 export const getUnixTimestamp = (date: Date): number => {
-  return parseInt((date.getTime() / 1000).toFixed(0));
+  return Math.floor(date.getTime() / 1000);
 };
 
 /**

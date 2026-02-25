@@ -5,6 +5,7 @@ import {
   getCorpusItemFromApprovedItem,
   getScheduledSurfaceByAccessGroup,
   getScheduledSurfaceByGuid,
+  getUnixTimestamp,
   toUtcDateString,
   getPocketPath,
   getNormalizedDomainFromUrl,
@@ -17,6 +18,17 @@ import {
 import { ApprovedItem } from '../database/types';
 
 describe('shared/utils', () => {
+  describe('getUnixTimestamp', () => {
+    it('should truncate (floor) milliseconds, not round them', () => {
+      // A date with 999 milliseconds. Rounding would produce a timestamp
+      // 1 second in the future; correct behavior is to truncate (floor).
+      const date = new Date('2024-06-15T12:00:00.999Z');
+      const expected = Math.floor(date.getTime() / 1000);
+
+      expect(getUnixTimestamp(date)).toBe(expected);
+    });
+  });
+
   // Timezones to test
   const timezones = [
     'UTC',
