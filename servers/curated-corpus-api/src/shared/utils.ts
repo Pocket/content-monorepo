@@ -146,8 +146,9 @@ const getUrlType = (path: string): CorpusTargetType => {
   return null;
 };
 
-export const getUrlId = (path: string): string => {
-  return path.match(slugRegex)[1];
+export const getUrlId = (path: string): string | null => {
+  const match = path.match(slugRegex);
+  return match ? match[1] : null;
 };
 
 /**

@@ -212,6 +212,20 @@ describe('shared/utils', () => {
         key: 'foo-bar',
       });
     });
+    it('should not crash on collection URLs without a slug', () => {
+      // A URL like /collections/ (trailing slash, no slug) matches the
+      // type prefix but has no slug for the regex to extract.
+      // This should return gracefully, not throw a TypeError.
+      expect(
+        getPocketPath('https://getpocket.com/collections/'),
+      ).toEqual({
+        locale: null,
+        path: '/collections/',
+        type: 'Collection',
+        key: null,
+      });
+    });
+
     it('doesnt match other pocket urls', () => {
       expect(getPocketPath('https://getpocket.com/saves')).toEqual({
         locale: null,
