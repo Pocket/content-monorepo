@@ -96,6 +96,34 @@ describe('utils', function () {
       // Required by client-api for disambiguation
       expect(result.header.kid).toEqual('helloworld');
     });
+
+    it('should truncate (floor) the current time, not round it, when generating iat', () => {
+      // Use a time with >= 500ms to expose Math.round vs Math.floor difference
+      const timeWithMs = new Date('2021-01-01 10:20:30.999');
+      jest.setSystemTime(timeWithMs);
+
+      const jwtConfig: JwtConfig = {
+        aud: 'test-aud',
+        groups: ['test-group'],
+        iss: 'test-iss',
+        name: 'test-name',
+        userId: 'test-userId',
+      };
+      const token = generateJwt(jwtConfig, testPrivateKey);
+
+      const result = jwt.verify(token, jwkToPem(testPublicKey), {
+        complete: true,
+      });
+
+      const payload = result.payload;
+
+      // Math.floor(timeWithMs.getTime() / 1000) should be used, not Math.round
+      const expectedIat = Math.floor(timeWithMs.getTime() / 1000);
+      expect(payload.iat).toEqual(expectedIat);
+
+      // Restore the original fake time for other tests
+      jest.setSystemTime(now);
+    });
   });
 
   describe('getLambdaPrivateJwtKey', () => {
