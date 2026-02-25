@@ -75,8 +75,15 @@ describe('content-common', () => {
         'this is a very long string that will be more than one hundred characters. it is a real epic of a comment, which was the style at the time.';
 
       expect(sanitizeText(string, maxStringLength)).toEqual(
-        'this is a very long string that will be more than one hundred characters. it is a real epic of a co',
+        'this is a very long string that will be more than one hundred characters. it is a real epic of a com',
       );
+    });
+
+    it('should return exactly maxLength characters when input exceeds maxLength', () => {
+      // 'a' repeated 20 times, with maxLength = 10
+      const input = 'a'.repeat(20);
+      const result = sanitizeText(input, 10);
+      expect(result.length).toBe(10);
     });
   });
 
