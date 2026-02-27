@@ -5,6 +5,7 @@ import {
   getCorpusItemFromApprovedItem,
   getScheduledSurfaceByAccessGroup,
   getScheduledSurfaceByGuid,
+  getUnixTimestamp,
   toUtcDateString,
   getPocketPath,
   getNormalizedDomainFromUrl,
@@ -17,6 +18,17 @@ import {
 import { ApprovedItem } from '../database/types';
 
 describe('shared/utils', () => {
+  describe('getUnixTimestamp', () => {
+    it('should truncate (floor) milliseconds, not round them', () => {
+      // A date with 999 milliseconds. Rounding would produce a timestamp
+      // 1 second in the future; correct behavior is to truncate (floor).
+      const date = new Date('2024-06-15T12:00:00.999Z');
+      const expected = Math.floor(date.getTime() / 1000);
+
+      expect(getUnixTimestamp(date)).toBe(expected);
+    });
+  });
+
   // Timezones to test
   const timezones = [
     'UTC',
@@ -200,6 +212,20 @@ describe('shared/utils', () => {
         key: 'foo-bar',
       });
     });
+    it('should not crash on collection URLs without a slug', () => {
+      // A URL like /collections/ (trailing slash, no slug) matches the
+      // type prefix but has no slug for the regex to extract.
+      // This should return gracefully, not throw a TypeError.
+      expect(
+        getPocketPath('https://getpocket.com/collections/'),
+      ).toEqual({
+        locale: null,
+        path: '/collections/',
+        type: 'Collection',
+        key: null,
+      });
+    });
+
     it('doesnt match other pocket urls', () => {
       expect(getPocketPath('https://getpocket.com/saves')).toEqual({
         locale: null,
