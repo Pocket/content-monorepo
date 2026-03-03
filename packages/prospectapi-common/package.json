@@ -25,7 +25,7 @@
     "@aws-sdk/lib-dynamodb": "3.529.1",
     "@aws-sdk/util-dynamodb": "3.529.1",
     "content-common": "workspace:*",
-    "@sentry/node": "8.47.0",
+    "@sentry/node": "10.40.0",
     "tslib": "2.7.0"
   },
   "devDependencies": {

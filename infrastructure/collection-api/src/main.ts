@@ -325,8 +325,8 @@ class CollectionAPI extends TerraformStack {
         // 2023-10-30: 3x request volume caused spikes in 504 errors, CPU, memory, latency.
         // Even though task count scaled out to 10, the CPU load was still 80%.
         // Allow for faster auto-scaling to handle request spikes from scheduled tasks.
-        targetMinCapacity: config.environment === 'Prod' ? 4 : 1,
-        targetMaxCapacity: config.environment === 'Prod' ? 20 : 4,
+        targetMinCapacity: config.environment === 'Prod' ? 0 : 1,
+        targetMaxCapacity: config.environment === 'Prod' ? 0 : 4,
         scaleOutThreshold: 25,
         scaleInThreshold: 15,
         stepScaleOutAdjustment: 4,

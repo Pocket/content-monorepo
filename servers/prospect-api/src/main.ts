@@ -1,30 +1,21 @@
-import { initSentry } from '@pocket-tools/sentry';
+import * as Sentry from '@sentry/node';
 import config from './config';
 
 // Init sentry MUST come before any other imports for auto instrumentation to kick in (request isolation)
-initSentry({
+Sentry.init({
   ...config.sentry,
-  skipOpenTelemetrySetup: true,
-  integrations(integrations) {
-    // we need to filter out NodeFetch integrations to avoid double tracing of
-    // HTTP requests. HTTP instrumentation is already configured by default in
-    // Sentry, which captures HTTP requests made by node fetch.
-    return integrations.filter((integration) => {
-      return integration.name !== 'NodeFetch';
-    });
-  },
-});
-
-import { nodeSDKBuilder } from '@pocket-tools/tracing';
-import { unleash } from './unleash';
-
-nodeSDKBuilder({ ...config.tracing, unleash: unleash() }).then(() => {
-  startServer(config.app.port).then(async ({ url }) => {
-    serverLogger.info(
-      `🚀 Server server is ready at http://localhost:${config.app.port}${url}`,
-    );
-  });
+  tracesSampleRate: 0.0,
+  includeLocalVariables: true,
+  maxValueLength: 2000,
 });
 
 import { serverLogger } from '@pocket-tools/ts-logger';
 import { startServer } from './express';
+
+(async () => {
+  startServer(config.app.port).then(async ({ url }) => {
+    serverLogger.info(
+      `🚀 Admin server is ready at http://localhost:${config.app.port}${url}`,
+    );
+  });
+})();
