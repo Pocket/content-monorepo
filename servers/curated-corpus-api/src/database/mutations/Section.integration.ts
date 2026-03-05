@@ -267,7 +267,7 @@ describe('Section', () => {
       expect(result.title).toEqual('Fake Custom Section Title');
     });
 
-    it('should append a suffix when a slug collision occurs on the same surface', async () => {
+    it('should append a suffix when a slug collision occurs', async () => {
       const baseInput: CreateCustomSectionInput = {
         title: 'Breaking News',
         description: 'description',
@@ -285,7 +285,7 @@ describe('Section', () => {
       expect(second.externalId).toEqual('breaking-news-2');
     });
 
-    it('should allow the same slug on different surfaces', async () => {
+    it('should detect collisions across surfaces (externalId is globally unique)', async () => {
       const usSection = await createCustomSection(db, {
         title: 'Breaking News',
         description: 'description',
@@ -306,7 +306,7 @@ describe('Section', () => {
       });
 
       expect(usSection.externalId).toEqual('breaking-news');
-      expect(gbSection.externalId).toEqual('breaking-news');
+      expect(gbSection.externalId).toEqual('breaking-news-2');
     });
 
     it('should check collisions against inactive sections', async () => {

@@ -173,11 +173,7 @@ export async function createCustomSection(
     allowAds,
   } = data;
 
-  const externalId = await generateSectionSlug(
-    title,
-    scheduledSurfaceGuid,
-    db,
-  );
+  const externalId = await generateSectionSlug(title, db);
 
   const createData = {
     externalId,

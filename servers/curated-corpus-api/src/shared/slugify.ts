@@ -39,24 +39,20 @@ export function titleToSlug(title: string): string {
 
 /**
  * Generates a unique section slug from a title, checking for collisions
- * against all sections (active and inactive) within the same
- * scheduledSurfaceGuid.
+ * globally against all sections (active and inactive). externalId has a
+ * global unique constraint in the database.
  *
  * On collision, appends -2, -3, etc.
  */
 export async function generateSectionSlug(
   title: string,
-  scheduledSurfaceGuid: string,
   db: PrismaClient,
 ): Promise<string> {
   const baseSlug = titleToSlug(title);
 
-  // Check if the base slug is available
-  const existing = await db.section.findFirst({
-    where: {
-      externalId: baseSlug,
-      scheduledSurfaceGuid,
-    },
+  // Check if the base slug is available (global uniqueness)
+  const existing = await db.section.findUnique({
+    where: { externalId: baseSlug },
   });
 
   if (!existing) {
@@ -66,7 +62,6 @@ export async function generateSectionSlug(
   // Find all colliding slugs to determine the next suffix
   const collisions = await db.section.findMany({
     where: {
-      scheduledSurfaceGuid,
       externalId: { startsWith: baseSlug },
     },
     select: { externalId: true },
