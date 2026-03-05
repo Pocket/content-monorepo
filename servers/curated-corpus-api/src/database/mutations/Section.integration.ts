@@ -240,6 +240,8 @@ describe('Section', () => {
 
       const result = await createCustomSection(db, input);
 
+      // externalId should be a slug derived from the title
+      expect(result.externalId).toEqual('fake-custom-section-title');
       expect(result.title).toEqual('Fake Custom Section Title');
       expect(result.description).toEqual('fake custom section description');
       expect(result.heroTitle).toEqual('fake hero title');
@@ -261,7 +263,71 @@ describe('Section', () => {
 
       const result = await createCustomSection(db, input);
 
+      expect(result.externalId).toEqual('fake-custom-section-title');
       expect(result.title).toEqual('Fake Custom Section Title');
+    });
+
+    it('should append a suffix when a slug collision occurs on the same surface', async () => {
+      const baseInput: CreateCustomSectionInput = {
+        title: 'Breaking News',
+        description: 'description',
+        startDate: '2025-01-01',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        createSource: ActivitySource.MANUAL,
+        active: true,
+        disabled: false,
+      };
+
+      const first = await createCustomSection(db, baseInput);
+      const second = await createCustomSection(db, baseInput);
+
+      expect(first.externalId).toEqual('breaking-news');
+      expect(second.externalId).toEqual('breaking-news-2');
+    });
+
+    it('should allow the same slug on different surfaces', async () => {
+      const usSection = await createCustomSection(db, {
+        title: 'Breaking News',
+        description: 'description',
+        startDate: '2025-01-01',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        createSource: ActivitySource.MANUAL,
+        active: true,
+        disabled: false,
+      });
+      const gbSection = await createCustomSection(db, {
+        title: 'Breaking News',
+        description: 'description',
+        startDate: '2025-01-01',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_GB,
+        createSource: ActivitySource.MANUAL,
+        active: true,
+        disabled: false,
+      });
+
+      expect(usSection.externalId).toEqual('breaking-news');
+      expect(gbSection.externalId).toEqual('breaking-news');
+    });
+
+    it('should check collisions against inactive sections', async () => {
+      const baseInput: CreateCustomSectionInput = {
+        title: 'Breaking News',
+        description: 'description',
+        startDate: '2025-01-01',
+        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
+        createSource: ActivitySource.MANUAL,
+        active: true,
+        disabled: false,
+      };
+
+      const first = await createCustomSection(db, baseInput);
+
+      // Soft-delete the first section
+      await deleteCustomSection(db, first.id, first.externalId);
+
+      // Create another with the same title — should still get suffix
+      const second = await createCustomSection(db, baseInput);
+      expect(second.externalId).toEqual('breaking-news-2');
     });
   });
 

@@ -82,6 +82,10 @@ describe('mutations: Section (createCustomSection)', () => {
     expect(result.body.errors).toBeUndefined();
     expect(result.body.data).not.toBeNull();
 
+    // externalId should be a slug derived from the title
+    expect(result.body.data?.createCustomSection.externalId).toEqual(
+      'fake-custom-section-title',
+    );
     // Expect all fields to be set correctly
     expect(result.body.data?.createCustomSection.title).toEqual(
       'Fake Custom Section Title',
