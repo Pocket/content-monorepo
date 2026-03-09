@@ -5,7 +5,7 @@ import { UserInputError } from '@pocket-tools/apollo-utils';
 // Based on collection-api config, extended to cover more special characters
 const SLUGIFY_CONFIG = {
   lower: true,
-  remove: /[*+~.()'"!:@?#$%^&{}|\\<>,;=\/]/g,
+  remove: /[*+~.()'"!:@?#$%^&{}|\\<>,;=/]/g,
 };
 
 // The longest custom section title in production is 47 characters. Slugs are
