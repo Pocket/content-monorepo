@@ -8,15 +8,10 @@ const SLUGIFY_CONFIG = {
   remove: /[*+~.()'"!:@?#$%^&{}|\\<>,;=/]/g,
 };
 
-// The longest custom section title in production is 47 characters. Slugs are
-// shorter than titles (special characters removed), so 50 is comfortably above
-// any observed value while keeping slugs tidy in analytics dashboards.
-const MAX_SLUG_LENGTH = 50;
-
 /**
  * Generates a slug from a title string.
  * Transliterates to ASCII, lowercases, replaces spaces with hyphens,
- * removes special characters, and hard-truncates at MAX_SLUG_LENGTH.
+ * and removes special characters.
  */
 export function titleToSlug(title: string): string {
   const raw = slugify(title, SLUGIFY_CONFIG);
@@ -27,7 +22,7 @@ export function titleToSlug(title: string): string {
     );
   }
 
-  return raw.length <= MAX_SLUG_LENGTH ? raw : raw.substring(0, MAX_SLUG_LENGTH);
+  return raw;
 }
 
 /**

@@ -40,13 +40,6 @@ describe('titleToSlug', () => {
     expect(titleToSlug('Über Wissenschaft')).toEqual('uber-wissenschaft');
   });
 
-  it('should truncate long slugs to 50 characters', () => {
-    const longTitle =
-      'This Is a Very Long Title That Exceeds the Maximum Allowed Length for Slugs';
-    const slug = titleToSlug(longTitle);
-    expect(slug.length).toBeLessThanOrEqual(50);
-  });
-
   it('should throw UserInputError for a title that produces an empty slug', () => {
     expect(() => titleToSlug('???')).toThrow(
       'Cannot generate a slug from the provided title',
