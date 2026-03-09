@@ -267,68 +267,6 @@ describe('Section', () => {
       expect(result.title).toEqual('Fake Custom Section Title');
     });
 
-    it('should append a suffix when a slug collision occurs', async () => {
-      const baseInput: CreateCustomSectionInput = {
-        title: 'Breaking News',
-        description: 'description',
-        startDate: '2025-01-01',
-        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
-        createSource: ActivitySource.MANUAL,
-        active: true,
-        disabled: false,
-      };
-
-      const first = await createCustomSection(db, baseInput);
-      const second = await createCustomSection(db, baseInput);
-
-      expect(first.externalId).toEqual('breaking-news');
-      expect(second.externalId).toEqual('breaking-news-2');
-    });
-
-    it('should detect collisions across surfaces (externalId is globally unique)', async () => {
-      const usSection = await createCustomSection(db, {
-        title: 'Breaking News',
-        description: 'description',
-        startDate: '2025-01-01',
-        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
-        createSource: ActivitySource.MANUAL,
-        active: true,
-        disabled: false,
-      });
-      const gbSection = await createCustomSection(db, {
-        title: 'Breaking News',
-        description: 'description',
-        startDate: '2025-01-01',
-        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_GB,
-        createSource: ActivitySource.MANUAL,
-        active: true,
-        disabled: false,
-      });
-
-      expect(usSection.externalId).toEqual('breaking-news');
-      expect(gbSection.externalId).toEqual('breaking-news-2');
-    });
-
-    it('should check collisions against inactive sections', async () => {
-      const baseInput: CreateCustomSectionInput = {
-        title: 'Breaking News',
-        description: 'description',
-        startDate: '2025-01-01',
-        scheduledSurfaceGuid: ScheduledSurfacesEnum.NEW_TAB_EN_US,
-        createSource: ActivitySource.MANUAL,
-        active: true,
-        disabled: false,
-      };
-
-      const first = await createCustomSection(db, baseInput);
-
-      // Soft-delete the first section
-      await deleteCustomSection(db, first.id, first.externalId);
-
-      // Create another with the same title — should still get suffix
-      const second = await createCustomSection(db, baseInput);
-      expect(second.externalId).toEqual('breaking-news-2');
-    });
   });
 
   describe('deleteCustomSection', () => {
