@@ -138,6 +138,7 @@ class CollectionAPI extends TerraformStack {
           maxCapacity: config.rds.maxCapacity,
         },
         createServerlessV2Instance: true,
+        finalSnapshotIdentifier: 'collectionApiFinalSnapshot',
       },
       tags: config.tags,
     });
