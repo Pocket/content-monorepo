@@ -16,8 +16,7 @@ const MAX_SLUG_LENGTH = 50;
 /**
  * Generates a slug from a title string.
  * Transliterates to ASCII, lowercases, replaces spaces with hyphens,
- * removes special characters, and truncates to MAX_SLUG_LENGTH at a
- * word boundary.
+ * removes special characters, and hard-truncates at MAX_SLUG_LENGTH.
  */
 export function titleToSlug(title: string): string {
   const raw = slugify(title, SLUGIFY_CONFIG);
@@ -53,10 +52,13 @@ export async function generateSectionSlug(
     return baseSlug;
   }
 
-  // Find all colliding slugs to determine the next suffix
+  // Find all colliding slugs (exact match + suffixed variants like -2, -3)
   const collisions = await db.section.findMany({
     where: {
-      externalId: { startsWith: baseSlug },
+      OR: [
+        { externalId: baseSlug },
+        { externalId: { startsWith: `${baseSlug}-` } },
+      ],
     },
     select: { externalId: true },
   });

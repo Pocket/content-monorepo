@@ -62,14 +62,15 @@ describe('titleToSlug', () => {
 
 /**
  * Builds a mock PrismaClient where the given slugs already exist.
- * findUnique returns a hit if the base slug is in the list;
- * findMany returns all of them (simulating startsWith results).
+ * findUnique looks up by externalId; findMany returns all rows.
  */
 function mockDbWithSlugs(...existing: string[]): PrismaClient {
   const rows = existing.map((externalId) => ({ externalId }));
   return {
     section: {
-      findUnique: jest.fn().mockResolvedValue(existing.length ? rows[0] : null),
+      findUnique: jest.fn().mockImplementation(({ where: { externalId } }) =>
+        Promise.resolve(rows.find((r) => r.externalId === externalId) ?? null),
+      ),
       findMany: jest.fn().mockResolvedValue(rows),
     },
   } as unknown as PrismaClient;
@@ -107,9 +108,10 @@ describe('generateSectionSlug', () => {
     expect(slug).toEqual('breaking-news-2');
   });
 
-  it('should not be confused by slugs that share a prefix', async () => {
-    // "breaking-news-today" matches startsWith("breaking-news") but is
-    // not a collision suffix — it should not affect suffix numbering.
+  it('should not be confused by non-numeric suffixes in results', async () => {
+    // "breaking-news-today" matches startsWith("breaking-news-") and
+    // appears in findMany results, but the suffix loop only checks
+    // numeric suffixes so it should not affect numbering.
     const slug = await generateSectionSlug(
       title,
       mockDbWithSlugs('breaking-news', 'breaking-news-today'),
