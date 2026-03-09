@@ -17,6 +17,7 @@ import {
 import { ActivitySource, ScheduledSurfacesEnum } from 'content-common';
 import { IABMetadata } from 'content-common';
 import { CreateCustomSectionInput, UpdateCustomSectionInput } from '../types';
+import { generateSectionSlug } from '../../shared/slugify';
 
 describe('Section', () => {
   let db: PrismaClient;
@@ -537,6 +538,69 @@ describe('Section', () => {
       expect(result.active).toBe(true); // Should remain unchanged
       expect(result.disabled).toBe(false); // Should remain unchanged
       expect(result.scheduledSurfaceGuid).toEqual(ScheduledSurfacesEnum.NEW_TAB_EN_US); // Should remain unchanged
+    });
+  });
+
+  describe('generateSectionSlug', () => {
+    it('should return base slug when no collision exists', async () => {
+      const slug = await generateSectionSlug('Breaking News', db);
+      expect(slug).toEqual('breaking-news');
+    });
+
+    it('should append -2 on first collision', async () => {
+      await createSectionHelper(db, {
+        externalId: 'breaking-news',
+        title: 'Breaking News',
+      });
+
+      const slug = await generateSectionSlug('Breaking News', db);
+      expect(slug).toEqual('breaking-news-2');
+    });
+
+    it('should skip taken suffixes', async () => {
+      await createSectionHelper(db, {
+        externalId: 'breaking-news',
+        title: 'Breaking News',
+      });
+      await createSectionHelper(db, {
+        externalId: 'breaking-news-2',
+        title: 'Breaking News',
+      });
+      await createSectionHelper(db, {
+        externalId: 'breaking-news-3',
+        title: 'Breaking News',
+      });
+
+      const slug = await generateSectionSlug('Breaking News', db);
+      expect(slug).toEqual('breaking-news-4');
+    });
+
+    it('should fill gaps in suffix sequence', async () => {
+      await createSectionHelper(db, {
+        externalId: 'breaking-news',
+        title: 'Breaking News',
+      });
+      await createSectionHelper(db, {
+        externalId: 'breaking-news-3',
+        title: 'Breaking News',
+      });
+
+      const slug = await generateSectionSlug('Breaking News', db);
+      expect(slug).toEqual('breaking-news-2');
+    });
+
+    it('should not be confused by non-numeric suffixes', async () => {
+      await createSectionHelper(db, {
+        externalId: 'breaking-news',
+        title: 'Breaking News',
+      });
+      await createSectionHelper(db, {
+        externalId: 'breaking-news-today',
+        title: 'Breaking News Today',
+      });
+
+      const slug = await generateSectionSlug('Breaking News', db);
+      expect(slug).toEqual('breaking-news-2');
     });
   });
 });

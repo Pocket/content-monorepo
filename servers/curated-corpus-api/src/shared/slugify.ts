@@ -2,19 +2,13 @@ import slugify from 'slugify';
 import { PrismaClient } from '.prisma/client';
 import { UserInputError } from '@pocket-tools/apollo-utils';
 
-// Based on collection-api config, extended to cover more special characters
-const SLUGIFY_CONFIG = {
-  lower: true,
-  remove: /[*+~.()'"!:@?#$%^&{}|\\<>,;=/]/g,
-};
-
 /**
  * Generates a slug from a title string.
  * Transliterates to ASCII, lowercases, replaces spaces with hyphens,
  * and removes special characters.
  */
 export function titleToSlug(title: string): string {
-  const raw = slugify(title, SLUGIFY_CONFIG);
+  const raw = slugify(title, { lower: true, strict: true });
 
   if (!raw) {
     throw new UserInputError(
