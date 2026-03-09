@@ -20,7 +20,7 @@ on:
       - '.github/workflows/section-manager-lambda.yml'
 jobs:
   infrastructure:
-    # this will reference the file below on the main branch
+    # this will reference the file below on the main branch.
     uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main
     with:
       scope: section-manager-lambda-cdk
