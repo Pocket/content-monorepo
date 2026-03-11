@@ -1,5 +1,4 @@
 import slugify from 'slugify';
-import { PrismaClient } from '.prisma/client';
 import { UserInputError } from '@pocket-tools/apollo-utils';
 
 /**
@@ -20,39 +19,23 @@ export function titleToSlug(title: string): string {
 }
 
 /**
- * Generates a unique section slug from a title, checking for collisions
- * globally against all sections (active and inactive). externalId has a
- * global unique constraint in the database.
+ * Resolves a unique slug from a base slug and a list of existing colliding
+ * externalIds. If the base slug is not taken, returns it directly. Otherwise,
+ * appends -2, -3, etc. until a free slug is found.
  *
- * On collision, appends -2, -3, etc.
+ * @param baseSlug - the slug generated from titleToSlug
+ * @param collisions - array of existing externalIds that match the base slug
+ *   or start with `${baseSlug}-`
  */
-export async function generateSectionSlug(
-  title: string,
-  db: PrismaClient,
-): Promise<string> {
-  const baseSlug = titleToSlug(title);
+export function resolveSlugCollisions(
+  baseSlug: string,
+  collisions: string[],
+): string {
+  const collisionSet = new Set(collisions);
 
-  // Check if the base slug is available (global uniqueness)
-  const existing = await db.section.findUnique({
-    where: { externalId: baseSlug },
-  });
-
-  if (!existing) {
+  if (!collisionSet.has(baseSlug)) {
     return baseSlug;
   }
-
-  // Find all colliding slugs (exact match + suffixed variants like -2, -3)
-  const collisions = await db.section.findMany({
-    where: {
-      OR: [
-        { externalId: baseSlug },
-        { externalId: { startsWith: `${baseSlug}-` } },
-      ],
-    },
-    select: { externalId: true },
-  });
-
-  const collisionSet = new Set(collisions.map((s) => s.externalId));
 
   let suffix = 2;
   while (collisionSet.has(`${baseSlug}-${suffix}`)) {

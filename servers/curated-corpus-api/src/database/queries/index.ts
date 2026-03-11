@@ -13,4 +13,8 @@ export {
   getScheduledItems,
   getItemsForScheduledSurface,
 } from './ScheduledItem';
-export { getSectionsWithSectionItems } from './Section';
+export {
+  getSectionsWithSectionItems,
+  getSectionSlugCollisions,
+  generateSectionSlug,
+} from './Section';
