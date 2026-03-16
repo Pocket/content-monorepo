@@ -169,6 +169,7 @@ export async function createCustomSection(
     sort,
     createSource,
     active,
+    disabled,
     followable,
     allowAds,
   } = data;
@@ -188,6 +189,7 @@ export async function createCustomSection(
     sort,
     createSource,
     active,
+    disabled,
     followable,
     allowAds,
   };

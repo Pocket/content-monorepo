@@ -120,6 +120,8 @@ describe('mutations: Section (createOrUpdateSection)', () => {
     expect(result.body.data?.createOrUpdateSection.sort).toEqual(1);
     expect(result.body.data?.createOrUpdateSection.createSource).toEqual('ML');
     expect(result.body.data?.createOrUpdateSection.active).toBeTruthy();
+    // New ML sections should be disabled by default, requiring explicit enablement
+    expect(result.body.data?.createOrUpdateSection.disabled).toBeTruthy();
   });
 
   it('should create a Section without optional properties', async () => {
