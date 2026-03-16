@@ -899,6 +899,9 @@ importers:
       prisma:
         specifier: 5.22.0
         version: 5.22.0
+      slugify:
+        specifier: 1.6.6
+        version: 1.6.6
       tldts:
         specifier: 5.7.87
         version: 5.7.87
@@ -8069,8 +8072,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typescript@6.0.0-dev.20260225:
-    resolution: {integrity: sha512-q2GQgpgls+G0UNriozf7YT37GfET/sMOUZzZ4emZ+4sOb0So8ePnFm6Xsz6x7SP1WjyZx1b17eG1eMnwqhg8nw==}
+  typescript@6.0.0-dev.20260305:
+    resolution: {integrity: sha512-JCpaEoo18VAXaQRsvdMLhwExx3k8QoryqWFTJXIvl3zkyVr5Gybd9Ap8mLatOP1RGfiUSYA7cW/mISZGBoBrbw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -13745,7 +13748,7 @@ snapshots:
     dependencies:
       semver: 7.7.2
       shelljs: 0.8.5
-      typescript: 6.0.0-dev.20260225
+      typescript: 6.0.0-dev.20260305
 
   drange@1.1.1: {}
 
@@ -17706,7 +17709,7 @@ snapshots:
 
   typescript@5.6.2: {}
 
-  typescript@6.0.0-dev.20260225: {}
+  typescript@6.0.0-dev.20260305: {}
 
   typia@7.6.4(@samchon/openapi@2.5.3)(typescript@5.6.2):
     dependencies:

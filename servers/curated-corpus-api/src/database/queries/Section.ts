@@ -1,6 +1,7 @@
 import { PrismaClient } from '.prisma/client';
 import { DateTime } from 'luxon';
 import { Section } from '../types';
+import { titleToSlug, resolveSlugCollisions } from '../../shared/slugify';
 
 /**
  * This query retrieves all active Sections & their associated active SectionItems for a given ScheduledSurface.
@@ -67,4 +68,42 @@ export async function getSectionsWithSectionItems(
   });
 
   return sections;
+}
+
+/**
+ * Returns all externalIds that match a base slug or start with `${baseSlug}-`.
+ * Used to detect collisions when generating unique section slugs.
+ */
+export async function getSectionSlugCollisions(
+  db: PrismaClient,
+  baseSlug: string,
+): Promise<string[]> {
+  const collisions = await db.section.findMany({
+    where: {
+      OR: [
+        { externalId: baseSlug },
+        { externalId: { startsWith: `${baseSlug}-` } },
+      ],
+    },
+    select: { externalId: true },
+  });
+
+  return collisions.map((s) => s.externalId);
+}
+
+/**
+ * Generates a unique section slug from a title, checking for collisions
+ * globally against all sections (active and inactive). externalId has a
+ * global unique constraint in the database.
+ *
+ * On collision, appends -2, -3, etc.
+ */
+export async function generateSectionSlug(
+  title: string,
+  db: PrismaClient,
+): Promise<string> {
+  const baseSlug = titleToSlug(title);
+  const collisions = await getSectionSlugCollisions(db, baseSlug);
+
+  return resolveSlugCollisions(baseSlug, collisions);
 }

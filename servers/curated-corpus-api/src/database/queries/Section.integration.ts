@@ -2,7 +2,11 @@ import { PrismaClient, Section} from '.prisma/client';
 
 import { client } from '../client';
 import { clearDb, createApprovedItemHelper } from '../../test/helpers';
-import { getSectionsWithSectionItems } from './Section';
+import {
+  getSectionsWithSectionItems,
+  getSectionSlugCollisions,
+  generateSectionSlug,
+} from './Section';
 import { createSectionHelper, createSectionItemHelper } from '../../test/helpers';
 import { ActivitySource, ScheduledSurfacesEnum } from 'content-common';
 
@@ -244,6 +248,52 @@ describe('Section', () => {
 
         expect(result).toEqual([]);
       });
+    });
+  });
+
+  describe('getSectionSlugCollisions', () => {
+    it('should return exact match and startsWith matches', async () => {
+      await createSectionHelper(db, {
+        externalId: 'breaking-news',
+        title: 'Breaking News',
+      });
+      await createSectionHelper(db, {
+        externalId: 'breaking-news-2',
+        title: 'Breaking News',
+      });
+      await createSectionHelper(db, {
+        externalId: 'breaking-news-today',
+        title: 'Breaking News Today',
+      });
+      await createSectionHelper(db, {
+        externalId: 'unrelated-slug',
+        title: 'Unrelated',
+      });
+
+      const collisions = await getSectionSlugCollisions(db, 'breaking-news');
+
+      expect(collisions.sort()).toEqual([
+        'breaking-news',
+        'breaking-news-2',
+        'breaking-news-today',
+      ]);
+    });
+
+    it('should return an empty array when no collisions exist', async () => {
+      const collisions = await getSectionSlugCollisions(db, 'no-match');
+      expect(collisions).toEqual([]);
+    });
+  });
+
+  describe('generateSectionSlug', () => {
+    it('should generate a unique slug with collision suffix', async () => {
+      await createSectionHelper(db, {
+        externalId: 'breaking-news',
+        title: 'Breaking News',
+      });
+
+      const slug = await generateSectionSlug('Breaking News', db);
+      expect(slug).toEqual('breaking-news-2');
     });
   });
 });

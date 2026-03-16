@@ -1,6 +1,7 @@
 import { PrismaClient, Prisma } from '.prisma/client';
 import { CreateCustomSectionInput, CreateSectionInput, DisableEnableSectionInput, UpdateCustomSectionInput, Section } from '../types';
 import { ActivitySource } from 'content-common';
+import { generateSectionSlug } from '../queries/Section';
 
 /**
  * This mutation creates a new Section.
@@ -172,7 +173,10 @@ export async function createCustomSection(
     allowAds,
   } = data;
 
+  const externalId = await generateSectionSlug(title, db);
+
   const createData = {
+    externalId,
     title,
     description,
     heroTitle,

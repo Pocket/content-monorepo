@@ -114,8 +114,10 @@ model ScheduleReview {
 // Sections allows us to group ApprovedItems arbitrarily for display on surfaces
 model Section {
   id                    Int             @id @default(autoincrement())
-  // note - for ML-generated Sections, externalId will be set by ML
-  externalId            String          @unique @default(uuid()) @db.VarChar(255)
+  // For ML-generated Sections, externalId is set by ML.
+  // For Custom (MANUAL) Sections, externalId is a human-readable slug
+  // generated from the section title (e.g. "breaking-news-2").
+  externalId            String          @unique @db.VarChar(255)
   title                 String          @db.VarChar(255)
   description           String?         @db.VarChar(255)
   heroTitle             String?         @db.VarChar(255)

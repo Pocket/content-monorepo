@@ -240,6 +240,8 @@ describe('Section', () => {
 
       const result = await createCustomSection(db, input);
 
+      // externalId should be a slug derived from the title
+      expect(result.externalId).toEqual('fake-custom-section-title');
       expect(result.title).toEqual('Fake Custom Section Title');
       expect(result.description).toEqual('fake custom section description');
       expect(result.heroTitle).toEqual('fake hero title');
@@ -261,8 +263,10 @@ describe('Section', () => {
 
       const result = await createCustomSection(db, input);
 
+      expect(result.externalId).toEqual('fake-custom-section-title');
       expect(result.title).toEqual('Fake Custom Section Title');
     });
+
   });
 
   describe('deleteCustomSection', () => {
@@ -535,4 +539,5 @@ describe('Section', () => {
       expect(result.scheduledSurfaceGuid).toEqual(ScheduledSurfacesEnum.NEW_TAB_EN_US); // Should remain unchanged
     });
   });
+
 });
