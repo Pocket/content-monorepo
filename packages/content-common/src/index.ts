@@ -44,7 +44,7 @@ export const sanitizeText = (input: string, maxLength: number): string => {
   sanitized = sanitized.replace(/  +/g, ' ');
 
   // trim to conform to our max length
-  return sanitized.substring(0, maxLength - 1);
+  return sanitized.substring(0, maxLength);
 };
 
 /**
