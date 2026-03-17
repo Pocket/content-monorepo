@@ -117,6 +117,7 @@ describe('SectionItemSnowplowHandler', () => {
 
   new SectionItemSnowplowHandler(emitter, tracker, [
     SectionItemEventType.ADD_SECTION_ITEM,
+    SectionItemEventType.UPDATE_SECTION_ITEM,
     SectionItemEventType.REMOVE_SECTION_ITEM,
   ]);
 
@@ -130,25 +131,31 @@ describe('SectionItemSnowplowHandler', () => {
       eventType: SectionItemEventType.ADD_SECTION_ITEM,
     });
 
+    emitter.emit(SectionItemEventType.UPDATE_SECTION_ITEM, {
+      ...sectionItemEventData,
+      eventType: SectionItemEventType.UPDATE_SECTION_ITEM,
+    });
+
     emitter.emit(SectionItemEventType.REMOVE_SECTION_ITEM, {
       ...sectionItemEventData,
       eventType: SectionItemEventType.REMOVE_SECTION_ITEM,
     });
 
     // make sure we only have good events
-    const allEvents = await waitForSnowplowEvents(2);
-    expect(allEvents.total).toEqual(2);
-    expect(allEvents.good).toEqual(2);
+    const allEvents = await waitForSnowplowEvents(3);
+    expect(allEvents.total).toEqual(3);
+    expect(allEvents.good).toEqual(3);
     expect(allEvents.bad).toEqual(0);
 
     const goodEvents = await getGoodSnowplowEvents();
 
     assertValidSnowplowSectionItemEvents(goodEvents[0].rawEvent.parameters.cx);
     assertValidSnowplowSectionItemEvents(goodEvents[1].rawEvent.parameters.cx);
+    assertValidSnowplowSectionItemEvents(goodEvents[2].rawEvent.parameters.cx);
 
     assertValidSnowplowObjectUpdateEvents(
       goodEvents.map((goodEvent) => goodEvent.rawEvent.parameters.ue_px),
-      ['section_item_added', 'section_item_removed'],
+      ['section_item_added', 'section_item_updated', 'section_item_removed'],
       'section_item',
     );
   });

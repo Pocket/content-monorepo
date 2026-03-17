@@ -100,9 +100,9 @@ export const processSqsSectionData = async (
             externalId: existingItem.externalId,
             rank: sqsSectionItem.rank,
           });
-          successfulCandidates++;
         }
-        // Skip creation — item already exists (rank updated if needed)
+        // Count as successful whether rank was updated or already matched
+        successfulCandidates++;
         continue;
       }
 

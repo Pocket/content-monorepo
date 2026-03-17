@@ -36,7 +36,7 @@ export interface SqsSectionItem {
 
 export interface ActiveSectionItem {
   externalId: string;
-  rank: number | null;
+  rank: number;
   approvedItem: {
     externalId: string;
     url: string;
@@ -62,7 +62,7 @@ export type CreateSectionItemApiInput = {
 
 export type UpdateSectionItemApiInput = {
   externalId: string;
-  rank?: number;
+  rank: number;
 };
 
 export type RemoveSectionItemApiInput = {

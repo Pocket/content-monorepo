@@ -152,7 +152,7 @@ export type CreateSectionItemApiInput = {
 
 export type UpdateSectionItemApiInput = {
   externalId: string;
-  rank?: number;
+  rank: number;
 };
 
 export type RemoveSectionItemApiInput = {
