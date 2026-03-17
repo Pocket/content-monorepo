@@ -1,8 +1,4 @@
-import {
-  AuthenticationError,
-  NotFoundError,
-  UserInputError,
-} from '@pocket-tools/apollo-utils';
+import { AuthenticationError, NotFoundError } from '@pocket-tools/apollo-utils';
 
 import {
   createSectionItem as dbCreateSectionItem,
@@ -94,14 +90,7 @@ export async function updateSectionItem(
   { data },
   context: IAdminContext,
 ): Promise<SectionItem> {
-  const { actionScreen, externalId, ...updateFields } = data;
-
-  // Validate at least one mutable field is provided
-  if (Object.keys(updateFields).length === 0) {
-    throw new UserInputError(
-      'At least one field to update must be provided.',
-    );
-  }
+  const { actionScreen, externalId, rank } = data;
 
   // Find the SectionItem and its parent Section for access control
   const existingItem = await context.db.sectionItem.findUnique({
@@ -123,7 +112,7 @@ export async function updateSectionItem(
 
   const sectionItem = await dbUpdateSectionItem(context.db, {
     externalId,
-    ...updateFields,
+    rank,
   });
 
   const sectionItemForEvents: SectionItemPayload = {

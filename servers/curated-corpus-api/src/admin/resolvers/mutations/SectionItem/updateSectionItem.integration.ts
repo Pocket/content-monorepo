@@ -146,43 +146,6 @@ describe('mutations: SectionItem (updateSectionItem)', () => {
     );
   });
 
-  it('should fail if no mutable fields are provided', async () => {
-    // Create a SectionItem first
-    const createResult = await request(app)
-      .post(graphQLUrl)
-      .set(headers)
-      .send({
-        query: print(CREATE_SECTION_ITEM),
-        variables: {
-          data: {
-            sectionExternalId: section.externalId,
-            approvedItemExternalId: approvedItem.externalId,
-            rank: 1,
-          },
-        },
-      });
-
-    const sectionItemExternalId =
-      createResult.body.data?.createSectionItem.externalId;
-
-    const result = await request(app)
-      .post(graphQLUrl)
-      .set(headers)
-      .send({
-        query: print(UPDATE_SECTION_ITEM),
-        variables: {
-          data: {
-            externalId: sectionItemExternalId,
-          },
-        },
-      });
-
-    expect(result.body.errors).not.toBeUndefined();
-    expect(result.body.errors?.[0].message).toContain(
-      'At least one field to update must be provided.',
-    );
-  });
-
   it('should not update an inactive SectionItem', async () => {
     // Directly create an inactive SectionItem in the DB
     const sectionItem = await createSectionItemHelper(db, {

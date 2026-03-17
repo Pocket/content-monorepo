@@ -99,14 +99,6 @@ describe('updateSectionItem resolver', () => {
     );
   });
 
-  it('should throw UserInputError if no mutable fields are provided', async () => {
-    const data = { externalId: 'section-item-uuid' };
-
-    await expect(
-      updateSectionItem(null, { data }, mockContext),
-    ).rejects.toThrow('At least one field to update must be provided.');
-  });
-
   it('should throw NotFoundError if section item does not exist', async () => {
     (mockContext.db as any).sectionItem.findUnique.mockResolvedValueOnce(null);
 

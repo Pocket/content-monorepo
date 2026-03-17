@@ -694,7 +694,7 @@ input UpdateSectionItemInput {
   """
   The updated rank of the SectionItem in relation to its siblings.
   """
-  rank: Int
+  rank: Int!
 }
 
 """

@@ -131,7 +131,7 @@ export type CreateSectionItemInput = {
 
 export type UpdateSectionItemInput = {
   externalId: string;
-  rank?: number | null;
+  rank: number;
 };
 
 export type RemoveSectionItemInput = {
