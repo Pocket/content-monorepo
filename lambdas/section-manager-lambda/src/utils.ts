@@ -23,6 +23,7 @@ import {
   createApprovedCorpusItem,
   createOrUpdateSection,
   createSectionItem,
+  updateSectionItem,
   getApprovedCorpusItemByUrl,
   removeSectionItem,
 } from './graphQlApiCalls';
@@ -65,9 +66,13 @@ export const processSqsSectionData = async (
 
   const sectionExternalId = sectionResult.externalId;
   const activeSectionItems = sectionResult.sectionItems || [];
-  // Get SectionItems URLs from existing active SectionItems
-  const activeSectionItemsUrlsSet = new Set(
-    activeSectionItems.map((item) => item.approvedItem.url),
+
+  // Build a map of URL -> { externalId, rank } for existing active items
+  const activeItemsByUrl = new Map(
+    activeSectionItems.map((item) => [
+      item.approvedItem.url,
+      { externalId: item.externalId, rank: item.rank },
+    ]),
   );
 
   // keep track of how many candidates succeeded, how many failed
@@ -85,11 +90,24 @@ export const processSqsSectionData = async (
     // convenience!
     const sqsSectionItem: SqsSectionItem = sqsSectionData.candidates[i];
     try {
-      let approvedItemExternalId: string;
-      // avoid creating SectionItem duplicates if the URL already exists
-      if (activeSectionItemsUrlsSet.has(sqsSectionItem.url)) {
+      // Check if URL already exists as an active SectionItem
+      const existingItem = activeItemsByUrl.get(sqsSectionItem.url);
+
+      if (existingItem) {
+        // URL exists — check if rank needs updating
+        if (existingItem.rank !== sqsSectionItem.rank) {
+          await updateSectionItem(config.adminApiEndpoint, graphHeaders, {
+            externalId: existingItem.externalId,
+            rank: sqsSectionItem.rank,
+          });
+          successfulCandidates++;
+        }
+        // Skip creation — item already exists (rank updated if needed)
         continue;
       }
+
+      let approvedItemExternalId: string;
+
       // see if the Corpus has an ApprovedItem matching the SectionItem's URL
       const approvedCorpusItem = await getApprovedCorpusItemByUrl(
         config.adminApiEndpoint,
@@ -117,15 +135,22 @@ export const processSqsSectionData = async (
 
       // call the mutation to createSectionItem using the ApprovedItem either
       // created or retrieved above
-      await createSectionItem(config.adminApiEndpoint, graphHeaders, {
-        approvedItemExternalId,
-        sectionExternalId,
-        rank: sqsSectionItem.rank,
-      });
+      const newSectionItemExternalId = await createSectionItem(
+        config.adminApiEndpoint,
+        graphHeaders,
+        {
+          approvedItemExternalId,
+          sectionExternalId,
+          rank: sqsSectionItem.rank,
+        },
+      );
       // Mark URL as active to prevent duplicate creation
       // ML should not be sending duplicate candidate URLs within a Section within the same run
       // this is a safe guard
-      activeSectionItemsUrlsSet.add(sqsSectionItem.url);
+      activeItemsByUrl.set(sqsSectionItem.url, {
+        externalId: newSectionItemExternalId,
+        rank: sqsSectionItem.rank,
+      });
       // update successful candidates count
       successfulCandidates++;
     } catch (e) {

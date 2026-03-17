@@ -1,7 +1,12 @@
-import { AuthenticationError, NotFoundError } from '@pocket-tools/apollo-utils';
+import {
+  AuthenticationError,
+  NotFoundError,
+  UserInputError,
+} from '@pocket-tools/apollo-utils';
 
 import {
   createSectionItem as dbCreateSectionItem,
+  updateSectionItem as dbUpdateSectionItem,
   removeSectionItem as dbRemoveSectionItem,
 } from '../../../../database/mutations';
 import { SectionItem } from '../../../../database/types';
@@ -71,6 +76,65 @@ export async function createSectionItem(
 
   context.emitSectionItemEvent(
     SectionItemEventType.ADD_SECTION_ITEM,
+    sectionItemForEvents,
+  );
+
+  return sectionItem;
+}
+
+/**
+ * Updates a SectionItem's mutable fields (e.g. rank).
+ *
+ * @param parent
+ * @param data
+ * @param context
+ */
+export async function updateSectionItem(
+  parent,
+  { data },
+  context: IAdminContext,
+): Promise<SectionItem> {
+  const { actionScreen, externalId, ...updateFields } = data;
+
+  // Validate at least one mutable field is provided
+  if (Object.keys(updateFields).length === 0) {
+    throw new UserInputError(
+      'At least one field to update must be provided.',
+    );
+  }
+
+  // Find the SectionItem and its parent Section for access control
+  const existingItem = await context.db.sectionItem.findUnique({
+    where: { externalId, active: true },
+    include: { section: true },
+  });
+
+  if (!existingItem) {
+    throw new NotFoundError(
+      `Cannot update a section item: Section item with id "${externalId}" does not exist.`,
+    );
+  }
+
+  const scheduledSurfaceGuid = existingItem.section.scheduledSurfaceGuid;
+
+  if (!context.authenticatedUser.canWriteToSurface(scheduledSurfaceGuid)) {
+    throw new AuthenticationError(ACCESS_DENIED_ERROR);
+  }
+
+  const sectionItem = await dbUpdateSectionItem(context.db, {
+    externalId,
+    ...updateFields,
+  });
+
+  const sectionItemForEvents: SectionItemPayload = {
+    sectionItem: {
+      ...sectionItem,
+      action_screen: actionScreen,
+    },
+  };
+
+  context.emitSectionItemEvent(
+    SectionItemEventType.UPDATE_SECTION_ITEM,
     sectionItemForEvents,
   );
 

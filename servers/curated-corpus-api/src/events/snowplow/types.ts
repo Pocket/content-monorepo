@@ -17,6 +17,7 @@ export type SnowplowEventType =
   | 'section_updated'
   | 'section_removed'
   | 'section_item_added'
+  | 'section_item_updated'
   | 'section_item_removed';
 
 export const ReviewedItemSnowplowEventMap: Record<
@@ -52,5 +53,6 @@ export const SectionItemSnowplowEventMap: Record<
   SnowplowEventType
 > = {
   ADD_SECTION_ITEM: 'section_item_added',
+  UPDATE_SECTION_ITEM: 'section_item_updated',
   REMOVE_SECTION_ITEM: 'section_item_removed',
 };

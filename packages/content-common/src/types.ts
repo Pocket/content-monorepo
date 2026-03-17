@@ -150,6 +150,11 @@ export type CreateSectionItemApiInput = {
   rank?: number;
 };
 
+export type UpdateSectionItemApiInput = {
+  externalId: string;
+  rank?: number;
+};
+
 export type RemoveSectionItemApiInput = {
   externalId: string;
   deactivateReasons: SectionItemRemovalReason[];

@@ -37,7 +37,7 @@ import {
   deleteCustomSection,
   updateCustomSection,
 } from './mutations/Section';
-import { createSectionItem, removeSectionItem } from './mutations/SectionItem';
+import { createSectionItem, updateSectionItem, removeSectionItem } from './mutations/SectionItem';
 import { createOrUpdatePublisherDomain } from './mutations/PublisherDomain';
 import { computeSectionStatus } from '../../shared/resolvers/fields/SectionStatus';
 import { getUrlMetadata } from './queries/UrlMetadata';
@@ -140,6 +140,7 @@ export const resolvers = {
     createScheduleReview: createScheduleReview,
     createOrUpdateSection: createOrUpdateSection,
     createSectionItem: createSectionItem,
+    updateSectionItem: updateSectionItem,
     removeSectionItem: removeSectionItem,
     disableEnableSection: disableEnableSection,
     createCustomSection: createCustomSection,

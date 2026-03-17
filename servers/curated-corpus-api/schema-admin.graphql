@@ -684,6 +684,20 @@ input CreateSectionItemInput {
 }
 
 """
+Input data for updating a SectionItem's mutable fields
+"""
+input UpdateSectionItemInput {
+  """
+  ID of the SectionItem. A string in UUID format.
+  """
+  externalId: ID!
+  """
+  The updated rank of the SectionItem in relation to its siblings.
+  """
+  rank: Int
+}
+
+"""
 Input data for removing a SectionItem
 """
 input RemoveSectionItemInput {
@@ -1391,6 +1405,11 @@ type Mutation {
   Creates a SectionItem within a Section.
   """
   createSectionItem(data: CreateSectionItemInput!): SectionItem!
+
+  """
+  Updates a SectionItem's mutable fields (e.g. rank).
+  """
+  updateSectionItem(data: UpdateSectionItemInput!): SectionItem!
 
   """
   Removes an active SectionItem from a Section.

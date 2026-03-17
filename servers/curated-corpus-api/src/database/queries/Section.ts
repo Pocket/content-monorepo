@@ -53,6 +53,7 @@ export async function getSectionsWithSectionItems(
         where: {
           active: true,
         },
+        orderBy: { rank: 'asc' },
         include: {
           approvedItem: {
             include: {

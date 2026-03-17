@@ -117,6 +117,7 @@ describe('SectionItemSnowplowHandler', () => {
 
   new SectionItemSnowplowHandler(emitter, tracker, [
     SectionItemEventType.ADD_SECTION_ITEM,
+    SectionItemEventType.UPDATE_SECTION_ITEM,
     SectionItemEventType.REMOVE_SECTION_ITEM,
   ]);
 
@@ -149,6 +150,47 @@ describe('SectionItemSnowplowHandler', () => {
     assertValidSnowplowObjectUpdateEvents(
       goodEvents.map((goodEvent) => goodEvent.rawEvent.parameters.ue_px),
       ['section_item_added', 'section_item_removed'],
+      'section_item',
+    );
+  });
+
+  it('should send a good event to Snowplow on section item update with rank', async () => {
+    const updatedSectionItem: SectionItemPayload = {
+      sectionItem: {
+        ...mockSectionItem,
+        rank: 5,
+      },
+    };
+
+    emitter.emit(SectionItemEventType.UPDATE_SECTION_ITEM, {
+      ...updatedSectionItem,
+      eventType: SectionItemEventType.UPDATE_SECTION_ITEM,
+    });
+
+    const allEvents = await waitForSnowplowEvents();
+    expect(allEvents.total).toEqual(1);
+    expect(allEvents.good).toEqual(1);
+    expect(allEvents.bad).toEqual(0);
+
+    const goodEvents = await getGoodSnowplowEvents();
+
+    const eventContext = parseSnowplowData(
+      goodEvents[0].rawEvent.parameters.cx,
+    );
+
+    expect(eventContext.data).toMatchObject([
+      {
+        schema: config.snowplow.schemas.sectionItem,
+        data: {
+          ...sectionItemEventContextData,
+          rank: 5,
+        },
+      },
+    ]);
+
+    assertValidSnowplowObjectUpdateEvents(
+      goodEvents.map((goodEvent) => goodEvent.rawEvent.parameters.ue_px),
+      ['section_item_updated'],
       'section_item',
     );
   });
