@@ -51,6 +51,11 @@ export default {
     source: 'curated-corpus-api',
     version: '0.0.2',
   },
+  gcp: {
+    projectId: process.env.GCP_EVENT_PROJECT || 'pocket-snowplow-shim-dev',
+    topicName: process.env.GCP_EVENT_TOPIC || 'snowplow-events-dev',
+    serviceAccountKey: process.env.GCP_EVENT_SERVICE_ACCOUNT_KEY || '',
+  },
   metadataParser: {
     endpoint: process.env.ZYTE_EXTRACT_API_ENDPOINT || '',
     apiKey: process.env.ZYTE_EXTRACT_API_KEY || '',

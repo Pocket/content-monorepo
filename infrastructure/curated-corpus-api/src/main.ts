@@ -257,6 +257,16 @@ class CuratedCorpusAPI extends TerraformStack {
               name: 'ZYTE_EXTRACT_API_ENDPOINT',
               value: 'https://api.zyte.com/v1/extract',
             },
+            {
+              name: 'GCP_EVENT_PROJECT',
+              value: 'pocket-snowplow-shim-dev',
+            },
+            {
+              name: 'GCP_EVENT_TOPIC',
+              value: config.isDev
+                ? 'snowplow-events-dev'
+                : 'snowplow-events-prod',
+            },
           ],
           logGroup: this.createCustomLogGroup('app'),
           logMultilinePattern: '^\\S.+',
@@ -280,6 +290,10 @@ class CuratedCorpusAPI extends TerraformStack {
             {
               name: 'ZYTE_EXTRACT_API_KEY',
               valueFrom: `arn:aws:secretsmanager:${region.name}:${caller.accountId}:secret:${config.name}/${config.environment}/ZYTE_EXTRACT_API_KEY`,
+            },
+            {
+              name: 'GCP_EVENT_SERVICE_ACCOUNT_KEY',
+              valueFrom: `arn:aws:secretsmanager:${region.name}:${caller.accountId}:secret:${config.name}/${config.environment}/GCP_EVENT_SERVICE_ACCOUNT_KEY`,
             },
           ],
         },
