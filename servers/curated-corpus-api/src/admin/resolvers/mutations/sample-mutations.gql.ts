@@ -119,6 +119,15 @@ export const CREATE_SECTION_ITEM = gql`
   ${AdminSectionItemData}
 `;
 
+export const UPDATE_SECTION_ITEM = gql`
+  mutation updateSectionItem($data: UpdateSectionItemInput!) {
+    updateSectionItem(data: $data) {
+      ...AdminSectionItemData
+    }
+  }
+  ${AdminSectionItemData}
+`;
+
 export const REMOVE_SECTION_ITEM = gql`
   mutation removeSectionItem($data: RemoveSectionItemInput!) {
     removeSectionItem(data: $data) {

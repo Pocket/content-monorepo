@@ -4,6 +4,7 @@ import { PrismaClient } from '.prisma/client';
 
 import {
   CreateSectionItemInput,
+  UpdateSectionItemInput,
   RemoveSectionItemInput,
   SectionItem,
 } from '../types';
@@ -78,6 +79,37 @@ export async function createSectionItem(
     },
   });
 }
+/**
+ * Updates a SectionItem's mutable fields (e.g. rank).
+ *
+ * @param db
+ * @param data
+ */
+export async function updateSectionItem(
+  db: PrismaClient,
+  data: UpdateSectionItemInput,
+): Promise<SectionItem> {
+  const { externalId, ...updateFields } = data;
+
+  return await db.sectionItem.update({
+    where: {
+      externalId,
+      active: true,
+    },
+    data: updateFields,
+    include: {
+      approvedItem: {
+        include: {
+          authors: {
+            orderBy: [{ sortOrder: 'asc' }],
+          },
+        },
+      },
+      section: true,
+    },
+  });
+}
+
 /**
  * This mutation removes a SectionItem from a Section.
  * The SectionItem is marked as in-active, `deactivatedBy` it set to MANUAL,

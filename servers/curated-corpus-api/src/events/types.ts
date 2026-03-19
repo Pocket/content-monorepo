@@ -24,6 +24,7 @@ export enum SectionEventType {
 
 export enum SectionItemEventType {
   ADD_SECTION_ITEM = 'ADD_SECTION_ITEM',
+  UPDATE_SECTION_ITEM = 'UPDATE_SECTION_ITEM',
   REMOVE_SECTION_ITEM = 'REMOVE_SECTION_ITEM',
 }
 

@@ -407,6 +407,7 @@ describe('utils', () => {
       const mockSectionItems = [
         {
           externalId: 'sectionItemExternalId1',
+          rank: 0,
           approvedItem: {
             externalId: 'approvedItemExternalId1',
             url: 'https://example-one.com',
@@ -414,6 +415,7 @@ describe('utils', () => {
         },
         {
           externalId: 'sectionItemExternalId2',
+          rank: 1,
           approvedItem: {
             externalId: 'approvedItemExternalId2',
             url: 'https://example-two.com',
@@ -579,16 +581,18 @@ describe('utils', () => {
         sectionItems: [
           {
             externalId: 'sectionItem1',
+            rank: 0,
             approvedItem: { externalId: 'approvedItem1', url: url1 },
           },
           {
             externalId: 'sectionItem2',
+            rank: 1,
             approvedItem: { externalId: 'approvedItem2', url: url2 },
           },
         ],
       });
 
-      // ML sends SectionItem payload with URL2 (already active) + URL3 (new)
+      // ML sends SectionItem payload with URL2 (already active, same rank) + URL3 (new)
       const sqs = createSqsSectionWithSectionItems({}, 0);
       sqs.candidates = [
         { url: url2, rank: 1 } as any,
@@ -631,6 +635,129 @@ describe('utils', () => {
           deactivateSource: 'ML',
         }),
       );
+    });
+
+    it('calls updateSectionItem when an existing item has a rank mismatch', async () => {
+      const url1 = 'https://example-one.com';
+      const url2 = 'https://example-two.com';
+
+      // Existing section has items with rank 0 and 1
+      mockCreateOrUpdateSection.mockResolvedValue({
+        externalId: 'sectionExternalId1',
+        sectionItems: [
+          {
+            externalId: 'sectionItem1',
+            rank: 0,
+            approvedItem: { externalId: 'approvedItem1', url: url1 },
+          },
+          {
+            externalId: 'sectionItem2',
+            rank: 1,
+            approvedItem: { externalId: 'approvedItem2', url: url2 },
+          },
+        ],
+      });
+
+      // ML sends the same URLs but with swapped ranks
+      const sqs = createSqsSectionWithSectionItems({}, 0);
+      sqs.candidates = [
+        { url: url1, rank: 1 } as any,
+        { url: url2, rank: 0 } as any,
+      ];
+
+      const mockUpdateSectionItem = jest
+        .spyOn(GraphQlApiCalls, 'updateSectionItem')
+        .mockResolvedValue('sectionItem1');
+
+      await Utils.processSqsSectionData(sqs, jwtBearerToken);
+
+      // No new items should be created (both URLs already exist)
+      expect(mockCreateSectionItem).not.toHaveBeenCalled();
+
+      // Both items should be updated since ranks changed
+      expect(mockUpdateSectionItem).toHaveBeenCalledTimes(2);
+      expect(mockUpdateSectionItem).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        { externalId: 'sectionItem1', rank: 1 },
+      );
+      expect(mockUpdateSectionItem).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        { externalId: 'sectionItem2', rank: 0 },
+      );
+    });
+
+    it('skips updateSectionItem when an existing item rank matches', async () => {
+      const url1 = 'https://example-one.com';
+
+      // Existing section has item with rank 0
+      mockCreateOrUpdateSection.mockResolvedValue({
+        externalId: 'sectionExternalId1',
+        sectionItems: [
+          {
+            externalId: 'sectionItem1',
+            rank: 0,
+            approvedItem: { externalId: 'approvedItem1', url: url1 },
+          },
+        ],
+      });
+
+      // ML sends same URL with same rank
+      const sqs = createSqsSectionWithSectionItems({}, 0);
+      sqs.candidates = [{ url: url1, rank: 0 } as any];
+
+      const mockUpdateSectionItem = jest
+        .spyOn(GraphQlApiCalls, 'updateSectionItem')
+        .mockResolvedValue('sectionItem1');
+
+      await Utils.processSqsSectionData(sqs, jwtBearerToken);
+
+      // No creates, no updates
+      expect(mockCreateSectionItem).not.toHaveBeenCalled();
+      expect(mockUpdateSectionItem).not.toHaveBeenCalled();
+    });
+
+    it('continues processing if updateSectionItem fails for one item', async () => {
+      const url1 = 'https://example-one.com';
+      const url2 = 'https://example-two.com';
+
+      mockCreateOrUpdateSection.mockResolvedValue({
+        externalId: 'sectionExternalId1',
+        sectionItems: [
+          {
+            externalId: 'sectionItem1',
+            rank: 0,
+            approvedItem: { externalId: 'approvedItem1', url: url1 },
+          },
+          {
+            externalId: 'sectionItem2',
+            rank: 1,
+            approvedItem: { externalId: 'approvedItem2', url: url2 },
+          },
+        ],
+      });
+
+      // ML sends both URLs with changed ranks
+      const sqs = createSqsSectionWithSectionItems({}, 0);
+      sqs.candidates = [
+        { url: url1, rank: 5 } as any,
+        { url: url2, rank: 6 } as any,
+      ];
+
+      const mockUpdateSectionItem = jest
+        .spyOn(GraphQlApiCalls, 'updateSectionItem')
+        .mockRejectedValueOnce(new Error('Update failed'))
+        .mockResolvedValueOnce('sectionItem2');
+
+      await Utils.processSqsSectionData(sqs, jwtBearerToken);
+
+      // Both updates attempted
+      expect(mockUpdateSectionItem).toHaveBeenCalledTimes(2);
+
+      // One failure logged
+      expect(sentryStub).toHaveBeenCalledTimes(1);
+      expect(mockConsoleError).toHaveBeenCalledTimes(1);
     });
   });
 });

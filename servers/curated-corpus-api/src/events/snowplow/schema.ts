@@ -32,6 +32,7 @@ export type CuratedCorpusItemUpdate = {
     | 'section_updated' // Section is updated
     | 'section_removed' // Section is removed
     | 'section_item_added' // SectionItem is added
+    | 'section_item_updated' // SectionItem is updated
     | 'section_item_removed'; // SectionItem is removed
   object: 'reviewed_corpus_item' | 'scheduled_corpus_item' | 'section' | 'section_item';
 };

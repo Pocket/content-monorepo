@@ -12,6 +12,7 @@ import {
   ActiveSectionItem,
   CreateSectionItemApiInput,
   CreateOrUpdateSectionApiInput,
+  UpdateSectionItemApiInput,
   RemoveSectionItemApiInput,
 } from './types';
 
@@ -65,6 +66,7 @@ export const createOrUpdateSection = async (
                 externalId
                 sectionItems {
                   externalId
+                  rank
                   approvedItem {
                     externalId
                     url
@@ -100,6 +102,7 @@ export const createOrUpdateSection = async (
     externalId: section.externalId,
     sectionItems: sectionItems.map((item: any) => ({
       externalId: item.externalId,
+      rank: item.rank,
       approvedItem: {
         externalId: item.approvedItem.externalId,
         url: item.approvedItem.url,
@@ -199,6 +202,55 @@ export async function createSectionItem(
   }
 
   return result.data.createSectionItem.externalId;
+}
+
+/**
+ * Calls the updateSectionItem mutation in curated-corpus-api. Updates
+ * mutable fields on a SectionItem (e.g. rank).
+ *
+ * @param adminApiEndpoint  string
+ * @param graphHeaders GraphQlApiHeaders object
+ * @param data UpdateSectionItemApiInput
+ * @returns Promise<string> - externalId of the updated SectionItem
+ */
+export async function updateSectionItem(
+  adminApiEndpoint: string,
+  graphHeaders: GraphQlApiCallHeaders,
+  data: UpdateSectionItemApiInput,
+): Promise<string> {
+  await sleep(config.app.graphQLSleep);
+
+  const mutation = `
+    mutation UpdateSectionItem($data: UpdateSectionItemInput!) {
+      updateSectionItem(data: $data) {
+        externalId
+      }
+    }`;
+
+  const variables = { data };
+
+  const res = await fetch(adminApiEndpoint, {
+    method: 'post',
+    headers: graphHeaders,
+    body: JSON.stringify({ query: mutation, variables }),
+  });
+
+  const result = await res.json();
+
+  console.log(`UpdateSectionItem MUTATION OUTPUT: ${JSON.stringify(result)}`);
+
+  // check for any errors returned by the mutation
+  if (!result.data && result.errors?.length > 0) {
+    throw new Error(
+      `updateSectionItem mutation failed: ${result.errors[0].message}`,
+    );
+  }
+
+  if (!result.data) {
+    throw new Error('updateSectionItem mutation returned no data');
+  }
+
+  return result.data.updateSectionItem.externalId;
 }
 
 /**

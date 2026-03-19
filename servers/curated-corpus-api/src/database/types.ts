@@ -129,6 +129,11 @@ export type CreateSectionItemInput = {
   rank?: number;
 };
 
+export type UpdateSectionItemInput = {
+  externalId: string;
+  rank: number;
+};
+
 export type RemoveSectionItemInput = {
   externalId: string;
   deactivateReasons: SectionItemRemovalReason[];
