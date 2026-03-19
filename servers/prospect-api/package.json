@@ -32,7 +32,7 @@
     "express": "5.1.0",
     "graphql": "16.9.0",
     "graphql-tag": "2.12.6",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "prospectapi-common": "workspace:*",
     "tslib": "2.7.0"
   },
