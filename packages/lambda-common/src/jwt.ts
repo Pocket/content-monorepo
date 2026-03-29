@@ -35,7 +35,7 @@ const getSecretsManagerClient = (): SecretsManagerClient => {
  * referenced from: https://github.com/Pocket/curation-tools-data-sync/blob/main/curation-authors-backfill/jwt.ts
  */
 export const generateJwt = (config: JwtConfig, privateKey: any): string => {
-  const now = Math.round(Date.now() / 1000);
+  const now = Math.floor(Date.now() / 1000);
 
   const payload: JwtPayload = {
     iss: config.iss,
