@@ -19,7 +19,7 @@ const rds = {
   // the minimum down to 2 or lower, but of course upcoming product/system usage
   // and changes should be considered.
   minCapacity: isDev ? 1 : 4,
-  maxCapacity: isDev ? 1 : 128, // max allowed by AWS for Aurora Serverless V2
+  maxCapacity: isDev ? 2 : 128, // max allowed by AWS for Aurora Serverless V2
 };
 
 export const config = {
