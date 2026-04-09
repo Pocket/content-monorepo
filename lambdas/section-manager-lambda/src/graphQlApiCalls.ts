@@ -8,6 +8,7 @@ import {
 } from 'lambda-common';
 
 import config from './config';
+import { GraphQlApiError } from './errors';
 import {
   ActiveSectionItem,
   CreateSectionItemApiInput,
@@ -90,8 +91,10 @@ export const createOrUpdateSection = async (
 
   // check for any errors when running or returned by the mutation
   if (!result.data && result.errors.length > 0) {
-    throw new Error(
-      `createOrUpdateSection mutation failed: ${result.errors[0].message}`,
+    const error = result.errors[0];
+    throw new GraphQlApiError(
+      `createOrUpdateSection mutation failed: ${error.message}`,
+      error.extensions?.code ?? 'UNKNOWN',
     );
   }
   const section = result.data.createOrUpdateSection;
@@ -151,8 +154,10 @@ export async function createApprovedCorpusItem(
 
   // check for any errors returned by the mutation
   if (!result.data && result.errors.length > 0) {
-    throw new Error(
-      `createApprovedCorpusItem mutation failed: ${result.errors[0].message}`,
+    const error = result.errors[0];
+    throw new GraphQlApiError(
+      `createApprovedCorpusItem mutation failed: ${error.message}`,
+      error.extensions?.code ?? 'UNKNOWN',
     );
   }
 
@@ -196,8 +201,10 @@ export async function createSectionItem(
 
   // check for any errors returned by the mutation
   if (!result.data && result.errors.length > 0) {
-    throw new Error(
-      `createSectionItem mutation failed: ${result.errors[0].message}`,
+    const error = result.errors[0];
+    throw new GraphQlApiError(
+      `createSectionItem mutation failed: ${error.message}`,
+      error.extensions?.code ?? 'UNKNOWN',
     );
   }
 
@@ -241,8 +248,10 @@ export async function updateSectionItem(
 
   // check for any errors returned by the mutation
   if (!result.data && result.errors?.length > 0) {
-    throw new Error(
-      `updateSectionItem mutation failed: ${result.errors[0].message}`,
+    const error = result.errors[0];
+    throw new GraphQlApiError(
+      `updateSectionItem mutation failed: ${error.message}`,
+      error.extensions?.code ?? 'UNKNOWN',
     );
   }
 
@@ -290,8 +299,10 @@ export async function removeSectionItem(
 
   // check for any errors returned by the mutation
   if (!result.data && result.errors.length > 0) {
-    throw new Error(
-      `removeSectionItem mutation failed: ${result.errors[0].message}`,
+    const error = result.errors[0];
+    throw new GraphQlApiError(
+      `removeSectionItem mutation failed: ${error.message}`,
+      error.extensions?.code ?? 'UNKNOWN',
     );
   }
 

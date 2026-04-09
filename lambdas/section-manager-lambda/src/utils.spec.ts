@@ -15,6 +15,7 @@ import {
   mockPocketImageCache,
 } from 'lambda-common';
 
+import { GraphQlApiError } from './errors';
 import * as GraphQlApiCalls from './graphQlApiCalls';
 import { createSqsSectionWithSectionItems } from './testHelpers';
 import {
@@ -358,6 +359,9 @@ describe('utils', () => {
       .mockImplementation(() => {});
     const mockConsoleLog = jest
       .spyOn(console, 'log')
+      .mockImplementation(() => {});
+    const mockConsoleWarn = jest
+      .spyOn(console, 'warn')
       .mockImplementation(() => {});
 
     afterEach(() => {
@@ -758,6 +762,111 @@ describe('utils', () => {
       // One failure logged
       expect(sentryStub).toHaveBeenCalledTimes(1);
       expect(mockConsoleError).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report GraphQlApiError with BAD_USER_INPUT to Sentry', async () => {
+      jest
+        .spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
+        .mockImplementation(async (_endpoint, _headers, url) => {
+          if (url.includes('bad-input')) {
+            throw new GraphQlApiError(
+              'A rejected item with the URL already exists',
+              'BAD_USER_INPUT',
+            );
+          }
+          return { externalId: 'approvedItemExternalId1', url };
+        });
+
+      sqsSectionData.candidates[1].url = 'https://bad-input.com';
+
+      await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
+
+      // Expected error should warn, not error
+      expect(mockConsoleWarn).toHaveBeenCalledTimes(1);
+      expect(mockConsoleWarn.mock.calls[0][0]).toContain(
+        'Failed to process SectionItem candidate for URL https://bad-input.com: ',
+      );
+      // Should NOT report to Sentry
+      expect(sentryStub).toHaveBeenCalledTimes(0);
+      expect(mockConsoleError).toHaveBeenCalledTimes(0);
+    });
+
+    it('does not report GraphQlApiError with FORBIDDEN to Sentry', async () => {
+      jest
+        .spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
+        .mockImplementation(async (_endpoint, _headers, url) => {
+          if (url.includes('forbidden')) {
+            throw new GraphQlApiError(
+              'Item was previously removed manually',
+              'FORBIDDEN',
+            );
+          }
+          return { externalId: 'approvedItemExternalId1', url };
+        });
+
+      sqsSectionData.candidates[1].url = 'https://forbidden.com';
+
+      await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
+
+      // Expected error should warn, not error
+      expect(mockConsoleWarn).toHaveBeenCalledTimes(1);
+      expect(mockConsoleWarn.mock.calls[0][0]).toContain(
+        'Failed to process SectionItem candidate for URL https://forbidden.com: ',
+      );
+      // Should NOT report to Sentry
+      expect(sentryStub).toHaveBeenCalledTimes(0);
+      expect(mockConsoleError).toHaveBeenCalledTimes(0);
+    });
+
+    it('reports GraphQlApiError with INTERNAL_SERVER_ERROR to Sentry', async () => {
+      jest
+        .spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
+        .mockImplementation(async (_endpoint, _headers, url) => {
+          if (url.includes('server-error')) {
+            throw new GraphQlApiError(
+              'Something went wrong',
+              'INTERNAL_SERVER_ERROR',
+            );
+          }
+          return { externalId: 'approvedItemExternalId1', url };
+        });
+
+      sqsSectionData.candidates[1].url = 'https://server-error.com';
+
+      await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
+
+      // Unexpected error should be reported to Sentry
+      expect(sentryStub).toHaveBeenCalledTimes(1);
+      expect(mockConsoleError).toHaveBeenCalledTimes(1);
+      expect(mockConsoleError.mock.calls[0][0]).toContain(
+        'Failed to process SectionItem candidate for URL https://server-error.com: ',
+      );
+      // Should NOT warn
+      expect(mockConsoleWarn).toHaveBeenCalledTimes(0);
+    });
+
+    it('reports a generic Error (non-GraphQlApiError) to Sentry', async () => {
+      jest
+        .spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
+        .mockImplementation(async (_endpoint, _headers, url) => {
+          if (url.includes('generic-error')) {
+            throw new Error('Some unexpected failure');
+          }
+          return { externalId: 'approvedItemExternalId1', url };
+        });
+
+      sqsSectionData.candidates[1].url = 'https://generic-error.com';
+
+      await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
+
+      // Generic errors should always be reported to Sentry
+      expect(sentryStub).toHaveBeenCalledTimes(1);
+      expect(mockConsoleError).toHaveBeenCalledTimes(1);
+      expect(mockConsoleError.mock.calls[0][0]).toContain(
+        'Failed to process SectionItem candidate for URL https://generic-error.com: ',
+      );
+      // Should NOT warn
+      expect(mockConsoleWarn).toHaveBeenCalledTimes(0);
     });
   });
 });

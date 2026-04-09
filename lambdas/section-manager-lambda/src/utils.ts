@@ -19,6 +19,7 @@ import {
 } from 'lambda-common';
 
 import config from './config';
+import { GraphQlApiError } from './errors';
 import {
   createApprovedCorpusItem,
   createOrUpdateSection,
@@ -154,12 +155,24 @@ export const processSqsSectionData = async (
       // update successful candidates count
       successfulCandidates++;
     } catch (e) {
-      // update failed candidates count
       failedCandidates++;
       const message = `Failed to process SectionItem candidate for URL ${sqsSectionItem.url}: `;
-      console.error(message, e);
-      Sentry.addBreadcrumb({ message });
-      Sentry.captureException(e);
+
+      // Classify by GraphQL error extension code rather than message string.
+      // BAD_USER_INPUT: rejected/already-approved items (from checkCorpusUrl)
+      // FORBIDDEN: manually removed items that ML cannot re-add
+      const isExpectedError =
+        e instanceof GraphQlApiError &&
+        (e.extensionCode === 'BAD_USER_INPUT' ||
+          e.extensionCode === 'FORBIDDEN');
+
+      if (isExpectedError) {
+        console.warn(message, e);
+      } else {
+        console.error(message, e);
+        Sentry.addBreadcrumb({ message });
+        Sentry.captureException(e);
+      }
       // continue to next item
     }
   }
