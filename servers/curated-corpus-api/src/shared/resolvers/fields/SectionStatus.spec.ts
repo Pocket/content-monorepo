@@ -5,12 +5,16 @@ import { SectionStatus } from '../../types';
 const testSurfacesTimeZones = [
   { guid: 'NEW_TAB_EN_US',   timezone: 'America/New_York' },
   { guid: 'NEW_TAB_DE_DE',   timezone: 'Europe/Berlin' },
+  { guid: 'NEW_TAB_DE_AT',   timezone: 'Europe/Vienna' },
+  { guid: 'NEW_TAB_DE_CH',   timezone: 'Europe/Zurich' },
   { guid: 'NEW_TAB_EN_GB',   timezone: 'Europe/London' },
   { guid: 'NEW_TAB_EN_CA',   timezone: 'America/Toronto' },
   { guid: 'NEW_TAB_EN_IE',   timezone: 'Europe/Dublin' },
   { guid: 'NEW_TAB_FR_FR',   timezone: 'Europe/Paris' },
+  { guid: 'NEW_TAB_FR_BE',   timezone: 'Europe/Brussels' },
   { guid: 'NEW_TAB_IT_IT',   timezone: 'Europe/Rome' },
   { guid: 'NEW_TAB_ES_ES',   timezone: 'Europe/Madrid' },
+  { guid: 'NEW_TAB_PL_PL',   timezone: 'Europe/Warsaw' },
   { guid: 'NEW_TAB_EN_INTL', timezone: 'Asia/Kolkata' },
 ];
 describe.each(testSurfacesTimeZones)(

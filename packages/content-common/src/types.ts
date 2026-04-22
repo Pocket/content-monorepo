@@ -276,12 +276,16 @@ export type SnowplowProspect = {
 export enum ScheduledSurfacesEnum {
   NEW_TAB_EN_US = 'NEW_TAB_EN_US',
   NEW_TAB_DE_DE = 'NEW_TAB_DE_DE',
+  NEW_TAB_DE_AT = 'NEW_TAB_DE_AT',
+  NEW_TAB_DE_CH = 'NEW_TAB_DE_CH',
   NEW_TAB_EN_GB = 'NEW_TAB_EN_GB',
   NEW_TAB_EN_CA = 'NEW_TAB_EN_CA',
   NEW_TAB_EN_IE = 'NEW_TAB_EN_IE',
   NEW_TAB_FR_FR = 'NEW_TAB_FR_FR',
+  NEW_TAB_FR_BE = 'NEW_TAB_FR_BE',
   NEW_TAB_IT_IT = 'NEW_TAB_IT_IT',
   NEW_TAB_ES_ES = 'NEW_TAB_ES_ES',
+  NEW_TAB_PL_PL = 'NEW_TAB_PL_PL',
   NEW_TAB_EN_INT = 'NEW_TAB_EN_INT',
   POCKET_HITS_EN_US = 'POCKET_HITS_EN_US',
   POCKET_HITS_DE_DE = 'POCKET_HITS_DE_DE',
@@ -295,12 +299,16 @@ export enum MozillaAccessGroup {
   SCHEDULED_SURFACE_CURATOR_FULL = 'mozilliansorg_pocket_scheduled_surface_curator_full', // Access to full corpus tool, implies they have access to all scheduled surfaces.
   NEW_TAB_CURATOR_ENUS = 'mozilliansorg_pocket_new_tab_curator_enus', // Access to en-US new tab in the corpus tool.
   NEW_TAB_CURATOR_DEDE = 'mozilliansorg_pocket_new_tab_curator_dede', // Access to de-DE new tab in corpus tool.
+  NEW_TAB_CURATOR_DEAT = 'mozilliansorg_pocket_new_tab_curator_deat', // Access to de-AT new tab in corpus tool.
+  NEW_TAB_CURATOR_DECH = 'mozilliansorg_pocket_new_tab_curator_dech', // Access to de-CH new tab in corpus tool.
   NEW_TAB_CURATOR_ENGB = 'mozilliansorg_pocket_new_tab_curator_engb', // Access to en-GB new tab in corpus tool.
   NEW_TAB_CURATOR_ENCA = 'mozilliansorg_pocket_new_tab_curator_enca', // Access to en-CA new tab in corpus tool.
   NEW_TAB_CURATOR_ENIE = 'mozilliansorg_pocket_new_tab_curator_enie', // Access to en-IE new tab in corpus tool.
   NEW_TAB_CURATOR_FRFR = 'mozilliansorg_pocket_new_tab_curator_frfr', // Access to fr-FR new tab in corpus tool.
+  NEW_TAB_CURATOR_FRBE = 'mozilliansorg_pocket_new_tab_curator_frbe', // Access to fr-BE new tab in corpus tool.
   NEW_TAB_CURATOR_ITIT = 'mozilliansorg_pocket_new_tab_curator_itit', // Access to it-IT new tab in corpus tool.
   NEW_TAB_CURATOR_ESES = 'mozilliansorg_pocket_new_tab_curator_eses', // Access to es-ES new tab in corpus tool.
+  NEW_TAB_CURATOR_PLPL = 'mozilliansorg_pocket_new_tab_curator_plpl', // Access to pl-PL new tab in corpus tool.
   NEW_TAB_CURATOR_ENINTL = 'mozilliansorg_pocket_new_tab_curator_enintl', // Access to en-INTL new tab in corpus tool.
   POCKET_HITS_CURATOR_ENUS = 'mozilliansorg_pocket_pocket_hits_curator_enus', // Access to en us Pocket Hits in the corpus tool.
   POCKET_HITS_CURATOR_DEDE = 'mozilliansorg_pocket_pocket_hits_curator_dede', // Access to de de Pocket Hits in the corpus tool.
@@ -370,6 +378,20 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_DEDE,
   },
   {
+    name: 'New Tab (de-AT)',
+    guid: 'NEW_TAB_DE_AT',
+    ianaTimezone: 'Europe/Vienna',
+    prospectTypes: [],
+    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_DEAT,
+  },
+  {
+    name: 'New Tab (de-CH)',
+    guid: 'NEW_TAB_DE_CH',
+    ianaTimezone: 'Europe/Zurich',
+    prospectTypes: [],
+    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_DECH,
+  },
+  {
     name: 'New Tab (en-GB)',
     guid: 'NEW_TAB_EN_GB',
     ianaTimezone: 'Europe/London',
@@ -403,6 +425,13 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_FRFR,
   },
   {
+    name: 'New Tab (fr-BE)',
+    guid: 'NEW_TAB_FR_BE',
+    ianaTimezone: 'Europe/Brussels',
+    prospectTypes: [],
+    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_FRBE,
+  },
+  {
     name: 'New Tab (it-IT)',
     guid: 'NEW_TAB_IT_IT',
     ianaTimezone: 'Europe/Rome',
@@ -423,6 +452,13 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.PUBLISHER_SUBMITTED,
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ESES,
+  },
+  {
+    name: 'New Tab (pl-PL)',
+    guid: 'NEW_TAB_PL_PL',
+    ianaTimezone: 'Europe/Warsaw',
+    prospectTypes: [],
+    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_PLPL,
   },
   {
     name: 'New Tab (en-INTL)',
