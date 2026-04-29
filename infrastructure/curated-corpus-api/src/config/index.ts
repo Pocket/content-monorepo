@@ -8,6 +8,8 @@ const domain = isDev
   ? `${domainPrefix}.getpocket.dev`
   : `${domainPrefix}.readitlater.com`;
 
+const s3LogsBucket = isDev ? 'pocket-data-items-dev' : 'pocket-data-items';
+
 const snowplowEndpoint = isDev
   ? 'com-getpocket-prod1.mini.snplow.net'
   : 'd.getpocket.com';
@@ -31,6 +33,7 @@ export const config = {
   environment,
   domain,
   rds,
+  s3LogsBucket,
   tags: {
     service: name,
     environment,
