@@ -207,7 +207,14 @@ class CuratedCorpusAPI extends TerraformStack {
     } = dependencies;
 
     return new PocketALBApplication(this, 'application', {
+      // the underlying terraform modules code will create a specific folder
+      // for access logs (/alb) and connection logs (/alb-connection) within
+      // the provided bucket.
+      // see https://github.com/Pocket/pocket-monorepo/blob/main/packages/terraform-modules/src/base/ApplicationLoadBalancer.ts#L143
       accessLogs: {
+        existingBucket: config.s3LogsBucket,
+      },
+      connectionLogs: {
         existingBucket: config.s3LogsBucket,
       },
       internal: true,
