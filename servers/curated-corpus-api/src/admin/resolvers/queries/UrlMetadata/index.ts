@@ -4,7 +4,11 @@ import { UrlMetadata } from 'content-common';
 
 import config from '../../../../config';
 import { IAdminContext } from '../../../context';
-import { convertParserJsonToUrlMetadata, fetchUrlMetadata } from './lib';
+import {
+  convertParserJsonToUrlMetadata,
+  fetchUrlMetadata,
+  validateUrl,
+} from './lib';
 import { lookupPublisher } from '../../../../database/mutations/PublisherDomain';
 
 /**
@@ -21,10 +25,8 @@ export const getUrlMetadata = async (
   { url },
   context: IAdminContext,
 ): Promise<UrlMetadata> => {
-  try {
-    // validate url by throwing if url format is incorrect
-    new URL(url).toString();
-  } catch (error) {
+  // ensure url is a valid http/https URL
+  if (!validateUrl(url)) {
     throw new UserInputError(`${url} is not a valid url`);
   }
 

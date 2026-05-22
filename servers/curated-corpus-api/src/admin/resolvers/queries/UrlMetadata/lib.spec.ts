@@ -4,6 +4,7 @@ import {
   convertParserJsonToUrlMetadata,
   deriveAuthors,
   deriveDatePublished,
+  validateUrl,
 } from './lib';
 
 describe('lib', () => {
@@ -209,5 +210,74 @@ describe('lib', () => {
         undefined,
       );
     });
+  });
+
+  describe('validateUrl', () => {
+    const invalidUrls: string[] = [
+      'not a url',
+      'file:///etc/passwd',
+      'dict://localhost:6379/INFO',
+      'http://127.0.0.1/',
+      'http://127.0.0.1:443/',
+      'http://curated-corpus-api/',
+      'sftp://127.0.0.1/',
+      'ftp://example.com',
+      'gopher://127.0.0.1:6379/_INFO%0D%0A',
+      'http://[::1]:80/',
+      'http://2130706433/',
+      'http://[::ffff:127.0.0.1]/',
+      'http://0x7f000001/',
+      'http://2130706433:4000/',
+      'javascript:alert(1)',
+      'data:text/html,<h1>test</h1>',
+      'http://169.254.169.254/',
+      'http://0177.0.0.1/',
+      'https://example.com.',
+      'https://user:pass@example.com',
+      'https://user@example.com',
+      'http://localhost',
+      'http://192.168.1.1',
+      'http://10.0.0.1',
+      'http://0.0.0.0',
+      'http://',
+      'http://.example.com',
+      'http://example',
+      'http://172.16.0.1/',
+      'http://[fe80::1]/',
+      'http://[::ffff:172.16.0.1]/',
+    ];
+
+    const validUrls: string[] = [
+      'http://example.com',
+      'https://example.com/',
+      'http://example.com:8080',
+      'https://example.com',
+      'https://example.com:8080',
+      'https://example.com?param=test&test=yep',
+      'https://example.com?param=test&test=yep#anchor',
+      'https://sub.example.com',
+      'https://sub-dub.example.com',
+      'https://example.com/path/to/content',
+      'https://example.co.uk',
+      'https://example.museum',
+      // very rare case of no user/pass but with the format.
+      // just noting explicitly that this is okay, but in practice we should
+      // not get urls of this nature
+      'http://:@example.com/',
+    ];
+
+    test.each(invalidUrls)(
+      'returns false when the URL %p is invalid',
+      (invalidUrl: string) => {
+        expect(validateUrl(invalidUrl)).toBe(false);
+      },
+    );
+
+    test.each(validUrls)(
+      'returns true when the URL %p is valid',
+      (validUrl: string) => {
+        expect(validateUrl(validUrl)).toBe(true);
+      },
+    );
   });
 });

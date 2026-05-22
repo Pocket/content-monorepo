@@ -175,3 +175,51 @@ export const convertParserJsonToUrlMetadata = (
     url,
   };
 };
+
+/**
+ * ensures a given URL is valid for our use cases. we only want http/https urls
+ * that point to a valid domain/tld. IP addresses should not be allowed.
+ *
+ * built from https://github.com/The-Node-Forge/url-validator/blob/main/src/validateUrl.ts
+ * keeping code local for tweaks and reduce package dependencies for a straight
+ * forward function.
+ *
+ * @param url
+ * @returns boolean
+ */
+export const validateUrl = (url: string): boolean => {
+  try {
+    const parsedUrl = new URL(url);
+
+    // ensure valid protocols (http/https)
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      return false;
+    }
+
+    // check for user:password in domain
+    if (parsedUrl.username || parsedUrl.password) {
+      return false;
+    }
+
+    // check for valid domain/TLD
+    // isIp is an extra careful check; tldts sets domain=null for IPs
+    const parsed = parse(parsedUrl.hostname);
+    if (!parsed.domain || parsed.isIp) {
+      return false;
+    }
+
+    // reject hostnames with a leading dot
+    if (parsedUrl.hostname.startsWith('.')) {
+      return false;
+    }
+
+    // reject hostnames with a trailing dot
+    if (parsedUrl.hostname.endsWith('.')) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+};

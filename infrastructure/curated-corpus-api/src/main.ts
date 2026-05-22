@@ -207,6 +207,9 @@ class CuratedCorpusAPI extends TerraformStack {
     } = dependencies;
 
     return new PocketALBApplication(this, 'application', {
+      accessLogs: {
+        existingBucket: config.s3LogsBucket,
+      },
       internal: true,
       prefix: config.prefix,
       alb6CharacterPrefix: config.shortName,

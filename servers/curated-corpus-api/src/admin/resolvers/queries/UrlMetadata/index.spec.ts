@@ -10,6 +10,8 @@ describe('lib', () => {
 
   describe('getUrlMetadata', () => {
     it('throws when the given URL is invalid', async () => {
+      // more comprehensive bad url tests are in lib.spec.ts
+      // this test just ensures the function throws on a bad url
       const badUrl = 'not url!';
 
       await expect(
