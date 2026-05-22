@@ -43,7 +43,7 @@ export default {
   },
   aws: {
     endpoint: localEndpoint,
-    region: process.env.AWS_REGION || 'us-east-1',
+    region,
     s3: {
       localEndpoint,
       bucket,
