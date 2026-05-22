@@ -11,12 +11,15 @@ let localEndpoint;
 let s3path;
 
 const bucket = process.env.AWS_S3_BUCKET || 'curated-corpus-api-local-images';
+const region = process.env.AWS_REGION || 'us-east-1';
 
 if (!awsEnvironments.includes(process.env.NODE_ENV ?? '')) {
   localEndpoint = process.env.AWS_S3_ENDPOINT || 'http://localhost:4566';
   s3path = `${localEndpoint}/${bucket}/`;
 } else {
-  s3path = `https://${bucket}.s3.amazonaws.com/`;
+  // Path-style regional form, matching the `Location` the AWS SDK Upload
+  // returns and what we persist; consumers use this as a `startsWith` prefix.
+  s3path = `https://s3.${region}.amazonaws.com/${bucket}/`;
 }
 
 // Environment variables below are set in .aws/src/main.ts
