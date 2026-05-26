@@ -11,12 +11,19 @@ let localEndpoint;
 let s3path;
 
 const bucket = process.env.AWS_S3_BUCKET || 'curated-corpus-api-local-images';
+const region = process.env.AWS_REGION || 'us-east-1';
 
 if (!awsEnvironments.includes(process.env.NODE_ENV ?? '')) {
   localEndpoint = process.env.AWS_S3_ENDPOINT || 'http://localhost:4566';
   s3path = `${localEndpoint}/${bucket}/`;
 } else {
-  s3path = `https://${bucket}.s3.amazonaws.com/`;
+  // Path-style regional form, matching the `Location` the AWS SDK Upload
+  // returns and what we persist; consumers use this as a `startsWith` prefix.
+  // There are older urls in the corpus in a different format, e.g.
+  // https://s3.amazonaws.com/pocket-curatedcorpusapi-prod-images/c312785b-e74f-4c05-bcd0-dbda3cdf54c7.jpeg
+  // Recent URLs all match the following format. If the older style URL is
+  // updated, then its image will be uploaded again under a different UUID.
+  s3path = `https://s3.${region}.amazonaws.com/${bucket}/`;
 }
 
 // Environment variables below are set in .aws/src/main.ts
@@ -40,7 +47,7 @@ export default {
   },
   aws: {
     endpoint: localEndpoint,
-    region: process.env.AWS_REGION || 'us-east-1',
+    region,
     s3: {
       localEndpoint,
       bucket,
