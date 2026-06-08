@@ -1,20 +1,32 @@
-# Claude Code security configuration:
-# 1. Prompt injection is mitigated by:
-#    - [x] include_comments_by_actor limits comment ingestion to allowlisted team members
-#    - [x] `gh pr view` is excluded from allowedTools so Claude cannot fetch comments independently
-#    - [x] Fork PRs are skipped entirely (if condition on head repo)
-# 2. Secret exfiltration is mitigated by:
-#    - [x] Claude cannot run arbitrary Bash (only specific gh/git patterns)
-#    - [x] OIDC validates workflow file matches the default branch
-#    - [x] pull_request trigger (not pull_request_target) ensures GitHub withholds secrets from fork PRs
-# 3. Production deployments are protected:
-#    - [x] main branch protection requires PR approval
-#    - [x] Claude can't merge or approve PRs; allowedTools does not include `gh pr merge` or `gh pr review`
-#    - [x] Claude's commits can't be merged; main require signed commits, and use_commit_signing is disabled
-# 4. Known limitations:
-#    - [ ] track_progress adds Edit/Write/git push tools (anthropics/claude-code-action#860); mitigated by #3
-#    - [ ] Only OIDC auth is well-supported; use_sticky_comment breaks with github_token (anthropics/claude-code-action#960)
+# Claude Code PR review - collapsed, sticky, advisory delivery.
+#
+# Behaviour:
+#  - Posts the review as a SINGLE PR comment whose entire body is hidden inside a <details> block
+#    behind a spoiler-free summary, so a reviewer only sees Claude's findings if they deliberately
+#    expand it (reduces anchoring/rubber-stamping). Claude is advisory only: it never approves,
+#    requests changes, or edits code; humans gate merges.
+#  - The review STICKS to one comment across pushes: Claude returns the comment body as structured
+#    output, and a deterministic step finds the prior review by its hidden <!-- claude-review -->
+#    marker and edits it in place, so re-runs UPDATE the comment instead of piling up new ones.
+#  - The review is a no-fluff list of findings; each is a severity circle plus a short title, then a
+#    one-paragraph explanation. When there is nothing to raise it is just "Looks good".
+#
+# Security configuration:
+#  1. Prompt injection is mitigated by:
+#     - [x] include_comments_by_actor limits comment ingestion to allowlisted maintainers
+#     - [x] Claude's ONLY tool is `gh pr diff`, so it cannot fetch PR comments, read arbitrary files,
+#           run arbitrary Bash, or post anything itself (a deterministic step posts the comment)
+#     - [x] Fork PRs are skipped entirely (if condition on head repo)
+#  2. Secret exfiltration is mitigated by:
+#     - [x] Claude cannot run arbitrary Bash (only `gh pr diff`), so it cannot exfiltrate secrets
+#     - [x] pull_request trigger (not pull_request_target) runs fork PRs without secrets, and forks
+#           are skipped anyway
+#  3. Production deployments are protected:
+#     - [x] main branch protection requires PR approval
+#     - [x] Claude can't merge, approve, or request changes (no such tools; it only emits review text)
+#     - [x] Claude's commits can't be merged; main requires signed commits, and use_commit_signing is disabled
 name: Claude PR Review
+
 on:
   pull_request:
 
@@ -23,37 +35,127 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   claude-review:
     name: Claude PR Review
     runs-on: ubuntu-latest
 
-    # Prevent running on fork PRs where secrets are unavailable
+    # Prevent running on fork PRs where secrets are unavailable.
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
 
     permissions:
       contents: read
       pull-requests: write
-      id-token: write # OIDC token for Claude GitHub App auth
+      issues: write
 
     steps:
       - uses: actions/checkout@v4
 
       # Getting started docs: https://code.claude.com/docs/en/github-actions
       # Detailed usage docs: https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
+      # Claude generates the review but does NOT post it. Its only tool is `gh pr diff`; it returns
+      # the full comment body via structured output. Posting is handled deterministically below.
       - uses: anthropics/claude-code-action@v1
+        id: claude
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: "/review"
-          # Pre-loads full PR context and shows a progress tracker.
-          # Without this, the review is buried in the Actions step summary instead of posted on the PR.
-          track_progress: true
-          # Prompt injection mitigation: only include comments from allowlisted team members in Claude's context.
-          # Empty (default) includes all actors. https://github.com/anthropics/claude-code-action/blob/main/action.yml
+          # Use the workflow GITHUB_TOKEN (not OIDC) so the review runs on PR branches, not only after
+          # merge to the default branch. Comments are authored by github-actions[bot].
+          github_token: ${{ github.token }}
+          # Only include comments from trusted maintainers in Claude's context (prompt-injection mitigation).
+          # Empty (default) would include all actors. See https://github.com/anthropics/claude-code-action/blob/main/action.yml
           include_comments_by_actor: "mmiermans,jpetto,Herraj"
-          # Update the same comment on each push instead of creating new ones.
-          use_sticky_comment: true
-          # Make inline code comments, PR comments, reading PR diffs, and git log for commit messages.
-          # Note: track_progress also grants Edit/Write/git push tools (see known limitations above).
+          prompt: |
+            You are an expert code reviewer running as an automated GitHub PR review on pull request
+            #${{ github.event.pull_request.number }} in ${{ github.repository }}. It runs on every push
+            and is advisory only: you never approve, request changes, or edit code.
+
+            Read the diff with: gh pr diff ${{ github.event.pull_request.number }}
+
+            Review the changes for:
+            - Correctness and likely bugs; edge cases and error handling
+            - Security: injection, auth, secret handling, unsafe parsing of untrusted input
+            - Performance: wasted work, redundant I/O, inefficient algorithms or data structures,
+              blocking work added to hot paths or startup
+            - Tests: coverage of the new or changed behaviour, including edge cases
+            - Project conventions, readability, and any public API or breaking-change risk
+            - Reuse: new code that re-implements something the project likely already provides; name the
+              probable existing helper to use instead
+            - Simplification: unnecessary complexity the diff adds (redundant or derivable state,
+              copy-paste variation, deep nesting, dead code left behind); name the simpler form
+            - Altitude: a change bolted on as a fragile special case where generalizing the underlying
+              mechanism would be the right depth
+
+            Return the review via the structured output field `comment_body`. Its content must be EXACTLY:
+              - line 1: the hidden marker (an invisible HTML comment): <!-- claude-review -->
+              - then a single collapsed <details> block:
+
+                <details>
+                <summary>🤖 Claude has reviewed this PR - expand after forming your own opinion</summary>
+
+                FINDINGS
+
+                </details>
+
+            FINDINGS is a flat list. Each finding is exactly two parts:
+
+              <circle> <short title>
+
+              <one tight paragraph: what it is, why it matters, and a concrete fix. Use a ```suggestion
+              block when you can give an exact code change.>
+
+            Separate findings with a blank line; order them most serious first. Severity circle:
+              - 🔴 blocking: correctness, security, data loss, or a breaking change
+              - 🟡 non-blocking: worth addressing, a tradeoff worth recording, or an intentional choice to flag
+              - 🔵 optional: minor or nit
+            If there is nothing worth raising, FINDINGS must be exactly: ✅ Looks good
+
+            No-fluff rules (important):
+            - Do NOT include an overview of what the PR does, a "Reviewed the diff..." preamble, an
+              "Overall" or verdict line, approval language, or any praise. No "looks good, wiring is
+              correct, nicely done" commentary. Every line is either an actionable finding or the single
+              "✅ Looks good".
+            - Do NOT restate what the PR or its description already says, and do NOT compliment the author.
+              If something is fine, write nothing about it.
+            - Do NOT use em dashes (the long dash). Use a hyphen, colon, or parentheses.
+            - The <summary> line must be exactly "🤖 Claude has reviewed this PR - expand after forming
+              your own opinion" and must reveal no findings, counts, or severities.
+            - Nothing visible may appear outside the <details> block (the marker renders invisibly); leave
+              a blank line immediately after </summary>.
+            - Do NOT post any comment yourself, do NOT post inline comments, do NOT approve or request
+              changes, and do NOT add any AI attribution. The workflow posts the comment for you.
           claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(git log:*)"
+            --allowedTools "Bash(gh pr diff:*)"
+            --json-schema '{"type":"object","additionalProperties":false,"required":["comment_body"],"properties":{"comment_body":{"type":"string"}}}'
+
+      # Deterministic sticky delivery: find the prior review by its marker and edit it in place,
+      # otherwise create it. Keeping this out of the model means stickiness does not depend on the
+      # model remembering to update vs. create.
+      - name: Post or update the single collapsed review comment
+        if: ${{ steps.claude.outputs.structured_output != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SO: ${{ steps.claude.outputs.structured_output }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Extract the model-authored comment body to a file (no shell interpolation of its content).
+          printf '%s' "$SO" | jq -r '.comment_body' > body.md
+          # Find a prior review comment by its hidden marker (author-agnostic), newest last. Paginate
+          # so the lookup is correct even on busy PRs with many comments.
+          ID=$(gh api --paginate "repos/$REPO/issues/$PR/comments" \
+            --jq '.[] | select(.body | contains("<!-- claude-review -->")) | .id' | tail -n1)
+          # Build the request body safely via jq (review text is never passed through the shell).
+          payload=$(jq -n --rawfile b body.md '{body: $b}')
+          if [ -n "$ID" ]; then
+            printf '%s' "$payload" | gh api -X PATCH "repos/$REPO/issues/comments/$ID" --input -
+            echo "Updated existing review comment $ID."
+          else
+            printf '%s' "$payload" | gh api -X POST "repos/$REPO/issues/$PR/comments" --input -
+            echo "Created new review comment."
+          fi
