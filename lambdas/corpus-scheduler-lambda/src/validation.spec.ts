@@ -251,7 +251,7 @@ describe('validation', function () {
       expect(() => {
         validateCandidate(badScheduledCandidate);
       }).toThrow(
-        'Error on assert(): invalid type on $input.scheduled_corpus_item.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT" | null)',
+        'Error on assert(): invalid type on $input.scheduled_corpus_item.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT" | "PL" | null)',
       );
     });
 
@@ -296,7 +296,7 @@ describe('validation', function () {
 
     it.each([
       ['authors', 'Array<string>'],
-      ['language', '"DE" | "EN" | "ES" | "FR" | "IT"'],
+      ['language', '"DE" | "EN" | "ES" | "FR" | "IT" | "PL"'],
     ])('should validate optional non-string properties', (field, type) => {
       const badScheduledCandidate = createScheduledCandidate() as any;
 

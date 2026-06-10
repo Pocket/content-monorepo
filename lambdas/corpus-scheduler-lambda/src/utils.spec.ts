@@ -290,7 +290,7 @@ describe('utils', function () {
       ).rejects.toThrow(
         new Error(
           `failed to map a4b5d99c-4c1b-4d35-bccf-6455c8df07b0 to CreateApprovedCorpusItemApiInput. ` +
-            `Reason: Error: Error on assert(): invalid type on $input.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT")`,
+            `Reason: Error: Error on assert(): invalid type on $input.language, expect to be ("DE" | "EN" | "ES" | "FR" | "IT" | "PL")`,
         ),
       );
     });

@@ -213,7 +213,7 @@ describe('validation', function () {
 
     it.each([
       ['authors', 'Array<string>'],
-      ['language', '"DE" | "EN" | "ES" | "FR" | "IT"'],
+      ['language', '"DE" | "EN" | "ES" | "FR" | "IT" | "PL"'],
     ])('should validate optional non-string properties', (field, type) => {
       // null is a valid value from ML
       sqsData.candidates[0][field] = null;
