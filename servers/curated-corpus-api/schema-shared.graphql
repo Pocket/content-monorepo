@@ -38,6 +38,8 @@ enum CorpusLanguage {
   FR
   "Spanish"
   ES
+  "Polish"
+  PL
 }
 
 """
