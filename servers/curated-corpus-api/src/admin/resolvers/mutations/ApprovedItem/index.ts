@@ -1,5 +1,6 @@
 import {
   AuthenticationError,
+  NotFoundError,
   UserInputError,
 } from '@pocket-tools/apollo-utils';
 import { ActionScreen, Topics } from 'content-common';
@@ -218,10 +219,20 @@ export async function updateApprovedItem(
     updatedItemData.externalId,
   );
 
+  // Guard against a non-existent item. Without this check, `existingItem` is
+  // null, `existingItem?.id` is `undefined`, and Prisma drops the undefined
+  // filter field — turning the deleteMany below into a delete-ALL that wipes
+  // the entire ApprovedItemAuthor table (HNT-2672).
+  if (!existingItem) {
+    throw new NotFoundError(
+      `Could not find an approved item with external id of "${updatedItemData.externalId}".`,
+    );
+  }
+
   // Remove the old author(s) from the DB records before we run the update function
   await context.db.approvedItemAuthor.deleteMany({
     where: {
-      approvedItemId: existingItem?.id,
+      approvedItemId: existingItem.id,
     },
   });
 

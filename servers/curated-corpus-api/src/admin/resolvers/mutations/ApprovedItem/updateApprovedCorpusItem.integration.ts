@@ -130,6 +130,62 @@ describe('mutations: ApprovedItem (updateApprovedCorpusItem)', () => {
     ).toEqual(data?.updateApprovedCorpusItem.externalId);
   });
 
+  // Regression guard for HNT-2672. Prevents all authors getting deleted, which happened on 2026-06-09.
+  it('should not delete any authors when updating a non-existent externalId', async () => {
+    // Create a SECOND approved item (in addition to `item` from beforeEach),
+    // also with authors. Both items' authors must survive the failed update.
+    const itemA = item;
+    const itemB = await createApprovedItemHelper(db, {
+      title: 'A second LEGO story',
+      status: CuratedStatus.RECOMMENDATION,
+      language: 'EN',
+    });
+
+    // Snapshot the total number of authors across the whole table before the
+    // update. The HNT-2672 bug wiped the entire ApprovedItemAuthor table.
+    const authorCountBefore = await db.approvedItemAuthor.count();
+    expect(authorCountBefore).toBeGreaterThan(0);
+
+    // Update using a random externalId that does not exist in the DB.
+    const badInput = {
+      ...input,
+      externalId: 'this-external-id-does-not-exist-12345',
+    };
+
+    const res = await request(app)
+      .post(graphQLUrl)
+      .set(headers)
+      .send({
+        query: print(UPDATE_APPROVED_ITEM),
+        variables: { data: badInput },
+      });
+
+    // The mutation must fail with a NotFound error...
+    expect(res.body.data).toBeNull();
+    expect(res.body.errors).not.toBeUndefined();
+    expect(res.body.errors?.[0].extensions?.code).toEqual('NOT_FOUND');
+    expect(res.body.errors?.[0].message).toContain(
+      `Could not find an approved item with external id of "${badInput.externalId}".`,
+    );
+
+    // ...and CRITICALLY, no authors may have been deleted.
+    const authorCountAfter = await db.approvedItemAuthor.count();
+    expect(authorCountAfter).toEqual(authorCountBefore);
+
+    // Re-fetch both items and confirm their authors are intact and unchanged.
+    const refetchedA = await db.approvedItem.findUnique({
+      where: { externalId: itemA.externalId },
+      include: { authors: { orderBy: [{ sortOrder: 'asc' }] } },
+    });
+    const refetchedB = await db.approvedItem.findUnique({
+      where: { externalId: itemB.externalId },
+      include: { authors: { orderBy: [{ sortOrder: 'asc' }] } },
+    });
+
+    expect(refetchedA?.authors).toEqual(itemA.authors);
+    expect(refetchedB?.authors).toEqual(itemB.authors);
+  });
+
   it('should succeed if optional data is not provided', async () => {
     // Set up event tracking
     const eventTracker = jest.fn();
