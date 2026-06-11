@@ -2,6 +2,7 @@ import { PrismaClient, Prisma } from '.prisma/client';
 import { CreateCustomSectionInput, CreateSectionInput, DisableEnableSectionInput, UpdateCustomSectionInput, Section } from '../types';
 import { ActivitySource } from 'content-common';
 import { generateSectionSlug } from '../queries/Section';
+import { assertDefined } from '../../shared/utils';
 
 /**
  * This mutation creates a new Section.
@@ -216,6 +217,13 @@ export async function deleteCustomSection(
   sectionId:number,
   sectionExternalId: string
 ): Promise<Section> {
+  // Guard against the Prisma "undefined filter" footgun (HNT-2672): if
+  // `sectionId` were null/undefined, Prisma would drop it from the `where`
+  // below. The `active: true` literal would still bound this particular
+  // updateMany, but we assert defined-ness for clarity/safety so this never
+  // silently widens to "all active SectionItems". See src/shared/utils.ts.
+  assertDefined(sectionId, 'sectionId');
+
   const sectionItemUpdateData: Prisma.SectionItemUpdateManyMutationInput = {
     active: false,
     deactivateSource: ActivitySource.MANUAL,

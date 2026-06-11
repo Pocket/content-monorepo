@@ -9,6 +9,7 @@ import {
   SectionItem,
 } from '../types';
 import { ActivitySource } from 'content-common';
+import { assertDefined } from '../../shared/utils';
 
 /**
  * This mutation creates a SectionItem & adds it to a Section
@@ -161,6 +162,13 @@ export async function deleteSectionItemsByApprovedItemId(
   db: PrismaClient,
   approvedItemId: number,
 ): Promise<void> {
+  // Guard against the Prisma "undefined filter" footgun: if `approvedItemId`
+  // were null/undefined, Prisma would drop the `where` field and this
+  // deleteMany would wipe the ENTIRE SectionItem table (HNT-2672). The `where`
+  // here has no bounding literal, so this guard is the only thing scoping the
+  // delete. See assertDefined in src/shared/utils.ts.
+  assertDefined(approvedItemId, 'approvedItemId');
+
   // TODO: we may want to emit an alaytics event here, as this action destroys
   // corpus-level history on SectionItems
   await db.sectionItem.deleteMany({

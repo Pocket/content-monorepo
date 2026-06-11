@@ -254,5 +254,31 @@ describe('SectionItem', () => {
       // ...and it should be associated to approvedItem2
       expect(sectionItems[0].approvedItemId).toEqual(approvedItem2.id);
     });
+
+    it('should throw and delete nothing when approvedItemId is undefined', async () => {
+      // Guards against the Prisma "undefined filter" footgun (HNT-2672): an
+      // undefined filter value would otherwise wipe the entire SectionItem
+      // table. The guard must reject before any rows are touched.
+      const approvedItem = await createApprovedItemHelper(db, {
+        title: 'Fake Item!',
+      });
+      const section = await createSectionHelper(db, {});
+
+      await createSectionItemHelper(db, {
+        approvedItemId: approvedItem.id,
+        sectionId: section.id,
+        rank: 1,
+        active: true,
+      });
+
+      await expect(
+        deleteSectionItemsByApprovedItemId(db, undefined as any),
+      ).rejects.toThrow('"approvedItemId" must be defined');
+
+      // nothing should have been deleted
+      const remaining = await db.sectionItem.findMany();
+      expect(remaining.length).toBe(1);
+      expect(remaining[0].approvedItemId).toEqual(approvedItem.id);
+    });
   });
 });

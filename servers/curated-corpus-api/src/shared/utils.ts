@@ -7,6 +7,53 @@ import { parse as parseDomain, getDomain } from 'tldts';
 import { DateTime } from 'luxon';
 
 /**
+ * DESTRUCTIVE PRISMA FOOTGUN — READ BEFORE WRITING deleteMany/updateMany
+ *
+ * Prisma silently DROPS `where` fields whose value is `undefined`. As a
+ * result, a query like:
+ *
+ *     db.someModel.deleteMany({ where: { fooId: undefined } })
+ *
+ * does NOT match "rows where fooId is undefined"; it compiles to
+ * `DELETE ... WHERE 1=1`, i.e. it wipes the ENTIRE table. The same is true
+ * for `updateMany`. This was the root cause of the HNT-2672 incident, where
+ * an `undefined` filter value turned a scoped delete into a delete-all.
+ *
+ * REQUIRED PATTERN for any destructive `deleteMany`/`updateMany`:
+ *   1. The `where` clause MUST contain at least one non-optional literal that
+ *      bounds the operation (e.g. `active: true`), OR
+ *   2. Every dynamic filter value MUST be validated as defined before the call
+ *      — use `assertDefined(value, 'name')` (below) at the top of the function.
+ *
+ * Do NOT build a destructive `where` from an optional-chained value such as
+ * `x?.id` without first running it through `assertDefined`.
+ */
+
+/**
+ * Asserts that a value is neither `null` nor `undefined`, returning it
+ * narrowed to its non-nullable type. Throws otherwise.
+ *
+ * Intended as a guard in front of destructive Prisma `deleteMany`/`updateMany`
+ * calls, where an `undefined` filter value silently widens the operation to
+ * the entire table (see the footgun note above and HNT-2672).
+ *
+ * @param value The value that must be defined.
+ * @param name A human-readable name for the value, used in the error message.
+ * @throws Error if `value` is `null` or `undefined`.
+ */
+export function assertDefined<T>(
+  value: T | null | undefined,
+  name: string,
+): T {
+  if (value === null || value === undefined) {
+    throw new Error(
+      `assertDefined: "${name}" must be defined, but received ${value}.`,
+    );
+  }
+  return value;
+}
+
+/**
  * Generate an integer Epoch time from a JavaScript Date object.
  *
  * @param date

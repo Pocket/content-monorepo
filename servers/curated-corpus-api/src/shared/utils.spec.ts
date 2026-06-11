@@ -13,6 +13,7 @@ import {
   normalizeDomain,
   validateDomainName,
   validateHttpUrl,
+  assertDefined,
 } from './utils';
 import { ApprovedItem } from '../database/types';
 
@@ -493,6 +494,29 @@ describe('shared/utils', () => {
           '"com" is not a valid domain name.',
         );
       });
+    });
+  });
+
+  describe('assertDefined', () => {
+    it('returns the value when it is defined', () => {
+      expect(assertDefined(123, 'id')).toBe(123);
+      expect(assertDefined(0, 'id')).toBe(0);
+      expect(assertDefined('', 'name')).toBe('');
+      expect(assertDefined(false, 'flag')).toBe(false);
+      const obj = { a: 1 };
+      expect(assertDefined(obj, 'obj')).toBe(obj);
+    });
+
+    it('throws when the value is undefined', () => {
+      expect(() => assertDefined(undefined, 'approvedItemId')).toThrow(
+        'assertDefined: "approvedItemId" must be defined, but received undefined.',
+      );
+    });
+
+    it('throws when the value is null', () => {
+      expect(() => assertDefined(null, 'sectionId')).toThrow(
+        'assertDefined: "sectionId" must be defined, but received null.',
+      );
     });
   });
 });
