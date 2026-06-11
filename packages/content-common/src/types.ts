@@ -16,6 +16,7 @@ export enum CorpusLanguage {
   ES = 'ES',
   FR = 'FR',
   IT = 'IT',
+  PL = 'PL',
 }
 
 export enum Topics {
