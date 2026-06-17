@@ -1403,8 +1403,10 @@ type Mutation {
 
   """
   Creates a SectionItem within a Section.
+  Returns null (a no-op) when an ML-automated process attempts to re-add an
+  item that an editor previously removed manually.
   """
-  createSectionItem(data: CreateSectionItemInput!): SectionItem!
+  createSectionItem(data: CreateSectionItemInput!): SectionItem
 
   """
   Updates a SectionItem's mutable fields (e.g. rank).
