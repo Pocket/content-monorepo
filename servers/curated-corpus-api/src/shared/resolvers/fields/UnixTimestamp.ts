@@ -28,5 +28,5 @@ export const getUnixTimestamp = (date: Date): number | null => {
   if (!date) {
     return null;
   }
-  return parseInt((date.getTime() / 1000).toFixed(0));
+  return Math.floor(date.getTime() / 1000);
 };

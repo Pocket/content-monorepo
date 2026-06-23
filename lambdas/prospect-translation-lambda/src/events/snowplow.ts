@@ -73,7 +73,7 @@ export const generateSnowplowEntity = (
     authors: prospect.authors?.split(','),
     publisher: prospect.publisher,
     domain: prospect.domain,
-    created_at: prospect.createdAt || Math.round(Date.now() / 1000), // date in seconds (snowplow expects integer & not number)
+    created_at: prospect.createdAt || Math.floor(Date.now() / 1000), // date in seconds (snowplow expects integer & not number)
     prospect_review_status: ProspectReviewStatus.Created,
     features: {
       data_source: features.data_source,
