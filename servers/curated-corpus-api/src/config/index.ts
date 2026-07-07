@@ -61,6 +61,10 @@ export default {
   metadataParser: {
     endpoint: process.env.ZYTE_EXTRACT_API_ENDPOINT || '',
     apiKey: process.env.ZYTE_EXTRACT_API_KEY || '',
+    // zyte calls generally take between 7 and 10 seconds to complete -
+    // 25 seconds should be generous enough here to allow calls to finish
+    // and not get us caught in long timeout errors
+    timeout: 25000,
   },
   sentry: {
     dsn: process.env.SENTRY_DSN || '',

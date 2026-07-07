@@ -80,25 +80,24 @@ export const deriveDatePublished = (dateRaw: any): string | undefined => {
  * broken out into a standalone function for easier mocking in tests.
  *
  * @param url URL for which to fetch metadata
- * @param metadataParserEnpointUrl URL endpoint of the metadata service
+ * @param metadataParserEndpointUrl URL endpoint of the metadata service
  * @param metadataParserApiKey API key for the metadata service
  * @returns JSON from the metadata service, or an empty object on failure
  */
 export const fetchUrlMetadata = async (
   url: string,
-  metadataParserEnpointUrl: string,
+  metadataParserEndpointUrl: string,
   metadataParserApiKey: string,
 ): Promise<{ [key: string]: any }> => {
   // Zyte-specific implementation
+
+  // default response - empty object
+  let json: { [key: string]: any } = {};
+  let fetchResponse: Response | undefined = undefined;
+
+  // 1. attempt to fetch metadata from zyte
   try {
-    const response = await fetch(metadataParserEnpointUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Basic ${Buffer.from(
-          metadataParserApiKey + ':',
-        ).toString('base64')}`,
-      },
+    fetchResponse = await fetch(metadataParserEndpointUrl, {
       body: JSON.stringify({
         url: url,
         article: true,
@@ -110,16 +109,75 @@ export const fetchUrlMetadata = async (
           service: config.app.serviceName,
         },
       }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${Buffer.from(
+          metadataParserApiKey + ':',
+        ).toString('base64')}`,
+      },
+      method: 'POST',
+      signal: AbortSignal.timeout(config.metadataParser.timeout),
     });
 
-    return await response.json();
+    // if the fetch gave us a non-2xx response, send to sentry.
+    // this will result in an empty object returned to the caller.
+    if (!fetchResponse.ok) {
+      // if response is not ok, try to capture the body of the response, as it
+      // may hold important error info.
+      const responseBody = await fetchResponse.text().catch(() => undefined);
+
+      Sentry.captureException(
+        new Error(`Metadata parser returned non-2xx HTTP status`),
+        {
+          extra: {
+            status: fetchResponse.status,
+            url,
+            responseBody,
+          },
+        },
+      );
+    }
   } catch (e) {
-    Sentry.captureException(
-      new Error(`Metadata parser failed to return metadata for ${url}`),
-    );
-    // gracefully return empty object when external metadata parser fails
-    return {};
+    // if any error occurred above, send it to sentry
+    Sentry.captureException(e, {
+      extra: {
+        message: `Metadata parser general fetch failure`,
+        url,
+      },
+    });
   }
+
+  // 2. if we successfully fetched data from zyte, attempt to get the JSON.
+  if (fetchResponse && fetchResponse.ok) {
+    try {
+      json = await fetchResponse.json();
+    } catch (e) {
+      Sentry.captureException(e, {
+        extra: {
+          message: `Metadata parser JSON response failure`,
+          url,
+        },
+      });
+    }
+  }
+
+  // 3. zyte's response may be a 2xx, with valid JSON, but there still may be
+  // an issue with the url attempted to be scraped.
+  // https://docs.zyte.com/zyte-api/usage/reference.html#operation/extract/response/200/statusCode
+  if (json.statusCode >= 400) {
+    Sentry.captureException(
+      new Error(`Metadata parser failed to parse given url.`),
+      {
+        extra: {
+          url,
+          status: json.statusCode,
+        },
+      },
+    );
+  }
+
+  // 4. return the json from zyte, or an empty object.
+  return json;
 };
 
 /**
