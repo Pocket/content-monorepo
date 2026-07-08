@@ -147,33 +147,3 @@ type Query {
   """
   getSections(filters: SectionFilters!): [Section!]!
 }
-
-type SavedItem @key(fields: "url") {
-  """
-  key field to identify the SavedItem entity in the ListApi service
-  """
-  url: String!
-
-  """
-  If the item is in corpus allow the saved item to reference it.  Exposing curated info for consistent UX
-  """
-  corpusItem: CorpusItem
-}
-
-type Item @key(fields: "givenUrl") {
-  """
-  key field to identify the CorpusItem entity in the RecsAPI service
-  """
-  givenUrl: Url!
-
-  """
-  Resolved URL field from the Parser in order to identify a given URL
-  in the Corpus (fallback if givenUrl is insufficient)
-  """
-  resolvedUrl: Url @external
-
-  """
-  If the item is in corpus allow the item to reference it.  Exposing curated info for consistent UX
-  """
-  corpusItem: CorpusItem @requires(fields: "resolvedUrl")
-}
