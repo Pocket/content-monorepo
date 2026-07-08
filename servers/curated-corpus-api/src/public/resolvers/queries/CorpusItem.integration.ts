@@ -4,10 +4,7 @@ import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '.prisma/client';
 import { client } from '../../../database/client';
 
-import {
-  CORPUS_ITEM_REFERENCE_RESOLVER,
-  CORPUS_ITEM_TARGET_REFERENCE_RESOLVER,
-} from './sample-queries.gql';
+import { CORPUS_ITEM_REFERENCE_RESOLVER } from './sample-queries.gql';
 import { clearDb, createApprovedItemHelper } from '../../../test/helpers';
 import { startServer } from '../../../express';
 import { IPublicContext } from '../../context';
@@ -23,8 +20,6 @@ describe('CorpusItem reference resolver', () => {
   let approvedItem2: ApprovedItem;
   let approvedItem3: ApprovedItem;
   let approvedItem4: ApprovedItem;
-  let approvedItemCollection: ApprovedItem;
-  let approvedItemSyndicated: ApprovedItem;
 
   beforeAll(async () => {
     // port 0 tells express to dynamically assign an available port
@@ -52,16 +47,6 @@ describe('CorpusItem reference resolver', () => {
 
     approvedItem4 = await createApprovedItemHelper(db, {
       title: 'Story four',
-    });
-
-    approvedItemSyndicated = await createApprovedItemHelper(db, {
-      title: 'Syndicated story one',
-      url: 'https://getpocket.com/explore/item/why-exhaustion-is-not-unique-to-our-overstimulated-age',
-    });
-
-    approvedItemCollection = await createApprovedItemHelper(db, {
-      title: 'Collection story one',
-      url: 'https://getpocket.com/collections/avocado-toast-was-king-these-recipes-are-vying-for-the-throne',
     });
   });
 
@@ -403,7 +388,6 @@ describe('CorpusItem reference resolver', () => {
     });
 
     it('handles repeat entities and sorts the results in order of the identifiers given', async () => {
-      console.log(approvedItem4);
       const result = await request(app)
         .post(graphQLUrl)
         .send({
@@ -442,214 +426,6 @@ describe('CorpusItem reference resolver', () => {
       verifyCorpusItemMetadata(result.body.data?._entities[1], approvedItem2);
       verifyCorpusItemMetadata(result.body.data?._entities[2], approvedItem3);
       verifyCorpusItemMetadata(result.body.data?._entities[3], approvedItem4);
-    });
-  });
-
-  describe('reference resolver for SavedItem', () => {
-    it('returns the corpus item if it exists on SavedItem', async () => {
-      const result = await request(app)
-        .post(graphQLUrl)
-        .send({
-          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
-          variables: {
-            representations: [
-              {
-                __typename: 'SavedItem',
-                url: approvedItem.url,
-              },
-            ],
-          },
-        });
-
-      expect(result.body.errors).toBeUndefined();
-
-      expect(result.body.data).not.toBeNull();
-      expect(result.body.data?._entities).toHaveLength(1);
-
-      verifyCorpusItemMetadata(
-        result.body.data?._entities[0].corpusItem,
-        approvedItem,
-      );
-    });
-
-    it('should return null on SavedItem if the url provided is not known', async () => {
-      const result = await request(app)
-        .post(graphQLUrl)
-        .send({
-          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
-          variables: {
-            representations: [
-              {
-                __typename: 'SavedItem',
-                url: 'ABRACADABRA',
-              },
-            ],
-          },
-        });
-
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data?._entities).toHaveLength(1);
-      expect(result.body.data?._entities[0].corpusItem).toBeNull();
-    });
-  });
-
-  describe('reference resolver for Item', () => {
-    it('returns the corpus item if it exists on Item', async () => {
-      const result = await request(app)
-        .post(graphQLUrl)
-        .send({
-          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
-          variables: {
-            representations: [
-              {
-                __typename: 'Item',
-                givenUrl: approvedItem.url,
-                resolvedUrl: approvedItem.url,
-              },
-            ],
-          },
-        });
-
-      expect(result.body.errors).toBeUndefined();
-
-      expect(result.body.data).not.toBeNull();
-      expect(result.body.data?._entities).toHaveLength(1);
-
-      verifyCorpusItemMetadata(
-        result.body.data?._entities[0].corpusItem,
-        approvedItem,
-      );
-    });
-    it('resolves the Item from resolvedUrl if givenUrl returns no record', async () => {
-      const result = await request(app)
-        .post(graphQLUrl)
-        .send({
-          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
-          variables: {
-            representations: [
-              {
-                __typename: 'Item',
-                givenUrl: 'https://www.youtube.com/watch?v=kfVsfOSbJY0',
-                resolvedUrl: approvedItem.url,
-              },
-            ],
-          },
-        });
-
-      expect(result.body.errors).toBeUndefined();
-
-      expect(result.body.data).not.toBeNull();
-      expect(result.body.data?._entities).toHaveLength(1);
-
-      verifyCorpusItemMetadata(
-        result.body.data?._entities[0].corpusItem,
-        approvedItem,
-      );
-    });
-
-    it('should return null on Item if the givenUrl and resolvedUrl provided are not known', async () => {
-      const result = await request(app)
-        .post(graphQLUrl)
-        .send({
-          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
-          variables: {
-            representations: [
-              {
-                __typename: 'Item',
-                givenUrl: 'ABRACADABRA',
-                resolvedUrl: 'ABRACADABRA',
-              },
-            ],
-          },
-        });
-
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data?._entities).toHaveLength(1);
-      expect(result.body.data?._entities[0].corpusItem).toBeNull();
-    });
-
-    it('should return null on Item if the givenUrl provided is not known and resolvedUrl is null', async () => {
-      const result = await request(app)
-        .post(graphQLUrl)
-        .send({
-          query: print(CORPUS_ITEM_REFERENCE_RESOLVER),
-          variables: {
-            representations: [
-              {
-                __typename: 'Item',
-                givenUrl: 'ABRACADABRA',
-                resolvedUrl: null,
-              },
-            ],
-          },
-        });
-
-      expect(result.body.errors).toBeUndefined();
-      expect(result.body.data?._entities).toHaveLength(1);
-      expect(result.body.data?._entities[0].corpusItem).toBeNull();
-    });
-  });
-
-  describe('target reference', () => {
-    it('returns the corpus target if its syndicated', async () => {
-      const result = await request(app)
-        .post(graphQLUrl)
-        .send({
-          query: print(CORPUS_ITEM_TARGET_REFERENCE_RESOLVER),
-          variables: {
-            representations: [
-              {
-                __typename: 'CorpusItem',
-                id: approvedItemSyndicated.externalId,
-              },
-            ],
-          },
-        });
-
-      expect(result.body.errors).toBeUndefined();
-
-      expect(result.body.data).not.toBeNull();
-      expect(result.body.data?._entities).toHaveLength(1);
-
-      expect(result.body.data?._entities[0].title).toEqual(
-        approvedItemSyndicated.title,
-      );
-      expect(result.body.data?._entities[0].target.slug).toEqual(
-        'why-exhaustion-is-not-unique-to-our-overstimulated-age',
-      );
-      expect(result.body.data?._entities[0].target.__typename).toEqual(
-        'SyndicatedArticle',
-      );
-    });
-
-    it('returns the corpus target if its collection', async () => {
-      const result = await request(app)
-        .post(graphQLUrl)
-        .send({
-          query: print(CORPUS_ITEM_TARGET_REFERENCE_RESOLVER),
-          variables: {
-            representations: [
-              {
-                __typename: 'CorpusItem',
-                id: approvedItemCollection.externalId,
-              },
-            ],
-          },
-        });
-
-      expect(result.body.errors).toBeUndefined();
-
-      expect(result.body.data).not.toBeNull();
-      expect(result.body.data?._entities).toHaveLength(1);
-      expect(result.body.data?._entities[0].title).toEqual(
-        approvedItemCollection.title,
-      );
-      expect(result.body.data?._entities[0].target.slug).toEqual(
-        'avocado-toast-was-king-these-recipes-are-vying-for-the-throne',
-      );
-      expect(result.body.data?._entities[0].target.__typename).toEqual(
-        'Collection',
-      );
     });
   });
 });

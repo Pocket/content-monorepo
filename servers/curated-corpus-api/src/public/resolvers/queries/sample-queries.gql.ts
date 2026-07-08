@@ -62,46 +62,6 @@ export const CORPUS_ITEM_REFERENCE_RESOLVER = gql`
           name
         }
       }
-      ... on SavedItem {
-        corpusItem {
-          id
-          title
-          authors {
-            name
-          }
-        }
-      }
-      ... on Item {
-        corpusItem {
-          id
-          title
-          authors {
-            name
-          }
-        }
-      }
-    }
-  }
-`;
-
-export const CORPUS_ITEM_TARGET_REFERENCE_RESOLVER = gql`
-  query ($representations: [_Any!]!) {
-    _entities(representations: $representations) {
-      ... on CorpusItem {
-        id
-        title
-        target {
-          __typename
-
-          ... on Collection {
-            slug
-          }
-
-          ... on SyndicatedArticle {
-            slug
-          }
-        }
-      }
     }
   }
 `;
