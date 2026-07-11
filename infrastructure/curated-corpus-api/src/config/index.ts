@@ -22,6 +22,11 @@ const rds = {
   // and changes should be considered.
   minCapacity: isDev ? 1 : 4,
   maxCapacity: isDev ? 2 : 128, // max allowed by AWS for Aurora Serverless V2
+  // Number of days Aurora retains automated backups and the continuous
+  // point-in-time-recovery (PITR) window. Unset defaults to 1 day, which left
+  // prod with a single backup and a one-day recovery window. 7 days gives more
+  // time to recover from data corruption that is not immediately apparent (HNT-2677).
+  backupRetentionPeriod: isDev ? 1 : 7,
 };
 
 export const config = {
