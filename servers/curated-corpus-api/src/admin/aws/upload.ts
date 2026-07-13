@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { v4 as uuidv4 } from 'uuid';
 import mime from 'mime-types';
 import { S3Client } from '@aws-sdk/client-s3';
@@ -40,6 +41,9 @@ export async function getS3UrlForImageUrl(
 
       s3ImageUrl = upload.url;
     } catch (err) {
+      Sentry.captureException(err, {
+        extra: { imageUrl },
+      });
       s3ImageUrl = null;
     }
   }
