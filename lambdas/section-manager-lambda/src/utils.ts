@@ -15,7 +15,6 @@ import {
   GraphQlApiCallHeaders,
   mapAuthorToApprovedItemAuthor,
   validateDatePublished,
-  validateImageUrl,
 } from 'lambda-common';
 
 import config from './config';
@@ -75,9 +74,11 @@ export const processSqsSectionData = async (
     ]),
   );
 
-  // keep track of how many candidates succeeded, how many failed
+  // keep track of how many candidates succeeded, failed, or were skipped
   let successfulCandidates = 0;
   let failedCandidates = 0;
+  // candidates skipped as an expected no-op (e.g. no usable image); not failures
+  let skippedCandidates = 0;
 
   // Get the existing SectionItems to remove from a Section
   const sectionItemsToRemove = computeSectionItemsToRemove(
@@ -124,6 +125,14 @@ export const processSqsSectionData = async (
         const apiInput = await mapSqsSectionItemToCreateApprovedItemApiInput(
           sqsSectionItem,
         );
+
+        // A null result means the candidate has no usable image. Images are
+        // required to display a recommendation on New Tab, so treat this as an
+        // expected skip (not a failure) rather than throwing downstream.
+        if (apiInput === null) {
+          skippedCandidates++;
+          continue;
+        }
 
         // create the ApprovedItem
         approvedItemExternalId = await createApprovedCorpusItem(
@@ -187,7 +196,7 @@ export const processSqsSectionData = async (
   }
 
   console.log(
-    `processSqsSectionData result: ${successfulCandidates} succeeded, ${failedCandidates} failed`,
+    `processSqsSectionData result: ${successfulCandidates} succeeded, ${failedCandidates} failed, ${skippedCandidates} skipped (no image)`,
   );
 };
 
@@ -242,7 +251,7 @@ export const mapSqsSectionDataToCreateOrUpdateSectionApiInput = (
  */
 export const mapSqsSectionItemToCreateApprovedItemApiInput = async (
   sqsSectionItem: SqsSectionItem,
-): Promise<CreateApprovedCorpusItemApiInput> => {
+): Promise<CreateApprovedCorpusItemApiInput | null> => {
   // source and topic are required from ML & have been validated upstream
   const source = sqsSectionItem.source;
   const topic = sqsSectionItem.topic;
@@ -264,9 +273,25 @@ export const mapSqsSectionItemToCreateApprovedItemApiInput = async (
     excerpt = excerpt && formatQuotesDashesDE(excerpt);
   }
 
-  let imageUrl: string | undefined = sqsSectionItem.image_url ?? undefined;
-  // only validate the imageUrl if it's defined
-  imageUrl = imageUrl && (await validateImageUrl(imageUrl));
+  // Images are required to render a recommendation on Firefox New Tab. ML
+  // sometimes sends candidates without one (image_url null/empty); previously
+  // every such item threw a typia assert error (~2,800/day) and was dropped as
+  // a "failure". Treat a missing image as an expected skip instead (HNT-2757).
+  //
+  // We intentionally no longer pre-validate a present image via the
+  // pocket-image-cache proxy: that proxy returns false negatives for images
+  // that are directly fetchable (e.g. ilsole24ore.com returns 200 directly but
+  // 500 through the proxy), so it dropped valid items. It is also redundant
+  // with curated-corpus-api, which fetches and uploads the image itself;
+  // genuine fetch failures surface there instead (see HNT-2758).
+  const imageUrl: string | undefined =
+    sqsSectionItem.image_url?.trim() || undefined;
+  if (!imageUrl) {
+    console.log(
+      `Skipping section item candidate for URL ${sqsSectionItem.url}: no image_url provided by ML (images are required for New Tab)`,
+    );
+    return null;
+  }
 
   // Validate date_published from ML; drop if invalid
   const datePublished = validateDatePublished(sqsSectionItem.date_published);
