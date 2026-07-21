@@ -89,37 +89,57 @@ export const fetchUrlMetadata = async (
   metadataParserEnpointUrl: string,
   metadataParserApiKey: string,
 ): Promise<{ [key: string]: any }> => {
-  // Zyte-specific implementation
-  try {
-    const response = await fetch(metadataParserEnpointUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Basic ${Buffer.from(
-          metadataParserApiKey + ':',
-        ).toString('base64')}`,
-      },
-      body: JSON.stringify({
-        url: url,
-        article: true,
-        articleOptions: {
-          extractFrom: 'browserHtml',
-        },
-        tags: {
-          environment: config.app.environment,
-          service: config.app.serviceName,
-        },
-      }),
-    });
+  // default to returning empty object
+  let res = {};
 
-    return await response.json();
-  } catch (e) {
+  // Zyte-specific implementation
+  const response = await fetch(metadataParserEnpointUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Basic ${Buffer.from(metadataParserApiKey + ':').toString(
+        'base64',
+      )}`,
+    },
+    body: JSON.stringify({
+      url: url,
+      article: true,
+      articleOptions: {
+        extractFrom: 'browserHtml',
+      },
+      tags: {
+        environment: config.app.environment,
+        service: config.app.serviceName,
+      },
+    }),
+  });
+
+  // if the fetch response wasn't okay, capture in sentry and log
+  if (!response.ok) {
     Sentry.captureException(
-      new Error(`Metadata parser failed to return metadata for ${url}`),
+      new Error(
+        `Metadata parser failed (HTTP ${response.status}) to return metadata for ${url}`,
+      ),
     );
-    // gracefully return empty object when external metadata parser fails
-    return {};
+
+    console.error('Zyte API error:', {
+      url,
+      status: response.status,
+      statusText: response.statusText,
+    });
+  } else {
+    try {
+      res = await response.json();
+    } catch (e) {
+      Sentry.captureException(
+        new Error(`Failed returning JSON response from Zyte for ${url}`),
+      );
+
+      console.error('Zyte JSON error:', { url, error: e });
+    }
   }
+
+  return res;
 };
 
 /**
