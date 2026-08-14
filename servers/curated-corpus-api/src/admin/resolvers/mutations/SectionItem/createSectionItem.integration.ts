@@ -246,7 +246,7 @@ describe('mutations: SectionItem (createSectionItem)', () => {
     );
   });
 
-  it('should block ML from re-adding a manually removed item', async () => {
+  it('should no-op (return null, no error) when ML re-adds a manually removed item', async () => {
     // First, manually remove an item from a section
     await db.sectionItem.create({
       data: {
@@ -286,12 +286,16 @@ describe('mutations: SectionItem (createSectionItem)', () => {
         variables: { data: input },
       });
 
-    // Should have a FORBIDDEN error
-    expect(result.body.errors).not.toBeUndefined();
-    expect(result.body.errors?.[0].extensions?.code).toEqual('FORBIDDEN');
-    expect(result.body.errors?.[0].message).toContain(
-      'Cannot create section item: This item was previously removed manually and cannot be re-added by ML.',
-    );
+    // Should be a no-op: no error surfaced (so it never reaches the admin-api
+    // gateway alert, HNT-2681) and createSectionItem resolves to null.
+    expect(result.body.errors).toBeUndefined();
+    expect(result.body.data?.createSectionItem).toBeNull();
+
+    // confirm nothing was created in section2
+    const created = await db.sectionItem.findFirst({
+      where: { approvedItemId: approvedItem.id, sectionId: section2.id },
+    });
+    expect(created).toBeNull();
   });
 
   it('should allow manual users to re-add a manually removed item', async () => {

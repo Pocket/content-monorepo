@@ -166,13 +166,15 @@ export async function createApprovedCorpusItem(
  * @param adminApiEndpoint  string
  * @param graphHeaders GraphQlApiHeaders object
  * @param data CreateSectionItemApiInput
- * @returns Promise<string> - externalId of the created SectionItem
+ * @returns Promise<string | null> - externalId of the created SectionItem, or
+ *   null when the mutation is a no-op (e.g. ML re-adding an item an editor
+ *   previously removed manually)
  */
 export async function createSectionItem(
   adminApiEndpoint: string,
   graphHeaders: GraphQlApiCallHeaders,
   data: CreateSectionItemApiInput,
-): Promise<string> {
+): Promise<string | null> {
   await sleep(config.app.graphQLSleep);
 
   const mutation = `
@@ -201,7 +203,8 @@ export async function createSectionItem(
     );
   }
 
-  return result.data.createSectionItem.externalId;
+  // The server returns null (not an error) when ML re-adds a manually-removed item.
+  return result.data.createSectionItem?.externalId ?? null;
 }
 
 /**

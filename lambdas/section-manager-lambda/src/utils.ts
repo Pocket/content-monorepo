@@ -144,6 +144,11 @@ export const processSqsSectionData = async (
           rank: sqsSectionItem.rank,
         },
       );
+      // A null result is an expected no-op (manually-removed item), so skip it
+      // without counting it as a failure.
+      if (newSectionItemExternalId === null) {
+        continue;
+      }
       // Mark URL as active to prevent duplicate creation
       // ML should not be sending duplicate candidate URLs within a Section within the same run
       // this is a safe guard

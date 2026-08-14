@@ -570,6 +570,36 @@ describe('utils', () => {
       );
     });
 
+    it('treats a createSectionItem no-op (null) as skipped, not a failure', async () => {
+      // all items already exist in the corpus
+      jest.spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl').mockResolvedValue(
+        {
+          externalId: 'approvedItemExternalId1',
+          url: 'test.com',
+        },
+      );
+
+      // createSectionItem returns null for the second candidate, simulating an
+      // item an editor previously removed manually (HNT-2681 no-op).
+      mockCreateSectionItem
+        .mockResolvedValueOnce('sectionItemExternalId1')
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('sectionItemExternalId3');
+
+      await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
+
+      expect(mockCreateSectionItem).toHaveBeenCalledTimes(sectionItemCount);
+
+      // a no-op is not an error: nothing captured/logged as a failure
+      expect(sentryStub).toHaveBeenCalledTimes(0);
+      expect(mockConsoleError).toHaveBeenCalledTimes(0);
+
+      // the no-op candidate is counted as neither succeeded nor failed
+      expect(mockConsoleLog.mock.calls[1][0]).toContain(
+        'processSqsSectionData result: 2 succeeded, 0 failed',
+      );
+    });
+
     it('calls the expected functions when creating ML SectionItems first, ignoring dupes, then removing old SectionItems, with deactivateSource=ML', async () => {
       const url1 = 'https://example-one.com';
       const url2 = 'https://example-two.com';

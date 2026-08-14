@@ -25,7 +25,7 @@ export async function createSectionItem(
   parent,
   { data },
   context: IAdminContext,
-): Promise<SectionItem> {
+): Promise<SectionItem | null> {
   const { actionScreen, ...createData } = data;
 
   // find the targeted Section so we can verify user has write access to its Scheduled Surface
@@ -62,6 +62,12 @@ export async function createSectionItem(
     },
     createSource,
   );
+
+  // dbCreateSectionItem returns null on the expected ML re-add no-op; nothing
+  // was created, so skip the event and return null.
+  if (!sectionItem) {
+    return null;
+  }
 
   const sectionItemForEvents: SectionItemPayload = {
     sectionItem: {

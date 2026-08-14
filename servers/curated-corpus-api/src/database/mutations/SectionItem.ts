@@ -1,4 +1,5 @@
-import { NotFoundError, ForbiddenError } from '@pocket-tools/apollo-utils';
+import { NotFoundError } from '@pocket-tools/apollo-utils';
+import { serverLogger } from '@pocket-tools/ts-logger';
 
 import { PrismaClient } from '.prisma/client';
 
@@ -16,12 +17,14 @@ import { ActivitySource } from 'content-common';
  * @param db
  * @param data
  * @param createSource - The source creating the section item (ML or MANUAL)
+ * @returns the created SectionItem, or null when ML attempts to re-add an item
+ *   that an editor previously removed manually (an expected no-op, not an error)
  */
 export async function createSectionItem(
   db: PrismaClient,
   data: CreateSectionItemInput,
   createSource: ActivitySource = ActivitySource.MANUAL,
-): Promise<SectionItem> {
+): Promise<SectionItem | null> {
   // we verify the Section/sectionId in the upstream resolver, so no need to
   // do so again here
   const { sectionId, approvedItemExternalId, rank } = data;
@@ -37,7 +40,9 @@ export async function createSectionItem(
     );
   }
 
-  // Check if ML is trying to add an item that was manually removed
+  // ML's dataset lags the corpus (data lake latency), so ML re-adding an item
+  // an editor removed manually is expected. Treat it as a no-op: log and
+  // return null instead of throwing an error (HNT-2681).
   if (createSource === ActivitySource.ML) {
     const manuallyRemovedItem = await db.sectionItem.findFirst({
       where: {
@@ -48,9 +53,14 @@ export async function createSectionItem(
     });
 
     if (manuallyRemovedItem) {
-      throw new ForbiddenError(
-        `Cannot create section item: This item was previously removed manually and cannot be re-added by ML.`,
+      serverLogger.info(
+        'Skipping ML re-add of a SectionItem that was previously removed manually',
+        {
+          approvedItemExternalId,
+          sectionId,
+        },
       );
+      return null;
     }
   }
 

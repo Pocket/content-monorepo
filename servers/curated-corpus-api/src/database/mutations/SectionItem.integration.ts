@@ -46,7 +46,7 @@ describe('SectionItem', () => {
       expect(result.approvedItemId).toEqual(approvedItem.id);
     });
 
-    it('should block ML from re-adding a manually removed item', async () => {
+    it('should no-op (return null) when ML re-adds a manually removed item', async () => {
       const approvedItem = await createApprovedItemHelper(db, {
         title: 'Test Item',
       });
@@ -67,19 +67,26 @@ describe('SectionItem', () => {
         },
       });
 
-      // ML should be blocked from adding this item to ANY section
-      await expect(
-        createSectionItem(
-          db,
-          {
-            sectionId: section2.id,
-            approvedItemExternalId: approvedItem.externalId,
-          },
-          ActivitySource.ML,
-        ),
-      ).rejects.toThrow(
-        'Cannot create section item: This item was previously removed manually and cannot be re-added by ML.',
+      // ML should be blocked from adding this item to ANY section; the guard
+      // is not scoped to a single section, so removal from section1 blocks
+      // re-adding to section2. This is an expected no-op (returns null), not
+      // an error (HNT-2681).
+      const result = await createSectionItem(
+        db,
+        {
+          sectionId: section2.id,
+          approvedItemExternalId: approvedItem.externalId,
+        },
+        ActivitySource.ML,
       );
+
+      expect(result).toBeNull();
+
+      // confirm nothing was created in section2
+      const created = await db.sectionItem.findFirst({
+        where: { approvedItemId: approvedItem.id, sectionId: section2.id },
+      });
+      expect(created).toBeNull();
     });
 
     it('should allow manual users to re-add a manually removed item', async () => {

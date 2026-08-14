@@ -96,7 +96,7 @@ describe('Upload', () => {
         uploadImageToS3FromUrl(s3, 'https://some.external.domain/image.jpg'),
       ).rejects.toThrow(
         new Error(
-          `Unknown/unexpected content-type for image: https://some.external.domain/image.jpg`,
+          `Unknown/unexpected content-type (text/javascript) for image: https://some.external.domain/image.jpg`,
         ),
       );
 

@@ -22,45 +22,9 @@ export const resolvers = {
       }
     },
   },
-  // Allow the `SavedItem` to resolve the corpus item
-  SavedItem: {
-    corpusItem: async (item, args, context: IPublicContext) => {
-      const corpusItem = await context.dataLoaders.corpusItemsByUrl.load(
-        item.url,
-      );
-
-      if (!corpusItem) {
-        return null;
-      }
-
-      return corpusItem;
-    },
-  },
   SectionItem: {
     corpusItem: (item) => {
       return getCorpusItemFromApprovedItem(item.approvedItem);
-    }
-  },
-  // Allow the `Item` to resolve the corpus item
-  Item: {
-    corpusItem: async (item, args, context: IPublicContext) => {
-      const { givenUrl, resolvedUrl } = item;
-
-      // try to get the corpusItem by the item's givenUrl
-      let corpusItem = await context.dataLoaders.corpusItemsByUrl.load(
-        givenUrl,
-      );
-
-      // if the item's givenUrl didn't return a corpusItem, and if the item has
-      // a resolvedUrl, try finding the corpusItem by resolvedUrl
-      if (!corpusItem && resolvedUrl) {
-        corpusItem = await context.dataLoaders.corpusItemsByUrl.load(
-          resolvedUrl,
-        );
-      }
-
-      // return the corpusItem or null
-      return corpusItem || null;
     },
   },
   Query: {

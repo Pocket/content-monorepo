@@ -1,8 +1,8 @@
 import { UserInputError } from '@pocket-tools/apollo-utils';
 import { ScheduledSurface, ScheduledSurfaces } from 'content-common';
-import { ApprovedItem, CorpusItem, CorpusTargetType } from '../database/types';
+import { ApprovedItem, CorpusItem } from '../database/types';
 import { ApprovedItemAuthor } from 'content-common';
-import { domainToASCII, parse } from 'url';
+import { domainToASCII } from 'url';
 import { parse as parseDomain, getDomain } from 'tldts';
 import { DateTime } from 'luxon';
 
@@ -83,8 +83,6 @@ export const getScheduledSurfaceByGuid = (
 export const getCorpusItemFromApprovedItem = (
   approvedItem: ApprovedItem,
 ): CorpusItem => {
-  const target = getPocketPath(approvedItem.url);
-
   return {
     id: approvedItem.externalId,
     url: approvedItem.url,
@@ -106,88 +104,9 @@ export const getCorpusItemFromApprovedItem = (
     // JS reason? or is it just better practice?
     topic: approvedItem.topic ?? undefined,
     isTimeSensitive: approvedItem.isTimeSensitive,
-    target: target?.key && {
-      slug: target.key,
-      __typename: target.type,
-    },
   };
 };
 // End Pocket shared data utility constructs/functions
-
-const slugRegex = /[\w/]+\/([\w-]+)$/;
-const localeRegex = /\/([a-z]{2}(-[A-Z]{2})?)(\/.*)/;
-
-/**
- *
- * @param path
- * @returns [locale, path]
- */
-const dropUrlLocalePath = (path: string): [string, string] => {
-  const match = path.match(localeRegex);
-
-  if (!match || match.length < 3) {
-    return [null, path];
-  }
-
-  return [match[1], match[3]];
-};
-
-/**
- *
- * @param path without locale.
- * @returns
- */
-const getUrlType = (path: string): CorpusTargetType => {
-  if (path.startsWith('/explore/item/')) {
-    return 'SyndicatedArticle';
-  } else if (path.startsWith('/collections/')) {
-    return 'Collection';
-  }
-  return null;
-};
-
-export const getUrlId = (path: string): string => {
-  return path.match(slugRegex)[1];
-};
-
-/**
- *
- * @param url Fully qualified URL.
- * @returns {locale, path, type, key} when URL has a known entity type.
- *          {locale, path} when its a pocket URL but the entities are not known.
- */
-export const getPocketPath = (
-  url: string,
-): {
-  locale: string;
-  path: string;
-  type?: CorpusTargetType;
-  key?: string;
-} => {
-  const obj = parse(url, true);
-
-  // Guard, only process getpocket.com urls.
-  if (obj.host != 'getpocket.com') {
-    return null;
-  }
-
-  // Drop the locale prefix from the path.
-  const [locale, path] = dropUrlLocalePath(obj.pathname);
-  const type = getUrlType(path);
-
-  if (type == null) {
-    return { locale, path };
-  }
-
-  const key = getUrlId(path);
-
-  return {
-    locale,
-    path,
-    type,
-    key,
-  };
-};
 
 /**
  * Normalizes a domain string by lowercasing, converting to ASCII (punycode),
