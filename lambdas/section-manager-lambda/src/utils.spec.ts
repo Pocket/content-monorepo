@@ -10,10 +10,7 @@ import {
   Topics,
   IABMetadata,
 } from 'content-common';
-import {
-  mapAuthorToApprovedItemAuthor,
-  mockPocketImageCache,
-} from 'lambda-common';
+import { mapAuthorToApprovedItemAuthor } from 'lambda-common';
 
 import * as GraphQlApiCalls from './graphQlApiCalls';
 import { createSqsSectionWithSectionItems } from './testHelpers';
@@ -93,8 +90,6 @@ describe('utils', () => {
 
   describe('mapSqsSectionItemToCreateApprovedItemApiInput', () => {
     it('should map SQS values correctly', async () => {
-      mockPocketImageCache(200);
-
       const result = await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
         sqsSectionItem,
       );
@@ -121,31 +116,26 @@ describe('utils', () => {
     });
 
     it('should use empty array for authors when not provided', async () => {
-      mockPocketImageCache(200);
-
       sqsSectionItem.authors = null;
 
       const result = await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
         sqsSectionItem,
       );
 
-      expect(result.authors).toEqual([]);
+      expect(result!.authors).toEqual([]);
     });
 
     it('should omit datePublished when date_published is null', async () => {
-      mockPocketImageCache(200);
-
       sqsSectionItem.date_published = null;
 
       const result = await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
         sqsSectionItem,
       );
 
-      expect(result.datePublished).toBeUndefined();
+      expect(result!.datePublished).toBeUndefined();
     });
 
     it('should omit datePublished and log error when date_published is invalid', async () => {
-      mockPocketImageCache(200);
       const consoleErrorSpy = jest
         .spyOn(console, 'error')
         .mockImplementation(() => {});
@@ -156,7 +146,7 @@ describe('utils', () => {
         sqsSectionItem,
       );
 
-      expect(result.datePublished).toBeUndefined();
+      expect(result!.datePublished).toBeUndefined();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Invalid date_published "invalid-date"'),
       );
@@ -169,8 +159,6 @@ describe('utils', () => {
      * expected type.
      */
     it('should fail if SQS does not have required data', async () => {
-      mockPocketImageCache(200);
-
       sqsSectionItem.title = null;
 
       await expect(
@@ -187,12 +175,11 @@ describe('utils', () => {
      * its type validation.
      */
     it('should fail with a Typia error if all optional source data is missing', async () => {
-      mockPocketImageCache(200);
-
       // remove all optional SQS data
       sqsSectionItem.authors = null;
       sqsSectionItem.excerpt = null;
-      sqsSectionItem.image_url = null;
+      // keep a valid image_url so the typia assert (not the graceful image skip)
+      // is what rejects the other missing required fields below
       sqsSectionItem.language = null;
       sqsSectionItem.title = null;
 
@@ -213,8 +200,6 @@ describe('utils', () => {
 
     describe('formatting titles and excerpts', () => {
       beforeEach(() => {
-        mockPocketImageCache(200);
-
         // note - ideally we'd just spy on the internal functions, but there's
         // no easy way (afaik) to do that when importing from an external
         // module.
@@ -233,10 +218,10 @@ describe('utils', () => {
             sqsSectionItem,
           );
 
-        expect(result.title).toEqual(
+        expect(result!.title).toEqual(
           formatQuotesEN(sqsSectionItem.title as string),
         );
-        expect(result.excerpt).toEqual(
+        expect(result!.excerpt).toEqual(
           formatQuotesEN(sqsSectionItem.excerpt as string),
         );
       });
@@ -249,10 +234,10 @@ describe('utils', () => {
             sqsSectionItem,
           );
 
-        expect(result.title).toEqual(
+        expect(result!.title).toEqual(
           formatQuotesDashesDE(sqsSectionItem.title as string),
         );
-        expect(result.excerpt).toEqual(
+        expect(result!.excerpt).toEqual(
           formatQuotesDashesDE(sqsSectionItem.excerpt as string),
         );
       });
@@ -265,21 +250,36 @@ describe('utils', () => {
             sqsSectionItem,
           );
 
-        expect(result.title).toEqual(sqsSectionItem.title as string);
-        expect(result.excerpt).toEqual(sqsSectionItem.excerpt as string);
+        expect(result!.title).toEqual(sqsSectionItem.title as string);
+        expect(result!.excerpt).toEqual(sqsSectionItem.excerpt as string);
       });
     });
 
-    it('should fail if image validation fails', async () => {
-      mockPocketImageCache(500);
+    it('returns null (skip) when image_url is missing — images are required for New Tab', async () => {
+      const consoleLogSpy = jest
+        .spyOn(console, 'log')
+        .mockImplementation(() => {});
+      sqsSectionItem.image_url = null;
 
-      await expect(
-        Utils.mapSqsSectionItemToCreateApprovedItemApiInput(sqsSectionItem),
-      ).rejects.toThrow(
-        new Error(
-          `Error on assert(): invalid type on $input.imageUrl, expect to be string`,
-        ),
+      const result = await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
+        sqsSectionItem,
       );
+
+      expect(result).toBeNull();
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        expect.stringContaining('no image_url provided by ML'),
+      );
+    });
+
+    it('returns null (skip) when image_url is an empty string', async () => {
+      jest.spyOn(console, 'log').mockImplementation(() => {});
+      sqsSectionItem.image_url = '';
+
+      const result = await Utils.mapSqsSectionItemToCreateApprovedItemApiInput(
+        sqsSectionItem,
+      );
+
+      expect(result).toBeNull();
     });
   });
 
@@ -572,12 +572,12 @@ describe('utils', () => {
 
     it('treats a createSectionItem no-op (null) as skipped, not a failure', async () => {
       // all items already exist in the corpus
-      jest.spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl').mockResolvedValue(
-        {
+      jest
+        .spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
+        .mockResolvedValue({
           externalId: 'approvedItemExternalId1',
           url: 'test.com',
-        },
-      );
+        });
 
       // createSectionItem returns null for the second candidate, simulating an
       // item an editor previously removed manually (HNT-2681 no-op).
@@ -597,6 +597,34 @@ describe('utils', () => {
       // the no-op candidate is counted as neither succeeded nor failed
       expect(mockConsoleLog.mock.calls[1][0]).toContain(
         'processSqsSectionData result: 2 succeeded, 0 failed',
+      );
+    });
+
+    it('skips a candidate with no usable image (mapper returns null) without counting it as a failure', async () => {
+      // none of the items exist in the corpus, so each goes through the create path
+      jest
+        .spyOn(GraphQlApiCalls, 'getApprovedCorpusItemByUrl')
+        .mockResolvedValue(null);
+
+      // the second candidate has no usable image -> mapper returns null (skip)
+      mockMapSqsSectionItemToCreateApprovedItemApiInput
+        .mockResolvedValueOnce({} as CreateApprovedCorpusItemApiInput)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({} as CreateApprovedCorpusItemApiInput);
+
+      await Utils.processSqsSectionData(sqsSectionData, jwtBearerToken);
+
+      // create is only attempted for the 2 candidates that have an image
+      expect(mockCreateApprovedCorpusItem).toHaveBeenCalledTimes(
+        sectionItemCount - 1,
+      );
+      expect(mockCreateSectionItem).toHaveBeenCalledTimes(sectionItemCount - 1);
+
+      // a skip is not an error
+      expect(sentryStub).toHaveBeenCalledTimes(0);
+      expect(mockConsoleError).toHaveBeenCalledTimes(0);
+      expect(mockConsoleLog.mock.calls[1][0]).toContain(
+        'processSqsSectionData result: 2 succeeded, 0 failed, 1 skipped',
       );
     });
 
