@@ -11,7 +11,7 @@ const domain = isDev
 const s3LogsBucket = isDev ? 'pocket-data-items-dev' : 'pocket-data-items';
 
 const snowplowEndpoint = isDev
-  ? 'com-getpocket-prod1.mini.snplow.net'
+  ? '73fbdaf4-dfc6-45b4-a597-be7a758b53d4.apps.snowplowanalytics.com'
   : 'd.getpocket.com';
 
 const rds = {
