@@ -37,7 +37,7 @@
     "tslib": "2.7.0"
   },
   "devDependencies": {
-    "@faker-js/faker": "8.4.1",
+    "@faker-js/faker": "10.5.0",
     "@types/jest": "29.5.12",
     "@types/lodash": "4.14.202",
     "eslint-config-custom": "workspace:*",
