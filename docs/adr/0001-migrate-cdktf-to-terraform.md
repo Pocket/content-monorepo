@@ -55,7 +55,7 @@ At cutover, the code gets only changes we can check with a plan compare:
 - **Split each stack into files by concern** (`alb.tf`, `ecs.tf`, `rds.tf`, ...).
 - **Write the ECS container definitions with `jsonencode()`** instead of a 2,400-character escaped string. This only goes in if the plan stays a no-op.
 - **Use `${local.environment}` in names**, plus one per-environment map for the ~11 values that really differ between dev and prod.
-- **Add `prevent_destroy` on Aurora.** The committed password is a placeholder (the real one lives only in state), so a re-created cluster would get the placeholder.
+- **Add `prevent_destroy` on Aurora, and keep no password in config.** The real password lives only in state (`ignore_changes`), so after state loss a create fails instead of building a cluster with a known password.
 
 Resource addresses and output names stay as CDKTF generated them. That is what keeps rollback possible, and the deploy jobs read the output names. We also chose one Terraform root per stack rather than Mozilla's `dev/`/`prod/`/`modules/` layout in webservices-infra. That layout would put a `module.` prefix on every address and break rollback; we can converge on it later with `moved` blocks.
 
