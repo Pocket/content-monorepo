@@ -48,14 +48,14 @@ Proposed option:
 We check the result mechanically: we compare the Terraform plan of the new code with the plan of today's CDKTF code against the same state. So far:
 - **section-manager-lambda:** matches on 21 of 21 resources in dev.
 - **curated-corpus-api:** matches on the 58 of 67 resources a read-only role can read. The plan doesn't complete yet: 8 of the other 9 are PagerDuty resources, which a separate PR removes first, and the last is a secret the read-only role can't read.
-- **curation-admin-tools:** today's CDKTF plan runs cleanly in dev; the HCL compare is still to do.
+- **curation-admin-tools:** the HCL's dev plan is identical to today's CDKTF plan (49 of 49 resources), including its 3 known perpetual changes.
 - **Prod:** each cutover PR's own CI plan runs the new code against prod with the read-only CI role, before anything is applied.
 
 At cutover, the code gets only changes we can check with a plan compare:
 - **Split each stack into files by concern** (`alb.tf`, `ecs.tf`, `rds.tf`, ...).
 - **Write the ECS container definitions with `jsonencode()`** instead of a 2,400-character escaped string. This only goes in if the plan stays a no-op.
 - **Use `${local.environment}` in names**, plus one per-environment map for the ~11 values that really differ between dev and prod.
-- **Add `prevent_destroy` on Aurora, and keep no password in config.** The real password lives only in state (`ignore_changes`), so after state loss a create fails instead of building a cluster with a known password.
+- **Add `prevent_destroy` on Aurora, and keep no password in config.** The real password lives in state and in the RDS secret, never in config (`ignore_changes`), so after state loss a create fails instead of building a cluster with a known password.
 
 Resource addresses and output names stay as CDKTF generated them. That is what keeps rollback possible, and the deploy jobs read the output names. We also chose one Terraform root per stack rather than Mozilla's `dev/`/`prod/`/`modules/` layout in webservices-infra. That layout would put a `module.` prefix on every address and break rollback; we can converge on it later with `moved` blocks.
 
@@ -63,7 +63,7 @@ We stay on Terraform 1.6.6, the version CI pins today, so the config source is t
 
 ### Positive Consequences
 
-* About 580 MB of dependencies and a TypeScript build step go away.
+* About 580 MB of dependencies and a TypeScript build step go away, once the last CDKTF stack (including corpus-scheduler-lambda and the ones being decommissioned) is gone.
 * Infrastructure diffs show real AWS resources instead of construct properties.
 * Provider upgrades become possible again, one PR per stack after the migration.
 * CI checks formatting and validity of every migrated stack for both environments on every PR (a content-monorepo job, and one in curation-admin-tools).

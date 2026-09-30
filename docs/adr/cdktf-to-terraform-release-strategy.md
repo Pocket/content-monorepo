@@ -21,7 +21,7 @@ Commands for every gate are in [`scripts/cdktf-to-terraform/README.md`](../../sc
 | 0.3 | **CCA only:** merge the PagerDuty-removal PR and apply it to dev and prod as a normal release. Then regenerate the CCA baseline, overrides and allowlist from the post-removal `main`. | Otherwise CCA's cutover plans show the PagerDuty destroys |
 | 0.4 | **CCA only:** get a dev role or session that can `secretsmanager:GetSecretValue` on the CCA RDS secret, for the dev gate | Without it, the dev plan errors and the gate fails |
 | 0.5 | Name an owner for `ProspectAPI-{env}-Queue-User`. Agree that prospect-api's teardown waits while any cutover or 30-day window is open, and that it's handled as a fix-forward in HCL. | ML uses its access key; deleting it breaks SML's apply and a CDKTF rollback |
-| 0.6 | Create a "cutover freeze" ruleset on `main` and `dev` that restricts updates, with a bypass for repo admins (the three backend engineers). Leave it disabled. | `main` has `enforce_admins: true`, so a branch lock would block the cutover merge itself; `dev` has no protection |
+| 0.6 | Create a "cutover freeze" ruleset on `main` and `dev` that restricts updates, with a bypass for repo admins (the three backend engineers), in content-monorepo **and** in curation-admin-tools. Leave both disabled. | `main` has `enforce_admins: true`, so a branch lock would block the cutover merge itself; `dev` has no protection |
 | 0.7 | Merge the CI Terraform checks PR (fmt + validate for both envs) | Every PR then checks formatting and validity of each migrated stack for dev and prod, so CI stays at parity with CDKTF's build |
 
 ## Phase 1: per-stack cutover
@@ -43,14 +43,14 @@ Suggested order: **SML, then CCA**, and **CAT independently**.
    - **SML/CCA:** compare the cutover PR's CI prod plan with the CI prod plan of a PR on the same `main` that touches only the stack's app path (e.g. `lambdas/section-manager-lambda/**`) and no infrastructure. The summary line and the set of changed addresses must be identical, every changed address must be on the allowlist, and each allowlisted address's full diff (its whole resource block in the plan log) must match the baseline's. Re-run the PR's plan right before merge.
    - **CAT** (its CI plan uses `-refresh=false`): a human runs refreshed prod plans of the CDKTF baseline and the HCL. That needs `aws configure export-credentials` for prod read-only, `TF_WORKSPACE=Prod`, `-lock=false`, and a Linux or Intel machine (the lockfile has no darwin_arm64 hash for null 2.1.2). Compare with the tool, then delete the plan files, because prod plan JSON holds secrets in plaintext.
 5. **Freeze:**
-   - Enable the freeze ruleset.
+   - Enable the freeze ruleset in the stack's repo (curation-admin-tools for CAT).
    - Check `dev` for other people's work in progress before resetting it.
    - Confirm there are no in-progress or queued runs of the stack's workflow, and that its last CodeDeploy deployment has finished (the workflow doesn't wait for it). For CAT, confirm the last pipeline execution succeeded and nothing is in progress.
    - Renovate plans can still take the state lock. That fails safe: re-run the job.
 6. **Dev cutover:** rebase the PR on current `main`, then push its head to `dev`. Confirm:
    - the apply shows only allowlisted changes;
    - the deploy step ran rather than being skipped (CCA: `ecs-codedeploy`; SML: the Lambda code updated) and the running version is the new one;
-   - a re-run of the infrastructure job plans only allowlisted changes (idempotency).
+   - idempotency: a read-only `terraform plan` of the applied HCL (dev read-only role, `-lock=false`) shows only the allowlisted perpetual changes. Don't re-run the infrastructure job for this: on `dev`/`main` a re-run applies again and re-runs the deploy.
 7. **Prod cutover:** merge to `main` with normal review and the required checks. Run the same confirmations, then disable the freeze.
 8. **After cutover:** principle 5 applies. For CAT, no Retry and no manual `start-build` of pre-cutover pipeline executions. Reset `dev` to `main`, so a stale branch can't reintroduce CDKTF.
 9. **Closing the rollback window:** at least one later prod apply whose deploy step actually ran, and 30 days since the prod cutover.
@@ -64,7 +64,11 @@ Suggested order: **SML, then CCA**, and **CAT independently**.
 
 A state-lock error or a cancelled run is **not** a trigger: re-run the job.
 
-**Action:**
+**Action, during the dev cutover (step 6, before the PR merges):** there is no merge to revert yet.
+- Keep the freeze, reset `dev` to `main` and push it, so the next run applies the CDKTF config again.
+- Confirm that apply shows only allowlisted changes and that its deploy ran. For CAT, the same with its `dev` branch and pipeline.
+
+**Action, after the prod merge:**
 - Re-enable (or keep) the freeze, repeat the step 5 checks, and revert the cutover PR with normal review and the required checks (including `test-integrations` for CCA).
 - Until Phase 2 cleanup or the stack's first provider bump, the revert alone restores CDKTF, for every stack.
 - If prospect-api's IAM user is already gone, a rollback fails the same way the HCL does: fix forward.
