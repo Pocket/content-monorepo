@@ -120,6 +120,7 @@ export const GET_SCHEDULED_SURFACES_FOR_USER = gql`
       guid
       name
       ianaTimezone
+      prospectTypes
     }
   }
 `;

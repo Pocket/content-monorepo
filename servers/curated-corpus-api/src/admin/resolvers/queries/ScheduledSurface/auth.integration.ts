@@ -48,6 +48,7 @@ describe('auth: ScheduledSurface', () => {
         expect(scheduledSurface.guid).toBeDefined();
         expect(scheduledSurface.name).toBeDefined();
         expect(scheduledSurface.ianaTimezone).toBeDefined();
+        expect(scheduledSurface.prospectTypes).toBeDefined();
       });
     });
 
@@ -71,6 +72,7 @@ describe('auth: ScheduledSurface', () => {
         expect(scheduledSurface.guid).toBeDefined();
         expect(scheduledSurface.name).toBeDefined();
         expect(scheduledSurface.ianaTimezone).toBeDefined();
+        expect(scheduledSurface.prospectTypes).toBeDefined();
       });
     });
 

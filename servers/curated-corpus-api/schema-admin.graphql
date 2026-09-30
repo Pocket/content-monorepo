@@ -149,6 +149,36 @@ enum ManualScheduleReason {
 }
 
 """
+Prospect types. This enum is not used anywhere in this schema, however it is used
+by the Curation Admin Tools frontend to filter prospects.
+"""
+enum ProspectType {
+  COUNTS
+  DISMISSED
+  DOMAIN_ALLOWLIST
+  PUBLISHER_SUBMITTED
+  RECOMMENDED
+  RSS_LOGISTIC
+  RSS_LOGISTIC_RECENT
+  SLATE_SCHEDULER_V2
+  TIMESPENT
+  TITLE_URL_MODELED
+  TOP_SAVED
+  QA_ENTERTAINMENT
+  QA_SPORTS
+  QA_MUSIC
+  QA_MOVIES
+  QA_BOOKS
+  QA_CELEBRITY
+  QA_TELEVISION
+  QA_MLB
+  QA_NFL
+  QA_NBA
+  QA_NHL
+  QA_SOCCER
+}
+
+"""
 The source of the corpus item
 """
 enum CorpusItemSource {
@@ -175,6 +205,10 @@ Indicates where in the Curation Tools UI the action took place
 """
 enum ActionScreen {
   """
+  This action took place from the prospecting screen in the admin tool
+  """
+  PROSPECTING
+  """
   This action took place from the schedule screen in the admin tool
   """
   SCHEDULE
@@ -189,7 +223,7 @@ enum ActionScreen {
 }
 
 """
-A Scheduled Surface.
+A Scheduled Surface, including its associated Prospect Types.
 """
 type ScheduledSurface {
   """
@@ -204,6 +238,10 @@ type ScheduledSurface {
   The IANA timezone of the Scheduled Surface, used to determine the start of a day.
   """
   ianaTimezone: String!
+  """
+  An array of associated ProspectTypes.
+  """
+  prospectTypes: [ProspectType!]!
 }
 
 """
