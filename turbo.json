@@ -24,9 +24,6 @@
       "cache": false,
       "persistent": true
     },
-    "db:dynamo-seed": {
-      "cache": false
-    },
     "db:prisma-seed": {
       "cache": false
     },

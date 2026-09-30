@@ -1,4 +1,3 @@
-import { UrlMetadata } from 'content-common';
 import { ApprovedCorpusItemOutput, GraphQlApiCallHeaders } from './types';
 
 /**
@@ -59,51 +58,4 @@ export async function getApprovedCorpusItemByUrl(
   }
 
   return result.data.getApprovedCorpusItemByUrl;
-}
-
-/**
- * Calls the getUrlMetadata query from prospect-api/parser.
- *
- * @param adminApiEndpoint string
- * @param graphHeaders GraphQlApiHeaders object
- * @param url string
- * @returns Promise<UrlMetadata>
- */
-export async function getUrlMetadata(
-  adminApiEndpoint: string,
-  graphHeaders: GraphQlApiCallHeaders,
-  url: string,
-): Promise<UrlMetadata> {
-  const query = `
-        query getUrlMetadata($url: String!) {
-          getUrlMetadata(url: $url) {
-              authors
-              datePublished
-              domain
-              excerpt
-              imageUrl
-              isCollection
-              isSyndicated
-              language
-              publisher
-              title
-              url
-          }
-        }`;
-
-  const variables = { url };
-
-  const res = await fetch(adminApiEndpoint, {
-    method: 'post',
-    headers: graphHeaders,
-    body: JSON.stringify({ query, variables }),
-  });
-
-  const result = await res.json();
-
-  if (!result.data && result.errors.length > 0) {
-    throw new Error(`getUrlMetadata query failed: ${result.errors[0].message}`);
-  }
-
-  return result.data.getUrlMetadata;
 }

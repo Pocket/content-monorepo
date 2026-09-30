@@ -56,7 +56,6 @@ export enum ActivitySource {
 export const ML_USERNAME = 'ML';
 
 export enum ActionScreen {
-  PROSPECTING = 'PROSPECTING',
   SCHEDULE = 'SCHEDULE',
   CORPUS = 'CORPUS',
   SECTIONS = 'SECTIONS',
@@ -189,91 +188,6 @@ export type CreateScheduledItemInput = {
   source: ActivitySource;
 };
 
-// these values will need to match those listed in the source of truth doc:
-// https://mozilla-hub.atlassian.net/wiki/spaces/PE/pages/390642851/Pocket+Shared+Data#Prospect-Types
-export enum ProspectType {
-  COUNTS = 'COUNTS',
-  DISMISSED = 'DISMISSED',
-  DOMAIN_ALLOWLIST = 'DOMAIN_ALLOWLIST',
-  PUBLISHER_SUBMITTED = 'PUBLISHER_SUBMITTED',
-  RECOMMENDED = 'RECOMMENDED',
-  RSS_LOGISTIC = 'RSS_LOGISTIC',
-  RSS_LOGISTIC_RECENT = 'RSS_LOGISTIC_RECENT',
-  SLATE_SCHEDULER_V2 = 'SLATE_SCHEDULER_V2',
-  TIMESPENT = 'TIMESPENT',
-  TITLE_URL_MODELED = 'TITLE_URL_MODELED',
-  TOP_SAVED = 'TOP_SAVED',
-  QA_ENTERTAINMENT = 'QA_ENTERTAINMENT',
-  QA_SPORTS = 'QA_SPORTS',
-  QA_MUSIC = 'QA_MUSIC',
-  QA_MOVIES = 'QA_MOVIES',
-  QA_BOOKS = 'QA_BOOKS',
-  QA_TELEVISION = 'QA_TELEVISION',
-  QA_CELEBRITY = 'QA_CELEBRITY',
-  QA_MLB = 'QA_MLB',
-  QA_NBA = 'QA_NBA',
-  QA_NFL = 'QA_NFL',
-  QA_NHL = 'QA_NHL',
-  QA_SOCCER = 'QA_SOCCER', // placeholder for now
-}
-
-export enum ProspectReviewStatus {
-  Created = 'created',
-  Recommendation = 'recommendation',
-  Corpus = 'corpus',
-  Rejected = 'rejected',
-  Dismissed = 'dismissed',
-}
-
-// used in prospect translation lambda
-export type ProspectFeatures = {
-  data_source: string;
-  rank: number;
-  save_count: number;
-  predicted_topic: string;
-};
-
-// used in prospect translation lambda
-export type ProspectRunDetails = {
-  candidate_set_id: string;
-  // unix timestamp
-  expires_at: number;
-  flow: string;
-  run_id: string;
-};
-
-// referenced from snowplow schema directly (used by prospect-api, prospect translation lambda)
-export type SnowplowProspect = {
-  object_version: 'new' | 'old';
-  // the prospect ID supplied by ML
-  prospect_id: string;
-  url: string;
-  title?: string;
-  excerpt?: string;
-  image_url?: string;
-  language?: string;
-  topic?: string;
-  is_collection?: boolean;
-  is_syndicated?: boolean;
-  authors?: string[];
-  publisher?: string;
-  domain?: string;
-  prospect_source: string;
-  scheduled_surface_id: string;
-  // The Unix timestamp in seconds.
-  created_at: number;
-  prospect_review_status: ProspectReviewStatus;
-  // The Unix timestamp in milliseconds.
-  reviewed_at?: number;
-  // The LDAP string of the curator who reviewed this prospect - for now, only removing prospect.
-  reviewed_by?: string;
-  // optional removal reasons and comment provided by a curator - only when removing.
-  status_reasons?: string[];
-  status_reason_comment?: string;
-  features?: ProspectFeatures;
-  run_details?: ProspectRunDetails;
-};
-
 export enum ScheduledSurfacesEnum {
   NEW_TAB_EN_US = 'NEW_TAB_EN_US',
   NEW_TAB_DE_DE = 'NEW_TAB_DE_DE',
@@ -324,7 +238,6 @@ export type ScheduledSurface = {
   name: string;
   guid: string;
   ianaTimezone: string;
-  prospectTypes: ProspectType[];
   accessGroup: string;
 };
 
@@ -333,179 +246,102 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     name: 'New Tab (en-US)',
     guid: 'NEW_TAB_EN_US',
     ianaTimezone: 'America/New_York',
-    prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
-      ProspectType.TOP_SAVED,
-      ProspectType.DOMAIN_ALLOWLIST,
-      ProspectType.DISMISSED,
-      ProspectType.TITLE_URL_MODELED,
-      ProspectType.RSS_LOGISTIC,
-      ProspectType.RSS_LOGISTIC_RECENT,
-      ProspectType.SLATE_SCHEDULER_V2,
-      ProspectType.PUBLISHER_SUBMITTED,
-      ProspectType.QA_MUSIC,
-      ProspectType.QA_MOVIES,
-      ProspectType.QA_BOOKS,
-      ProspectType.QA_TELEVISION,
-      ProspectType.QA_CELEBRITY,
-      ProspectType.QA_MLB,
-      ProspectType.QA_NBA,
-      ProspectType.QA_NFL,
-      ProspectType.QA_NHL,
-      ProspectType.QA_SOCCER,
-    ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENUS,
   },
   {
     name: 'New Tab (en-CA)',
     guid: 'NEW_TAB_EN_CA',
     ianaTimezone: 'America/Toronto',
-    prospectTypes: [],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENCA,
   },
   {
     name: 'New Tab (de-DE)',
     guid: 'NEW_TAB_DE_DE',
     ianaTimezone: 'Europe/Berlin',
-    prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
-      ProspectType.DOMAIN_ALLOWLIST,
-      ProspectType.DISMISSED,
-      ProspectType.TITLE_URL_MODELED,
-      ProspectType.RSS_LOGISTIC,
-      ProspectType.SLATE_SCHEDULER_V2,
-      ProspectType.PUBLISHER_SUBMITTED,
-      ProspectType.QA_ENTERTAINMENT,
-      ProspectType.QA_SPORTS,
-    ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_DEDE,
   },
   {
     name: 'New Tab (de-AT)',
     guid: 'NEW_TAB_DE_AT',
     ianaTimezone: 'Europe/Vienna',
-    prospectTypes: [],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_DEAT,
   },
   {
     name: 'New Tab (de-CH)',
     guid: 'NEW_TAB_DE_CH',
     ianaTimezone: 'Europe/Zurich',
-    prospectTypes: [],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_DECH,
   },
   {
     name: 'New Tab (en-GB)',
     guid: 'NEW_TAB_EN_GB',
     ianaTimezone: 'Europe/London',
-    prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
-      ProspectType.RECOMMENDED,
-      ProspectType.DISMISSED,
-      ProspectType.TITLE_URL_MODELED,
-      ProspectType.RSS_LOGISTIC,
-      ProspectType.PUBLISHER_SUBMITTED,
-    ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENGB,
   },
   {
     name: 'New Tab (en-IE)',
     guid: 'NEW_TAB_EN_IE',
     ianaTimezone: 'Europe/Dublin',
-    prospectTypes: [],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENIE,
   },
   {
     name: 'New Tab (EN Europe)',
     guid: 'NEW_TAB_EN_XE',
     ianaTimezone: 'Europe/Berlin',
-    prospectTypes: [],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENXE,
   },
   {
     name: 'New Tab (fr-FR)',
     guid: 'NEW_TAB_FR_FR',
     ianaTimezone: 'Europe/Paris',
-    prospectTypes: [
-      ProspectType.DOMAIN_ALLOWLIST,
-      ProspectType.RSS_LOGISTIC,
-      ProspectType.PUBLISHER_SUBMITTED,
-    ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_FRFR,
   },
   {
     name: 'New Tab (fr-BE)',
     guid: 'NEW_TAB_FR_BE',
     ianaTimezone: 'Europe/Brussels',
-    prospectTypes: [],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_FRBE,
   },
   {
     name: 'New Tab (it-IT)',
     guid: 'NEW_TAB_IT_IT',
     ianaTimezone: 'Europe/Rome',
-    prospectTypes: [
-      ProspectType.DOMAIN_ALLOWLIST,
-      ProspectType.RSS_LOGISTIC,
-      ProspectType.PUBLISHER_SUBMITTED,
-    ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ITIT,
   },
   {
     name: 'New Tab (es-ES)',
     guid: 'NEW_TAB_ES_ES',
     ianaTimezone: 'Europe/Madrid',
-    prospectTypes: [
-      ProspectType.DOMAIN_ALLOWLIST,
-      ProspectType.RSS_LOGISTIC,
-      ProspectType.PUBLISHER_SUBMITTED,
-    ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ESES,
   },
   {
     name: 'New Tab (ES Global)',
     guid: 'NEW_TAB_ES_XA',
     ianaTimezone: 'America/Mexico_City',
-    prospectTypes: [],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ESXA,
   },
   {
     name: 'New Tab (pl-PL)',
     guid: 'NEW_TAB_PL_PL',
     ianaTimezone: 'Europe/Warsaw',
-    prospectTypes: [],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_PLPL,
   },
   {
     name: 'New Tab (en-INTL)',
     guid: 'NEW_TAB_EN_INTL',
     ianaTimezone: 'Asia/Kolkata',
-    prospectTypes: [
-      ProspectType.COUNTS,
-      ProspectType.TIMESPENT,
-      ProspectType.RECOMMENDED,
-      ProspectType.DISMISSED,
-      ProspectType.TITLE_URL_MODELED,
-      ProspectType.RSS_LOGISTIC,
-      ProspectType.PUBLISHER_SUBMITTED,
-    ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENINTL,
   },
   {
     name: 'Pocket Hits (en-US)',
     guid: 'POCKET_HITS_EN_US',
     ianaTimezone: 'America/New_York',
-    prospectTypes: [ProspectType.TOP_SAVED],
     accessGroup: MozillaAccessGroup.POCKET_HITS_CURATOR_ENUS,
   },
   {
     name: 'Pocket Hits (de-DE)',
     guid: 'POCKET_HITS_DE_DE',
     ianaTimezone: 'Europe/Berlin',
-    prospectTypes: [ProspectType.TOP_SAVED],
     accessGroup: MozillaAccessGroup.POCKET_HITS_CURATOR_DEDE,
   },
 
@@ -513,12 +349,10 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     name: 'Sandbox',
     guid: 'SANDBOX',
     ianaTimezone: 'America/New_York',
-    prospectTypes: [],
     accessGroup: MozillaAccessGroup.CURATOR_SANDBOX,
   },
 ];
 
-// prospect-api
 export interface UrlMetadata {
   url: string;
   imageUrl?: string;
