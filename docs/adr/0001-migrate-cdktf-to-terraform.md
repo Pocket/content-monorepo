@@ -49,7 +49,7 @@ We check the result mechanically: we compare the Terraform plan of the new code 
 - **section-manager-lambda:** matches on 21 of 21 resources in dev.
 - **curated-corpus-api:** matches on the 58 of 67 resources a read-only role can read. The plan doesn't complete yet: 8 of the other 9 are PagerDuty resources, which a separate PR removes first, and the last is a secret the read-only role can't read.
 - **curation-admin-tools:** the HCL's dev plan is identical to today's CDKTF plan (49 of 49 resources), including its 3 known perpetual changes.
-- **Prod:** each cutover PR's own CI plan runs the new code against prod with the read-only CI role, before anything is applied.
+- **Prod:** each cutover PR's own CI plan runs the new code against prod with the read-only CI role, before anything is applied (curation-admin-tools: a manual refreshed prod plan, because its CI plan doesn't refresh; release strategy step 4).
 
 At cutover, the code gets only changes we can check with a plan compare:
 - **Split each stack into files by concern** (`alb.tf`, `ecs.tf`, `rds.tf`, ...).
@@ -73,7 +73,7 @@ We stay on Terraform 1.6.6, the version CI pins today, so the config source is t
 * The code is verbose (curated-corpus-api is ~1,900 lines) and keeps hashed names such as `aws_iam_role.application_ecs_service_ecs-iam_ecs-execution-role_FB754BAA`.
 * curation-admin-tools stays on AWS provider 4.21.0 until a separate upgrade.
 * A per-stack `concurrency` group has to land before any cutover, and each stack has a 30-day change freeze after its cutover (release strategy [3], principle 5).
-* Rollback is a single revert. It ends at that stack's first provider upgrade or at the CDKTF cleanup, whichever comes first.
+* Rollback is a single revert, but only until the first of: an HCL change to that stack after its cutover, its first provider bump, or the CDKTF cleanup (release strategy [3], Rollback window).
 
 ## Pros and Cons of the Options
 
@@ -121,7 +121,7 @@ Keep the current versions and change nothing.
 ## Risks
 
 * **Silent non-deploy:** the deploy step only runs when the `ecs-task-containerName` output is present. Renaming it skips prod deploys while CI stays green.
-* **Every stack applies at once:** deleting the CDKTF packages rewrites `pnpm-lock.yaml`, which triggers every stack's prod apply. That cleanup waits until every stack's rollback window has closed.
+* **Every stack applies at once:** deleting the CDKTF packages rewrites `pnpm-lock.yaml`, which triggers every stack's prod apply. That cleanup waits until every migrated stack is past its 30-day change freeze (release strategy [3], Phase 1 step 9).
 
 ## Implementation Impact
 
