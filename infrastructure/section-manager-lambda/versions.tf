@@ -2,7 +2,7 @@
 #   cp dev_backend.tfvars backend.tf && terraform init -backend=false
 
 terraform {
-  required_version = ">= 1.6.6"
+  required_version = ">= 1.16.4"
 
   required_providers {
     aws = {

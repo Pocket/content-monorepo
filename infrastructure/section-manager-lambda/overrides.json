@@ -10,6 +10,6 @@
     "terraform.required_providers.local": "Provider dropped (unused), see provider.local.",
     "terraform.required_providers.null": "Provider dropped (unused), see provider.null.",
     "terraform.required_providers.aws.source": "CDKTF emits the short form \"aws\"; \"hashicorp/aws\" is the same registry address.",
-    "terraform.required_version": "New pin \">= 1.6.6\" to match .terraform-version (CI tfenv)."
+    "terraform.required_version": "New pin \">= 1.16.4\" to match .terraform-version (CI tfenv); the cutover moves the CLI from 1.6.6 to 1.16.4 (see the ADR)."
   }
 }
