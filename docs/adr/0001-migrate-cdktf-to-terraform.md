@@ -126,12 +126,12 @@ Keep the current versions and change nothing.
 ## Implementation Impact
 
 * **Rollout:** one stack at a time, dev before prod, gated on plan comparisons. See the release strategy [3].
-* **prospect-api teardown:** section-manager-lambda attaches its SQS policy to an IAM user that prospect-api owns, and the ML team uses that user's access key. Adopting the user needs either a manual `state rm` or a Terraform 1.7+ upgrade first. Open: which of the two, and the ML team needs a heads-up.
+* **prospect-api teardown:** the `ProspectAPI-{env}-Queue-User` IAM user is torn down with prospect-api. section-manager-lambda attaches its SQS policy to that user by name, so the teardown also removes that attachment, after the ML team stops using the user's access key.
+* **Alarm notifications:** routing curated-corpus-api's canary alarms to Slack (#hnt-dev-be-alerts) is out of scope. Today they notify PagerDuty, which nobody watches.
 
 ## Open Questions
 
 * Who can run a complete dev plan of curated-corpus-api (it needs secret read access)?
-* Confirm nobody relies on the curated-corpus-api PagerDuty services before we remove them.
 * Who owns the `CurationAdminTools-{Dev,Prod}` CodeBuild projects, which no stack defines?
 * Is curation-admin-tools' prod state at `env:/Prod/CurationAdminTools`?
 
