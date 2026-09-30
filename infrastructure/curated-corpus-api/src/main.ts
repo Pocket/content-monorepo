@@ -11,7 +11,6 @@ import {
   ApplicationRDSCluster,
   PocketALBApplication,
   PocketAwsSyntheticChecks,
-  PocketPagerDuty,
   PocketVPC,
 } from '@pocket-tools/terraform-modules';
 import { DataAwsSnsTopic } from '@cdktf/provider-aws/lib/data-aws-sns-topic';
@@ -44,12 +43,10 @@ class CuratedCorpusAPI extends TerraformStack {
     const caller = new DataAwsCallerIdentity(this, 'caller');
     const region = new DataAwsRegion(this, 'region');
     const pocketVpc = new PocketVPC(this, 'pocket-vpc');
-    const curatedCorpusPagerduty = this.createPagerDuty();
 
     this.createPocketAlbApplication({
       rds: this.createRds(pocketVpc),
       s3: this.createS3Bucket(),
-      pagerDuty: curatedCorpusPagerduty,
       secretsManagerKmsAlias: this.getSecretsManagerKmsAlias(),
       snsTopic: this.getCodeDeploySnsTopic(),
       region,
@@ -57,10 +54,6 @@ class CuratedCorpusAPI extends TerraformStack {
     });
 
     new PocketAwsSyntheticChecks(this, 'synthetics', {
-      alarmTopicArn:
-        config.environment === 'Prod'
-          ? curatedCorpusPagerduty.snsCriticalAlarmTopic.arn
-          : '', // this should be improved, empty string recreates updates constantly as is in cdktf
       environment: process.env.NODE_ENV === 'development' ? 'Dev' : 'Prod', // yes we should use config.environment, but needs more refinment in module
       prefix: config.prefix,
       query: [
@@ -173,39 +166,16 @@ class CuratedCorpusAPI extends TerraformStack {
     });
   }
 
-  /**
-   * Create PagerDuty service for alerts
-   * @private
-   */
-  private createPagerDuty() {
-    return new PocketPagerDuty(this, 'pagerduty', {
-      prefix: config.prefix,
-      service: {
-        criticalEscalationPolicyId: config.pagerduty.escalationPolicyIdCritical,
-        nonCriticalEscalationPolicyId:
-          config.pagerduty.escalationPolicyIdNonCritical,
-      },
-    });
-  }
-
   private createPocketAlbApplication(dependencies: {
     rds: ApplicationRDSCluster;
     s3: S3Bucket;
-    pagerDuty: PocketPagerDuty;
     region: DataAwsRegion;
     caller: DataAwsCallerIdentity;
     secretsManagerKmsAlias: DataAwsKmsAlias;
     snsTopic: DataAwsSnsTopic;
   }): PocketALBApplication {
-    const {
-      rds,
-      s3,
-      pagerDuty,
-      region,
-      caller,
-      secretsManagerKmsAlias,
-      snsTopic,
-    } = dependencies;
+    const { rds, s3, region, caller, secretsManagerKmsAlias, snsTopic } =
+      dependencies;
 
     return new PocketALBApplication(this, 'application', {
       accessLogs: {
@@ -366,7 +336,6 @@ class CuratedCorpusAPI extends TerraformStack {
           evaluationPeriods: 4, // 1 hr total
           threshold: 500, // 500 ms
           period: 900, // 15 minutes
-          actions: config.isDev ? [] : [pagerDuty.snsNonCriticalAlarmTopic.arn],
         },
       },
     });
