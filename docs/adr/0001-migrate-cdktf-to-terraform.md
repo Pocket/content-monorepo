@@ -72,7 +72,7 @@ We stay on Terraform 1.6.6, the version CI pins today, so the config source is t
 
 * The code is verbose (curated-corpus-api is ~1,900 lines) and keeps hashed names such as `aws_iam_role.application_ecs_service_ecs-iam_ecs-execution-role_FB754BAA`.
 * curation-admin-tools stays on AWS provider 4.21.0 until a separate upgrade.
-* A per-stack `concurrency` group has to land before any cutover, and each stack has a 30-day change freeze after its cutover (release strategy [3], principle 5).
+* A per-stack `concurrency` group has to land before any cutover, and each stack has a half-day change freeze after its cutover (release strategy [3], principle 5).
 * Rollback is a single revert, but only until the first of: an HCL change to that stack after its cutover, its first provider bump, or the CDKTF cleanup (release strategy [3], Rollback window).
 
 ## Pros and Cons of the Options
@@ -121,7 +121,7 @@ Keep the current versions and change nothing.
 ## Risks
 
 * **Silent non-deploy:** the deploy step only runs when the `ecs-task-containerName` output is present. Renaming it skips prod deploys while CI stays green.
-* **Every stack applies at once:** deleting the CDKTF packages rewrites `pnpm-lock.yaml`, which triggers every stack's prod apply. That cleanup waits until every migrated stack is past its 30-day change freeze (release strategy [3], Phase 1 step 9).
+* **Every stack applies at once:** deleting the CDKTF packages rewrites `pnpm-lock.yaml`, which triggers every stack's prod apply. That cleanup waits until every migrated stack is past its change freeze (release strategy [3], Phase 1 step 9).
 
 ## Implementation Impact
 
