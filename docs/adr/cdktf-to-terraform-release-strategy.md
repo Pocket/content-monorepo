@@ -34,14 +34,14 @@ Suggested order: **SML, then CCA**, and **CAT independently**.
 **Roles:** one engineer drives, a second reviews the gate output and watches the deploy.
 
 1. **Offline gate:** for dev and prod, `render_locals.py` evaluates that env's locals, and `tfeq.js` then exits 0 against a fresh synth of `main`, with the committed `overrides.json`. This is where Prod values are checked offline.
-2. **Dev gate:** read-only dev plans of the CDKTF baseline and the HCL. `strict-compare-plans.sh baseline candidate allowlist` exits 0.
+2. **Dev gate:** read-only dev plans of the CDKTF baseline (Terraform 1.6.6, as today) and the HCL (1.16.4). `strict-compare-plans.sh baseline candidate allowlist` exits 0.
 3. **Cutover PR:**
    - Adds the HCL, `{dev,prod}_backend.tfvars`, `.terraform.lock.hcl`, `overrides.json` and a `.gitignore` entry for `backend.tf`. Switches to `raw-terraform: true` with `stack-output-path` at the stack root, deletes `cdktf.json`, and removes the stack's `synth` script from its `package.json`.
    - The rest of `package.json`, `src/`, `pnpm-lock.yaml` and the workflow `name:` stay unchanged.
    - For CAT: `buildspec.yml` switches to terraform, keeps `TF_WORKSPACE` and fixes the `cp` path.
 4. **Prod gate (human, checklist):**
    - **SML/CCA:** compare the cutover PR's CI prod plan with the CI prod plan of a PR on the same `main` that touches only the stack's app path (e.g. `lambdas/section-manager-lambda/**`) and no infrastructure. The summary line and the set of changed addresses must be identical, every changed address must be on the allowlist, and each allowlisted address's full diff (its whole resource block in the plan log) must match the baseline's. (Repeated on the rebased head in step 7.)
-   - **CAT** (its CI plan uses `-refresh=false`): a human runs refreshed prod plans of the CDKTF baseline and the HCL. That needs `aws configure export-credentials` for prod read-only, `TF_WORKSPACE=Prod`, `-lock=false`, and a Linux or Intel machine (null 2.1.2 has no darwin_arm64 build). Compare with the tool, then delete the plan files, because prod plan JSON holds secrets in plaintext.
+   - **CAT** (its CI plan uses `-refresh=false`): a human runs refreshed prod plans of the CDKTF baseline (Terraform 1.6.6) and the HCL (1.16.4). That needs `aws configure export-credentials` for prod read-only, `TF_WORKSPACE=Prod`, `-lock=false`, and a Linux or Intel machine (null 2.1.2 has no darwin_arm64 build). Compare with the tool, then delete the plan files, because prod plan JSON holds secrets in plaintext.
 5. **Freeze:**
    - Enable the freeze ruleset in the stack's repo (curation-admin-tools for CAT).
    - Check `dev` for other people's work in progress before resetting it.
@@ -84,6 +84,7 @@ A state-lock error or a cancelled run is **not** a trigger: re-run the job.
   - curation-admin-tools, 4 (in that repo): `data.aws_caller_identity.curationadmintools_application_pocketvpc_currentidentity_8BA4E431`, `data.aws_kms_alias.curationadmintools_application_pocketvpc_secretsmanagerkey_A71C9E80`, `data.aws_region.curationadmintools_application_pocketvpc_currentregion_5922CDA9`, `data.aws_security_groups.curationadmintools_application_pocketvpc_defaultsecuritygroups_18064505`.
 - The lockfile change triggers every stack and **redeploys every app in prod**. Run it as its own normal release.
 - Provider bumps come after that, one PR per stack: AWS 5.83.1 → 6.x, and CAT 4.21.0 → 5, which replaces `aws_subnet_ids`. A stack's first provider bump ends its rollback window.
+- Switch each S3 backend from DynamoDB locking (`dynamodb_table`) to `use_lockfile` once that stack's rollback window has ended. Until then CDKTF on 1.6.6 needs the DynamoDB lock, so the deprecation warning on HCL runs is expected.
 - Cleaning up collection-api's state belongs to its decommission.
 
 ## Communication

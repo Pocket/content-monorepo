@@ -43,7 +43,7 @@ We looked at three more options and rejected them early:
 
 Proposed option:
 
-* **A.** Convert CDKTF's synthesized JSON to HCL, one stack at a time, on Terraform 1.6.6.
+* **A.** Convert CDKTF's synthesized JSON to HCL, one stack at a time, moving the CLI to Terraform 1.16.4.
 
 We check the result mechanically: we compare the Terraform plan of the new code with the plan of today's CDKTF code against the same state. So far:
 - **section-manager-lambda:** matches on 21 of 21 resources in dev.
@@ -59,7 +59,7 @@ At cutover, the code gets only changes we can check with a plan compare:
 
 Resource addresses and output names stay as CDKTF generated them. That is what keeps rollback possible, and the deploy jobs read the output names. We also chose one Terraform root per stack rather than Mozilla's `dev/`/`prod/`/`modules/` layout in webservices-infra. That layout would put a `module.` prefix on every address and break rollback; we can converge on it later with `moved` blocks.
 
-We stay on Terraform 1.6.6, the version CI pins today, so the config source is the only thing that changes. OpenTofu, which Mozilla's shared Terraform CI uses, is a separate follow-up decision.
+The cutover also moves the Terraform CLI from 1.6.6, the version CI pins today, to 1.16.4 (latest stable). Terraform 1.x is backward compatible, and the dev plan compare verifies it: the CDKTF baseline plans on 1.6.6 and the HCL on 1.16.4. State written by 1.16.4 stays readable by 1.6.6, so rollback still works. Provider versions stay exactly as CDKTF pins them. DynamoDB state locking stays for now, so HCL and CDKTF runs share one lock, and the `dynamodb_table` deprecation warning is expected; switching to `use_lockfile` is a follow-up. OpenTofu, which Mozilla's shared Terraform CI uses, is a separate follow-up decision.
 
 ### Positive Consequences
 
