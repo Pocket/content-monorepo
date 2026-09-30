@@ -22,6 +22,7 @@ Commands for every gate are in [`scripts/cdktf-to-terraform/README.md`](../../sc
 | 0.4 | **CCA only:** get a dev role or session that can `secretsmanager:GetSecretValue` on the CCA RDS secret, for the dev gate | Without it, the dev plan errors and the gate fails |
 | 0.5 | Name an owner for `ProspectAPI-{env}-Queue-User`. Agree that prospect-api's teardown waits while any cutover or 30-day window is open, and that it's handled as a fix-forward in HCL. | ML uses its access key; deleting it breaks SML's apply and a CDKTF rollback |
 | 0.6 | Create a "cutover freeze" ruleset on `main` and `dev` that restricts updates, with a bypass for repo admins (the three backend engineers). Leave it disabled. | `main` has `enforce_admins: true`, so a branch lock would block the cutover merge itself; `dev` has no protection |
+| 0.7 | Merge the CI Terraform checks PR (fmt + validate for both envs) | Every PR then checks formatting and validity of each migrated stack for dev and prod, so CI stays at parity with CDKTF's build |
 
 ## Phase 1: per-stack cutover
 

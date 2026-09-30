@@ -68,6 +68,7 @@ We stay on Terraform 1.6.6, the version CI pins today, so the config source is t
 * About 580 MB of dependencies and a TypeScript build step go away.
 * Infrastructure diffs show real AWS resources instead of construct properties.
 * Provider upgrades become possible again, one PR per stack after the migration.
+* CI checks formatting and validity of every stack for both environments on every PR.
 
 ### Negative Consequences
 
