@@ -51,7 +51,7 @@ Suggested order: **SML, then CCA**, and **CAT independently**.
    - the apply shows only allowlisted changes;
    - the deploy step ran rather than being skipped (CCA: `ecs-codedeploy`; SML: the Lambda code updated) and the running version is the new one;
    - idempotency: a read-only `terraform plan` of the applied HCL (dev read-only role, `-lock=false`) shows only the allowlisted perpetual changes. Don't re-run the infrastructure job for this: on `dev`/`main` a re-run applies again and re-runs the deploy.
-7. **Prod cutover:** merge to `main` with normal review and the required checks. Run the same confirmations, then disable the freeze.
+7. **Prod cutover:** after the step 6 rebase, push the rebased head to the PR and repeat the step 4 prod gate on that new CI plan (with a fresh baseline if `main` moved), then merge to `main` with normal review and the required checks. Run the same confirmations, then disable the freeze.
 8. **After cutover:** principle 5 applies. For CAT, no Retry and no manual `start-build` of pre-cutover pipeline executions. Reset `dev` to `main`, so a stale branch can't reintroduce CDKTF.
 9. **Closing the rollback window:** at least one later prod apply whose deploy step actually ran, and 30 days since the prod cutover.
 
