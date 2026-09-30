@@ -23,9 +23,7 @@ jobs:
     # this will reference the file below on the main branch.
     uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main
     with:
-      # Plain Terraform: the raw-terraform action copies {dev,prod}_backend.tfvars
-      # to backend.tf and runs init + plan/apply in stack-output-path. In this
-      # mode scope is only the tfcmt PR comment label.
+      # scope is only the tfcmt label in raw-terraform mode.
       scope: section-manager-lambda-cdk
       stack-output-path: infrastructure/section-manager-lambda
       raw-terraform: true

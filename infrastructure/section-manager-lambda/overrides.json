@@ -10,6 +10,6 @@
     "terraform.required_providers.null": "Provider dropped (unused), see provider.null.",
     "terraform.required_providers.aws.source": "CDKTF emits the short form \"aws\"; \"hashicorp/aws\" is the same registry address.",
     "terraform.required_version": "New pin \">= 1.6.6\" to match .terraform-version (CI tfenv).",
-    "resource.aws_sqs_queue.section-manager-sqs-lambda_lambda_sqs_queue_146756B6.redrive_policy": "jsonencode() instead of a hand-built JSON string (synth --hcl mangles it); same keys and values, the provider compares JSON semantically. The dev plan confirms no diff."
+    "resource.aws_sqs_queue.section-manager-sqs-lambda_lambda_sqs_queue_146756B6.redrive_policy": "jsonencode() of the same JSON; the provider compares it semantically (dev plan: no diff)."
   }
 }

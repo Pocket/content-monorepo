@@ -1,5 +1,4 @@
 # Lambda from PocketSQSWithLambdaTarget (@pocket-tools/terraform-modules 5.20.0).
-# The SQS visibility timeout (sqs.tf) must stay >= the lambda timeout.
 
 # Code bucket
 resource "aws_s3_bucket" "section-manager-sqs-lambda_code-bucket_B7EF5E37" {
@@ -44,12 +43,12 @@ resource "aws_lambda_function" "section-manager-sqs-lambda_D7365DAE" {
   handler                        = "index.handler"
   memory_size                    = 512
   publish                        = true
-  reserved_concurrent_executions = 1
+  reserved_concurrent_executions = 1 # only one instance of this function may run at a time
   role                           = aws_iam_role.section-manager-sqs-lambda_execution-role_D23D53C9.arn
   runtime                        = "nodejs20.x"
   source_code_hash               = data.archive_file.section-manager-sqs-lambda_lambda-default-file_9FFED07F.output_base64sha256
   tags                           = local.tags
-  timeout                        = 180
+  timeout                        = 180 # also update the generateJwt expiration and the SQS visibility timeout (sqs.tf) when changing this
 
   environment {
     variables = {
@@ -117,7 +116,7 @@ resource "aws_codedeploy_deployment_group" "section-manager-sqs-lambda_lambda-co
 
 
 resource "aws_lambda_event_source_mapping" "section-manager-sqs-lambda_lambda_event_source_mapping_B67750B1" {
-  batch_size                         = 1
+  batch_size                         = 1 # so SQS doesn't combine messages (that skips an ML candidate set); the handler rejects >1 record
   event_source_arn                   = aws_sqs_queue.section-manager-sqs-lambda_lambda_sqs_queue_146756B6.arn
   function_name                      = aws_lambda_alias.section-manager-sqs-lambda_alias_3275471A.arn
   maximum_batching_window_in_seconds = 60

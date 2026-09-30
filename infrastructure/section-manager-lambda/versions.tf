@@ -1,9 +1,4 @@
-# Plain Terraform for section-manager-lambda, converted from the CDKTF stack
-# (cdktf synth JSON, NODE_ENV=development and production). Resource addresses
-# and output names keep the CDKTF logical IDs so they match existing state.
-#
-# local.environment ("Dev" | "Prod") comes from {dev,prod}_backend.tfvars,
-# which CI copies to backend.tf. Locally:
+# local.environment comes from <env>_backend.tfvars; locally:
 #   cp dev_backend.tfvars backend.tf && terraform init -backend=false
 
 terraform {
