@@ -116,7 +116,7 @@ resource "aws_codedeploy_deployment_group" "section-manager-sqs-lambda_lambda-co
 
 
 resource "aws_lambda_event_source_mapping" "section-manager-sqs-lambda_lambda_event_source_mapping_B67750B1" {
-  batch_size                         = 1 # so SQS doesn't combine messages (that skips an ML candidate set); the handler rejects >1 record
+  batch_size                         = 1 # so SQS doesn't combine messages (that skips an ML candidate set); the handler drops a batch of >1 record (Sentry error, no retry)
   event_source_arn                   = aws_sqs_queue.section-manager-sqs-lambda_lambda_sqs_queue_146756B6.arn
   function_name                      = aws_lambda_alias.section-manager-sqs-lambda_alias_3275471A.arn
   maximum_batching_window_in_seconds = 60

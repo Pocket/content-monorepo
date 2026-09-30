@@ -22,5 +22,3 @@ provider "aws" {
     tags = local.tags
   }
 }
-
-provider "archive" {}
