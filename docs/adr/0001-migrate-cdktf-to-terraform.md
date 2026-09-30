@@ -4,8 +4,6 @@
 * **Deciders:** J, Herraj Luhano, Mathijs Miermans
 * **Date:** 2026-09-29
 
-Technical Story: TBD (Jira ticket to be created after review)
-
 ## Context and Problem Statement
 
 The AWS infrastructure for three New Tab backend services is defined in CDK for Terraform (CDKTF), mostly through the `@pocket-tools/terraform-modules` construct library:
@@ -68,24 +66,23 @@ We stay on Terraform 1.6.6, the version CI pins today, so the config source is t
 * About 580 MB of dependencies and a TypeScript build step go away.
 * Infrastructure diffs show real AWS resources instead of construct properties.
 * Provider upgrades become possible again, one PR per stack after the migration.
-* CI checks formatting and validity of every stack for both environments on every PR.
+* CI checks formatting and validity of every migrated stack for both environments on every PR (a content-monorepo job, and one in curation-admin-tools).
 
 ### Negative Consequences
 
 * The code is verbose (curated-corpus-api is ~1,900 lines) and keeps hashed names such as `aws_iam_role.application_ecs_service_ecs-iam_ecs-execution-role_FB754BAA`.
 * curation-admin-tools stays on AWS provider 4.21.0 until a separate upgrade.
-* A per-stack `concurrency` group has to land before any cutover, and a stack gets no HCL-only changes for 30 days after its cutover, the window in which GitHub lets someone re-run an old CDKTF run.
-* Rollback is a single revert, and is only available until the first provider upgrade.
+* A per-stack `concurrency` group has to land before any cutover, and each stack has a 30-day change freeze after its cutover (release strategy [3], principle 5).
+* Rollback is a single revert. It ends at that stack's first provider upgrade or at the CDKTF cleanup, whichever comes first.
 
 ## Pros and Cons of the Options
 
 ### A. Convert synthesized JSON to HCL
 
-A 150-line converter reads the `cdktf synth` JSON and the provider schemas, and writes HCL with the same resources and addresses. content-monorepo stacks switch to the shared workflow's existing `raw-terraform` mode. curation-admin-tools keeps its CodePipeline, and only its `buildspec.yml` changes.
+A 149-line converter reads the `cdktf synth` JSON and the provider schemas, and writes HCL with the same resources and addresses. content-monorepo stacks switch to the shared workflow's existing `raw-terraform` mode. curation-admin-tools keeps its CodePipeline, and only its `buildspec.yml` changes.
 
 #### Pros
 
-* Matches the synthesized JSON; confirmed by two independent comparison tools, and by dev plans so far.
 * The same tool covers cdktf 0.20 and 0.11, so curation-admin-tools needs no special path.
 * Can move towards idiomatic modules later, one `moved` block at a time.
 
@@ -124,19 +121,17 @@ Keep the current versions and change nothing.
 ## Risks
 
 * **Silent non-deploy:** the deploy step only runs when the `ecs-task-containerName` output is present. Renaming it skips prod deploys while CI stays green.
-* **Every stack applies at once:** deleting the CDKTF packages rewrites `pnpm-lock.yaml`, which triggers every stack's prod apply. That cleanup waits until all stacks are migrated.
-* **A stale CDKTF apply after cutover:** closed by the concurrency group and the 30-day rule (see Negative Consequences).
+* **Every stack applies at once:** deleting the CDKTF packages rewrites `pnpm-lock.yaml`, which triggers every stack's prod apply. That cleanup waits until every stack's rollback window has closed.
 
 ## Implementation Impact
 
 * **Rollout:** one stack at a time, dev before prod, gated on plan comparisons. See the release strategy [3].
-* **prospect-api teardown:** section-manager-lambda attaches its SQS policy to an IAM user that prospect-api owns, and the ML team uses that user's access key. Adopting the user needs either a manual `state rm` or a Terraform 1.7+ upgrade first.
+* **prospect-api teardown:** section-manager-lambda attaches its SQS policy to an IAM user that prospect-api owns, and the ML team uses that user's access key. Adopting the user needs either a manual `state rm` or a Terraform 1.7+ upgrade first. Open: which of the two, and the ML team needs a heads-up.
 
 ## Open Questions
 
 * Who can run a complete dev plan of curated-corpus-api (it needs secret read access)?
 * Confirm nobody relies on the curated-corpus-api PagerDuty services before we remove them.
-* The IAM user: `state rm`, or Terraform 1.7+ first? Does the ML team need a heads-up?
 * Who owns the `CurationAdminTools-{Dev,Prod}` CodeBuild projects, which no stack defines?
 * Is curation-admin-tools' prod state at `env:/Prod/CurationAdminTools`?
 
@@ -145,4 +140,4 @@ Keep the current versions and change nothing.
 * [1]: https://github.com/hashicorp/terraform-cdk (archived 2025-12-10)
 * [2]: https://github.com/open-constructs/cdk-terrain
 * [3]: [Release strategy](cdktf-to-terraform-release-strategy.md)
-* Precedent: `infrastructure/user-list-search` in pocket-monorepo uses the `raw-terraform` workflow mode
+* Precedent: `infrastructure/user-list-search` in pocket-monorepo used the `raw-terraform` workflow mode, but its workflow is archived and that path hasn't run in a long time. The SML cutover PR's own plan is its first real run.
