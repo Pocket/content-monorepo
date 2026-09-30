@@ -330,8 +330,9 @@ class CuratedCorpusAPI extends TerraformStack {
         targetMaxCapacity: 10,
       },
       alarms: {
-        // A non-critical alarm will be raised if request latency
-        // exceeds 500 ms within a 15-minute period four times in a row.
+        // The alarm goes off if request latency exceeds 500 ms within a
+        // 15-minute period four times in a row. It has no actions, so it
+        // notifies nobody.
         httpLatency: {
           evaluationPeriods: 4, // 1 hr total
           threshold: 500, // 500 ms
