@@ -5,7 +5,7 @@ import http from 'http';
 import * as Sentry from '@sentry/node';
 
 import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
+import { expressMiddleware } from '@as-integrations/express5';
 //See https://github.com/jaydenseric/graphql-upload/issues/305#issuecomment-1135285811 on why we do this
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 

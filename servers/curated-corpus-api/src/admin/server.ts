@@ -1,6 +1,10 @@
 import { Server } from 'http';
 
-import { ApolloServer, GraphQLRequestContext } from '@apollo/server';
+import {
+  ApolloServer,
+  ApolloServerPlugin,
+  GraphQLRequestContext,
+} from '@apollo/server';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
@@ -22,7 +26,8 @@ export function getAdminServer(
   httpServer: Server,
 ): ApolloServer<IAdminContext> {
   const plugins = [
-    sentryPlugin,
+    // apollo-utils 3.x is typed against AS4 (only HeaderMap differs); drop the cast with apollo-utils 4 (HNT-3505).
+    sentryPlugin as unknown as ApolloServerPlugin,
     ApolloServerPluginDrainHttpServer({ httpServer }),
     // All our subgraphs are behind a VPC and a VPN so its safe to enable the Landing Page
     ApolloServerPluginLandingPageLocalDefault({ footer: false }),
@@ -47,6 +52,8 @@ export function getAdminServer(
     plugins,
     introspection: true,
     formatError: errorHandler,
+    // Keep AS4's 200 for variable coercion errors (custom Date/NonNegativeInt scalars); a 400 makes the admin-api gateway replace BAD_USER_INPUT with "400: Bad Request".
+    status400ForVariableCoercionErrors: false,
   });
 }
 
