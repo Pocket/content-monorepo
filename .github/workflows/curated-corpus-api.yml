@@ -71,7 +71,8 @@ jobs:
       scope: curated-corpus-api
       app-path: servers/curated-corpus-api
       app-port: 4025
-      sentry-project: curated-corpus-api
+      sentry-org: mozilla
+      sentry-project: hnt-curated-corpus-api
       docker-repo-name-pattern: curatedcorpusapi-{0}-app
       terraform-output: ${{needs.infrastructure.outputs.terraform-output}}
     secrets: inherit
@@ -82,6 +83,7 @@ jobs:
     uses: pocket/pocket-monorepo/.github/workflows/reuse-sentry-release.yml@main
     needs: [api]
     with:
-      sentry-project: curated-corpus-api
+      sentry-organization: mozilla
+      sentry-project: hnt-curated-corpus-api
       sentry-environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
     secrets: inherit
