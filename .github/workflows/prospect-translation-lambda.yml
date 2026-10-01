@@ -41,7 +41,8 @@ jobs:
     needs: [infrastructure]
     with:
       scope: prospect-translation-aws_lambda
-      sentry-project: prospect-translation-lambda
+      sentry-org: mozilla
+      sentry-project: hnt-prospect-translation-lambda
       s3-bucket-pattern: pocket-prospectapi-{0}-sqs-translation
       codedeploy-app-name-pattern: ProspectAPI-{0}-Sqs-Translation-Lambda
       codedeploy-group-name-pattern: ProspectAPI-{0}-Sqs-Translation-Lambda
@@ -54,6 +55,7 @@ jobs:
     uses: pocket/pocket-monorepo/.github/workflows/reuse-sentry-release.yml@main
     needs: [sqs-lambda]
     with:
-      sentry-project: prospect-translation-lambda
+      sentry-organization: mozilla
+      sentry-project: hnt-prospect-translation-lambda
       sentry-environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
     secrets: inherit

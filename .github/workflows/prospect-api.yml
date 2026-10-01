@@ -58,7 +58,8 @@ jobs:
       scope: prospect-api
       app-path: servers/prospect-api
       app-port: 4026
-      sentry-project: prospect-api
+      sentry-org: mozilla
+      sentry-project: hnt-prospect-api
       docker-repo-name-pattern: prospectapi-{0}-app
       terraform-output: ${{needs.infrastructure.outputs.terraform-output}}
     secrets: inherit
@@ -69,6 +70,7 @@ jobs:
     uses: pocket/pocket-monorepo/.github/workflows/reuse-sentry-release.yml@main
     needs: [api]
     with:
-      sentry-project: prospect-api
+      sentry-organization: mozilla
+      sentry-project: hnt-prospect-api
       sentry-environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
     secrets: inherit

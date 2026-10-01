@@ -33,7 +33,8 @@ jobs:
     needs: [infrastructure]
     with:
       scope: section-manager-lambda
-      sentry-project: section-manager-lambda
+      sentry-org: mozilla
+      sentry-project: hnt-section-manager-lambda
       s3-bucket-pattern: pocket-sectionmanagerlambda-{0}-sqs
       codedeploy-app-name-pattern: SectionManagerLambda-{0}-SQS-Lambda
       codedeploy-group-name-pattern: SectionManagerLambda-{0}-SQS-Lambda
@@ -46,6 +47,7 @@ jobs:
     uses: pocket/pocket-monorepo/.github/workflows/reuse-sentry-release.yml@main
     needs: [sqs-lambda]
     with:
-      sentry-project: section-manager-lambda
+      sentry-organization: mozilla
+      sentry-project: hnt-section-manager-lambda
       sentry-environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
     secrets: inherit

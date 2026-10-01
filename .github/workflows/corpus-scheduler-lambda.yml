@@ -41,7 +41,8 @@ jobs:
     needs: [infrastructure]
     with:
       scope: corpus-scheduler-aws_lambda
-      sentry-project: corpus-scheduler-lambda
+      sentry-org: mozilla
+      sentry-project: hnt-corpus-scheduler-lambda
       s3-bucket-pattern: pocket-corpusschedulerlambda-{0}-sqs
       codedeploy-app-name-pattern: CorpusSchedulerLambda-{0}-SQS-Lambda
       codedeploy-group-name-pattern: CorpusSchedulerLambda-{0}-SQS-Lambda
@@ -54,6 +55,7 @@ jobs:
     uses: pocket/pocket-monorepo/.github/workflows/reuse-sentry-release.yml@main
     needs: [sqs-lambda]
     with:
-      sentry-project: corpus-scheduler-lambda
+      sentry-organization: mozilla
+      sentry-project: hnt-corpus-scheduler-lambda
       sentry-environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
     secrets: inherit
