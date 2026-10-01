@@ -1,0 +1,5 @@
+.terraform
+backend.tf
+index.js.zip
+*.tfplan
+*.tfstate*

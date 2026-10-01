@@ -23,8 +23,10 @@ jobs:
     # this will reference the file below on the main branch.
     uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main
     with:
+      # scope is only the tfcmt label in raw-terraform mode.
       scope: section-manager-lambda-cdk
-      stack-output-path: infrastructure/section-manager-lambda/cdktf.out/stacks/section-manager-lambda-wrapper
+      stack-output-path: infrastructure/section-manager-lambda
+      raw-terraform: true
     secrets: inherit
 
   sqs-lambda:

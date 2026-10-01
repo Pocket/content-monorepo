@@ -1,0 +1,15 @@
+{
+  "accept": {
+    "data.aws_kms_alias": "PocketVPC lookup (secrets manager KMS alias) that nothing in this stack references; data source only, no plan impact.",
+    "data.aws_security_groups.pocket-vpc_internal_security_groups_147262D8": "Unused PocketVPC lookup; data source only, no plan impact.",
+    "data.aws_ssm_parameter.pocket-vpc_public_subnets_7F9CDB28": "Unused PocketVPC lookup; data source only, no plan impact.",
+    "data.aws_subnets.pocket-vpc_public_subnet_ids_0B13AF23": "Unused PocketVPC lookup; data source only, no plan impact.",
+    "provider.archive": "Empty provider block dropped; Terraform configures archive implicitly from required_providers.",
+    "provider.local": "No resource or data source uses the local provider.",
+    "provider.null": "No resource or data source uses the null provider.",
+    "terraform.required_providers.local": "Provider dropped (unused), see provider.local.",
+    "terraform.required_providers.null": "Provider dropped (unused), see provider.null.",
+    "terraform.required_providers.aws.source": "CDKTF emits the short form \"aws\"; \"hashicorp/aws\" is the same registry address.",
+    "terraform.required_version": "New pin \">= 1.16.4\" to match .terraform-version (CI tfenv); the cutover moves the CLI from 1.6.6 to 1.16.4 (see the ADR)."
+  }
+}

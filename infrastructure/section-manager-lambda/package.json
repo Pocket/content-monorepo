@@ -7,7 +7,6 @@
   "private": true,
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "synth": "cdktf synth",
     "compile": "tsc --pretty",
     "watch": "tsc -w",
     "test": "echo ok",
