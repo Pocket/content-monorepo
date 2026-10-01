@@ -157,6 +157,95 @@ importers:
         specifier: 5.6.2
         version: 5.6.2
 
+  infrastructure/prospect-api:
+    dependencies:
+      '@cdktf/provider-archive':
+        specifier: 10.3.0
+        version: 10.3.0(cdktf@0.20.11(constructs@10.4.2))(constructs@10.4.2)
+      '@cdktf/provider-aws':
+        specifier: 19.49.1
+        version: 19.49.1(cdktf@0.20.11(constructs@10.4.2))(constructs@10.4.2)
+      '@cdktf/provider-local':
+        specifier: 10.1.1
+        version: 10.1.1(cdktf@0.20.11(constructs@10.4.2))(constructs@10.4.2)
+      '@cdktf/provider-null':
+        specifier: 10.0.1
+        version: 10.0.1(cdktf@0.20.11(constructs@10.4.2))(constructs@10.4.2)
+      '@cdktf/provider-pagerduty':
+        specifier: 13.15.1
+        version: 13.15.1(cdktf@0.20.11(constructs@10.4.2))(constructs@10.4.2)
+      '@pocket-tools/terraform-modules':
+        specifier: 5.20.0
+        version: 5.20.0(encoding@0.1.13)(ink@3.2.0(react@17.0.2))(react@17.0.2)
+      cdktf:
+        specifier: 0.20.11
+        version: 0.20.11(constructs@10.4.2)
+      cdktf-cli:
+        specifier: 0.20.11
+        version: 0.20.11(encoding@0.1.13)(ink@3.2.0(react@17.0.2))(react@17.0.2)
+      constructs:
+        specifier: 10.4.2
+        version: 10.4.2
+      infrastructure-common:
+        specifier: workspace:*
+        version: link:../../packages/infrastructure-common
+    devDependencies:
+      '@types/node':
+        specifier: ~20.12
+        version: 20.12.14
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../../packages/eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
+      typescript:
+        specifier: 5.6.2
+        version: 5.6.2
+
+  infrastructure/prospect-translation-lambda:
+    dependencies:
+      '@cdktf/provider-archive':
+        specifier: 10.3.0
+        version: 10.3.0(cdktf@0.20.11(constructs@10.4.2))(constructs@10.4.2)
+      '@cdktf/provider-aws':
+        specifier: 19.49.1
+        version: 19.49.1(cdktf@0.20.11(constructs@10.4.2))(constructs@10.4.2)
+      '@cdktf/provider-local':
+        specifier: 10.1.1
+        version: 10.1.1(cdktf@0.20.11(constructs@10.4.2))(constructs@10.4.2)
+      '@cdktf/provider-null':
+        specifier: 10.0.1
+        version: 10.0.1(cdktf@0.20.11(constructs@10.4.2))(constructs@10.4.2)
+      '@cdktf/provider-pagerduty':
+        specifier: 13.15.1
+        version: 13.15.1(cdktf@0.20.11(constructs@10.4.2))(constructs@10.4.2)
+      '@pocket-tools/terraform-modules':
+        specifier: 5.20.0
+        version: 5.20.0(encoding@0.1.13)(ink@3.2.0(react@17.0.2))(react@17.0.2)
+      cdktf:
+        specifier: 0.20.11
+        version: 0.20.11(constructs@10.4.2)
+      cdktf-cli:
+        specifier: 0.20.11
+        version: 0.20.11(encoding@0.1.13)(ink@3.2.0(react@17.0.2))(react@17.0.2)
+      constructs:
+        specifier: 10.4.2
+        version: 10.4.2
+    devDependencies:
+      '@types/node':
+        specifier: ~20.12
+        version: 20.12.14
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../../packages/eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
+      typescript:
+        specifier: 5.6.2
+        version: 5.6.2
+
   infrastructure/section-manager-lambda:
     dependencies:
       '@cdktf/provider-archive':

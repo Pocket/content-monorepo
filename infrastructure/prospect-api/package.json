@@ -1,0 +1,35 @@
+{
+  "name": "prospect-api-cdk",
+  "version": "1.0.0",
+  "main": "dist/main.js",
+  "types": "dist/main.ts",
+  "license": "MPL-2.0",
+  "private": true,
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "synth": "cdktf synth",
+    "compile": "tsc --pretty",
+    "watch": "tsc -w",
+    "test": "echo ok",
+    "lint": "eslint --fix-dry-run \"src/**/*.ts\"",
+    "format": "eslint --fix \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "@cdktf/provider-archive": "10.3.0",
+    "@cdktf/provider-aws": "19.49.1",
+    "@cdktf/provider-local": "10.1.1",
+    "@cdktf/provider-null": "10.0.1",
+    "@cdktf/provider-pagerduty": "13.15.1",
+    "@pocket-tools/terraform-modules": "5.20.0",
+    "cdktf-cli": "0.20.11",
+    "cdktf": "0.20.11",
+    "constructs": "10.4.2",
+    "infrastructure-common": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "~20.12",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*",
+    "typescript": "5.6.2"
+  }
+}
