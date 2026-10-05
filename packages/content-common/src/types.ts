@@ -217,63 +217,6 @@ export enum ProspectType {
   QA_SOCCER = 'QA_SOCCER', // placeholder for now
 }
 
-export enum ProspectReviewStatus {
-  Created = 'created',
-  Recommendation = 'recommendation',
-  Corpus = 'corpus',
-  Rejected = 'rejected',
-  Dismissed = 'dismissed',
-}
-
-// used in prospect translation lambda
-export type ProspectFeatures = {
-  data_source: string;
-  rank: number;
-  save_count: number;
-  predicted_topic: string;
-};
-
-// used in prospect translation lambda
-export type ProspectRunDetails = {
-  candidate_set_id: string;
-  // unix timestamp
-  expires_at: number;
-  flow: string;
-  run_id: string;
-};
-
-// referenced from snowplow schema directly (used by prospect-api, prospect translation lambda)
-export type SnowplowProspect = {
-  object_version: 'new' | 'old';
-  // the prospect ID supplied by ML
-  prospect_id: string;
-  url: string;
-  title?: string;
-  excerpt?: string;
-  image_url?: string;
-  language?: string;
-  topic?: string;
-  is_collection?: boolean;
-  is_syndicated?: boolean;
-  authors?: string[];
-  publisher?: string;
-  domain?: string;
-  prospect_source: string;
-  scheduled_surface_id: string;
-  // The Unix timestamp in seconds.
-  created_at: number;
-  prospect_review_status: ProspectReviewStatus;
-  // The Unix timestamp in milliseconds.
-  reviewed_at?: number;
-  // The LDAP string of the curator who reviewed this prospect - for now, only removing prospect.
-  reviewed_by?: string;
-  // optional removal reasons and comment provided by a curator - only when removing.
-  status_reasons?: string[];
-  status_reason_comment?: string;
-  features?: ProspectFeatures;
-  run_details?: ProspectRunDetails;
-};
-
 export enum ScheduledSurfacesEnum {
   NEW_TAB_EN_US = 'NEW_TAB_EN_US',
   NEW_TAB_DE_DE = 'NEW_TAB_DE_DE',
@@ -282,12 +225,14 @@ export enum ScheduledSurfacesEnum {
   NEW_TAB_EN_GB = 'NEW_TAB_EN_GB',
   NEW_TAB_EN_CA = 'NEW_TAB_EN_CA',
   NEW_TAB_EN_IE = 'NEW_TAB_EN_IE',
+  NEW_TAB_EN_XE = 'NEW_TAB_EN_XE',
   NEW_TAB_FR_FR = 'NEW_TAB_FR_FR',
   NEW_TAB_FR_BE = 'NEW_TAB_FR_BE',
   NEW_TAB_IT_IT = 'NEW_TAB_IT_IT',
   NEW_TAB_ES_ES = 'NEW_TAB_ES_ES',
+  NEW_TAB_ES_XA = 'NEW_TAB_ES_XA',
   NEW_TAB_PL_PL = 'NEW_TAB_PL_PL',
-  NEW_TAB_EN_INT = 'NEW_TAB_EN_INT',
+  NEW_TAB_EN_INTL = 'NEW_TAB_EN_INTL',
   POCKET_HITS_EN_US = 'POCKET_HITS_EN_US',
   POCKET_HITS_DE_DE = 'POCKET_HITS_DE_DE',
   SANDBOX = 'SANDBOX',
@@ -305,10 +250,12 @@ export enum MozillaAccessGroup {
   NEW_TAB_CURATOR_ENGB = 'mozilliansorg_pocket_new_tab_curator_engb', // Access to en-GB new tab in corpus tool.
   NEW_TAB_CURATOR_ENCA = 'mozilliansorg_pocket_new_tab_curator_enca', // Access to en-CA new tab in corpus tool.
   NEW_TAB_CURATOR_ENIE = 'mozilliansorg_pocket_new_tab_curator_enie', // Access to en-IE new tab in corpus tool.
+  NEW_TAB_CURATOR_ENXE = 'mozilliansorg_pocket_new_tab_curator_enxe', // Access to en-XE (cross-Europe English) new tab in corpus tool.
   NEW_TAB_CURATOR_FRFR = 'mozilliansorg_pocket_new_tab_curator_frfr', // Access to fr-FR new tab in corpus tool.
   NEW_TAB_CURATOR_FRBE = 'mozilliansorg_pocket_new_tab_curator_frbe', // Access to fr-BE new tab in corpus tool.
   NEW_TAB_CURATOR_ITIT = 'mozilliansorg_pocket_new_tab_curator_itit', // Access to it-IT new tab in corpus tool.
   NEW_TAB_CURATOR_ESES = 'mozilliansorg_pocket_new_tab_curator_eses', // Access to es-ES new tab in corpus tool.
+  NEW_TAB_CURATOR_ESXA = 'mozilliansorg_pocket_new_tab_curator_esxa', // Access to es-XA (cross-Latin America Spanish) new tab in corpus tool.
   NEW_TAB_CURATOR_PLPL = 'mozilliansorg_pocket_new_tab_curator_plpl', // Access to pl-PL new tab in corpus tool.
   NEW_TAB_CURATOR_ENINTL = 'mozilliansorg_pocket_new_tab_curator_enintl', // Access to en-INTL new tab in corpus tool.
   POCKET_HITS_CURATOR_ENUS = 'mozilliansorg_pocket_pocket_hits_curator_enus', // Access to en us Pocket Hits in the corpus tool.
@@ -415,6 +362,13 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENIE,
   },
   {
+    name: 'New Tab (EN Europe)',
+    guid: 'NEW_TAB_EN_XE',
+    ianaTimezone: 'Europe/Berlin',
+    prospectTypes: [],
+    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENXE,
+  },
+  {
     name: 'New Tab (fr-FR)',
     guid: 'NEW_TAB_FR_FR',
     ianaTimezone: 'Europe/Paris',
@@ -453,6 +407,13 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
       ProspectType.PUBLISHER_SUBMITTED,
     ],
     accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ESES,
+  },
+  {
+    name: 'New Tab (ES Global)',
+    guid: 'NEW_TAB_ES_XA',
+    ianaTimezone: 'America/Mexico_City',
+    prospectTypes: [],
+    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ESXA,
   },
   {
     name: 'New Tab (pl-PL)',
@@ -500,7 +461,6 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
   },
 ];
 
-// prospect-api
 export interface UrlMetadata {
   url: string;
   imageUrl?: string;

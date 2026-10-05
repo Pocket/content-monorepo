@@ -6,7 +6,6 @@ import {
   getScheduledSurfaceByAccessGroup,
   getScheduledSurfaceByGuid,
   toUtcDateString,
-  getPocketPath,
   getNormalizedDomainFromUrl,
   getRegistrableDomainFromUrl,
   getLocalDate,
@@ -136,80 +135,6 @@ describe('shared/utils', () => {
       expect(result.imageUrl).toEqual(approvedItem.imageUrl);
       expect(result.topic).toEqual(approvedItem.topic);
       expect(result.isTimeSensitive).toEqual(approvedItem.isTimeSensitive);
-    });
-  });
-
-  describe('getPocketPath', () => {
-    it('matches syndicated articles without locale', () => {
-      expect(
-        getPocketPath('https://getpocket.com/explore/item/foo-bar'),
-      ).toEqual({
-        locale: null,
-        path: '/explore/item/foo-bar',
-        type: 'SyndicatedArticle',
-        key: 'foo-bar',
-      });
-    });
-    it('matches syndicated articles with two character locale', () => {
-      expect(
-        getPocketPath('https://getpocket.com/de/explore/item/foo-bar'),
-      ).toEqual({
-        locale: 'de',
-        path: '/explore/item/foo-bar',
-        type: 'SyndicatedArticle',
-        key: 'foo-bar',
-      });
-    });
-    it('matches syndicated articles with five character locale', () => {
-      expect(
-        getPocketPath('https://getpocket.com/en-GB/explore/item/foo-bar'),
-      ).toEqual({
-        locale: 'en-GB',
-        path: '/explore/item/foo-bar',
-        type: 'SyndicatedArticle',
-        key: 'foo-bar',
-      });
-    });
-    it('matches collections without locale', () => {
-      expect(
-        getPocketPath('https://getpocket.com/collections/foo-bar'),
-      ).toEqual({
-        locale: null,
-        path: '/collections/foo-bar',
-        type: 'Collection',
-        key: 'foo-bar',
-      });
-    });
-    it('matches collections articles with two character locale', () => {
-      expect(
-        getPocketPath('https://getpocket.com/de/collections/foo-bar'),
-      ).toEqual({
-        locale: 'de',
-        path: '/collections/foo-bar',
-        type: 'Collection',
-        key: 'foo-bar',
-      });
-    });
-    it('matches collections articles with five character locale', () => {
-      expect(
-        getPocketPath('https://getpocket.com/en-GB/collections/foo-bar'),
-      ).toEqual({
-        locale: 'en-GB',
-        path: '/collections/foo-bar',
-        type: 'Collection',
-        key: 'foo-bar',
-      });
-    });
-    it('doesnt match other pocket urls', () => {
-      expect(getPocketPath('https://getpocket.com/saves')).toEqual({
-        locale: null,
-        path: '/saves',
-      });
-      expect(getPocketPath('https://getpocket.com')).toEqual({
-        locale: null,
-        path: '/',
-      });
-      expect(getPocketPath('https://other.com')).toBeNull();
     });
   });
 

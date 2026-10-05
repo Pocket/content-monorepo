@@ -6,7 +6,7 @@ const prefix = `${name}-${environment}`;
 // we are currently in limbo regarding our data pipeline - leaving the below
 // here commented out in case we end up staying with snowplow
 //const snowplowEndpoint = isDev
-//  ? 'com-getpocket-prod1.mini.snplow.net'
+//  ? '73fbdaf4-dfc6-45b4-a597-be7a758b53d4.apps.snowplowanalytics.com'
 //  : 'd.getpocket.com';
 
 export const config = {

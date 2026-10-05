@@ -1,6 +1,5 @@
 import { RequiredRetryOptions } from 'got';
 
-const environment = process.env.ENVIRONMENT || 'development';
 const snowplowEndpoint = process.env.SNOWPLOW_ENDPOINT || 'localhost:9090';
 
 // Snowplow uses Got. By default, Got does not retry POST, so we need to enable this explicitly.
@@ -13,7 +12,15 @@ const retries: Partial<RequiredRetryOptions> = {
 const config = {
   snowplow: {
     endpoint: snowplowEndpoint,
-    httpProtocol: environment === 'production' ? 'https' : 'http',
+    // only testing and local development should talk over http - other envs
+    // (prod, dev) should use https.
+    // 127.0.0.1 is guarded against as an extra measure - local and testing
+    // should always use localhost.
+    httpProtocol:
+      snowplowEndpoint.includes('localhost') ||
+      snowplowEndpoint.includes('127.0.0.1')
+        ? 'http'
+        : 'https',
     bufferSize: 1,
     retries,
     namespace: 'pocket-backend',

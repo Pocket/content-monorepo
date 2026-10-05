@@ -11,7 +11,7 @@ const domain = isDev
 const s3LogsBucket = isDev ? 'pocket-data-items-dev' : 'pocket-data-items';
 
 const snowplowEndpoint = isDev
-  ? 'com-getpocket-prod1.mini.snplow.net'
+  ? '73fbdaf4-dfc6-45b4-a597-be7a758b53d4.apps.snowplowanalytics.com'
   : 'd.getpocket.com';
 
 const rds = {
@@ -22,6 +22,11 @@ const rds = {
   // and changes should be considered.
   minCapacity: isDev ? 1 : 4,
   maxCapacity: isDev ? 2 : 128, // max allowed by AWS for Aurora Serverless V2
+  // Number of days Aurora retains automated backups and the continuous
+  // point-in-time-recovery (PITR) window. Unset defaults to 1 day, which left
+  // prod with a single backup and a one-day recovery window. 7 days gives more
+  // time to recover from data corruption that is not immediately apparent (HNT-2677).
+  backupRetentionPeriod: isDev ? 1 : 7,
 };
 
 export const config = {

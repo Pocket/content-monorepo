@@ -106,7 +106,7 @@ To spin up a service individually, pass the `--filter={service_name}` to the `pn
 cd content-monorepo
 docker compose up --wait
 pnpm build
-pnpm dev --filter=prospect-api
+pnpm dev --filter=curated-corpus-api
 ```
 
 Note that the GraphQL endpoints can be reached on the ip:port shown at startup. For example, `curated-corpus-api` can be reached at:
@@ -128,7 +128,7 @@ To run unit tests individually per service:
 ```
 cd content-monorepo
 pnpm build
-pnpm test --filter=prospect-api
+pnpm test --filter=curated-corpus-api
 ```
 
 ### Integration Tests
@@ -166,18 +166,6 @@ To enable step-through debugging in VSCode:
 4. Open up a test file and click the `Run` and `Debug` commands that float above the test definition. It should work!
 
 If you have trouble with any of the steps above, try re-starting VSCode.
-
-## DynamoDB
-
-Prospect-api uses `dynamodb` as the db system. When running `docker compose up`, the `localstack` container executes a `dynamodb.sh` script where the prospect-api table
-is created.
-To seed the table with data, run the seeding script:
-
-```
-cd content-monorepo
-pnpm build
-pnpm db:dynamo-seed
-```
 
 If you want to delete dynamodb database, restart the docker and re-run the seed
 
@@ -251,11 +239,6 @@ We leverage [Pocket's tracing package](https://www.npmjs.com/package/@pocket-too
   - [Unleash feature flag](https://featureflags.getpocket.dev/projects/default/features/perm.content.tracing.curated-corpus-api) (Dev)
   - [Unleash feature flag](https://featureflags.readitlater.com/projects/default/features/perm.content.tracing.curated-corpus-api) (Prod)
 
-- Prospect API
-
-  - [Unleash feature flag](https://featureflags.getpocket.dev/projects/default/features/perm.content.tracing.prospect-api) (Dev)
-  - [Unleash feature flag](https://featureflags.readitlater.com/projects/default/features/perm.content.tracing.prospect-api) (Prod)
-
 Traces and logs for the above services can be found in GCP (filter by service name):
 
 - [GCP Logs Explorer](https://console.cloud.google.com/logs/query;cursorTimestamp=2024-11-20T16:35:39.086537379Z;customDuration=today?inv=1&invt=AbiAGg&project=moz-fx-pocket-prod-61fb)
@@ -300,9 +283,7 @@ Local tracing is enabled by default and sends trace data to a Grafana Docker ima
 
 [![Collection API](https://github.com/Pocket/content-monorepo/actions/workflows/collection-api.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/collection-api.yml)  
 [![Curated Corpus API](https://github.com/Pocket/content-monorepo/actions/workflows/curated-corpus-api.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/curated-corpus-api.yml)  
-[![Prospect API](https://github.com/Pocket/content-monorepo/actions/workflows/prospect-api.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/prospect-api.yml)
 
 ### Lambdas
 
-[![Prospect Translation Lambda](https://github.com/Pocket/content-monorepo/actions/workflows/prospect-translation-lambda.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/prospect-translation-lambda.yml)  
 [![Corpus Scheduler Lambda](https://github.com/Pocket/content-monorepo/actions/workflows/corpus-scheduler-lambda.yml/badge.svg)](https://github.com/Pocket/content-monorepo/actions/workflows/corpus-scheduler-lambda.yml)

@@ -1,11 +1,17 @@
+import * as Sentry from '@sentry/node';
+
 import { parse } from 'tldts';
 
 import {
   convertParserJsonToUrlMetadata,
   deriveAuthors,
   deriveDatePublished,
+  fetchUrlMetadata,
   validateUrl,
 } from './lib';
+
+// mock sentry
+jest.mock('@sentry/node');
 
 describe('lib', () => {
   describe('convertParserJsonToUrlMetadata', () => {
@@ -279,5 +285,176 @@ describe('lib', () => {
         expect(validateUrl(validUrl)).toBe(true);
       },
     );
+  });
+
+  describe('fetchUrlMetadata', () => {
+    let mockSentryCaptureException: jest.Mock;
+
+    afterAll(() => {
+      jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    beforeAll(() => {
+      mockSentryCaptureException = Sentry.captureException as jest.Mock;
+    });
+
+    it('returns expected json on successful fetch', async () => {
+      const jsonResponse = {
+        statusCode: 200,
+        article: {
+          title: 'test article',
+        },
+      };
+
+      jest.spyOn(global, 'fetch').mockImplementation(
+        jest.fn(() =>
+          Promise.resolve({
+            // return data doesn't matter for this test
+            json: () => Promise.resolve(jsonResponse),
+            ok: true,
+          }),
+        ) as jest.Mock,
+      );
+
+      const json = await fetchUrlMetadata(
+        'https://test.com',
+        'https://metadataendpoint.test/',
+        'fakeApiKey',
+      );
+
+      expect(json).toEqual(jsonResponse);
+    });
+
+    it('returns empty object and calls sentry if fetch fails', async () => {
+      jest
+        .spyOn(global, 'fetch')
+        .mockImplementation(() => Promise.reject('fetch error!'));
+
+      const json = await fetchUrlMetadata(
+        'https://test.com',
+        'https://metadataendpoint.test/',
+        'fakeApiKey',
+      );
+
+      // make sure an empty object was returned
+      expect(json).toEqual({});
+
+      // make sure sentry was called as expected
+      expect(mockSentryCaptureException).toHaveBeenCalledWith('fetch error!', {
+        extra: {
+          message: `Metadata parser general fetch failure`,
+          url: 'https://test.com',
+        },
+      });
+    });
+
+    it('returns empty object and calls sentry if response is not ok', async () => {
+      jest.spyOn(global, 'fetch').mockImplementation(
+        jest.fn(() =>
+          Promise.resolve({
+            text: () => Promise.resolve('some error'),
+            ok: false,
+            status: 500,
+          }),
+        ) as jest.Mock,
+      );
+
+      const json = await fetchUrlMetadata(
+        'https://test.com',
+        'https://metadataendpoint.test/',
+        'fakeApiKey',
+      );
+
+      // make sure an empty object was returned
+      expect(json).toEqual({});
+
+      // make sure sentry was called as expected
+      expect(mockSentryCaptureException).toHaveBeenCalledWith(
+        new Error('Metadata parser returned non-2xx HTTP status'),
+        {
+          extra: {
+            status: 500,
+            url: 'https://test.com',
+            responseBody: 'some error',
+          },
+        },
+      );
+    });
+
+    it('returns empty object and calls sentry if json parsing fails', async () => {
+      jest.spyOn(global, 'fetch').mockImplementation(
+        jest.fn(() =>
+          Promise.resolve({
+            // make sure json parsing fails
+            json: () => Promise.reject('i am decidedly not json!'),
+            ok: true,
+          }),
+        ) as jest.Mock,
+      );
+
+      const json = await fetchUrlMetadata(
+        'https://test.com',
+        'https://metadataendpoint.test/',
+        'fakeApiKey',
+      );
+
+      // make sure an empty object was returned
+      expect(json).toEqual({});
+
+      // make sure sentry was called as expected
+      expect(mockSentryCaptureException).toHaveBeenCalledWith(
+        'i am decidedly not json!',
+        {
+          extra: {
+            message: `Metadata parser JSON response failure`,
+            url: 'https://test.com',
+          },
+        },
+      );
+    });
+
+    it('returns expected json and calls sentry if statusCode is >= 400', async () => {
+      const jsonResponse = {
+        // zyte's API could not find the URL requested, but still returns
+        // a 200 HTTP response. the 404 is reported in the API response.
+        // i.e. the call to zyte succeeds, but it was unable to retrieve
+        // metadata for the given url.
+        statusCode: 404,
+        article: {},
+      };
+
+      jest.spyOn(global, 'fetch').mockImplementation(
+        jest.fn(() =>
+          Promise.resolve({
+            json: () => Promise.resolve(jsonResponse),
+            ok: true,
+          }),
+        ) as jest.Mock,
+      );
+
+      const json = await fetchUrlMetadata(
+        'https://test.com',
+        'https://metadataendpoint.test/',
+        'fakeApiKey',
+      );
+
+      // make sure expected object was returned
+      expect(json).toEqual(jsonResponse);
+
+      // make sure sentry was called as expected
+      expect(mockSentryCaptureException).toHaveBeenCalledWith(
+        new Error(`Metadata parser failed to parse given url.`),
+        {
+          extra: {
+            url: 'https://test.com',
+            status: json.statusCode,
+          },
+        },
+      );
+    });
   });
 });

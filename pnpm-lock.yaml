@@ -353,64 +353,6 @@ importers:
         specifier: 5.6.2
         version: 5.6.2
 
-  lambdas/prospect-translation-lambda:
-    dependencies:
-      '@aws-sdk/client-dynamodb':
-        specifier: 3.529.1
-        version: 3.529.1
-      '@aws-sdk/lib-dynamodb':
-        specifier: 3.529.1
-        version: 3.529.1(@aws-sdk/client-dynamodb@3.529.1)
-      '@sentry/serverless':
-        specifier: 7.112.2
-        version: 7.112.2
-      '@snowplow/node-tracker':
-        specifier: 3.5.0
-        version: 3.5.0
-      content-common:
-        specifier: workspace:*
-        version: link:../../packages/content-common
-      lambda-common:
-        specifier: workspace:*
-        version: link:../../packages/lambda-common
-      prospectapi-common:
-        specifier: workspace:*
-        version: link:../../packages/prospectapi-common
-      tldts:
-        specifier: 5.7.87
-        version: 5.7.87
-      tslib:
-        specifier: 2.7.0
-        version: 2.7.0
-      uuid:
-        specifier: 9.0.1
-        version: 9.0.1
-    devDependencies:
-      '@types/aws-lambda':
-        specifier: 8.10.134
-        version: 8.10.134
-      '@types/jest':
-        specifier: 29.5.12
-        version: 29.5.12
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../../packages/eslint-config-custom
-      jest:
-        specifier: 29.7.0
-        version: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@5.6.2))
-      msw:
-        specifier: 2.4.7
-        version: 2.4.7(typescript@5.6.2)
-      ts-jest:
-        specifier: 29.1.2
-        version: 29.1.2(@babel/core@7.27.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.7))(esbuild@0.23.1)(jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@5.6.2)))(typescript@5.6.2)
-      tsconfig:
-        specifier: workspace:*
-        version: link:../../packages/tsconfig
-      typescript:
-        specifier: 5.6.2
-        version: 5.6.2
-
   lambdas/section-manager-lambda:
     dependencies:
       '@aws-sdk/client-secrets-manager':
@@ -621,55 +563,6 @@ importers:
       ts-jest:
         specifier: 29.1.2
         version: 29.1.2(@babel/core@7.27.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.7))(jest@29.7.0(@types/node@20.12.14)(ts-node@10.9.2(@types/node@20.12.14)(typescript@5.6.2)))(typescript@5.6.2)
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
-      tsup:
-        specifier: 8.2.4
-        version: 8.2.4(typescript@5.6.2)
-      typescript:
-        specifier: 5.6.2
-        version: 5.6.2
-
-  packages/prospectapi-common:
-    dependencies:
-      '@aws-sdk/client-dynamodb':
-        specifier: 3.529.1
-        version: 3.529.1
-      '@aws-sdk/lib-dynamodb':
-        specifier: 3.529.1
-        version: 3.529.1(@aws-sdk/client-dynamodb@3.529.1)
-      '@aws-sdk/util-dynamodb':
-        specifier: 3.529.1
-        version: 3.529.1(@aws-sdk/client-dynamodb@3.529.1)
-      '@sentry/node':
-        specifier: 10.40.0
-        version: 10.40.0
-      content-common:
-        specifier: workspace:*
-        version: link:../content-common
-      tslib:
-        specifier: 2.7.0
-        version: 2.7.0
-    devDependencies:
-      '@faker-js/faker':
-        specifier: 8.4.1
-        version: 8.4.1
-      '@types/jest':
-        specifier: 29.5.12
-        version: 29.5.12
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../eslint-config-custom
-      jest:
-        specifier: 29.7.0
-        version: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@5.6.2))
-      msw:
-        specifier: 2.4.7
-        version: 2.4.7(typescript@5.6.2)
-      ts-jest:
-        specifier: 29.1.2
-        version: 29.1.2(@babel/core@7.27.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.7))(esbuild@0.23.1)(jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@5.6.2)))(typescript@5.6.2)
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -958,91 +851,6 @@ importers:
         specifier: 5.6.2
         version: 5.6.2
 
-  servers/prospect-api:
-    dependencies:
-      '@apollo/server':
-        specifier: 4.12.1
-        version: 4.12.1(encoding@0.1.13)(graphql@16.9.0)
-      '@apollo/subgraph':
-        specifier: 2.9.0
-        version: 2.9.0(graphql@16.9.0)
-      '@aws-sdk/client-dynamodb':
-        specifier: 3.529.1
-        version: 3.529.1
-      '@aws-sdk/lib-dynamodb':
-        specifier: 3.529.1
-        version: 3.529.1(@aws-sdk/client-dynamodb@3.529.1)
-      '@pocket-tools/apollo-utils':
-        specifier: 3.5.0
-        version: 3.5.0(encoding@0.1.13)
-      '@pocket-tools/feature-flags-client':
-        specifier: 1.0.0
-        version: 1.0.0
-      '@pocket-tools/ts-logger':
-        specifier: ^1.9.4
-        version: 1.13.0
-      '@sentry/node':
-        specifier: 10.40.0
-        version: 10.40.0
-      '@snowplow/node-tracker':
-        specifier: 3.5.0
-        version: 3.5.0
-      content-common:
-        specifier: workspace:*
-        version: link:../../packages/content-common
-      cors:
-        specifier: 2.8.5
-        version: 2.8.5
-      express:
-        specifier: 5.1.0
-        version: 5.1.0
-      graphql:
-        specifier: 16.9.0
-        version: 16.9.0
-      graphql-tag:
-        specifier: 2.12.6
-        version: 2.12.6(graphql@16.9.0)
-      lodash:
-        specifier: 4.17.21
-        version: 4.17.21
-      prospectapi-common:
-        specifier: workspace:*
-        version: link:../../packages/prospectapi-common
-      tslib:
-        specifier: 2.7.0
-        version: 2.7.0
-    devDependencies:
-      '@faker-js/faker':
-        specifier: 8.4.1
-        version: 8.4.1
-      '@types/jest':
-        specifier: 29.5.12
-        version: 29.5.12
-      '@types/lodash':
-        specifier: 4.14.202
-        version: 4.14.202
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../../packages/eslint-config-custom
-      jest:
-        specifier: 29.7.0
-        version: 29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@5.6.2))
-      nodemon:
-        specifier: 3.0.1
-        version: 3.0.1
-      supertest:
-        specifier: 6.3.4
-        version: 6.3.4
-      ts-jest:
-        specifier: 29.1.2
-        version: 29.1.2(@babel/core@7.27.7)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.7))(esbuild@0.23.1)(jest@29.7.0(@types/node@22.15.33)(ts-node@10.9.2(@types/node@22.15.33)(typescript@5.6.2)))(typescript@5.6.2)
-      tsconfig:
-        specifier: workspace:*
-        version: link:../../packages/tsconfig
-      typescript:
-        specifier: 5.6.2
-        version: 5.6.2
-
 packages:
 
   '@ampproject/remapping@2.3.0':
@@ -1183,10 +991,6 @@ packages:
   '@aws-crypto/util@3.0.0':
     resolution: {integrity: sha512-2OJlpeJpCR48CC8r+uKVChzs9Iungj9wkZrl8Z041DWEWvyIHILYKCPNzJghKsivj+S3mLo6BVc7mBNzdxA46w==}
 
-  '@aws-sdk/client-dynamodb@3.529.1':
-    resolution: {integrity: sha512-oyMCMu4JUGUIwuLYm2WAI/wUbw3RwWwgPTPTxJdus79NVgQ0lGCZnS4cOd2LtzufRglShr5LZUvueVdyn8Hrjw==}
-    engines: {node: '>=14.0.0'}
-
   '@aws-sdk/client-s3@3.529.1':
     resolution: {integrity: sha512-ZpvyO4w3XWo/OjXLd3fm7CLcKUUYcyady9qzTnKKSnp8a2NqO7UvU/1zhYdm+yyy8TR/9t7sDy+q6AYd4Nsr8g==}
     engines: {node: '>=14.0.0'}
@@ -1243,16 +1047,6 @@ packages:
     resolution: {integrity: sha512-AGuZDOKN+AttjwTjrF47WLqzeEut2YynyxjkXZhxZF/xn8i5Y51kUAUdXsXw1bgR25pAeXQIdhsrQlRa1Pm5kw==}
     engines: {node: '>=14.0.0'}
 
-  '@aws-sdk/endpoint-cache@3.495.0':
-    resolution: {integrity: sha512-XCDrpiS50WaPzPzp7FwsChPHtX9PQQUU4nRzcn2N7IkUtpcFCUx8m1PAZe086VQr6hrbdeE4Z4j8hUPNwVdJGQ==}
-    engines: {node: '>=14.0.0'}
-
-  '@aws-sdk/lib-dynamodb@3.529.1':
-    resolution: {integrity: sha512-SLGDUoAyYQ5UlZzQ0+kXEZFEcqizE56uYSuR5ohRpeks6ghkwEC0iNJDJlFqTtzWP7f6Noh5pKjvtQ0OzhH88Q==}
-    engines: {node: '>=14.0.0'}
-    peerDependencies:
-      '@aws-sdk/client-dynamodb': ^3.0.0
-
   '@aws-sdk/lib-storage@3.529.1':
     resolution: {integrity: sha512-KFL9M9nNaMQ7IFqJixzfjLWn9xAoSQKSsrTTeh/r8Lhhr7NB6V4F3tqAuyQWasfwy/38l9hFZgK4bWP7OoEp9A==}
     engines: {node: '>=14.0.0'}
@@ -1261,10 +1055,6 @@ packages:
 
   '@aws-sdk/middleware-bucket-endpoint@3.525.0':
     resolution: {integrity: sha512-nYfQ2Xspfef7j8mZO7varUWLPH6HQlXateH7tBVtBNUAazyQE4UJEvC0fbQ+Y01e+FKlirim/m2umkdMXqAlTg==}
-    engines: {node: '>=14.0.0'}
-
-  '@aws-sdk/middleware-endpoint-discovery@3.525.0':
-    resolution: {integrity: sha512-nT/XYP3RDRWPFCTEOZQbOC3HWmUkxB0fDuobmH8WzL92MCBGz9gBG/q9XBxiw9pHk9Dky/MIkLV50BlGB3kM7g==}
     engines: {node: '>=14.0.0'}
 
   '@aws-sdk/middleware-expect-continue@3.523.0':
@@ -1330,12 +1120,6 @@ packages:
   '@aws-sdk/util-arn-parser@3.495.0':
     resolution: {integrity: sha512-hwdA3XAippSEUxs7jpznwD63YYFR+LtQvlEcebPTgWR9oQgG9TfS+39PUfbnEeje1ICuOrN3lrFqFbmP9uzbMg==}
     engines: {node: '>=14.0.0'}
-
-  '@aws-sdk/util-dynamodb@3.529.1':
-    resolution: {integrity: sha512-SXVK/eT7iJwLO4/Kq9Qvlm1zs5gUnpshE1EJ9+9yks9Q79KYI5FuRQxU0qZ0vxHuLHsesDAIJy59iKsWmVls6A==}
-    engines: {node: '>=14.0.0'}
-    peerDependencies:
-      '@aws-sdk/client-dynamodb': ^3.0.0
 
   '@aws-sdk/util-endpoints@3.525.0':
     resolution: {integrity: sha512-DIW7WWU5tIGkeeKX6NJUyrEIdWMiqjLQG3XBzaUj+ufIENwNjdAHhlD8l2vX7Yr3JZRT6yN/84wBCj7Tw1xd1g==}
@@ -3661,9 +3445,6 @@ packages:
 
   '@types/koa@2.15.0':
     resolution: {integrity: sha512-7QFsywoE5URbuVnG3loe03QXuGajrnotr3gQkXcEBShORai23MePfFYdhz90FEtBBpkyIYQbVD+evKtloCgX3g==}
-
-  '@types/lodash@4.14.202':
-    resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
 
   '@types/long@4.0.2':
     resolution: {integrity: sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==}
@@ -6642,9 +6423,6 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  mnemonist@0.38.3:
-    resolution: {integrity: sha512-2K9QYubXx/NAjv4VLq1d1Ly8pWNC5L3BrixtdkyTegXWJIqY+zLNDhhX/A+ZwWt70tB1S8H4BE8FLYEFyNoOBw==}
-
   module-details-from-path@1.0.4:
     resolution: {integrity: sha512-EGWKgxALGMgzvxYF1UyGTy0HXX/2vHLkw6+NvDKW2jypWbHpjQuj4UMcqQWXHERJhVGKikolT06G3bcKe4fi7w==}
 
@@ -6804,9 +6582,6 @@ packages:
   object.values@1.2.1:
     resolution: {integrity: sha512-gXah6aZrcUxjWg2zR2MwouP2eHlCBzdV4pygudehaKXSGW4v2AsRQUK+lwwXhii6KFZcunEnmSUoYp5CXibxtA==}
     engines: {node: '>= 0.4'}
-
-  obliterator@1.6.1:
-    resolution: {integrity: sha512-9WXswnqINnnhOG/5SLimUlzuU1hFJUc8zkwyD59Sd+dPOMf05PmnYG/d6Q7HZ+KmgkZJa1PxRso6QdM3sTNHig==}
 
   obliterator@2.0.5:
     resolution: {integrity: sha512-42CPE9AhahZRsMNslczq0ctAEtqk8Eka26QofnqC346BZdHDySk3LWka23LI7ULIw11NmltpiLagIq8gBozxTw==}
@@ -8554,54 +8329,6 @@ snapshots:
       '@aws-sdk/util-utf8-browser': 3.259.0
       tslib: 1.14.1
 
-  '@aws-sdk/client-dynamodb@3.529.1':
-    dependencies:
-      '@aws-crypto/sha256-browser': 3.0.0
-      '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sts': 3.529.1(@aws-sdk/credential-provider-node@3.529.1)
-      '@aws-sdk/core': 3.529.1
-      '@aws-sdk/credential-provider-node': 3.529.1
-      '@aws-sdk/middleware-endpoint-discovery': 3.525.0
-      '@aws-sdk/middleware-host-header': 3.523.0
-      '@aws-sdk/middleware-logger': 3.523.0
-      '@aws-sdk/middleware-recursion-detection': 3.523.0
-      '@aws-sdk/middleware-user-agent': 3.525.0
-      '@aws-sdk/region-config-resolver': 3.525.0
-      '@aws-sdk/types': 3.523.0
-      '@aws-sdk/util-endpoints': 3.525.0
-      '@aws-sdk/util-user-agent-browser': 3.523.0
-      '@aws-sdk/util-user-agent-node': 3.525.0
-      '@smithy/config-resolver': 2.2.0
-      '@smithy/core': 1.4.2
-      '@smithy/fetch-http-handler': 2.5.0
-      '@smithy/hash-node': 2.2.0
-      '@smithy/invalid-dependency': 2.2.0
-      '@smithy/middleware-content-length': 2.2.0
-      '@smithy/middleware-endpoint': 2.5.1
-      '@smithy/middleware-retry': 2.3.1
-      '@smithy/middleware-serde': 2.3.0
-      '@smithy/middleware-stack': 2.2.0
-      '@smithy/node-config-provider': 2.3.0
-      '@smithy/node-http-handler': 2.5.0
-      '@smithy/protocol-http': 3.3.0
-      '@smithy/smithy-client': 2.5.1
-      '@smithy/types': 2.12.0
-      '@smithy/url-parser': 2.2.0
-      '@smithy/util-base64': 2.3.0
-      '@smithy/util-body-length-browser': 2.2.0
-      '@smithy/util-body-length-node': 2.3.0
-      '@smithy/util-defaults-mode-browser': 2.2.1
-      '@smithy/util-defaults-mode-node': 2.3.1
-      '@smithy/util-endpoints': 1.2.0
-      '@smithy/util-middleware': 2.2.0
-      '@smithy/util-retry': 2.2.0
-      '@smithy/util-utf8': 2.3.0
-      '@smithy/util-waiter': 2.2.0
-      tslib: 2.7.0
-      uuid: 9.0.1
-    transitivePeerDependencies:
-      - aws-crt
-
   '@aws-sdk/client-s3@3.529.1':
     dependencies:
       '@aws-crypto/sha1-browser': 3.0.0
@@ -8937,19 +8664,6 @@ snapshots:
       - '@aws-sdk/credential-provider-node'
       - aws-crt
 
-  '@aws-sdk/endpoint-cache@3.495.0':
-    dependencies:
-      mnemonist: 0.38.3
-      tslib: 2.7.0
-
-  '@aws-sdk/lib-dynamodb@3.529.1(@aws-sdk/client-dynamodb@3.529.1)':
-    dependencies:
-      '@aws-sdk/client-dynamodb': 3.529.1
-      '@aws-sdk/util-dynamodb': 3.529.1(@aws-sdk/client-dynamodb@3.529.1)
-      '@smithy/smithy-client': 2.5.1
-      '@smithy/types': 2.12.0
-      tslib: 2.7.0
-
   '@aws-sdk/lib-storage@3.529.1(@aws-sdk/client-s3@3.529.1)':
     dependencies:
       '@aws-sdk/client-s3': 3.529.1
@@ -8969,15 +8683,6 @@ snapshots:
       '@smithy/protocol-http': 3.3.0
       '@smithy/types': 2.12.0
       '@smithy/util-config-provider': 2.3.0
-      tslib: 2.7.0
-
-  '@aws-sdk/middleware-endpoint-discovery@3.525.0':
-    dependencies:
-      '@aws-sdk/endpoint-cache': 3.495.0
-      '@aws-sdk/types': 3.523.0
-      '@smithy/node-config-provider': 2.3.0
-      '@smithy/protocol-http': 3.3.0
-      '@smithy/types': 2.12.0
       tslib: 2.7.0
 
   '@aws-sdk/middleware-expect-continue@3.523.0':
@@ -9102,11 +8807,6 @@ snapshots:
 
   '@aws-sdk/util-arn-parser@3.495.0':
     dependencies:
-      tslib: 2.7.0
-
-  '@aws-sdk/util-dynamodb@3.529.1(@aws-sdk/client-dynamodb@3.529.1)':
-    dependencies:
-      '@aws-sdk/client-dynamodb': 3.529.1
       tslib: 2.7.0
 
   '@aws-sdk/util-endpoints@3.525.0':
@@ -12394,8 +12094,6 @@ snapshots:
       '@types/keygrip': 1.0.6
       '@types/koa-compose': 3.2.8
       '@types/node': 20.12.14
-
-  '@types/lodash@4.14.202': {}
 
   '@types/long@4.0.2': {}
 
@@ -16086,10 +15784,6 @@ snapshots:
 
   mkdirp@1.0.4: {}
 
-  mnemonist@0.38.3:
-    dependencies:
-      obliterator: 1.6.1
-
   module-details-from-path@1.0.4: {}
 
   morgan@1.10.0:
@@ -16271,8 +15965,6 @@ snapshots:
       call-bound: 1.0.4
       define-properties: 1.2.1
       es-object-atoms: 1.1.1
-
-  obliterator@1.6.1: {}
 
   obliterator@2.0.5: {}
 

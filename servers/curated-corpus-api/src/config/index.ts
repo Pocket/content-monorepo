@@ -61,6 +61,11 @@ export default {
   metadataParser: {
     endpoint: process.env.ZYTE_EXTRACT_API_ENDPOINT || '',
     apiKey: process.env.ZYTE_EXTRACT_API_KEY || '',
+    // zyte calls generally take between 7 and 10 seconds to complete, though
+    // at times, calls can greatly exceed that. we were getting regular
+    // timeouts with a 25 second limit - as of 2026/08/24, extending to 50
+    // seconds. note that the load balancer has a 60 second idle timeout.
+    timeout: 50000,
   },
   sentry: {
     dsn: process.env.SENTRY_DSN || '',
