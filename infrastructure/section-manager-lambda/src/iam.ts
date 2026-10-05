@@ -19,9 +19,12 @@ export class MlIamUserPolicy extends Construct {
     //  I scheduled a meeting to brainstorm how we might create shared infrastructure in this repo.
     const iamUserName = `ProspectAPI-${config.environment}-Queue-User`;
 
-    // Metaflow uses this user to send to the section-manager and corpus-scheduler
-    // queues. It used to live in the prospect-api stack, so import it here to
-    // keep it when that stack is destroyed.
+    // Metaflow sends to the section-manager and corpus-scheduler queues with this
+    // user's access keys (GCP secret metaflow-job-secrets). It used to live in the
+    // prospect-api stack; importFrom adopts it here and is a no-op after the first
+    // apply, so it can be removed later. Do not delete this resource or change its
+    // construct path: either destroys the user and its keys. To stop managing it,
+    // replace it with a `removed` block with destroy = false.
     const iamUser = new IamUser(this, 'iam-user', {
       name: iamUserName,
       tags: config.tags,
