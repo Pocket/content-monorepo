@@ -250,12 +250,12 @@ export enum MozillaAccessGroup {
   NEW_TAB_CURATOR_ENGB = 'mozilliansorg_pocket_new_tab_curator_engb', // Access to en-GB new tab in corpus tool.
   NEW_TAB_CURATOR_ENCA = 'mozilliansorg_pocket_new_tab_curator_enca', // Access to en-CA new tab in corpus tool.
   NEW_TAB_CURATOR_ENIE = 'mozilliansorg_pocket_new_tab_curator_enie', // Access to en-IE new tab in corpus tool.
-  NEW_TAB_CURATOR_ENXE = 'mozilliansorg_pocket_new_tab_curator_enxe', // Access to en-XE (cross-Europe English) new tab in corpus tool.
+  NEW_TAB_CURATOR_ENROW = 'mozilliansorg_pocket_new_tab_curator_enrow', // Access to en-ROW (rest-of-world English) new tab in corpus tool.
   NEW_TAB_CURATOR_FRFR = 'mozilliansorg_pocket_new_tab_curator_frfr', // Access to fr-FR new tab in corpus tool.
   NEW_TAB_CURATOR_FRBE = 'mozilliansorg_pocket_new_tab_curator_frbe', // Access to fr-BE new tab in corpus tool.
   NEW_TAB_CURATOR_ITIT = 'mozilliansorg_pocket_new_tab_curator_itit', // Access to it-IT new tab in corpus tool.
   NEW_TAB_CURATOR_ESES = 'mozilliansorg_pocket_new_tab_curator_eses', // Access to es-ES new tab in corpus tool.
-  NEW_TAB_CURATOR_ESXA = 'mozilliansorg_pocket_new_tab_curator_esxa', // Access to es-XA (cross-Latin America Spanish) new tab in corpus tool.
+  NEW_TAB_CURATOR_ESROW = 'mozilliansorg_pocket_new_tab_curator_esrow', // Access to es-ROW (rest-of-world Spanish) new tab in corpus tool.
   NEW_TAB_CURATOR_PLPL = 'mozilliansorg_pocket_new_tab_curator_plpl', // Access to pl-PL new tab in corpus tool.
   NEW_TAB_CURATOR_ENINTL = 'mozilliansorg_pocket_new_tab_curator_enintl', // Access to en-INTL new tab in corpus tool.
   POCKET_HITS_CURATOR_ENUS = 'mozilliansorg_pocket_pocket_hits_curator_enus', // Access to en us Pocket Hits in the corpus tool.
@@ -366,7 +366,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     guid: 'NEW_TAB_EN_ROW',
     ianaTimezone: 'Europe/Berlin',
     prospectTypes: [],
-    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENXE,
+    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ENROW,
   },
   {
     name: 'New Tab (fr-FR)',
@@ -413,7 +413,7 @@ export const ScheduledSurfaces: ScheduledSurface[] = [
     guid: 'NEW_TAB_ES_ROW',
     ianaTimezone: 'America/Mexico_City',
     prospectTypes: [],
-    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ESXA,
+    accessGroup: MozillaAccessGroup.NEW_TAB_CURATOR_ESROW,
   },
   {
     name: 'New Tab (pl-PL)',
