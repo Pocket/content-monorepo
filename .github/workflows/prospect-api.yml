@@ -1,0 +1,22 @@
+# Temporary: only here to destroy the prospect-api infra (HNT-3474).
+name: Prospect API
+on:
+  pull_request:
+    paths:
+      - 'infrastructure/prospect-api/**'
+      - '.github/workflows/prospect-api.yml'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'infrastructure/prospect-api/**'
+      - '.github/workflows/prospect-api.yml'
+jobs:
+  infrastructure:
+    # this will reference the file below on the main branch
+    uses: pocket/pocket-monorepo/.github/workflows/reuse-infrastructure.yml@main
+    with:
+      scope: prospect-api-cdk
+      stack-output-path: infrastructure/prospect-api/cdktf.out/stacks/prospect-api
+    secrets: inherit
