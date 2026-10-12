@@ -15,6 +15,18 @@
   "versionGroups": [
     {
       "dependencies": [
+        "@apollo/server",
+        "@apollo/server-plugin-response-cache",
+        "graphql"
+      ],
+      "packages": [
+        "collection-api"
+      ],
+      "isIgnored": true,
+      "label": "collection-api stays on Apollo Server 4 until it is deleted (HNT-3502)"
+    },
+    {
+      "dependencies": [
         "@aws-sdk/**"
       ],
       "dependencyTypes": [
